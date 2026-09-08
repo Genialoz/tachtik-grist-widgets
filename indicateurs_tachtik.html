@@ -4,58 +4,46 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Tâchtik — Indicateurs</title>
-
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
-
   <style>
     :root {
-      --bg: #f5f8fc;
+      --text: #17324d;
+      --muted: #6f7f8f;
+      --border: #e7edf3;
       --card: #ffffff;
-      --text: #18324a;
-      --muted: #6f8091;
-      --border: #e5ebf1;
-      --shadow: 0 8px 24px rgba(31, 55, 78, 0.08);
-      --radius: 18px;
+      --shadow: 0 6px 18px rgba(24, 50, 77, 0.08);
     }
-
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     html, body {
       margin: 0;
+      width: 100%;
       min-height: 100%;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
                    "Segoe UI", Roboto, Arial, sans-serif;
-      background: var(--bg);
+      background: transparent;
       color: var(--text);
     }
-
-    body {
-      padding: 14px;
-    }
-
+    body { padding: 10px; }
     .dashboard {
-      width: 100%;
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 14px;
+      gap: 10px;
+      width: 100%;
     }
-
     .kpi {
       position: relative;
-      overflow: hidden;
-      min-height: 138px;
-      padding: 18px;
-      background: var(--card);
+      min-height: 96px;
+      padding: 14px 16px 14px 18px;
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: 16px;
+      background: var(--card);
       box-shadow: var(--shadow);
       display: flex;
-      flex-direction: column;
+      align-items: center;
       justify-content: space-between;
+      gap: 12px;
+      overflow: hidden;
     }
-
     .kpi::before {
       content: "";
       position: absolute;
@@ -63,162 +51,125 @@
       width: 5px;
       background: var(--accent);
     }
-
-    .kpi-header {
+    .left {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 11px;
       min-width: 0;
     }
-
     .icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 38px;
       display: grid;
       place-items: center;
-      flex: 0 0 auto;
-      font-size: 20px;
+      border-radius: 12px;
       background: var(--soft);
+      font-size: 19px;
     }
-
+    .texts { min-width: 0; }
     .label {
       font-size: 14px;
-      font-weight: 700;
-      color: #52677a;
-      line-height: 1.2;
+      font-weight: 750;
+      line-height: 1.15;
+      color: #40586f;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-
-    .value-line {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-      margin-top: 15px;
-    }
-
-    .value {
-      font-size: clamp(34px, 4vw, 48px);
-      line-height: 1;
-      font-weight: 800;
-      letter-spacing: -0.04em;
-      color: var(--text);
-    }
-
-    .unit {
-      font-size: 12px;
-      font-weight: 600;
+    .sub {
+      margin-top: 4px;
+      font-size: 11px;
       color: var(--muted);
+      white-space: nowrap;
     }
-
-    .all {
-      --accent: #2d6cdf;
-      --soft: #eef4ff;
+    .value {
+      flex: 0 0 auto;
+      font-size: clamp(30px, 3vw, 42px);
+      line-height: 1;
+      font-weight: 850;
+      letter-spacing: -0.045em;
+      color: var(--accent);
     }
-
-    .late {
-      --accent: #dc3545;
-      --soft: #fff0f2;
-    }
-
-    .soon {
-      --accent: #f39c12;
-      --soft: #fff7e8;
-    }
-
-    .done {
-      --accent: #2e9d65;
-      --soft: #ecf8f1;
-    }
+    .all  { --accent: #2f6fdd; --soft: #edf4ff; }
+    .late { --accent: #d83a4a; --soft: #fff0f2; }
+    .soon { --accent: #e59616; --soft: #fff6e5; }
+    .done { --accent: #2f9b67; --soft: #edf8f2; }
 
     .message {
-      width: 100%;
-      min-height: 120px;
       display: none;
-      place-items: center;
+      min-height: 80px;
+      align-items: center;
+      justify-content: center;
       text-align: center;
-      padding: 22px;
       color: var(--muted);
-      font-size: 14px;
+      font-size: 13px;
+      padding: 16px;
     }
 
-    @media (max-width: 900px) {
-      .dashboard {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
+    @media (max-width: 760px) {
+      .dashboard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
-
-    @media (max-width: 480px) {
-      body {
-        padding: 10px;
-      }
-
-      .dashboard {
-        grid-template-columns: 1fr;
-        gap: 10px;
-      }
-
-      .kpi {
-        min-height: 118px;
-      }
+    @media (max-width: 420px) {
+      body { padding: 8px; }
+      .dashboard { grid-template-columns: 1fr; gap: 8px; }
+      .kpi { min-height: 84px; }
     }
   </style>
 </head>
 
 <body>
-  <div id="dashboard" class="dashboard">
+  <main id="dashboard" class="dashboard">
     <section class="kpi all">
-      <div class="kpi-header">
+      <div class="left">
         <div class="icon">📋</div>
-        <div class="label">À traiter</div>
+        <div class="texts">
+          <div class="label">À traiter</div>
+          <div class="sub">Contributions actives</div>
+        </div>
       </div>
-      <div class="value-line">
-        <div id="kpi-total" class="value">0</div>
-        <div class="unit">contribution(s)</div>
-      </div>
+      <div id="kpi-total" class="value">0</div>
     </section>
 
     <section class="kpi late">
-      <div class="kpi-header">
+      <div class="left">
         <div class="icon">⏰</div>
-        <div class="label">En retard</div>
+        <div class="texts">
+          <div class="label">En retard</div>
+          <div class="sub">Échéance dépassée</div>
+        </div>
       </div>
-      <div class="value-line">
-        <div id="kpi-late" class="value">0</div>
-        <div class="unit">contribution(s)</div>
-      </div>
+      <div id="kpi-late" class="value">0</div>
     </section>
 
     <section class="kpi soon">
-      <div class="kpi-header">
+      <div class="left">
         <div class="icon">⚡</div>
-        <div class="label">Moins de 7 jours</div>
+        <div class="texts">
+          <div class="label">Moins de 7 jours</div>
+          <div class="sub">Échéance proche</div>
+        </div>
       </div>
-      <div class="value-line">
-        <div id="kpi-soon" class="value">0</div>
-        <div class="unit">contribution(s)</div>
-      </div>
+      <div id="kpi-soon" class="value">0</div>
     </section>
 
     <section class="kpi done">
-      <div class="kpi-header">
-        <div class="icon">✓</div>
-        <div class="label">Terminées</div>
+      <div class="left">
+        <div class="icon">✅</div>
+        <div class="texts">
+          <div class="label">Terminées</div>
+          <div class="sub">Contributions finalisées</div>
+        </div>
       </div>
-      <div class="value-line">
-        <div id="kpi-done" class="value">0</div>
-        <div class="unit">contribution(s)</div>
-      </div>
+      <div id="kpi-done" class="value">0</div>
     </section>
-  </div>
+  </main>
 
-  <div id="message" class="message">
-    En attente des données Grist…
-  </div>
+  <div id="message" class="message">En attente des données Grist…</div>
 
   <script>
     const dashboard = document.getElementById("dashboard");
     const message = document.getElementById("message");
-
     const elTotal = document.getElementById("kpi-total");
     const elLate = document.getElementById("kpi-late");
     const elSoon = document.getElementById("kpi-soon");
@@ -245,20 +196,14 @@
     }
 
     function render(records) {
-      if (!Array.isArray(records)) {
-        records = [];
-      }
-
+      records = Array.isArray(records) ? records : [];
       const late = findCount(records, ["retard"]);
       const under7 = findCount(records, ["moins", "7", "jour"]);
       const under15 = findCount(records, ["moins", "15", "jour"]);
       const upcoming = findCount(records, ["venir"]);
       const done = findCount(records, ["fait"]);
 
-      // Toutes les alertes actives constituent les contributions "À traiter".
-      const totalActive = late + under7 + under15 + upcoming;
-
-      elTotal.textContent = totalActive;
+      elTotal.textContent = late + under7 + under15 + upcoming;
       elLate.textContent = late;
       elSoon.textContent = under7;
       elDone.textContent = done;
@@ -269,14 +214,13 @@
 
     function showError(text) {
       dashboard.style.display = "none";
-      message.style.display = "grid";
+      message.style.display = "flex";
       message.textContent = text;
     }
 
     try {
       grist.ready({ requiredAccess: "read table" });
-
-      grist.onRecords(function(records) {
+      grist.onRecords(records => {
         try {
           render(records);
         } catch (err) {
