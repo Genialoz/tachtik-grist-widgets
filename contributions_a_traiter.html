@@ -919,10 +919,41 @@
       line-height: 1.5;
     }
 
+    .mail-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .mail-summary-card {
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #fbfdff;
+      border: 1px solid #e5edf3;
+    }
+
+    .mail-summary-label {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+    }
+
+    .mail-summary-value {
+      color: var(--ink);
+      font-size: 10px;
+      font-weight: 850;
+      line-height: 1.35;
+    }
+
     .mail-history {
       display: grid;
       gap: 8px;
-      margin-top: 14px;
+      margin-top: 10px;
     }
 
     .mail-history-item {
@@ -1836,11 +1867,13 @@
 
             <div class="mail-panel-head">
               <div>
-                <div class="mail-panel-title">📨 Historique des envois</div>
-                <div class="mail-panel-subtitle">Envois et relances enregistrés pour cette contribution</div>
+                <div class="mail-panel-title">📨 Suivi des envois</div>
+                <div class="mail-panel-subtitle">Vue d’ensemble et historique des envois et relances</div>
               </div>
               <div id="mail-context" class="mail-context"></div>
             </div>
+
+            <div id="mail-summary" class="mail-summary"></div>
 
             <div id="mail-history" class="mail-history"></div>
 
@@ -3197,76 +3230,94 @@
         .sort((a, b) => {
           const dateA = dateValue(a.Date_envoi);
           const dateB = dateValue(b.Date_envoi);
-
           const timeA = dateA ? dateA.getTime() : 0;
           const timeB = dateB ? dateB.getTime() : 0;
-
-          if (timeA !== timeB) {
-            return timeB - timeA;
-          }
-
+          if (timeA !== timeB) return timeB - timeA;
           return Number(b.id) - Number(a.id);
         });
 
       const contacts = getActiveContacts(record);
       const contextParts = [];
-
-      if (contacts.to.length) {
-        contextParts.push(
-          `<strong>À :</strong> ${escapeHtml(contacts.to.join("; "))}`
-        );
-      }
-
-      if (contacts.cc.length) {
-        contextParts.push(
-          `<strong>Cc :</strong> ${escapeHtml(contacts.cc.join("; "))}`
-        );
-      }
-
+      if (contacts.to.length) contextParts.push(`<strong>À :</strong> ${escapeHtml(contacts.to.join("; "))}`);
+      if (contacts.cc.length) contextParts.push(`<strong>Cc :</strong> ${escapeHtml(contacts.cc.join("; "))}`);
       $("mail-context").innerHTML = contextParts.join("<br>");
+
+      const initialRows = history.filter(row => normalizeText(row.Type_envoi) === "envoi initial");
+      const reminderRows = history.filter(row => normalizeText(row.Type_envoi) === "relance");
+      const firstInitial = initialRows.length
+        ? [...initialRows].sort((a, b) => {
+            const da = dateValue(a.Date_envoi);
+            const db = dateValue(b.Date_envoi);
+            return (da ? da.getTime() : 0) - (db ? db.getTime() : 0);
+          })[0]
+        : null;
+      const latestReminder = reminderRows.length ? reminderRows[0] : null;
+
+      let firstSendText = "Aucun envoi enregistré";
+      if (firstInitial) {
+        firstSendText = formatDateTime(firstInitial.Date_envoi) || "Envoi initial enregistré";
+      } else if (record.Mail_initial_envoye) {
+        firstSendText = formatDateTime(record.Date_mail_initial) || "Envoi initial enregistré";
+      }
+
+      const latestReminderText = latestReminder
+        ? (formatDateTime(latestReminder.Date_envoi) || "Relance enregistrée")
+        : "Aucune relance enregistrée";
+
+      $("mail-summary").innerHTML = `
+        <div class="mail-summary-card">
+          <span class="mail-summary-label">📨 Premier envoi</span>
+          <span class="mail-summary-value">${escapeHtml(firstSendText)}</span>
+        </div>
+        <div class="mail-summary-card">
+          <span class="mail-summary-label">🔔 Dernière relance</span>
+          <span class="mail-summary-value">${escapeHtml(latestReminderText)}</span>
+        </div>
+        <div class="mail-summary-card">
+          <span class="mail-summary-label">Nombre de relances</span>
+          <span class="mail-summary-value">${reminderRows.length}</span>
+        </div>
+      `;
 
       if (history.length === 0) {
         $("mail-history").innerHTML = `
           <div class="mail-history-empty">
-            Aucun envoi enregistré dans l'historique.
+            Aucun envoi ni aucune relance enregistré dans l'historique.
           </div>
         `;
         return;
       }
 
-      $("mail-history").innerHTML = history
-        .map(row => {
-          const type = text(row.Type_envoi) || "Envoi";
-          const mode = text(row.Mode_envoi) || "";
-          const auteur = text(row.Auteur);
-          const recipients = text(row.Destinataires);
-          const copies = text(row.Copies);
-          const object = text(row.Objet);
-          const status = text(row.Statut_envoi) || "Enregistré";
+      $("mail-history").innerHTML = history.map(row => {
+        const rawType = text(row.Type_envoi) || "Envoi";
+        const normalizedType = normalizeText(rawType);
+        const typeLabel = normalizedType === "relance" ? "🔔 Relance" : normalizedType === "envoi initial" ? "📨 Envoi initial" : rawType;
+        const mode = text(row.Mode_envoi) || "";
+        const auteur = text(row.Auteur);
+        const recipients = text(row.Destinataires);
+        const copies = text(row.Copies);
+        const object = text(row.Objet);
+        const status = text(row.Statut_envoi) || "Enregistré";
 
-          const details = [
-            `<strong>${escapeHtml(type)}</strong>${mode ? ` — ${escapeHtml(mode)}` : ""}`,
-            recipients ? `À : ${escapeHtml(recipients)}` : "",
-            copies ? `Cc : ${escapeHtml(copies)}` : "",
-            object ? `Objet : ${escapeHtml(object)}` : "",
-            auteur ? `Auteur : ${escapeHtml(auteur)}` : ""
-          ].filter(Boolean).join("<br>");
+        const details = [
+          `<strong>${escapeHtml(typeLabel)}</strong>`,
+          recipients ? `<strong>À :</strong> ${escapeHtml(recipients)}` : "",
+          copies ? `<strong>Cc :</strong> ${escapeHtml(copies)}` : "",
+          object ? `<strong>Objet :</strong> ${escapeHtml(object)}` : "",
+          auteur ? `<strong>Par :</strong> ${escapeHtml(auteur)}` : "",
+          mode ? `<strong>Mode :</strong> ${escapeHtml(mode)}` : ""
+        ].filter(Boolean).join("<br>");
 
-          return `
-            <div class="mail-history-item">
-              <div class="mail-history-date">
-                ${escapeHtml(formatDateTime(row.Date_envoi) || "Date non renseignée")}
-              </div>
-              <div class="mail-history-main">
-                ${details}
-              </div>
-              <div class="mail-history-status">
-                ${escapeHtml(status)}
-              </div>
+        return `
+          <div class="mail-history-item">
+            <div class="mail-history-date">
+              ${escapeHtml(formatDateTime(row.Date_envoi) || "Date non renseignée")}
             </div>
-          `;
-        })
-        .join("");
+            <div class="mail-history-main">${details}</div>
+            <div class="mail-history-status">${escapeHtml(status)}</div>
+          </div>
+        `;
+      }).join("");
     }
 
     /* =========================
