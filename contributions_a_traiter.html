@@ -492,6 +492,7 @@
     }
 
     .detail-btn,
+    .initial-mail-btn,
     .reminder-btn {
       padding: 9px 12px;
       border-radius: 11px;
@@ -508,6 +509,14 @@
 
     .detail-btn:hover {
       background: #f5f8fb;
+    }
+
+    .initial-mail-btn {
+      border:
+        1px solid #88a9df;
+      background:
+        var(--blue-soft);
+      color: #275db7;
     }
 
     .reminder-btn {
@@ -771,28 +780,106 @@
        COURRIELS & HISTORIQUE
        ========================= */
 
-    .detail-email-btn,
+    .mail-actions-panel {
+      margin-top: 14px;
+      padding: 18px 20px;
+      border-radius: 18px;
+      background: white;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .mail-actions-title {
+      font-size: 13px;
+      font-weight: 900;
+      color: var(--ink);
+    }
+
+    .mail-actions-subtitle {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.5;
+    }
+
+    .mail-actions-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .mail-action-card {
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid #e2eaf1;
+      background: #fbfdff;
+    }
+
+    .mail-action-card.initial {
+      background: var(--blue-soft);
+      border-color: #d4e2fb;
+    }
+
+    .mail-action-card.reminder {
+      background: var(--orange-soft);
+      border-color: #f1d6ad;
+    }
+
+    .mail-action-label {
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--ink);
+    }
+
+    .mail-action-help {
+      margin-top: 4px;
+      min-height: 32px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.45;
+    }
+
+    .mail-action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 11px;
+    }
+
+    .detail-initial-email-btn,
+    .detail-reminder-email-btn,
+    .detail-confirm-initial-btn,
     .detail-confirm-reminder-btn {
       display: none;
-      padding: 10px 15px;
-      border-radius: 12px;
-      font-size: 12px;
+      padding: 9px 12px;
+      border-radius: 11px;
+      font-size: 11px;
       font-weight: 850;
     }
 
-    .detail-email-btn {
+    .detail-initial-email-btn {
       border: 1px solid #88a9df;
-      background: var(--blue-soft);
+      background: white;
       color: #275db7;
     }
 
+    .detail-reminder-email-btn {
+      border: 1px solid #e1a13b;
+      background: white;
+      color: #9a620d;
+    }
+
+    .detail-confirm-initial-btn,
     .detail-confirm-reminder-btn {
       border: 1px solid #6eb58f;
       background: var(--green-soft);
       color: #267b55;
     }
 
-    .detail-email-btn:disabled,
+    .detail-initial-email-btn:disabled,
+    .detail-reminder-email-btn:disabled,
+    .detail-confirm-initial-btn:disabled,
     .detail-confirm-reminder-btn:disabled {
       opacity: .55;
       cursor: wait;
@@ -888,6 +975,10 @@
     @media (max-width: 850px) {
       .mail-context {
         text-align: left;
+      }
+
+      .mail-actions-grid {
+        grid-template-columns: 1fr;
       }
 
       .mail-history-item {
@@ -1346,26 +1437,69 @@
         <div class="status-actions">
 
           <button
-            id="detail-email-btn"
-            class="detail-email-btn"
-            type="button"
-          >
-            ✉️ Préparer la relance
-          </button>
-
-          <button
-            id="detail-confirm-reminder-btn"
-            class="detail-confirm-reminder-btn"
-            type="button"
-          >
-            ✓ Enregistrer la relance envoyée
-          </button>
-
-          <button
             id="status-action-btn"
             class="status-action"
             type="button"
           ></button>
+
+        </div>
+
+      </section>
+
+      <section id="mail-actions-panel" class="mail-actions-panel">
+
+        <div class="mail-actions-title">✉️ Actions de messagerie</div>
+        <div class="mail-actions-subtitle">
+          Choisissez librement le type de message. Une relance peut être préparée même si le premier envoi a été effectué hors de Tâchtik.
+        </div>
+
+        <div class="mail-actions-grid">
+
+          <div class="mail-action-card initial">
+            <div class="mail-action-label">✉️ Envoi</div>
+            <div class="mail-action-help">
+              Prépare le courriel d'envoi à partir du modèle du bureau d'origine.
+            </div>
+            <div class="mail-action-buttons">
+              <button
+                id="detail-initial-email-btn"
+                class="detail-initial-email-btn"
+                type="button"
+              >
+                ✉️ Préparer un envoi
+              </button>
+              <button
+                id="detail-confirm-initial-btn"
+                class="detail-confirm-initial-btn"
+                type="button"
+              >
+                ✓ Enregistrer l'envoi
+              </button>
+            </div>
+          </div>
+
+          <div class="mail-action-card reminder">
+            <div class="mail-action-label">🔔 Relance</div>
+            <div class="mail-action-help">
+              Prépare le courriel de relance, y compris lorsque le premier envoi n'a pas été enregistré dans Tâchtik.
+            </div>
+            <div class="mail-action-buttons">
+              <button
+                id="detail-reminder-email-btn"
+                class="detail-reminder-email-btn"
+                type="button"
+              >
+                🔔 Préparer une relance
+              </button>
+              <button
+                id="detail-confirm-reminder-btn"
+                class="detail-confirm-reminder-btn"
+                type="button"
+              >
+                ✓ Enregistrer la relance
+              </button>
+            </div>
+          </div>
 
         </div>
 
@@ -1585,7 +1719,7 @@
             <div class="mail-panel-head">
               <div>
                 <div class="mail-panel-title">📨 Historique des envois</div>
-                <div class="mail-panel-subtitle">Relances enregistrées pour cette contribution</div>
+                <div class="mail-panel-subtitle">Envois et relances enregistrés pour cette contribution</div>
               </div>
               <div id="mail-context" class="mail-context"></div>
             </div>
@@ -1792,6 +1926,7 @@
 
     let pendingMailRecordId = null;
     let pendingMailData = null;
+    let pendingMailType = null;
 
     /* =========================
        OUTILS
@@ -2527,6 +2662,59 @@
       return result;
     }
 
+    function buildInitialMail(record) {
+      const params = getOfficeParameters(record);
+
+      if (!params) {
+        throw new Error(
+          `Aucun paramétrage de courriel n'est défini pour le bureau ${text(record.Bureau_origine)}.`
+        );
+      }
+
+      const contacts = getActiveContacts(record);
+
+      if (contacts.to.length === 0) {
+        throw new Error(
+          `Aucun destinataire principal actif n'est défini pour le département ${text(record.Contributeur)}.`
+        );
+      }
+
+      const defaultSubject = "Nouvelle contribution – [NUMERO] – [TITRE]";
+      const defaultBody = [
+        "Bonjour,",
+        "",
+        "Une nouvelle contribution vous a été attribuée.",
+        "",
+        "Référence : [NUMERO]",
+        "Titre : [TITRE]",
+        "Description : [DESCRIPTION]",
+        "",
+        "Échéance : [ECHEANCE]",
+        "Priorité : [PRIORITE]",
+        "",
+        "Merci par avance pour votre retour.",
+        "",
+        "Bien cordialement,",
+        "",
+        "[NOM_SIGNATURE]"
+      ].join("\n");
+
+      return {
+        to: contacts.to,
+        cc: contacts.cc,
+        subject: replaceTemplate(
+          text(params.Objet_mail_envoi) || defaultSubject,
+          record,
+          params
+        ),
+        body: replaceTemplate(
+          text(params.Corps_mail_envoi) || defaultBody,
+          record,
+          params
+        )
+      };
+    }
+
     function buildReminderMail(record) {
       const params = getOfficeParameters(record);
 
@@ -2563,23 +2751,19 @@
         "[NOM_SIGNATURE]"
       ].join("\n");
 
-      const subject = replaceTemplate(
-        text(params.Objet_mail_relance) || defaultSubject,
-        record,
-        params
-      );
-
-      const body = replaceTemplate(
-        text(params.Corps_mail_relance) || defaultBody,
-        record,
-        params
-      );
-
       return {
         to: contacts.to,
         cc: contacts.cc,
-        subject,
-        body
+        subject: replaceTemplate(
+          text(params.Objet_mail_relance) || defaultSubject,
+          record,
+          params
+        ),
+        body: replaceTemplate(
+          text(params.Corps_mail_relance) || defaultBody,
+          record,
+          params
+        )
       };
     }
 
@@ -2604,21 +2788,24 @@
       link.remove();
     }
 
-    async function prepareReminderEmail(id) {
+    async function prepareEmail(id, type) {
       const record = allRecords.find(
         row => Number(row.id) === Number(id)
       );
 
       if (!record || !canManageReminder(record)) {
-        showToast("Vous n'êtes pas autorisé à relancer cette contribution.");
+        showToast("Vous n'êtes pas autorisé à envoyer un message pour cette contribution.");
         return;
       }
 
       try {
-        const mail = buildReminderMail(record);
+        const mail = type === "initial"
+          ? buildInitialMail(record)
+          : buildReminderMail(record);
 
         pendingMailRecordId = Number(record.id);
         pendingMailData = mail;
+        pendingMailType = type;
 
         if (Number(selectedRecordId) !== Number(record.id)) {
           openDetail(Number(record.id));
@@ -2628,7 +2815,9 @@
         }
 
         showToast(
-          "✉️ Courriel préparé. Après l'envoi, cliquez sur « Enregistrer la relance envoyée »."
+          type === "initial"
+            ? "✉️ Courriel préparé. Après l'envoi, cliquez sur « Enregistrer l'envoi »."
+            : "🔔 Relance préparée. Après l'envoi, cliquez sur « Enregistrer la relance »."
         );
 
         launchMailto(mail);
@@ -2639,40 +2828,39 @@
       }
     }
 
-    async function confirmReminderSent() {
+    async function confirmEmailSent(type) {
       const record = getSelectedRecord();
 
       if (
         !record
         || Number(pendingMailRecordId) !== Number(record.id)
         || !pendingMailData
+        || pendingMailType !== type
         || !canManageReminder(record)
       ) {
-        showToast("Préparez d'abord le courriel de relance.");
+        showToast(
+          type === "initial"
+            ? "Préparez d'abord le courriel d'envoi."
+            : "Préparez d'abord le courriel de relance."
+        );
         return;
       }
 
-      const button = $("detail-confirm-reminder-btn");
+      const button = type === "initial"
+        ? $("detail-confirm-initial-btn")
+        : $("detail-confirm-reminder-btn");
 
       try {
         button.disabled = true;
 
-        await grist.docApi.applyUserActions([
-          [
-            "UpdateRecord",
-            "CONTRIBUTIONS",
-            Number(record.id),
-            {
-              Dernier_rappel: todayGristDate()
-            }
-          ],
+        const actions = [
           [
             "AddRecord",
             "RELANCES",
             null,
             {
               Contribution: Number(record.id),
-              Type_envoi: "Relance",
+              Type_envoi: type === "initial" ? "Envoi initial" : "Relance",
               Mode_envoi: "Manuel",
               Destinataires: pendingMailData.to.join("; "),
               Copies: pendingMailData.cc.join("; "),
@@ -2680,12 +2868,41 @@
               Statut_envoi: "Envoyé"
             }
           ]
-        ]);
+        ];
+
+        if (type === "initial") {
+          actions.unshift([
+            "UpdateRecord",
+            "CONTRIBUTIONS",
+            Number(record.id),
+            {
+              Mail_initial_envoye: true,
+              Date_mail_initial: Date.now() / 1000
+            }
+          ]);
+        }
+        else {
+          actions.unshift([
+            "UpdateRecord",
+            "CONTRIBUTIONS",
+            Number(record.id),
+            {
+              Dernier_rappel: todayGristDate()
+            }
+          ]);
+        }
+
+        await grist.docApi.applyUserActions(actions);
 
         pendingMailRecordId = null;
         pendingMailData = null;
+        pendingMailType = null;
 
-        showToast("✓ Relance enregistrée dans l'historique");
+        showToast(
+          type === "initial"
+            ? "✓ Envoi enregistré dans l'historique"
+            : "✓ Relance enregistrée dans l'historique"
+        );
 
         await new Promise(resolve => setTimeout(resolve, 500));
         await loadContributions();
@@ -2693,7 +2910,9 @@
       catch (error) {
         console.error(error);
         showToast(
-          "Impossible d'enregistrer la relance. Vérifiez les droits sur RELANCES et Dernier_rappel."
+          type === "initial"
+            ? "Impossible d'enregistrer l'envoi. Vérifiez les droits sur RELANCES, Mail_initial_envoye et Date_mail_initial."
+            : "Impossible d'enregistrer la relance. Vérifiez les droits sur RELANCES et Dernier_rappel."
         );
       }
       finally {
@@ -2706,17 +2925,23 @@
         return "";
       }
 
-      const label = hasReminderHistory(record)
-        ? "✉️ Préparer une nouvelle relance"
-        : "✉️ Préparer la relance";
-
       return `
+        <button
+          class="initial-mail-btn"
+          data-mail-id="${Number(record.id)}"
+          data-mail-type="initial"
+          type="button"
+        >
+          ✉️ Préparer un envoi
+        </button>
+
         <button
           class="reminder-btn"
           data-mail-id="${Number(record.id)}"
+          data-mail-type="relance"
           type="button"
         >
-          ${label}
+          🔔 Préparer une relance
         </button>
       `;
     }
@@ -2884,10 +3109,14 @@
         });
 
       document
-        .querySelectorAll(".reminder-btn")
+        .querySelectorAll(".initial-mail-btn, .reminder-btn")
         .forEach(button => {
           button.addEventListener("click", () => {
-            prepareReminderEmail(Number(button.dataset.mailId));
+            const type = button.dataset.mailType === "initial"
+              ? "initial"
+              : "relance";
+
+            prepareEmail(Number(button.dataset.mailId), type);
           });
         });
     }
@@ -2927,6 +3156,7 @@
       selectedRecordId = null;
       pendingMailRecordId = null;
       pendingMailData = null;
+      pendingMailType = null;
 
       $("detail-view").style.display = "none";
       $("list-view").style.display = "block";
@@ -2974,8 +3204,11 @@
 
       const status = $("detail-status");
       const statusButton = $("status-action-btn");
-      const emailButton = $("detail-email-btn");
-      const confirmButton = $("detail-confirm-reminder-btn");
+      const mailActionsPanel = $("mail-actions-panel");
+      const initialButton = $("detail-initial-email-btn");
+      const reminderEmailButton = $("detail-reminder-email-btn");
+      const confirmInitialButton = $("detail-confirm-initial-btn");
+      const confirmReminderButton = $("detail-confirm-reminder-btn");
 
       if (isTodo(record)) {
         status.textContent = "🔵 À faire";
@@ -2994,20 +3227,25 @@
         statusButton.style.display = canEdit ? "inline-flex" : "none";
       }
 
-      if (canManageReminder(record)) {
-        emailButton.style.display = "inline-flex";
-        emailButton.textContent = hasReminderHistory(record)
-          ? "✉️ Préparer une nouvelle relance"
-          : "✉️ Préparer la relance";
-      }
-      else {
-        emailButton.style.display = "none";
-      }
+      const canMail = canManageReminder(record);
 
-      confirmButton.style.display =
-        canManageReminder(record)
+      mailActionsPanel.style.display = canMail ? "block" : "none";
+      initialButton.style.display = canMail ? "inline-flex" : "none";
+      reminderEmailButton.style.display = canMail ? "inline-flex" : "none";
+
+      confirmInitialButton.style.display =
+        canMail
         && Number(pendingMailRecordId) === Number(record.id)
         && Boolean(pendingMailData)
+        && pendingMailType === "initial"
+          ? "inline-flex"
+          : "none";
+
+      confirmReminderButton.style.display =
+        canMail
+        && Number(pendingMailRecordId) === Number(record.id)
+        && Boolean(pendingMailData)
+        && pendingMailType === "relance"
           ? "inline-flex"
           : "none";
 
@@ -3203,19 +3441,34 @@
       $("back-list-btn").addEventListener("click", closeDetail);
       $("status-action-btn").addEventListener("click", toggleStatus);
 
-      $("detail-email-btn").addEventListener("click", async () => {
+      $("detail-initial-email-btn").addEventListener("click", async () => {
         const record = getSelectedRecord();
 
         if (!record) {
           return;
         }
 
-        await prepareReminderEmail(Number(record.id));
+        await prepareEmail(Number(record.id), "initial");
       });
+
+      $("detail-reminder-email-btn").addEventListener("click", async () => {
+        const record = getSelectedRecord();
+
+        if (!record) {
+          return;
+        }
+
+        await prepareEmail(Number(record.id), "relance");
+      });
+
+      $("detail-confirm-initial-btn").addEventListener(
+        "click",
+        () => confirmEmailSent("initial")
+      );
 
       $("detail-confirm-reminder-btn").addEventListener(
         "click",
-        confirmReminderSent
+        () => confirmEmailSent("relance")
       );
 
       $("edit-btn").addEventListener("click", enterEditMode);
