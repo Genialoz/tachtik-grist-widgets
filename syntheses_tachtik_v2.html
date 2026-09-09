@@ -408,8 +408,7 @@ function buildDefaultBody(data){
   lines.push("Bien cordialement,");
   lines.push("");
   lines.push(state.params?.Nom_signature || state.bureauCode || "");
-  return lines.join("
-");
+  return lines.join("\n");
 }
 
 function detailBlock(list){
@@ -454,16 +453,13 @@ function renderTemplate(template, data){
 
   // Si une section est décochée, on retire aussi son titre standard du modèle.
   if(!$("includeLate").checked){
-    out = out.replace(/^.*Contributions en retard.*
-?/gmi, "");
+    out = out.replace(/^.*Contributions en retard.*\n?/gmi, "");
   }
   if(!$("includeReminders").checked){
-    out = out.replace(/^.*Contributions à relancer.*
-?/gmi, "");
+    out = out.replace(/^.*Contributions à relancer.*\n?/gmi, "");
   }
   if(!$("includeUpcoming").checked){
-    out = out.replace(/^.*Prochaines échéances.*
-?/gmi, "");
+    out = out.replace(/^.*Prochaines échéances.*\n?/gmi, "");
   }
 
   return cleanEmptyLines(out);
