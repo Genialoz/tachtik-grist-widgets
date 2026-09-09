@@ -451,6 +451,11 @@
       font-size: 22px;
     }
 
+    .quick-card.reminder-link .quick-icon {
+      background:
+        var(--orange-soft);
+    }
+
     .quick-content {
       min-width: 0;
     }
@@ -895,6 +900,37 @@
 
       </a>
 
+
+      <!-- À TRAITER & RELANCES -->
+
+      <a
+        class="quick-card reminder-link"
+        href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/9"
+        target="_top"
+      >
+
+        <div class="quick-icon">
+          🔔
+        </div>
+
+        <div class="quick-content">
+
+          <div class="quick-title">
+            À traiter & relances
+          </div>
+
+          <div class="quick-sub">
+            Voir les échéances proches et les rappels à effectuer
+          </div>
+
+        </div>
+
+        <div class="quick-arrow">
+          ›
+        </div>
+
+      </a>
+
     </section>
 
 
@@ -1244,14 +1280,6 @@
 
     async function identifyUser() {
 
-      /*
-        Création d'une ligne technique dans SESSION_WIDGET.
-
-        L'adresse e-mail est remplie automatiquement
-        par la formule de déclenchement user.Email
-        définie dans Grist.
-      */
-
       await grist.docApi.applyUserActions([
         [
           "AddRecord",
@@ -1262,11 +1290,6 @@
       ]);
 
 
-      /*
-        Petite attente pour permettre à Grist
-        de calculer les formules.
-      */
-
       await new Promise(
         resolve =>
           setTimeout(
@@ -1276,20 +1299,11 @@
       );
 
 
-      /*
-        Lecture de la table SESSION_WIDGET.
-      */
-
       const rawTable =
         await grist.docApi.fetchTable(
           "SESSION_WIDGET"
         );
 
-
-      /*
-        Conversion de la structure Grist
-        en liste de lignes.
-      */
 
       const rows =
         tableToRows(
@@ -1308,19 +1322,11 @@
       }
 
 
-      /*
-        On utilise la dernière ligne créée.
-      */
-
       const profile =
         rows[
           rows.length - 1
         ];
 
-
-      /*
-        Affichage du profil.
-      */
 
       renderProfile(
         profile
@@ -1342,22 +1348,11 @@
 
       try {
 
-        /*
-          Important :
-          le widget doit être configuré dans Grist
-          avec l'ACCÈS COMPLET AU DOCUMENT.
-        */
-
         grist.ready({
           requiredAccess:
             "full"
         });
 
-
-        /*
-          Les contributions visibles dans le widget
-          dépendent des règles d'accès Grist.
-        */
 
         grist.onRecords(
           records => {
@@ -1382,10 +1377,6 @@
           }
         );
 
-
-        /*
-          Identification de l'utilisateur.
-        */
 
         await identifyUser();
 
