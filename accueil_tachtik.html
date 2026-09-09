@@ -42,6 +42,7 @@
     body {
       margin: 0;
       min-height: 100%;
+
       font-family:
         Inter,
         ui-sans-serif,
@@ -377,6 +378,110 @@
     }
 
     /* ===========================
+       ACCÈS RAPIDES
+       =========================== */
+
+    .quick-grid {
+      display: grid;
+
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+      gap: 14px;
+    }
+
+    .quick-card {
+      display: flex;
+
+      align-items: center;
+
+      gap: 14px;
+
+      width: 100%;
+
+      padding: 18px;
+
+      border:
+        1px solid var(--line);
+
+      border-radius: 18px;
+
+      background:
+        var(--surface);
+
+      box-shadow:
+        var(--shadow);
+
+      color:
+        var(--ink);
+
+      text-decoration: none;
+
+      transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        border-color 0.15s ease;
+    }
+
+    .quick-card:hover {
+      transform:
+        translateY(-2px);
+
+      border-color:
+        #c8d8e6;
+
+      box-shadow:
+        0 14px 30px rgba(21, 50, 75, 0.12);
+    }
+
+    .quick-icon {
+      flex: 0 0 auto;
+
+      width: 46px;
+      height: 46px;
+
+      display: grid;
+      place-items: center;
+
+      border-radius: 14px;
+
+      background:
+        var(--blue-soft);
+
+      font-size: 22px;
+    }
+
+    .quick-content {
+      min-width: 0;
+    }
+
+    .quick-title {
+      font-size: 14px;
+      font-weight: 800;
+
+      color:
+        var(--ink);
+    }
+
+    .quick-sub {
+      margin-top: 4px;
+
+      font-size: 11px;
+
+      color:
+        var(--muted);
+    }
+
+    .quick-arrow {
+      margin-left: auto;
+
+      font-size: 21px;
+
+      color:
+        #8da1b2;
+    }
+
+    /* ===========================
        MESSAGES
        =========================== */
 
@@ -471,13 +576,22 @@
           repeat(2, minmax(0, 1fr));
       }
 
+      .quick-grid {
+        grid-template-columns:
+          1fr;
+      }
+
       .hero-content {
-        align-items: flex-start;
-        flex-direction: column;
+        align-items:
+          flex-start;
+
+        flex-direction:
+          column;
       }
 
       .profile-box {
-        width: 100%;
+        width:
+          100%;
       }
 
     }
@@ -485,20 +599,26 @@
     @media (max-width: 520px) {
 
       body {
-        padding: 10px;
+        padding:
+          10px;
       }
 
       .hero {
-        border-radius: 18px;
-        padding: 20px;
+        border-radius:
+          18px;
+
+        padding:
+          20px;
       }
 
       .kpis {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+          1fr;
       }
 
       .foot {
-        flex-direction: column;
+        flex-direction:
+          column;
       }
 
     }
@@ -508,6 +628,10 @@
 <body>
 
   <main class="app">
+
+    <!-- ===========================
+         BANDEAU
+         =========================== -->
 
     <section class="hero">
 
@@ -573,6 +697,10 @@
 
     </section>
 
+
+    <!-- ===========================
+         VUE D'ENSEMBLE
+         =========================== -->
 
     <div class="section-head">
 
@@ -687,11 +815,69 @@
     </section>
 
 
+    <!-- ===========================
+         ACCÈS RAPIDES
+         =========================== -->
+
+    <div class="section-head">
+
+      <h2 class="section-title">
+        Accès rapides
+      </h2>
+
+      <div class="section-note">
+        Navigation Tâchtik
+      </div>
+
+    </div>
+
+
+    <section class="quick-grid">
+
+      <a
+        class="quick-card"
+        href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/4"
+        target="_top"
+      >
+
+        <div class="quick-icon">
+          📋
+        </div>
+
+        <div class="quick-content">
+
+          <div class="quick-title">
+            Contributions
+          </div>
+
+          <div class="quick-sub">
+            Consulter et gérer toutes les contributions
+          </div>
+
+        </div>
+
+        <div class="quick-arrow">
+          ›
+        </div>
+
+      </a>
+
+    </section>
+
+
+    <!-- ===========================
+         MESSAGE
+         =========================== -->
+
     <div
       id="message"
       class="message"
     ></div>
 
+
+    <!-- ===========================
+         PIED
+         =========================== -->
 
     <div class="foot">
 
@@ -939,7 +1125,7 @@
 
 
     /* ===========================================
-       CONVERSION DU RETOUR fetchTable()
+       CONVERSION fetchTable()
        =========================================== */
 
     function tableToRows(table) {
@@ -955,7 +1141,8 @@
       }
 
 
-      const rows = [];
+      const rows =
+        [];
 
 
       for (
@@ -1021,7 +1208,7 @@
     async function identifyUser() {
 
       /*
-        1. Création d'une ligne technique.
+        Création d'une ligne technique.
       */
 
       await grist.docApi.applyUserActions([
@@ -1035,8 +1222,8 @@
 
 
       /*
-        2. Attente pour laisser Grist calculer
-           les formules et formules de déclenchement.
+        Attente pour laisser Grist calculer
+        les formules et formules de déclenchement.
       */
 
       await new Promise(
@@ -1049,7 +1236,7 @@
 
 
       /*
-        3. Lecture de SESSION_WIDGET.
+        Lecture de SESSION_WIDGET.
       */
 
       const rawTable =
@@ -1076,7 +1263,7 @@
 
 
       /*
-        4. On prend la dernière ligne disponible.
+        On prend la dernière ligne disponible.
       */
 
       const profile =
@@ -1086,7 +1273,7 @@
 
 
       /*
-        5. Affichage.
+        Affichage.
       */
 
       renderProfile(
