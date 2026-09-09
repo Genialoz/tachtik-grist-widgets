@@ -1,1 +1,2342 @@
+<!DOCTYPE html>
+<html lang="fr">
 
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Tâchtik — À traiter & relances</title>
+
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+
+  <style>
+    :root {
+      --ink: #15324b;
+      --muted: #6f8190;
+      --line: #e3ebf2;
+      --surface: #ffffff;
+      --page: #f5f8fb;
+
+      --blue: #2f6fdd;
+      --blue-soft: #eef4ff;
+
+      --red: #d94a59;
+      --red-soft: #fff1f3;
+
+      --orange: #df8f18;
+      --orange-soft: #fff6e8;
+
+      --violet: #7857d6;
+      --violet-soft: #f3efff;
+
+      --green: #2e9465;
+      --green-soft: #edf9f2;
+
+      --yellow: #c99b24;
+      --yellow-soft: #fff9e7;
+
+      --shadow: 0 10px 28px rgba(21, 50, 75, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+
+      color: var(--ink);
+      background: var(--page);
+    }
+
+    body {
+      padding: 20px;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .app {
+      width: min(1280px, 100%);
+      margin: 0 auto;
+    }
+
+    /* =========================
+       HEADER
+       ========================= */
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+
+      padding: 24px 26px;
+
+      color: white;
+
+      border-radius: 24px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #173d66 0%,
+          #245f9a 62%,
+          #2f6fdd 100%
+        );
+
+      box-shadow:
+        0 16px 40px rgba(23, 61, 102, 0.18);
+    }
+
+    .hero::after {
+      content: "";
+
+      position: absolute;
+
+      width: 260px;
+      height: 260px;
+
+      right: -80px;
+      top: -120px;
+
+      border-radius: 50%;
+
+      background:
+        rgba(255, 255, 255, 0.08);
+    }
+
+    .hero-top {
+      position: relative;
+      z-index: 1;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+
+      gap: 12px;
+    }
+
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+
+      display: grid;
+      place-items: center;
+
+      border-radius: 14px;
+
+      background:
+        rgba(255, 255, 255, 0.16);
+
+      border:
+        1px solid rgba(255, 255, 255, 0.16);
+
+      font-size: 22px;
+    }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 850;
+      letter-spacing: 0.02em;
+    }
+
+    .brand-sub {
+      margin-top: 2px;
+
+      font-size: 11px;
+
+      color:
+        rgba(255, 255, 255, 0.72);
+    }
+
+    .home-link {
+      position: relative;
+      z-index: 2;
+
+      display: inline-flex;
+      align-items: center;
+
+      gap: 7px;
+
+      padding: 9px 13px;
+
+      color: white;
+      text-decoration: none;
+
+      border-radius: 11px;
+
+      background:
+        rgba(255, 255, 255, 0.13);
+
+      border:
+        1px solid rgba(255, 255, 255, 0.17);
+    }
+
+    .home-link:hover {
+      background:
+        rgba(255, 255, 255, 0.2);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+
+      margin-top: 25px;
+    }
+
+    .hero h1 {
+      margin: 0;
+
+      font-size:
+        clamp(26px, 4vw, 38px);
+
+      letter-spacing: -0.035em;
+    }
+
+    .hero p {
+      max-width: 720px;
+
+      margin:
+        9px 0 0;
+
+      font-size: 13px;
+      line-height: 1.55;
+
+      color:
+        rgba(255, 255, 255, 0.76);
+    }
+
+    /* =========================
+       KPI
+       ========================= */
+
+    .kpis {
+      display: grid;
+
+      grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+      gap: 13px;
+
+      margin-top: 18px;
+    }
+
+    .kpi {
+      position: relative;
+      overflow: hidden;
+
+      padding: 16px 17px;
+
+      min-height: 112px;
+
+      border-radius: 18px;
+
+      background: var(--surface);
+
+      border:
+        1px solid var(--line);
+
+      box-shadow:
+        var(--shadow);
+    }
+
+    .kpi::before {
+      content: "";
+
+      position: absolute;
+
+      left: 0;
+      top: 0;
+      bottom: 0;
+
+      width: 5px;
+
+      background:
+        var(--accent);
+    }
+
+    .kpi-top {
+      display: flex;
+      align-items: center;
+
+      gap: 9px;
+
+      font-size: 12px;
+      font-weight: 800;
+
+      color: #526a7e;
+    }
+
+    .kpi-icon {
+      width: 33px;
+      height: 33px;
+
+      display: grid;
+      place-items: center;
+
+      border-radius: 10px;
+
+      background:
+        var(--soft);
+    }
+
+    .kpi-value {
+      margin-top: 11px;
+
+      font-size: 29px;
+      font-weight: 900;
+
+      line-height: 1;
+
+      color:
+        var(--accent);
+    }
+
+    .todo {
+      --accent: var(--blue);
+      --soft: var(--blue-soft);
+    }
+
+    .late {
+      --accent: var(--red);
+      --soft: var(--red-soft);
+    }
+
+    .remind {
+      --accent: var(--orange);
+      --soft: var(--orange-soft);
+    }
+
+    .urgent {
+      --accent: var(--violet);
+      --soft: var(--violet-soft);
+    }
+
+    /* =========================
+       TOOLBAR
+       ========================= */
+
+    .panel {
+      margin-top: 18px;
+
+      padding: 17px;
+
+      border-radius: 19px;
+
+      background: var(--surface);
+
+      border:
+        1px solid var(--line);
+
+      box-shadow:
+        var(--shadow);
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+
+      gap: 10px;
+
+      flex-wrap: wrap;
+    }
+
+    .search-wrap {
+      position: relative;
+
+      flex:
+        1 1 300px;
+    }
+
+    .search-icon {
+      position: absolute;
+
+      left: 13px;
+      top: 50%;
+
+      transform:
+        translateY(-50%);
+
+      pointer-events: none;
+    }
+
+    .search {
+      width: 100%;
+
+      padding:
+        11px 13px 11px 39px;
+
+      border:
+        1px solid #d9e4ed;
+
+      border-radius: 12px;
+
+      background:
+        #fbfdff;
+
+      color:
+        var(--ink);
+
+      outline: none;
+    }
+
+    .search:focus {
+      border-color:
+        #8fb1ea;
+
+      box-shadow:
+        0 0 0 3px rgba(47, 111, 221, 0.1);
+    }
+
+    .select {
+      min-width: 155px;
+
+      padding:
+        11px 35px 11px 12px;
+
+      border:
+        1px solid #d9e4ed;
+
+      border-radius: 12px;
+
+      background:
+        #fbfdff;
+
+      color:
+        var(--ink);
+
+      outline: none;
+    }
+
+    /* =========================
+       FILTRES RAPIDES
+       ========================= */
+
+    .quick-filters {
+      display: flex;
+      flex-wrap: wrap;
+
+      gap: 8px;
+
+      margin-top: 13px;
+    }
+
+    .filter-btn {
+      padding:
+        8px 12px;
+
+      border:
+        1px solid #dbe5ed;
+
+      border-radius: 999px;
+
+      background: white;
+
+      color:
+        #536b7e;
+
+      cursor: pointer;
+
+      font-size: 11px;
+      font-weight: 750;
+    }
+
+    .filter-btn:hover {
+      border-color:
+        #a9bfd1;
+    }
+
+    .filter-btn.active {
+      color: white;
+
+      border-color:
+        var(--blue);
+
+      background:
+        var(--blue);
+    }
+
+    /* =========================
+       RÉSULTATS
+       ========================= */
+
+    .results-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      gap: 12px;
+
+      margin:
+        20px 2px 10px;
+    }
+
+    .results-title {
+      font-size: 15px;
+      font-weight: 850;
+    }
+
+    .results-count {
+      font-size: 11px;
+
+      color:
+        var(--muted);
+    }
+
+    /* =========================
+       CARTES CONTRIBUTIONS
+       ========================= */
+
+    .contribution-list {
+      display: grid;
+
+      gap: 10px;
+    }
+
+    .contribution {
+      display: grid;
+
+      grid-template-columns:
+        minmax(0, 1fr) auto;
+
+      gap: 16px;
+
+      padding: 17px 18px;
+
+      border-radius: 17px;
+
+      background: var(--surface);
+
+      border:
+        1px solid var(--line);
+
+      box-shadow:
+        0 5px 16px rgba(21, 50, 75, 0.055);
+    }
+
+    .contribution:hover {
+      border-color:
+        #cbdbe7;
+
+      box-shadow:
+        0 9px 22px rgba(21, 50, 75, 0.08);
+    }
+
+    .contribution-main {
+      min-width: 0;
+    }
+
+    .contribution-top {
+      display: flex;
+      align-items: center;
+
+      gap: 9px;
+
+      flex-wrap: wrap;
+    }
+
+    .number {
+      font-size: 11px;
+      font-weight: 850;
+
+      color:
+        var(--blue);
+    }
+
+    .title {
+      font-size: 15px;
+      font-weight: 850;
+
+      color:
+        var(--ink);
+    }
+
+    .description {
+      margin-top: 7px;
+
+      max-width: 820px;
+
+      color:
+        var(--muted);
+
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+
+      gap:
+        7px 15px;
+
+      margin-top: 12px;
+
+      color:
+        #617688;
+
+      font-size: 11px;
+    }
+
+    .meta-item {
+      display: inline-flex;
+      align-items: center;
+
+      gap: 5px;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+
+      gap: 6px;
+
+      margin-top: 11px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+
+      min-height: 25px;
+
+      padding:
+        4px 8px;
+
+      border-radius: 999px;
+
+      font-size: 10px;
+      font-weight: 800;
+
+      background:
+        #f1f5f8;
+
+      color:
+        #536b7e;
+    }
+
+    .badge.red {
+      background:
+        var(--red-soft);
+
+      color:
+        #b23a49;
+    }
+
+    .badge.orange {
+      background:
+        var(--orange-soft);
+
+      color:
+        #a76912;
+    }
+
+    .badge.yellow {
+      background:
+        var(--yellow-soft);
+
+      color:
+        #8a6c16;
+    }
+
+    .badge.violet {
+      background:
+        var(--violet-soft);
+
+      color:
+        #6444bc;
+    }
+
+    .badge.blue {
+      background:
+        var(--blue-soft);
+
+      color:
+        #275db7;
+    }
+
+    .badge.green {
+      background:
+        var(--green-soft);
+
+      color:
+        #267b55;
+    }
+
+    .contribution-side {
+      min-width: 165px;
+
+      display: flex;
+      flex-direction: column;
+
+      align-items: flex-end;
+      justify-content: space-between;
+
+      gap: 12px;
+    }
+
+    .deadline {
+      text-align: right;
+    }
+
+    .deadline-label {
+      font-size: 9px;
+
+      text-transform: uppercase;
+
+      letter-spacing:
+        0.07em;
+
+      color:
+        var(--muted);
+    }
+
+    .deadline-date {
+      margin-top: 3px;
+
+      font-size: 14px;
+      font-weight: 850;
+    }
+
+    .deadline-days {
+      margin-top: 3px;
+
+      font-size: 10px;
+
+      color:
+        var(--muted);
+    }
+
+    .empty {
+      padding: 40px 20px;
+
+      text-align: center;
+
+      border:
+        1px dashed #cad8e3;
+
+      border-radius: 18px;
+
+      background:
+        rgba(255, 255, 255, 0.55);
+
+      color:
+        var(--muted);
+    }
+
+    .empty-icon {
+      font-size: 28px;
+    }
+
+    .empty-title {
+      margin-top: 8px;
+
+      font-size: 14px;
+      font-weight: 850;
+
+      color:
+        var(--ink);
+    }
+
+    .empty-text {
+      margin-top: 5px;
+
+      font-size: 11px;
+    }
+
+    .foot {
+      display: flex;
+      justify-content: space-between;
+
+      gap: 14px;
+
+      margin-top: 16px;
+
+      padding: 13px 15px;
+
+      border-radius: 15px;
+
+      background:
+        rgba(255, 255, 255, 0.72);
+
+      border:
+        1px solid var(--line);
+
+      color:
+        var(--muted);
+
+      font-size: 10px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+
+      gap: 7px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+
+      border-radius: 50%;
+
+      background:
+        var(--green);
+    }
+
+    /* =========================
+       RESPONSIVE
+       ========================= */
+
+    @media (max-width: 850px) {
+
+      .kpis {
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
+      }
+
+      .contribution {
+        grid-template-columns:
+          1fr;
+      }
+
+      .contribution-side {
+        min-width: 0;
+
+        flex-direction: row;
+
+        align-items: center;
+      }
+
+      .deadline {
+        text-align: left;
+      }
+
+    }
+
+    @media (max-width: 520px) {
+
+      body {
+        padding: 10px;
+      }
+
+      .hero {
+        padding: 20px;
+
+        border-radius: 18px;
+      }
+
+      .hero-top {
+        align-items: flex-start;
+      }
+
+      .brand-sub {
+        display: none;
+      }
+
+      .kpis {
+        grid-template-columns:
+          1fr 1fr;
+      }
+
+      .select {
+        width: 100%;
+      }
+
+      .contribution-side {
+        flex-direction: column;
+
+        align-items: flex-start;
+      }
+
+      .foot {
+        flex-direction: column;
+      }
+
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="app">
+
+    <!-- =========================
+         HEADER
+         ========================= -->
+
+    <section class="hero">
+
+      <div class="hero-top">
+
+        <div class="brand">
+
+          <div class="brand-mark">
+            ✓
+          </div>
+
+          <div>
+
+            <div class="brand-name">
+              TÂCHTIK
+            </div>
+
+            <div class="brand-sub">
+              Suivi des contributions de la DGRH
+            </div>
+
+          </div>
+
+        </div>
+
+        <a
+          class="home-link"
+          href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH"
+          target="_top"
+        >
+          ← Retour
+        </a>
+
+      </div>
+
+      <div class="hero-content">
+
+        <h1>
+          À traiter & relances
+        </h1>
+
+        <p>
+          Suivez les contributions en cours, identifiez les échéances
+          prioritaires et retrouvez rapidement les demandes nécessitant
+          une relance.
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         KPI
+         ========================= -->
+
+    <section class="kpis">
+
+      <article class="kpi todo">
+
+        <div class="kpi-top">
+
+          <span class="kpi-icon">
+            📋
+          </span>
+
+          À traiter
+
+        </div>
+
+        <div
+          id="kpi-todo"
+          class="kpi-value"
+        >
+          0
+        </div>
+
+      </article>
+
+
+      <article class="kpi late">
+
+        <div class="kpi-top">
+
+          <span class="kpi-icon">
+            ⏰
+          </span>
+
+          En retard
+
+        </div>
+
+        <div
+          id="kpi-late"
+          class="kpi-value"
+        >
+          0
+        </div>
+
+      </article>
+
+
+      <article class="kpi remind">
+
+        <div class="kpi-top">
+
+          <span class="kpi-icon">
+            🔔
+          </span>
+
+          À relancer
+
+        </div>
+
+        <div
+          id="kpi-remind"
+          class="kpi-value"
+        >
+          0
+        </div>
+
+      </article>
+
+
+      <article class="kpi urgent">
+
+        <div class="kpi-top">
+
+          <span class="kpi-icon">
+            ⚡
+          </span>
+
+          Urgentes
+
+        </div>
+
+        <div
+          id="kpi-urgent"
+          class="kpi-value"
+        >
+          0
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <!-- =========================
+         FILTRES
+         ========================= -->
+
+    <section class="panel">
+
+      <div class="toolbar">
+
+        <div class="search-wrap">
+
+          <span class="search-icon">
+            🔎
+          </span>
+
+          <input
+            id="search"
+            class="search"
+            type="search"
+            placeholder="Rechercher un numéro, un titre, un demandeur..."
+          >
+
+        </div>
+
+
+        <select
+          id="priority-filter"
+          class="select"
+        >
+
+          <option value="">
+            Toutes les priorités
+          </option>
+
+          <option value="normale">
+            Normale
+          </option>
+
+          <option value="haute">
+            Haute
+          </option>
+
+          <option value="urgente">
+            Urgente
+          </option>
+
+        </select>
+
+
+        <select
+          id="department-filter"
+          class="select"
+        >
+
+          <option value="">
+            Tous les départements
+          </option>
+
+        </select>
+
+
+        <select
+          id="origin-filter"
+          class="select"
+        >
+
+          <option value="">
+            Tous les bureaux d'origine
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="quick-filters">
+
+        <button
+          class="filter-btn active"
+          data-filter="all"
+        >
+          Toutes
+        </button>
+
+        <button
+          class="filter-btn"
+          data-filter="late"
+        >
+          🔴 En retard
+        </button>
+
+        <button
+          class="filter-btn"
+          data-filter="remind"
+        >
+          🔔 À relancer
+        </button>
+
+        <button
+          class="filter-btn"
+          data-filter="urgent"
+        >
+          ⚡ Urgentes
+        </button>
+
+        <button
+          class="filter-btn"
+          data-filter="week"
+        >
+          📅 Cette semaine
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         RÉSULTATS
+         ========================= -->
+
+    <div class="results-head">
+
+      <div class="results-title">
+        Contributions à traiter
+      </div>
+
+      <div
+        id="results-count"
+        class="results-count"
+      >
+        0 contribution
+      </div>
+
+    </div>
+
+
+    <section
+      id="contribution-list"
+      class="contribution-list"
+    ></section>
+
+
+    <div class="foot">
+
+      <span class="status">
+
+        <span class="dot"></span>
+
+        Données synchronisées avec Grist
+
+      </span>
+
+      <span>
+        Les filtres n’altèrent pas les données.
+      </span>
+
+    </div>
+
+  </main>
+
+
+  <script>
+
+    const $ = id =>
+      document.getElementById(id);
+
+
+    let allRecords = [];
+
+    let quickFilter =
+      "all";
+
+
+    function clean(value) {
+
+      return String(
+        value == null
+          ? ""
+          : value
+      )
+      .trim()
+      .toLowerCase();
+
+    }
+
+
+    function text(value) {
+
+      return String(
+        value == null
+          ? ""
+          : value
+      );
+
+    }
+
+
+    function escapeHtml(value) {
+
+      return text(value)
+        .replaceAll(
+          "&",
+          "&amp;"
+        )
+        .replaceAll(
+          "<",
+          "&lt;"
+        )
+        .replaceAll(
+          ">",
+          "&gt;"
+        )
+        .replaceAll(
+          '"',
+          "&quot;"
+        )
+        .replaceAll(
+          "'",
+          "&#039;"
+        );
+
+    }
+
+
+    function isTodo(record) {
+
+      const statut =
+        clean(
+          record.Statut
+        );
+
+      return (
+        statut === "à faire"
+        ||
+        statut === "a faire"
+      );
+
+    }
+
+
+    function isLate(record) {
+
+      return clean(
+        record.Alerte
+      )
+      .includes(
+        "retard"
+      );
+
+    }
+
+
+    function needsReminder(record) {
+
+      return clean(
+        record.Rappel_a_faire
+      )
+      .includes(
+        "relancer"
+      );
+
+    }
+
+
+    function isUrgent(record) {
+
+      return clean(
+        record.Priorite
+      ) === "urgente";
+
+    }
+
+
+    function dateValue(value) {
+
+      if (
+        value == null
+        ||
+        value === ""
+      ) {
+
+        return null;
+
+      }
+
+
+      if (
+        typeof value === "number"
+      ) {
+
+        return new Date(
+          value * 1000
+        );
+
+      }
+
+
+      const d =
+        new Date(value);
+
+
+      return Number.isNaN(
+        d.getTime()
+      )
+        ? null
+        : d;
+
+    }
+
+
+    function formatDate(value) {
+
+      const d =
+        dateValue(value);
+
+
+      if (!d) {
+
+        return "Non renseignée";
+
+      }
+
+
+      return new Intl.DateTimeFormat(
+        "fr-FR",
+        {
+          day:
+            "2-digit",
+
+          month:
+            "2-digit",
+
+          year:
+            "numeric"
+        }
+      )
+      .format(d);
+
+    }
+
+
+    function isThisWeek(record) {
+
+      const d =
+        dateValue(
+          record.Echeance
+        );
+
+
+      if (!d) {
+
+        return false;
+
+      }
+
+
+      const now =
+        new Date();
+
+
+      const today =
+        new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate()
+        );
+
+
+      const day =
+        today.getDay() || 7;
+
+
+      const monday =
+        new Date(today);
+
+
+      monday.setDate(
+        today.getDate() -
+        day +
+        1
+      );
+
+
+      const sunday =
+        new Date(monday);
+
+
+      sunday.setDate(
+        monday.getDate() +
+        6
+      );
+
+
+      sunday.setHours(
+        23,
+        59,
+        59,
+        999
+      );
+
+
+      return (
+        d >= monday
+        &&
+        d <= sunday
+      );
+
+    }
+
+
+    function sortByDeadline(records) {
+
+      return [...records]
+        .sort(
+          (a, b) => {
+
+            const da =
+              dateValue(
+                a.Echeance
+              );
+
+            const db =
+              dateValue(
+                b.Echeance
+              );
+
+
+            if (
+              !da
+              &&
+              !db
+            ) {
+
+              return 0;
+
+            }
+
+
+            if (!da) {
+
+              return 1;
+
+            }
+
+
+            if (!db) {
+
+              return -1;
+
+            }
+
+
+            return (
+              da.getTime() -
+              db.getTime()
+            );
+
+          }
+        );
+
+    }
+
+
+    function populateSelect(
+      id,
+      values,
+      firstLabel
+    ) {
+
+      const select =
+        $(id);
+
+
+      const current =
+        select.value;
+
+
+      const unique =
+        [...new Set(
+          values
+            .map(text)
+            .map(v => v.trim())
+            .filter(Boolean)
+        )]
+        .sort(
+          (a, b) =>
+            a.localeCompare(
+              b,
+              "fr"
+            )
+        );
+
+
+      select.innerHTML =
+        `<option value="">${escapeHtml(firstLabel)}</option>`;
+
+
+      for (
+        const value
+        of unique
+      ) {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+
+        option.value =
+          clean(value);
+
+        option.textContent =
+          value;
+
+
+        select.appendChild(
+          option
+        );
+
+      }
+
+
+      select.value =
+        current;
+
+    }
+
+
+    function renderKpis() {
+
+      const active =
+        allRecords.filter(
+          isTodo
+        );
+
+
+      $("kpi-todo").textContent =
+        active.length;
+
+
+      $("kpi-late").textContent =
+        active.filter(
+          isLate
+        ).length;
+
+
+      $("kpi-remind").textContent =
+        active.filter(
+          needsReminder
+        ).length;
+
+
+      $("kpi-urgent").textContent =
+        active.filter(
+          isUrgent
+        ).length;
+
+    }
+
+
+    function getFilteredRecords() {
+
+      const search =
+        clean(
+          $("search").value
+        );
+
+
+      const priority =
+        clean(
+          $("priority-filter").value
+        );
+
+
+      const department =
+        clean(
+          $("department-filter").value
+        );
+
+
+      const origin =
+        clean(
+          $("origin-filter").value
+        );
+
+
+      return sortByDeadline(
+        allRecords
+          .filter(
+            isTodo
+          )
+          .filter(
+            record => {
+
+              if (!search) {
+
+                return true;
+
+              }
+
+
+              const haystack =
+                [
+                  record.Numero,
+                  record.Titre,
+                  record.Demandeur,
+                  record.Description,
+                  record.Contributeur,
+                  record.Bureau_origine
+                ]
+                .map(clean)
+                .join(" ");
+
+
+              return haystack.includes(
+                search
+              );
+
+            }
+          )
+          .filter(
+            record => {
+
+              if (!priority) {
+
+                return true;
+
+              }
+
+
+              return (
+                clean(
+                  record.Priorite
+                )
+                === priority
+              );
+
+            }
+          )
+          .filter(
+            record => {
+
+              if (!department) {
+
+                return true;
+
+              }
+
+
+              return (
+                clean(
+                  record.Contributeur
+                )
+                === department
+              );
+
+            }
+          )
+          .filter(
+            record => {
+
+              if (!origin) {
+
+                return true;
+
+              }
+
+
+              return (
+                clean(
+                  record.Bureau_origine
+                )
+                === origin
+              );
+
+            }
+          )
+          .filter(
+            record => {
+
+              if (
+                quickFilter === "late"
+              ) {
+
+                return isLate(
+                  record
+                );
+
+              }
+
+
+              if (
+                quickFilter === "remind"
+              ) {
+
+                return needsReminder(
+                  record
+                );
+
+              }
+
+
+              if (
+                quickFilter === "urgent"
+              ) {
+
+                return isUrgent(
+                  record
+                );
+
+              }
+
+
+              if (
+                quickFilter === "week"
+              ) {
+
+                return isThisWeek(
+                  record
+                );
+
+              }
+
+
+              return true;
+
+            }
+          )
+      );
+
+    }
+
+
+    function alertBadge(record) {
+
+      const value =
+        text(
+          record.Alerte
+        );
+
+
+      const normalized =
+        clean(value);
+
+
+      if (!value) {
+
+        return "";
+
+      }
+
+
+      let cls =
+        "blue";
+
+
+      if (
+        normalized.includes(
+          "retard"
+        )
+      ) {
+
+        cls =
+          "red";
+
+      }
+
+      else if (
+        normalized.includes(
+          "7 jours"
+        )
+      ) {
+
+        cls =
+          "orange";
+
+      }
+
+      else if (
+        normalized.includes(
+          "15 jours"
+        )
+      ) {
+
+        cls =
+          "yellow";
+
+      }
+
+
+      return `
+        <span class="badge ${cls}">
+          ${escapeHtml(value)}
+        </span>
+      `;
+
+    }
+
+
+    function priorityBadge(record) {
+
+      const value =
+        text(
+          record.Priorite
+        );
+
+
+      const normalized =
+        clean(value);
+
+
+      if (!value) {
+
+        return "";
+
+      }
+
+
+      let cls =
+        "blue";
+
+
+      if (
+        normalized === "urgente"
+      ) {
+
+        cls =
+          "violet";
+
+      }
+
+      else if (
+        normalized === "haute"
+      ) {
+
+        cls =
+          "orange";
+
+      }
+
+      else if (
+        normalized === "normale"
+      ) {
+
+        cls =
+          "green";
+
+      }
+
+
+      return `
+        <span class="badge ${cls}">
+          Priorité ${escapeHtml(value)}
+        </span>
+      `;
+
+    }
+
+
+    function reminderBadge(record) {
+
+      if (
+        !needsReminder(
+          record
+        )
+      ) {
+
+        return "";
+
+      }
+
+
+      return `
+        <span class="badge orange">
+          🔔 À relancer
+        </span>
+      `;
+
+    }
+
+
+    function deadlineText(record) {
+
+      const days =
+        record.Jours_restants;
+
+
+      if (
+        days == null
+        ||
+        days === ""
+      ) {
+
+        return "";
+
+      }
+
+
+      const n =
+        Number(days);
+
+
+      if (
+        Number.isNaN(n)
+      ) {
+
+        return "";
+
+      }
+
+
+      if (n < 0) {
+
+        const abs =
+          Math.abs(n);
+
+
+        return (
+          abs +
+          (
+            abs > 1
+              ? " jours de retard"
+              : " jour de retard"
+          )
+        );
+
+      }
+
+
+      if (n === 0) {
+
+        return "Échéance aujourd’hui";
+
+      }
+
+
+      return (
+        "Dans " +
+        n +
+        (
+          n > 1
+            ? " jours"
+            : " jour"
+        )
+      );
+
+    }
+
+
+    function renderList() {
+
+      const records =
+        getFilteredRecords();
+
+
+      const list =
+        $("contribution-list");
+
+
+      $("results-count").textContent =
+        records.length +
+        (
+          records.length > 1
+            ? " contributions"
+            : " contribution"
+        );
+
+
+      if (
+        records.length === 0
+      ) {
+
+        list.innerHTML = `
+          <div class="empty">
+
+            <div class="empty-icon">
+              ✓
+            </div>
+
+            <div class="empty-title">
+              Aucune contribution trouvée
+            </div>
+
+            <div class="empty-text">
+              Modifiez les filtres ou la recherche pour afficher d’autres résultats.
+            </div>
+
+          </div>
+        `;
+
+
+        return;
+
+      }
+
+
+      list.innerHTML =
+        records
+          .map(
+            record => {
+
+              const numero =
+                escapeHtml(
+                  record.Numero || ""
+                );
+
+
+              const titre =
+                escapeHtml(
+                  record.Titre ||
+                  "Sans titre"
+                );
+
+
+              const description =
+                escapeHtml(
+                  record.Description || ""
+                );
+
+
+              const contributeur =
+                escapeHtml(
+                  record.Contributeur || ""
+                );
+
+
+              const origin =
+                escapeHtml(
+                  record.Bureau_origine || ""
+                );
+
+
+              const demandeur =
+                escapeHtml(
+                  record.Demandeur || ""
+                );
+
+
+              return `
+                <article class="contribution">
+
+                  <div class="contribution-main">
+
+                    <div class="contribution-top">
+
+                      <span class="number">
+                        ${numero}
+                      </span>
+
+                      <span class="title">
+                        ${titre}
+                      </span>
+
+                    </div>
+
+
+                    ${
+                      description
+                        ? `
+                          <div class="description">
+                            ${description}
+                          </div>
+                        `
+                        : ""
+                    }
+
+
+                    <div class="meta">
+
+                      ${
+                        contributeur
+                          ? `
+                            <span class="meta-item">
+                              👤
+                              <strong>Contributeur :</strong>
+                              ${contributeur}
+                            </span>
+                          `
+                          : ""
+                      }
+
+
+                      ${
+                        origin
+                          ? `
+                            <span class="meta-item">
+                              🏢
+                              <strong>Origine :</strong>
+                              ${origin}
+                            </span>
+                          `
+                          : ""
+                      }
+
+
+                      ${
+                        demandeur
+                          ? `
+                            <span class="meta-item">
+                              ✉️
+                              <strong>Demandeur :</strong>
+                              ${demandeur}
+                            </span>
+                          `
+                          : ""
+                      }
+
+                    </div>
+
+
+                    <div class="badges">
+
+                      ${alertBadge(record)}
+
+                      ${priorityBadge(record)}
+
+                      ${reminderBadge(record)}
+
+                    </div>
+
+                  </div>
+
+
+                  <div class="contribution-side">
+
+                    <div class="deadline">
+
+                      <div class="deadline-label">
+                        Échéance
+                      </div>
+
+                      <div class="deadline-date">
+                        ${escapeHtml(
+                          formatDate(
+                            record.Echeance
+                          )
+                        )}
+                      </div>
+
+                      <div class="deadline-days">
+                        ${escapeHtml(
+                          deadlineText(
+                            record
+                          )
+                        )}
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                </article>
+              `;
+
+            }
+          )
+          .join("");
+
+    }
+
+
+    function renderAll() {
+
+      renderKpis();
+
+
+      populateSelect(
+        "department-filter",
+        allRecords
+          .filter(isTodo)
+          .map(
+            r =>
+              r.Contributeur
+          ),
+        "Tous les départements"
+      );
+
+
+      populateSelect(
+        "origin-filter",
+        allRecords
+          .filter(isTodo)
+          .map(
+            r =>
+              r.Bureau_origine
+          ),
+        "Tous les bureaux d'origine"
+      );
+
+
+      renderList();
+
+    }
+
+
+    function bindEvents() {
+
+      $("search")
+        .addEventListener(
+          "input",
+          renderList
+        );
+
+
+      $("priority-filter")
+        .addEventListener(
+          "change",
+          renderList
+        );
+
+
+      $("department-filter")
+        .addEventListener(
+          "change",
+          renderList
+        );
+
+
+      $("origin-filter")
+        .addEventListener(
+          "change",
+          renderList
+        );
+
+
+      document
+        .querySelectorAll(
+          ".filter-btn"
+        )
+        .forEach(
+          button => {
+
+            button.addEventListener(
+              "click",
+              () => {
+
+                quickFilter =
+                  button.dataset.filter;
+
+
+                document
+                  .querySelectorAll(
+                    ".filter-btn"
+                  )
+                  .forEach(
+                    item =>
+                      item.classList.remove(
+                        "active"
+                      )
+                  );
+
+
+                button
+                  .classList
+                  .add(
+                    "active"
+                  );
+
+
+                renderList();
+
+              }
+            );
+
+          }
+        );
+
+    }
+
+
+    function init() {
+
+      grist.ready({
+        requiredAccess:
+          "full"
+      });
+
+
+      bindEvents();
+
+
+      grist.onRecords(
+        records => {
+
+          allRecords =
+            Array.isArray(records)
+              ? records
+              : [];
+
+
+          renderAll();
+
+        }
+      );
+
+    }
+
+
+    init();
+
+  </script>
+
+</body>
+
+</html>
