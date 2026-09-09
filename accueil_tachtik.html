@@ -68,10 +68,6 @@
       margin: 0 auto;
     }
 
-    /* ===========================
-       BANDEAU
-       =========================== */
-
     .hero {
       position: relative;
       overflow: hidden;
@@ -190,10 +186,6 @@
       line-height: 1.55;
     }
 
-    /* ===========================
-       PROFIL
-       =========================== */
-
     .profile-box {
       min-width: 220px;
 
@@ -234,10 +226,6 @@
         rgba(255, 255, 255, 0.75);
     }
 
-    /* ===========================
-       SECTIONS
-       =========================== */
-
     .section-head {
       display: flex;
 
@@ -261,10 +249,6 @@
 
       color: var(--muted);
     }
-
-    /* ===========================
-       KPI
-       =========================== */
 
     .kpis {
       display: grid;
@@ -377,10 +361,6 @@
       --soft: var(--violet-soft);
     }
 
-    /* ===========================
-       ACCÈS RAPIDES
-       =========================== */
-
     .quick-grid {
       display: grid;
 
@@ -491,10 +471,6 @@
         #8da1b2;
     }
 
-    /* ===========================
-       MESSAGES
-       =========================== */
-
     .message {
       display: none;
 
@@ -524,10 +500,6 @@
 
       color: #276947;
     }
-
-    /* ===========================
-       PIED
-       =========================== */
 
     .foot {
       display: flex;
@@ -574,10 +546,6 @@
       box-shadow:
         0 0 0 3px rgba(46, 148, 101, 0.12);
     }
-
-    /* ===========================
-       RESPONSIVE
-       =========================== */
 
     @media (max-width: 860px) {
 
@@ -638,10 +606,6 @@
 <body>
 
   <main class="app">
-
-    <!-- ===========================
-         BANDEAU
-         =========================== -->
 
     <section class="hero">
 
@@ -708,10 +672,6 @@
     </section>
 
 
-    <!-- ===========================
-         VUE D'ENSEMBLE
-         =========================== -->
-
     <div class="section-head">
 
       <h2 class="section-title">
@@ -733,10 +693,7 @@
           📋
         </div>
 
-        <div
-          id="kpi-todo"
-          class="kpi-value"
-        >
+        <div id="kpi-todo" class="kpi-value">
           0
         </div>
 
@@ -757,10 +714,7 @@
           ⏰
         </div>
 
-        <div
-          id="kpi-late"
-          class="kpi-value"
-        >
+        <div id="kpi-late" class="kpi-value">
           0
         </div>
 
@@ -781,10 +735,7 @@
           🔔
         </div>
 
-        <div
-          id="kpi-remind"
-          class="kpi-value"
-        >
+        <div id="kpi-remind" class="kpi-value">
           0
         </div>
 
@@ -805,10 +756,7 @@
           ⚡
         </div>
 
-        <div
-          id="kpi-urgent"
-          class="kpi-value"
-        >
+        <div id="kpi-urgent" class="kpi-value">
           0
         </div>
 
@@ -825,10 +773,6 @@
     </section>
 
 
-    <!-- ===========================
-         ACCÈS RAPIDES
-         =========================== -->
-
     <div class="section-head">
 
       <h2 class="section-title">
@@ -843,8 +787,6 @@
 
 
     <section class="quick-grid">
-
-      <!-- CONTRIBUTIONS -->
 
       <a
         class="quick-card"
@@ -875,8 +817,6 @@
       </a>
 
 
-      <!-- NOUVELLE CONTRIBUTION -->
-
       <a
         class="quick-card"
         href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/14"
@@ -906,8 +846,6 @@
       </a>
 
 
-      <!-- À TRAITER & RELANCES -->
-
       <a
         class="quick-card reminder-link"
         href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/9"
@@ -936,8 +874,6 @@
 
       </a>
 
-
-      <!-- CONTRIBUTIONS TERMINÉES -->
 
       <a
         class="quick-card finished-link"
@@ -970,19 +906,11 @@
     </section>
 
 
-    <!-- ===========================
-         MESSAGE
-         =========================== -->
-
     <div
       id="message"
       class="message"
     ></div>
 
-
-    <!-- ===========================
-         PIED
-         =========================== -->
 
     <div class="foot">
 
@@ -1019,10 +947,6 @@
       .toLowerCase();
 
 
-    /* ===========================================
-       MESSAGES
-       =========================================== */
-
     function showError(text) {
 
       const box =
@@ -1056,10 +980,6 @@
 
     }
 
-
-    /* ===========================================
-       KPI
-       =========================================== */
 
     function renderContributions(records) {
 
@@ -1145,10 +1065,6 @@
     }
 
 
-    /* ===========================================
-       PROFIL
-       =========================================== */
-
     function renderProfile(profile) {
 
       if (!profile) {
@@ -1233,10 +1149,6 @@
     }
 
 
-    /* ===========================================
-       CONVERSION fetchTable()
-       =========================================== */
-
     function tableToRows(table) {
 
       if (
@@ -1310,39 +1222,53 @@
     }
 
 
-    /* ===========================================
-       IDENTIFICATION
-       =========================================== */
-
     async function identifyUser() {
 
       /*
-       * 1. Création de la ligne temporaire.
-       *
-       * AddRecord renvoie l'identifiant exact
-       * de la ligne créée.
+       * ÉTAPE 1
+       * Lire SESSION_WIDGET avant la création.
        */
 
-      const addResult =
-        await grist.docApi.applyUserActions([
-          [
-            "AddRecord",
-            "SESSION_WIDGET",
-            null,
-            {}
-          ]
-        ]);
+      const beforeTable =
+        await grist.docApi.fetchTable(
+          "SESSION_WIDGET"
+        );
 
 
-      const sessionRowId =
-        Array.isArray(addResult)
-          ? addResult[0]
-          : null;
+      const beforeRows =
+        tableToRows(
+          beforeTable
+        );
+
+
+      const beforeIds =
+        new Set(
+          beforeRows.map(
+            row =>
+              Number(row.id)
+          )
+        );
 
 
       /*
-       * 2. On laisse le temps aux formules déclenchées
-       *    et aux formules de profil de se calculer.
+       * ÉTAPE 2
+       * Créer une ligne temporaire.
+       */
+
+      await grist.docApi.applyUserActions([
+        [
+          "AddRecord",
+          "SESSION_WIDGET",
+          null,
+          {}
+        ]
+      ]);
+
+
+      /*
+       * ÉTAPE 3
+       * Attendre que Grist renseigne Email,
+       * Nom, rôle et périmètre.
        */
 
       await new Promise(
@@ -1355,72 +1281,78 @@
 
 
       /*
-       * 3. Lecture de SESSION_WIDGET.
+       * ÉTAPE 4
+       * Relire SESSION_WIDGET.
        */
 
-      const rawTable =
+      const afterTable =
         await grist.docApi.fetchTable(
           "SESSION_WIDGET"
         );
 
 
-      const rows =
+      const afterRows =
         tableToRows(
-          rawTable
+          afterTable
+        );
+
+
+      /*
+       * ÉTAPE 5
+       * Repérer les lignes qui n'existaient
+       * pas avant AddRecord.
+       */
+
+      const newRows =
+        afterRows.filter(
+          row =>
+            !beforeIds.has(
+              Number(row.id)
+            )
         );
 
 
       if (
-        rows.length === 0
+        newRows.length === 0
       ) {
 
         throw new Error(
-          "SESSION_WIDGET ne contient aucune ligne lisible."
+          "La ligne de session créée par Tâchtik n'a pas pu être retrouvée."
         );
 
       }
 
 
       /*
-       * 4. On cherche précisément la ligne
-       *    que CE chargement vient de créer.
-       *
-       * En secours seulement, on utilise
-       * la dernière ligne lisible.
+       * S'il y en a plusieurs, on choisit
+       * celle ayant l'identifiant le plus élevé.
        */
 
-      let profile =
-        null;
+      newRows.sort(
+        (a, b) =>
+          Number(b.id) -
+          Number(a.id)
+      );
 
 
-      if (
-        sessionRowId !== null
-        &&
-        sessionRowId !== undefined
-      ) {
-
-        profile =
-          rows.find(
-            row =>
-              Number(row.id) ===
-              Number(sessionRowId)
-          ) || null;
-
-      }
+      const profile =
+        newRows[0];
 
 
-      if (!profile) {
+      const sessionRowId =
+        profile.id;
 
-        profile =
-          rows[
-            rows.length - 1
-          ];
 
-      }
+      console.log(
+        "SESSION_WIDGET créée :",
+        sessionRowId,
+        profile
+      );
 
 
       /*
-       * 5. Affichage du profil.
+       * ÉTAPE 6
+       * Afficher le profil.
        */
 
       renderProfile(
@@ -1428,63 +1360,51 @@
       );
 
 
-      showSuccess(
-        "Profil identifié avec succès."
-      );
-
-
       /*
-       * 6. Nettoyage.
-       *
-       * On supprime UNIQUEMENT la ligne
-       * que le widget vient de créer.
-       *
-       * Une erreur de nettoyage ne doit
-       * jamais empêcher l'accueil Tâchtik
-       * de fonctionner.
+       * ÉTAPE 7
+       * Supprimer exactement la ligne
+       * utilisée pour cette identification.
        */
 
-      if (
-        sessionRowId !== null
-        &&
-        sessionRowId !== undefined
-      ) {
+      try {
 
-        try {
-
-          await grist.docApi.applyUserActions([
-            [
-              "RemoveRecord",
-              "SESSION_WIDGET",
-              sessionRowId
-            ]
-          ]);
-
-
-          console.log(
-            "Session temporaire supprimée :",
+        await grist.docApi.applyUserActions([
+          [
+            "RemoveRecord",
+            "SESSION_WIDGET",
             sessionRowId
-          );
+          ]
+        ]);
 
-        }
 
-        catch (cleanupError) {
+        console.log(
+          "SESSION_WIDGET supprimée :",
+          sessionRowId
+        );
 
-          console.warn(
-            "Le profil est identifié, mais la ligne SESSION_WIDGET n'a pas pu être supprimée :",
-            cleanupError
-          );
 
-        }
+        showSuccess(
+          "Profil identifié avec succès."
+        );
+
+      }
+
+      catch (cleanupError) {
+
+        console.error(
+          "ERREUR SUPPRESSION SESSION_WIDGET :",
+          cleanupError
+        );
+
+
+        showSuccess(
+          "Profil identifié avec succès."
+        );
 
       }
 
     }
 
-
-    /* ===========================================
-       INITIALISATION
-       =========================================== */
 
     async function init() {
 
