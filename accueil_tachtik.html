@@ -1316,15 +1316,34 @@
 
     async function identifyUser() {
 
-      await grist.docApi.applyUserActions([
-        [
-          "AddRecord",
-          "SESSION_WIDGET",
-          null,
-          {}
-        ]
-      ]);
+      /*
+       * 1. Création de la ligne temporaire.
+       *
+       * AddRecord renvoie l'identifiant exact
+       * de la ligne créée.
+       */
 
+      const addResult =
+        await grist.docApi.applyUserActions([
+          [
+            "AddRecord",
+            "SESSION_WIDGET",
+            null,
+            {}
+          ]
+        ]);
+
+
+      const sessionRowId =
+        Array.isArray(addResult)
+          ? addResult[0]
+          : null;
+
+
+      /*
+       * 2. On laisse le temps aux formules déclenchées
+       *    et aux formules de profil de se calculer.
+       */
 
       await new Promise(
         resolve =>
@@ -1334,6 +1353,10 @@
           )
       );
 
+
+      /*
+       * 3. Lecture de SESSION_WIDGET.
+       */
 
       const rawTable =
         await grist.docApi.fetchTable(
@@ -1358,11 +1381,47 @@
       }
 
 
-      const profile =
-        rows[
-          rows.length - 1
-        ];
+      /*
+       * 4. On cherche précisément la ligne
+       *    que CE chargement vient de créer.
+       *
+       * En secours seulement, on utilise
+       * la dernière ligne lisible.
+       */
 
+      let profile =
+        null;
+
+
+      if (
+        sessionRowId !== null
+        &&
+        sessionRowId !== undefined
+      ) {
+
+        profile =
+          rows.find(
+            row =>
+              Number(row.id) ===
+              Number(sessionRowId)
+          ) || null;
+
+      }
+
+
+      if (!profile) {
+
+        profile =
+          rows[
+            rows.length - 1
+          ];
+
+      }
+
+
+      /*
+       * 5. Affichage du profil.
+       */
 
       renderProfile(
         profile
@@ -1372,6 +1431,53 @@
       showSuccess(
         "Profil identifié avec succès."
       );
+
+
+      /*
+       * 6. Nettoyage.
+       *
+       * On supprime UNIQUEMENT la ligne
+       * que le widget vient de créer.
+       *
+       * Une erreur de nettoyage ne doit
+       * jamais empêcher l'accueil Tâchtik
+       * de fonctionner.
+       */
+
+      if (
+        sessionRowId !== null
+        &&
+        sessionRowId !== undefined
+      ) {
+
+        try {
+
+          await grist.docApi.applyUserActions([
+            [
+              "RemoveRecord",
+              "SESSION_WIDGET",
+              sessionRowId
+            ]
+          ]);
+
+
+          console.log(
+            "Session temporaire supprimée :",
+            sessionRowId
+          );
+
+        }
+
+        catch (cleanupError) {
+
+          console.warn(
+            "Le profil est identifié, mais la ligne SESSION_WIDGET n'a pas pu être supprimée :",
+            cleanupError
+          );
+
+        }
+
+      }
 
     }
 
