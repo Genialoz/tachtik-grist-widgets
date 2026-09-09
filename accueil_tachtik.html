@@ -30,6 +30,7 @@
       --violet-soft: #f3efff;
 
       --green: #2e9465;
+      --green-soft: #edf9f2;
 
       --shadow: 0 10px 28px rgba(21, 50, 75, 0.08);
     }
@@ -84,7 +85,6 @@
         );
 
       color: white;
-
       border-radius: 24px;
       padding: 26px 28px;
 
@@ -454,6 +454,11 @@
     .quick-card.reminder-link .quick-icon {
       background:
         var(--orange-soft);
+    }
+
+    .quick-card.finished-link .quick-icon {
+      background:
+        var(--green-soft);
     }
 
     .quick-content {
@@ -921,6 +926,37 @@
 
           <div class="quick-sub">
             Voir les échéances proches et les rappels à effectuer
+          </div>
+
+        </div>
+
+        <div class="quick-arrow">
+          ›
+        </div>
+
+      </a>
+
+
+      <!-- CONTRIBUTIONS TERMINÉES -->
+
+      <a
+        class="quick-card finished-link"
+        href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/10"
+        target="_top"
+      >
+
+        <div class="quick-icon">
+          ✅
+        </div>
+
+        <div class="quick-content">
+
+          <div class="quick-title">
+            Contributions terminées
+          </div>
+
+          <div class="quick-sub">
+            Consulter l’historique des contributions finalisées
           </div>
 
         </div>
