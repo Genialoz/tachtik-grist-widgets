@@ -46,7 +46,6 @@
     body {
       margin: 0;
       min-height: 100%;
-
       font-family:
         Inter,
         ui-sans-serif,
@@ -57,7 +56,6 @@
         Roboto,
         Arial,
         sans-serif;
-
       color: var(--ink);
       background: var(--page);
     }
@@ -84,11 +82,8 @@
     .hero {
       position: relative;
       overflow: hidden;
-
       padding: 24px 26px;
-
       color: white;
-
       border-radius: 24px;
 
       background:
@@ -105,54 +100,38 @@
 
     .hero::after {
       content: "";
-
       position: absolute;
-
       width: 260px;
       height: 260px;
-
       right: -80px;
       top: -120px;
-
       border-radius: 50%;
-
-      background:
-        rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.08);
     }
 
     .hero-top {
       position: relative;
       z-index: 1;
-
       display: flex;
       align-items: center;
       justify-content: space-between;
-
       gap: 20px;
     }
 
     .brand {
       display: flex;
       align-items: center;
-
       gap: 12px;
     }
 
     .brand-mark {
       width: 44px;
       height: 44px;
-
       display: grid;
       place-items: center;
-
       border-radius: 14px;
-
-      background:
-        rgba(255, 255, 255, 0.16);
-
-      border:
-        1px solid rgba(255, 255, 255, 0.16);
-
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.16);
       font-size: 22px;
     }
 
@@ -164,68 +143,46 @@
 
     .brand-sub {
       margin-top: 2px;
-
       font-size: 11px;
-
-      color:
-        rgba(255, 255, 255, 0.72);
+      color: rgba(255, 255, 255, 0.72);
     }
 
     .home-link {
       position: relative;
       z-index: 2;
-
       display: inline-flex;
       align-items: center;
-
       gap: 7px;
-
       padding: 9px 13px;
-
       color: white;
       text-decoration: none;
-
       border-radius: 11px;
-
-      background:
-        rgba(255, 255, 255, 0.13);
-
-      border:
-        1px solid rgba(255, 255, 255, 0.17);
+      background: rgba(255, 255, 255, 0.13);
+      border: 1px solid rgba(255, 255, 255, 0.17);
     }
 
     .home-link:hover {
-      background:
-        rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.2);
     }
 
     .hero-content {
       position: relative;
       z-index: 1;
-
       margin-top: 25px;
     }
 
     .hero h1 {
       margin: 0;
-
-      font-size:
-        clamp(26px, 4vw, 38px);
-
+      font-size: clamp(26px, 4vw, 38px);
       letter-spacing: -0.035em;
     }
 
     .hero p {
       max-width: 720px;
-
-      margin:
-        9px 0 0;
-
+      margin: 9px 0 0;
       font-size: 13px;
       line-height: 1.55;
-
-      color:
-        rgba(255, 255, 255, 0.76);
+      color: rgba(255, 255, 255, 0.76);
     }
 
     /* =========================
@@ -234,84 +191,56 @@
 
     .kpis {
       display: grid;
-
-      grid-template-columns:
-        repeat(4, minmax(0, 1fr));
-
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 13px;
-
       margin-top: 18px;
     }
 
     .kpi {
       position: relative;
       overflow: hidden;
-
       padding: 16px 17px;
-
       min-height: 112px;
-
       border-radius: 18px;
-
       background: var(--surface);
-
-      border:
-        1px solid var(--line);
-
-      box-shadow:
-        var(--shadow);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
     }
 
     .kpi::before {
       content: "";
-
       position: absolute;
-
       left: 0;
       top: 0;
       bottom: 0;
-
       width: 5px;
-
-      background:
-        var(--accent);
+      background: var(--accent);
     }
 
     .kpi-top {
       display: flex;
       align-items: center;
-
       gap: 9px;
-
       font-size: 12px;
       font-weight: 800;
-
       color: #526a7e;
     }
 
     .kpi-icon {
       width: 33px;
       height: 33px;
-
       display: grid;
       place-items: center;
-
       border-radius: 10px;
-
-      background:
-        var(--soft);
+      background: var(--soft);
     }
 
     .kpi-value {
       margin-top: 11px;
-
       font-size: 29px;
       font-weight: 900;
-
       line-height: 1;
-
-      color:
-        var(--accent);
+      color: var(--accent);
     }
 
     .todo {
@@ -340,93 +269,55 @@
 
     .panel {
       margin-top: 18px;
-
       padding: 17px;
-
       border-radius: 19px;
-
       background: var(--surface);
-
-      border:
-        1px solid var(--line);
-
-      box-shadow:
-        var(--shadow);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
     }
 
     .toolbar {
       display: flex;
       align-items: center;
-
       gap: 10px;
-
       flex-wrap: wrap;
     }
 
     .search-wrap {
       position: relative;
-
-      flex:
-        1 1 300px;
+      flex: 1 1 300px;
     }
 
     .search-icon {
       position: absolute;
-
       left: 13px;
       top: 50%;
-
-      transform:
-        translateY(-50%);
-
+      transform: translateY(-50%);
       pointer-events: none;
     }
 
     .search {
       width: 100%;
-
-      padding:
-        11px 13px 11px 39px;
-
-      border:
-        1px solid #d9e4ed;
-
+      padding: 11px 13px 11px 39px;
+      border: 1px solid #d9e4ed;
       border-radius: 12px;
-
-      background:
-        #fbfdff;
-
-      color:
-        var(--ink);
-
+      background: #fbfdff;
+      color: var(--ink);
       outline: none;
     }
 
     .search:focus {
-      border-color:
-        #8fb1ea;
-
-      box-shadow:
-        0 0 0 3px rgba(47, 111, 221, 0.1);
+      border-color: #8fb1ea;
+      box-shadow: 0 0 0 3px rgba(47, 111, 221, 0.1);
     }
 
     .select {
       min-width: 155px;
-
-      padding:
-        11px 35px 11px 12px;
-
-      border:
-        1px solid #d9e4ed;
-
+      padding: 11px 35px 11px 12px;
+      border: 1px solid #d9e4ed;
       border-radius: 12px;
-
-      background:
-        #fbfdff;
-
-      color:
-        var(--ink);
-
+      background: #fbfdff;
+      color: var(--ink);
       outline: none;
     }
 
@@ -437,45 +328,29 @@
     .quick-filters {
       display: flex;
       flex-wrap: wrap;
-
       gap: 8px;
-
       margin-top: 13px;
     }
 
     .filter-btn {
-      padding:
-        8px 12px;
-
-      border:
-        1px solid #dbe5ed;
-
+      padding: 8px 12px;
+      border: 1px solid #dbe5ed;
       border-radius: 999px;
-
       background: white;
-
-      color:
-        #536b7e;
-
+      color: #536b7e;
       cursor: pointer;
-
       font-size: 11px;
       font-weight: 750;
     }
 
     .filter-btn:hover {
-      border-color:
-        #a9bfd1;
+      border-color: #a9bfd1;
     }
 
     .filter-btn.active {
       color: white;
-
-      border-color:
-        var(--blue);
-
-      background:
-        var(--blue);
+      border-color: var(--blue);
+      background: var(--blue);
     }
 
     /* =========================
@@ -486,11 +361,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-
       gap: 12px;
-
-      margin:
-        20px 2px 10px;
+      margin: 20px 2px 10px;
     }
 
     .results-title {
@@ -500,9 +372,7 @@
 
     .results-count {
       font-size: 11px;
-
-      color:
-        var(--muted);
+      color: var(--muted);
     }
 
     /* =========================
@@ -511,37 +381,23 @@
 
     .contribution-list {
       display: grid;
-
       gap: 10px;
     }
 
     .contribution {
       display: grid;
-
-      grid-template-columns:
-        minmax(0, 1fr) auto;
-
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: 16px;
-
       padding: 17px 18px;
-
       border-radius: 17px;
-
       background: var(--surface);
-
-      border:
-        1px solid var(--line);
-
-      box-shadow:
-        0 5px 16px rgba(21, 50, 75, 0.055);
+      border: 1px solid var(--line);
+      box-shadow: 0 5px 16px rgba(21, 50, 75, 0.055);
     }
 
     .contribution:hover {
-      border-color:
-        #cbdbe7;
-
-      box-shadow:
-        0 9px 22px rgba(21, 50, 75, 0.08);
+      border-color: #cbdbe7;
+      box-shadow: 0 9px 22px rgba(21, 50, 75, 0.08);
     }
 
     .contribution-main {
@@ -551,36 +407,26 @@
     .contribution-top {
       display: flex;
       align-items: center;
-
       gap: 9px;
-
       flex-wrap: wrap;
     }
 
     .number {
       font-size: 11px;
       font-weight: 850;
-
-      color:
-        var(--blue);
+      color: var(--blue);
     }
 
     .title {
       font-size: 15px;
       font-weight: 850;
-
-      color:
-        var(--ink);
+      color: var(--ink);
     }
 
     .description {
       margin-top: 7px;
-
       max-width: 820px;
-
-      color:
-        var(--muted);
-
+      color: var(--muted);
       font-size: 12px;
       line-height: 1.45;
     }
@@ -588,112 +434,73 @@
     .meta {
       display: flex;
       flex-wrap: wrap;
-
-      gap:
-        7px 15px;
-
+      gap: 7px 15px;
       margin-top: 12px;
-
-      color:
-        #617688;
-
+      color: #617688;
       font-size: 11px;
     }
 
     .meta-item {
       display: inline-flex;
       align-items: center;
-
       gap: 5px;
     }
 
     .badges {
       display: flex;
       flex-wrap: wrap;
-
       gap: 6px;
-
       margin-top: 11px;
     }
 
     .badge {
       display: inline-flex;
       align-items: center;
-
       min-height: 25px;
-
-      padding:
-        4px 8px;
-
+      padding: 4px 8px;
       border-radius: 999px;
-
       font-size: 10px;
       font-weight: 800;
-
-      background:
-        #f1f5f8;
-
-      color:
-        #536b7e;
+      background: #f1f5f8;
+      color: #536b7e;
     }
 
     .badge.red {
-      background:
-        var(--red-soft);
-
-      color:
-        #b23a49;
+      background: var(--red-soft);
+      color: #b23a49;
     }
 
     .badge.orange {
-      background:
-        var(--orange-soft);
-
-      color:
-        #a76912;
+      background: var(--orange-soft);
+      color: #a76912;
     }
 
     .badge.yellow {
-      background:
-        var(--yellow-soft);
-
-      color:
-        #8a6c16;
+      background: var(--yellow-soft);
+      color: #8a6c16;
     }
 
     .badge.violet {
-      background:
-        var(--violet-soft);
-
-      color:
-        #6444bc;
+      background: var(--violet-soft);
+      color: #6444bc;
     }
 
     .badge.blue {
-      background:
-        var(--blue-soft);
-
-      color:
-        #275db7;
+      background: var(--blue-soft);
+      color: #275db7;
     }
 
     .badge.green {
-      background:
-        var(--green-soft);
-
-      color:
-        #267b55;
+      background: var(--green-soft);
+      color: #267b55;
     }
 
     .contribution-side {
       min-width: 165px;
-
       display: flex;
       flex-direction: column;
-
       align-items: flex-end;
       justify-content: space-between;
-
       gap: 12px;
     }
 
@@ -703,47 +510,30 @@
 
     .deadline-label {
       font-size: 9px;
-
       text-transform: uppercase;
-
-      letter-spacing:
-        0.07em;
-
-      color:
-        var(--muted);
+      letter-spacing: 0.07em;
+      color: var(--muted);
     }
 
     .deadline-date {
       margin-top: 3px;
-
       font-size: 14px;
       font-weight: 850;
     }
 
     .deadline-days {
       margin-top: 3px;
-
       font-size: 10px;
-
-      color:
-        var(--muted);
+      color: var(--muted);
     }
 
     .empty {
       padding: 40px 20px;
-
       text-align: center;
-
-      border:
-        1px dashed #cad8e3;
-
+      border: 1px dashed #cad8e3;
       border-radius: 18px;
-
-      background:
-        rgba(255, 255, 255, 0.55);
-
-      color:
-        var(--muted);
+      background: rgba(255, 255, 255, 0.55);
+      color: var(--muted);
     }
 
     .empty-icon {
@@ -752,59 +542,40 @@
 
     .empty-title {
       margin-top: 8px;
-
       font-size: 14px;
       font-weight: 850;
-
-      color:
-        var(--ink);
+      color: var(--ink);
     }
 
     .empty-text {
       margin-top: 5px;
-
       font-size: 11px;
     }
 
     .foot {
       display: flex;
       justify-content: space-between;
-
       gap: 14px;
-
       margin-top: 16px;
-
       padding: 13px 15px;
-
       border-radius: 15px;
-
-      background:
-        rgba(255, 255, 255, 0.72);
-
-      border:
-        1px solid var(--line);
-
-      color:
-        var(--muted);
-
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--line);
+      color: var(--muted);
       font-size: 10px;
     }
 
     .status {
       display: inline-flex;
       align-items: center;
-
       gap: 7px;
     }
 
     .dot {
       width: 8px;
       height: 8px;
-
       border-radius: 50%;
-
-      background:
-        var(--green);
+      background: var(--green);
     }
 
     /* =========================
@@ -812,40 +583,32 @@
        ========================= */
 
     @media (max-width: 850px) {
-
       .kpis {
-        grid-template-columns:
-          repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
       .contribution {
-        grid-template-columns:
-          1fr;
+        grid-template-columns: 1fr;
       }
 
       .contribution-side {
         min-width: 0;
-
         flex-direction: row;
-
         align-items: center;
       }
 
       .deadline {
         text-align: left;
       }
-
     }
 
     @media (max-width: 520px) {
-
       body {
         padding: 10px;
       }
 
       .hero {
         padding: 20px;
-
         border-radius: 18px;
       }
 
@@ -858,8 +621,7 @@
       }
 
       .kpis {
-        grid-template-columns:
-          1fr 1fr;
+        grid-template-columns: 1fr 1fr;
       }
 
       .select {
@@ -868,14 +630,12 @@
 
       .contribution-side {
         flex-direction: column;
-
         align-items: flex-start;
       }
 
       .foot {
         flex-direction: column;
       }
-
     }
   </style>
 </head>
@@ -883,10 +643,6 @@
 <body>
 
   <main class="app">
-
-    <!-- =========================
-         HEADER
-         ========================= -->
 
     <section class="hero">
 
@@ -899,7 +655,6 @@
           </div>
 
           <div>
-
             <div class="brand-name">
               TÂCHTIK
             </div>
@@ -907,7 +662,6 @@
             <div class="brand-sub">
               Suivi des contributions de la DGRH
             </div>
-
           </div>
 
         </div>
@@ -939,105 +693,57 @@
     </section>
 
 
-    <!-- =========================
-         KPI
-         ========================= -->
-
     <section class="kpis">
 
       <article class="kpi todo">
-
         <div class="kpi-top">
-
-          <span class="kpi-icon">
-            📋
-          </span>
-
+          <span class="kpi-icon">📋</span>
           À traiter
-
         </div>
 
-        <div
-          id="kpi-todo"
-          class="kpi-value"
-        >
+        <div id="kpi-todo" class="kpi-value">
           0
         </div>
-
       </article>
 
 
       <article class="kpi late">
-
         <div class="kpi-top">
-
-          <span class="kpi-icon">
-            ⏰
-          </span>
-
+          <span class="kpi-icon">⏰</span>
           En retard
-
         </div>
 
-        <div
-          id="kpi-late"
-          class="kpi-value"
-        >
+        <div id="kpi-late" class="kpi-value">
           0
         </div>
-
       </article>
 
 
       <article class="kpi remind">
-
         <div class="kpi-top">
-
-          <span class="kpi-icon">
-            🔔
-          </span>
-
+          <span class="kpi-icon">🔔</span>
           À relancer
-
         </div>
 
-        <div
-          id="kpi-remind"
-          class="kpi-value"
-        >
+        <div id="kpi-remind" class="kpi-value">
           0
         </div>
-
       </article>
 
 
       <article class="kpi urgent">
-
         <div class="kpi-top">
-
-          <span class="kpi-icon">
-            ⚡
-          </span>
-
+          <span class="kpi-icon">⚡</span>
           Urgentes
-
         </div>
 
-        <div
-          id="kpi-urgent"
-          class="kpi-value"
-        >
+        <div id="kpi-urgent" class="kpi-value">
           0
         </div>
-
       </article>
 
     </section>
 
-
-    <!-- =========================
-         FILTRES
-         ========================= -->
 
     <section class="panel">
 
@@ -1059,10 +765,7 @@
         </div>
 
 
-        <select
-          id="priority-filter"
-          class="select"
-        >
+        <select id="priority-filter" class="select">
 
           <option value="">
             Toutes les priorités
@@ -1083,10 +786,7 @@
         </select>
 
 
-        <select
-          id="department-filter"
-          class="select"
-        >
+        <select id="department-filter" class="select">
 
           <option value="">
             Tous les départements
@@ -1095,10 +795,7 @@
         </select>
 
 
-        <select
-          id="origin-filter"
-          class="select"
-        >
+        <select id="origin-filter" class="select">
 
           <option value="">
             Tous les bureaux d'origine
@@ -1127,6 +824,20 @@
 
         <button
           class="filter-btn"
+          data-filter="close"
+        >
+          🟠 Échéance proche
+        </button>
+
+        <button
+          class="filter-btn"
+          data-filter="watch"
+        >
+          🟡 À surveiller
+        </button>
+
+        <button
+          class="filter-btn"
           data-filter="remind"
         >
           🔔 À relancer
@@ -1151,20 +862,13 @@
     </section>
 
 
-    <!-- =========================
-         RÉSULTATS
-         ========================= -->
-
     <div class="results-head">
 
       <div class="results-title">
         Contributions à traiter
       </div>
 
-      <div
-        id="results-count"
-        class="results-count"
-      >
+      <div id="results-count" class="results-count">
         0 contribution
       </div>
 
@@ -1180,11 +884,8 @@
     <div class="foot">
 
       <span class="status">
-
         <span class="dot"></span>
-
         Données synchronisées avec Grist
-
       </span>
 
       <span>
@@ -1203,13 +904,10 @@
 
 
     let allRecords = [];
-
-    let quickFilter =
-      "all";
+    let quickFilter = "all";
 
 
     function clean(value) {
-
       return String(
         value == null
           ? ""
@@ -1217,94 +915,67 @@
       )
       .trim()
       .toLowerCase();
-
     }
 
 
     function text(value) {
-
       return String(
         value == null
           ? ""
           : value
       );
-
     }
 
 
     function escapeHtml(value) {
-
       return text(value)
-        .replaceAll(
-          "&",
-          "&amp;"
-        )
-        .replaceAll(
-          "<",
-          "&lt;"
-        )
-        .replaceAll(
-          ">",
-          "&gt;"
-        )
-        .replaceAll(
-          '"',
-          "&quot;"
-        )
-        .replaceAll(
-          "'",
-          "&#039;"
-        );
-
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     }
 
 
     function isTodo(record) {
-
       const statut =
-        clean(
-          record.Statut
-        );
+        clean(record.Statut);
 
       return (
         statut === "à faire"
         ||
         statut === "a faire"
       );
-
     }
 
 
     function isLate(record) {
+      return clean(record.Alerte)
+        .includes("en retard");
+    }
 
-      return clean(
-        record.Alerte
-      )
-      .includes(
-        "retard"
-      );
 
+    function isClose(record) {
+      return clean(record.Alerte)
+        .includes("échéance proche");
+    }
+
+
+    function isWatch(record) {
+      return clean(record.Alerte)
+        .includes("à surveiller");
     }
 
 
     function needsReminder(record) {
-
-      return clean(
-        record.Rappel_a_faire
-      )
-      .includes(
-        "relancer"
-      );
-
+      return clean(record.Rappel_a_faire)
+        .includes("relancer");
     }
 
 
     function isUrgent(record) {
-
-      return clean(
-        record.Priorite
-      ) === "urgente";
-
+      return clean(record.Priorite)
+        === "urgente";
     }
 
 
@@ -1315,20 +986,16 @@
         ||
         value === ""
       ) {
-
         return null;
-
       }
 
 
       if (
         typeof value === "number"
       ) {
-
         return new Date(
           value * 1000
         );
-
       }
 
 
@@ -1341,7 +1008,6 @@
       )
         ? null
         : d;
-
     }
 
 
@@ -1352,27 +1018,19 @@
 
 
       if (!d) {
-
         return "Non renseignée";
-
       }
 
 
       return new Intl.DateTimeFormat(
         "fr-FR",
         {
-          day:
-            "2-digit",
-
-          month:
-            "2-digit",
-
-          year:
-            "numeric"
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric"
         }
       )
       .format(d);
-
     }
 
 
@@ -1385,9 +1043,7 @@
 
 
       if (!d) {
-
         return false;
-
       }
 
 
@@ -1441,7 +1097,6 @@
         &&
         d <= sunday
       );
-
     }
 
 
@@ -1462,28 +1117,16 @@
               );
 
 
-            if (
-              !da
-              &&
-              !db
-            ) {
-
+            if (!da && !db) {
               return 0;
-
             }
-
 
             if (!da) {
-
               return 1;
-
             }
 
-
             if (!db) {
-
               return -1;
-
             }
 
 
@@ -1491,10 +1134,8 @@
               da.getTime() -
               db.getTime()
             );
-
           }
         );
-
     }
 
 
@@ -1506,7 +1147,6 @@
 
       const select =
         $(id);
-
 
       const current =
         select.value;
@@ -1532,16 +1172,12 @@
         `<option value="">${escapeHtml(firstLabel)}</option>`;
 
 
-      for (
-        const value
-        of unique
-      ) {
+      for (const value of unique) {
 
         const option =
           document.createElement(
             "option"
           );
-
 
         option.value =
           clean(value);
@@ -1549,17 +1185,14 @@
         option.textContent =
           value;
 
-
         select.appendChild(
           option
         );
-
       }
 
 
       select.value =
         current;
-
     }
 
 
@@ -1591,7 +1224,6 @@
         active.filter(
           isUrgent
         ).length;
-
     }
 
 
@@ -1623,16 +1255,14 @@
 
       return sortByDeadline(
         allRecords
-          .filter(
-            isTodo
-          )
+
+          .filter(isTodo)
+
           .filter(
             record => {
 
               if (!search) {
-
                 return true;
-
               }
 
 
@@ -1652,16 +1282,14 @@
               return haystack.includes(
                 search
               );
-
             }
           )
+
           .filter(
             record => {
 
               if (!priority) {
-
                 return true;
-
               }
 
 
@@ -1671,16 +1299,14 @@
                 )
                 === priority
               );
-
             }
           )
+
           .filter(
             record => {
 
               if (!department) {
-
                 return true;
-
               }
 
 
@@ -1690,16 +1316,14 @@
                 )
                 === department
               );
-
             }
           )
+
           .filter(
             record => {
 
               if (!origin) {
-
                 return true;
-
               }
 
 
@@ -1709,62 +1333,70 @@
                 )
                 === origin
               );
-
             }
           )
+
           .filter(
             record => {
 
               if (
                 quickFilter === "late"
               ) {
-
                 return isLate(
                   record
                 );
+              }
 
+
+              if (
+                quickFilter === "close"
+              ) {
+                return isClose(
+                  record
+                );
+              }
+
+
+              if (
+                quickFilter === "watch"
+              ) {
+                return isWatch(
+                  record
+                );
               }
 
 
               if (
                 quickFilter === "remind"
               ) {
-
                 return needsReminder(
                   record
                 );
-
               }
 
 
               if (
                 quickFilter === "urgent"
               ) {
-
                 return isUrgent(
                   record
                 );
-
               }
 
 
               if (
                 quickFilter === "week"
               ) {
-
                 return isThisWeek(
                   record
                 );
-
               }
 
 
               return true;
-
             }
           )
       );
-
     }
 
 
@@ -1781,9 +1413,7 @@
 
 
       if (!value) {
-
         return "";
-
       }
 
 
@@ -1793,35 +1423,34 @@
 
       if (
         normalized.includes(
-          "retard"
+          "en retard"
         )
       ) {
-
-        cls =
-          "red";
-
+        cls = "red";
       }
 
       else if (
         normalized.includes(
-          "7 jours"
+          "échéance proche"
         )
       ) {
-
-        cls =
-          "orange";
-
+        cls = "orange";
       }
 
       else if (
         normalized.includes(
-          "15 jours"
+          "à surveiller"
         )
       ) {
+        cls = "yellow";
+      }
 
-        cls =
-          "yellow";
-
+      else if (
+        normalized.includes(
+          "fait"
+        )
+      ) {
+        cls = "green";
       }
 
 
@@ -1830,7 +1459,6 @@
           ${escapeHtml(value)}
         </span>
       `;
-
     }
 
 
@@ -1847,9 +1475,7 @@
 
 
       if (!value) {
-
         return "";
-
       }
 
 
@@ -1860,28 +1486,19 @@
       if (
         normalized === "urgente"
       ) {
-
-        cls =
-          "violet";
-
+        cls = "violet";
       }
 
       else if (
         normalized === "haute"
       ) {
-
-        cls =
-          "orange";
-
+        cls = "orange";
       }
 
       else if (
         normalized === "normale"
       ) {
-
-        cls =
-          "green";
-
+        cls = "green";
       }
 
 
@@ -1890,7 +1507,6 @@
           Priorité ${escapeHtml(value)}
         </span>
       `;
-
     }
 
 
@@ -1901,9 +1517,7 @@
           record
         )
       ) {
-
         return "";
-
       }
 
 
@@ -1912,7 +1526,6 @@
           🔔 À relancer
         </span>
       `;
-
     }
 
 
@@ -1927,9 +1540,7 @@
         ||
         days === ""
       ) {
-
         return "";
-
       }
 
 
@@ -1940,9 +1551,7 @@
       if (
         Number.isNaN(n)
       ) {
-
         return "";
-
       }
 
 
@@ -1960,14 +1569,11 @@
               : " jour de retard"
           )
         );
-
       }
 
 
       if (n === 0) {
-
         return "Échéance aujourd’hui";
-
       }
 
 
@@ -1980,7 +1586,6 @@
             : " jour"
         )
       );
-
     }
 
 
@@ -2025,9 +1630,7 @@
           </div>
         `;
 
-
         return;
-
       }
 
 
@@ -2188,11 +1791,9 @@
 
                 </article>
               `;
-
             }
           )
           .join("");
-
     }
 
 
@@ -2226,7 +1827,6 @@
 
 
       renderList();
-
     }
 
 
@@ -2295,21 +1895,17 @@
 
 
                 renderList();
-
               }
             );
-
           }
         );
-
     }
 
 
     function init() {
 
       grist.ready({
-        requiredAccess:
-          "full"
+        requiredAccess: "full"
       });
 
 
@@ -2326,10 +1922,8 @@
 
 
           renderAll();
-
         }
       );
-
     }
 
 
