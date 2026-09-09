@@ -2821,11 +2821,26 @@
 
       let result = text(template);
 
+      // Supprime automatiquement une ligne de modèle lorsqu'elle contient
+      // au moins une variable dont la valeur est vide. Exemple :
+      // « Description : [DESCRIPTION] » disparaît si Description est vide.
+      const lines = result.split(/\r?\n/);
+      const keptLines = lines.filter(line => {
+        const variablesInLine = Object.keys(values).filter(key => line.includes(key));
+        if (variablesInLine.length === 0) {
+          return true;
+        }
+        return !variablesInLine.some(key => !text(values[key]).trim());
+      });
+
+      result = keptLines.join("\n");
+
       for (const [key, value] of Object.entries(values)) {
         result = result.split(key).join(value);
       }
 
-      return result;
+      // Évite les grands espaces laissés par plusieurs lignes supprimées.
+      return result.replace(/\n{3,}/g, "\n\n").trim();
     }
 
     function buildInitialMail(record) {
