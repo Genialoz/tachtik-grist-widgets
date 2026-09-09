@@ -15,7 +15,7 @@
     .variables{display:flex;flex-wrap:wrap;gap:6px}.var{border:1px solid #cbd9e5;background:#f8fbfd;border-radius:8px;padding:6px 8px;font-family:Consolas,monospace;font-size:10px;cursor:pointer;color:#31536f}.var:hover{background:var(--blue2);border-color:#a9c4f2}.hint{color:var(--muted);font-size:11px;line-height:1.5;margin-top:10px}.notice{background:#f1f7ff;border:1px solid #cfe0f7;border-radius:12px;padding:11px 12px;font-size:11px;line-height:1.5;margin-top:14px}
     .actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}.btn{border-radius:10px;padding:9px 14px;font-weight:850;cursor:pointer}.secondary{background:#fff;border:1px solid var(--line);color:var(--ink)}.primary{background:var(--blue);border:1px solid var(--blue);color:#fff}.primary:disabled{opacity:.5;cursor:not-allowed}
     .preview{margin-top:18px;border-top:1px solid var(--line);padding-top:17px}.preview-box{border:1px solid var(--line);background:#fbfdff;border-radius:13px;padding:14px;white-space:pre-wrap;line-height:1.55;min-height:110px}.preview-meta{display:grid;grid-template-columns:80px 1fr;gap:7px;font-size:11px;margin-bottom:12px}.preview-meta b{color:var(--muted)}
-    .status{margin-top:12px;font-size:11px;font-weight:750;color:var(--muted)}.status.ok{color:var(--ok)}.status.err{color:var(--danger)}
+    .status{margin-top:12px;font-size:11px;font-weight:750;color:var(--muted);min-height:18px}.status.ok{color:var(--ok)}.status.err{color:var(--danger)}.status.flash{background:#eef9f4;border:1px solid #bfe7d4;border-radius:10px;padding:9px 10px;color:var(--ok);animation:fadein .18s ease-out}@keyframes fadein{from{opacity:0;transform:translateY(-2px)}to{opacity:1;transform:translateY(0)}}
     .empty{padding:35px;text-align:center;color:var(--muted)}
     @media(max-width:800px){.grid{grid-template-columns:1fr}.wrap{padding:12px}.hero{border-radius:16px}}
   </style>
@@ -56,13 +56,13 @@
   function text(v){return String(v==null?'':v)} function rowsFrom(t){if(!t)return[];return (t.id||[]).map((id,i)=>{let r={id};for(const k of Object.keys(t))if(k!=='id')r[k]=t[k][i];return r})}
   function codeMap(){const m=new Map();for(const b of bureaux)m.set(Number(b.id),text(b.Code)||text(b.Nom));return m}
   function selected(){return rows.find(r=>Number(r.id)===Number($('bureau').value))}
-  function setStatus(msg,cls=''){const e=$('status');e.textContent=msg;e.className='status '+cls}
+  let statusTimer=null;function setStatus(msg,cls='',autoClear=false){const e=$('status');if(statusTimer){clearTimeout(statusTimer);statusTimer=null}e.textContent=msg;e.className='status '+cls;if(autoClear&&msg){statusTimer=setTimeout(()=>{e.textContent='';e.className='status'},3500)}}
   function renderBureaux(){const map=codeMap();$('bureau').innerHTML=rows.map(r=>`<option value="${r.id}">${escapeHtml(map.get(Number(r.Bureau))||'Bureau non défini')}</option>`).join(''); if(!rows.length){$('editor').innerHTML='<div class="empty">Aucun paramétrage de bureau disponible.</div>'}}
   function escapeHtml(v){return text(v).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;')}
   function loadEditor(){const r=selected();if(!r)return;const [o,c]=fields[currentType];$('objet').value=text(r[o]);$('corps').value=text(r[c]);dirty=false;preview();setStatus('')}
   function preview(){let o=$('objet').value,b=$('corps').value;for(const [k,v] of Object.entries(samples)){o=o.split(k).join(v);b=b.split(k).join(v)}$('preview-subject').textContent=o||'—';$('preview-body').textContent=b||'Aucun contenu.'}
   function insertVar(v){const el=activeField||$('corps');const start=el.selectionStart??el.value.length,end=el.selectionEnd??start;el.value=el.value.slice(0,start)+v+el.value.slice(end);el.focus();el.selectionStart=el.selectionEnd=start+v.length;dirty=true;preview()}
-  async function save(){const r=selected();if(!r)return;const [o,c]=fields[currentType];$('save').disabled=true;try{await grist.docApi.applyUserActions([['UpdateRecord','PARAMETRES_BUREAUX',Number(r.id),{[o]:$('objet').value,[c]:$('corps').value}]]);r[o]=$('objet').value;r[c]=$('corps').value;dirty=false;setStatus('✓ Modèle enregistré.','ok')}catch(e){console.error(e);setStatus("Impossible d'enregistrer le modèle. Vérifiez vos droits d'accès.",'err')}finally{$('save').disabled=false}}
+  async function save(){const r=selected();if(!r)return;const [o,c]=fields[currentType];const btn=$('save');const originalLabel='💾 Enregistrer le modèle';btn.disabled=true;btn.textContent='Enregistrement…';setStatus('');try{await grist.docApi.applyUserActions([['UpdateRecord','PARAMETRES_BUREAUX',Number(r.id),{[o]:$('objet').value,[c]:$('corps').value}]]);r[o]=$('objet').value;r[c]=$('corps').value;dirty=false;btn.textContent='✓ Enregistré';setStatus('✓ Modèle enregistré avec succès','ok flash',true);setTimeout(()=>{btn.textContent=originalLabel;btn.disabled=false},1800)}catch(e){console.error(e);btn.textContent=originalLabel;btn.disabled=false;setStatus("Impossible d'enregistrer le modèle. Vérifiez vos droits d'accès.",'err')}}
   async function init(){try{const [p,b]=await Promise.all([grist.docApi.fetchTable('PARAMETRES_BUREAUX'),grist.docApi.fetchTable('BUREAUX_ORIGINE')]);rows=rowsFrom(p);bureaux=rowsFrom(b);renderBureaux();loadEditor()}catch(e){console.error(e);setStatus("Impossible de charger les paramètres. Vérifiez l'accès aux tables PARAMETRES_BUREAUX et BUREAUX_ORIGINE.",'err')}}
   $('variables').innerHTML=VARS.map(v=>`<button class="var" data-v="${v}">${v}</button>`).join('');
   $('variables').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b)insertVar(b.dataset.v)});
@@ -72,4 +72,3 @@
 </script>
 </body>
 </html>
-
