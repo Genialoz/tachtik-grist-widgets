@@ -177,7 +177,6 @@
 
       display: inline-flex;
       align-items: center;
-
       gap: 7px;
 
       padding: 9px 13px;
@@ -225,6 +224,35 @@
 
       color:
         rgba(255, 255, 255, 0.76);
+    }
+
+    /* Diagnostic temporaire */
+
+    .profile-debug {
+      position: relative;
+      z-index: 1;
+
+      display: inline-flex;
+      align-items: center;
+
+      gap: 7px;
+
+      margin-top: 14px;
+
+      padding: 7px 11px;
+
+      border-radius: 10px;
+
+      background:
+        rgba(255, 255, 255, 0.13);
+
+      border:
+        1px solid rgba(255, 255, 255, 0.18);
+
+      font-size: 11px;
+      font-weight: 750;
+
+      color: white;
     }
 
     /* =========================
@@ -391,13 +419,6 @@
       outline: none;
     }
 
-    .search:focus {
-      border-color: #8fb1ea;
-
-      box-shadow:
-        0 0 0 3px rgba(47, 111, 221, 0.1);
-    }
-
     .select {
       min-width: 155px;
 
@@ -443,10 +464,6 @@
       font-weight: 750;
     }
 
-    .filter-btn:hover {
-      border-color: #a9bfd1;
-    }
-
     .filter-btn.active {
       color: white;
 
@@ -487,10 +504,6 @@
       gap: 10px;
     }
 
-    /* =========================
-       CARTE CONTRIBUTION
-       ========================= */
-
     .contribution {
       display: grid;
 
@@ -510,13 +523,6 @@
 
       box-shadow:
         0 5px 16px rgba(21, 50, 75, 0.055);
-    }
-
-    .contribution:hover {
-      border-color: #cbdbe7;
-
-      box-shadow:
-        0 9px 22px rgba(21, 50, 75, 0.08);
     }
 
     .contribution-main {
@@ -569,13 +575,6 @@
       font-size: 11px;
     }
 
-    .meta-item {
-      display: inline-flex;
-      align-items: center;
-
-      gap: 5px;
-    }
-
     .badges {
       display: flex;
       flex-wrap: wrap;
@@ -589,18 +588,12 @@
       display: inline-flex;
       align-items: center;
 
-      min-height: 25px;
-
       padding: 4px 8px;
 
       border-radius: 999px;
 
       font-size: 10px;
       font-weight: 800;
-
-      background: #f1f5f8;
-
-      color: #536b7e;
     }
 
     .badge.red {
@@ -634,14 +627,13 @@
     }
 
     .contribution-side {
-      min-width: 180px;
+      min-width: 190px;
 
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      justify-content: space-between;
 
-      gap: 14px;
+      gap: 15px;
     }
 
     .deadline {
@@ -652,8 +644,6 @@
       font-size: 9px;
 
       text-transform: uppercase;
-
-      letter-spacing: 0.07em;
 
       color: var(--muted);
     }
@@ -673,23 +663,7 @@
       color: var(--muted);
     }
 
-    /* =========================
-       RAPPEL
-       ========================= */
-
-    .reminder-action {
-      display: flex;
-
-      justify-content: flex-end;
-    }
-
     .reminder-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-
-      gap: 7px;
-
       padding: 9px 12px;
 
       border:
@@ -697,7 +671,8 @@
 
       border-radius: 11px;
 
-      background: var(--orange-soft);
+      background:
+        var(--orange-soft);
 
       color: #9a620d;
 
@@ -707,28 +682,31 @@
       font-weight: 800;
     }
 
-    .reminder-btn:hover:not(:disabled) {
-      background: #ffedce;
-    }
-
     .reminder-btn:disabled {
-      cursor: wait;
-
       opacity: 0.55;
+      cursor: wait;
     }
 
-    /* =========================
-       MESSAGES
-       ========================= */
+    .empty {
+      padding: 40px;
+
+      text-align: center;
+
+      border:
+        1px dashed #cad8e3;
+
+      border-radius: 18px;
+
+      background: white;
+
+      color: var(--muted);
+    }
 
     .toast {
       position: fixed;
-      z-index: 9999;
 
       right: 22px;
       bottom: 22px;
-
-      max-width: 390px;
 
       padding: 13px 16px;
 
@@ -739,26 +717,13 @@
       font-size: 12px;
       font-weight: 700;
 
-      box-shadow:
-        0 12px 30px rgba(21, 50, 75, 0.22);
-
       opacity: 0;
 
       pointer-events: none;
-
-      transform:
-        translateY(10px);
-
-      transition:
-        opacity 0.2s ease,
-        transform 0.2s ease;
     }
 
     .toast.visible {
       opacity: 1;
-
-      transform:
-        translateY(0);
     }
 
     .toast.success {
@@ -769,85 +734,11 @@
       background: #b23a49;
     }
 
-    .empty {
-      padding: 40px 20px;
-
-      text-align: center;
-
-      border:
-        1px dashed #cad8e3;
-
-      border-radius: 18px;
-
-      background:
-        rgba(255, 255, 255, 0.55);
-
-      color: var(--muted);
-    }
-
-    .empty-icon {
-      font-size: 28px;
-    }
-
-    .empty-title {
-      margin-top: 8px;
-
-      font-size: 14px;
-      font-weight: 850;
-
-      color: var(--ink);
-    }
-
-    .empty-text {
-      margin-top: 5px;
-
-      font-size: 11px;
-    }
-
-    .foot {
-      display: flex;
-      justify-content: space-between;
-
-      gap: 14px;
-
-      margin-top: 16px;
-
-      padding: 13px 15px;
-
-      border-radius: 15px;
-
-      background:
-        rgba(255, 255, 255, 0.72);
-
-      border:
-        1px solid var(--line);
-
-      color: var(--muted);
-
-      font-size: 10px;
-    }
-
-    .status {
-      display: inline-flex;
-      align-items: center;
-
-      gap: 7px;
-    }
-
-    .dot {
-      width: 8px;
-      height: 8px;
-
-      border-radius: 50%;
-
-      background: var(--green);
-    }
-
     @media (max-width: 850px) {
 
       .kpis {
         grid-template-columns:
-          repeat(2, minmax(0, 1fr));
+          repeat(2, 1fr);
       }
 
       .contribution {
@@ -855,61 +746,16 @@
       }
 
       .contribution-side {
-        min-width: 0;
-
-        flex-direction: row;
-        align-items: center;
+        align-items: flex-start;
       }
 
       .deadline {
         text-align: left;
       }
     }
-
-    @media (max-width: 520px) {
-
-      body {
-        padding: 10px;
-      }
-
-      .hero {
-        padding: 20px;
-
-        border-radius: 18px;
-      }
-
-      .brand-sub {
-        display: none;
-      }
-
-      .kpis {
-        grid-template-columns:
-          1fr 1fr;
-      }
-
-      .select {
-        width: 100%;
-      }
-
-      .contribution-side {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .foot {
-        flex-direction: column;
-      }
-
-      .toast {
-        left: 12px;
-        right: 12px;
-        bottom: 12px;
-
-        max-width: none;
-      }
-    }
   </style>
 </head>
+
 
 <body>
 
@@ -939,6 +785,7 @@
 
         </div>
 
+
         <a
           class="home-link"
           href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH"
@@ -949,6 +796,7 @@
 
       </div>
 
+
       <div class="hero-content">
 
         <h1>
@@ -956,10 +804,17 @@
         </h1>
 
         <p>
-          Suivez les contributions en cours, identifiez les échéances
-          prioritaires et retrouvez rapidement les demandes nécessitant
-          une relance.
+          Suivez les contributions en cours, les échéances
+          et les relances à effectuer.
         </p>
+
+
+        <div
+          id="profile-debug"
+          class="profile-debug"
+        >
+          👤 Profil détecté : identification…
+        </div>
 
       </div>
 
@@ -969,7 +824,6 @@
     <section class="kpis">
 
       <article class="kpi todo">
-
         <div class="kpi-top">
           <span class="kpi-icon">📋</span>
           À traiter
@@ -978,12 +832,10 @@
         <div id="kpi-todo" class="kpi-value">
           0
         </div>
-
       </article>
 
 
       <article class="kpi late">
-
         <div class="kpi-top">
           <span class="kpi-icon">⏰</span>
           En retard
@@ -992,12 +844,10 @@
         <div id="kpi-late" class="kpi-value">
           0
         </div>
-
       </article>
 
 
       <article class="kpi remind">
-
         <div class="kpi-top">
           <span class="kpi-icon">🔔</span>
           À relancer
@@ -1006,12 +856,10 @@
         <div id="kpi-remind" class="kpi-value">
           0
         </div>
-
       </article>
 
 
       <article class="kpi urgent">
-
         <div class="kpi-top">
           <span class="kpi-icon">⚡</span>
           Urgentes
@@ -1020,7 +868,6 @@
         <div id="kpi-urgent" class="kpi-value">
           0
         </div>
-
       </article>
 
     </section>
@@ -1089,52 +936,31 @@
 
       <div class="quick-filters">
 
-        <button
-          class="filter-btn active"
-          data-filter="all"
-        >
+        <button class="filter-btn active" data-filter="all">
           Toutes
         </button>
 
-        <button
-          class="filter-btn"
-          data-filter="late"
-        >
+        <button class="filter-btn" data-filter="late">
           🔴 En retard
         </button>
 
-        <button
-          class="filter-btn"
-          data-filter="close"
-        >
+        <button class="filter-btn" data-filter="close">
           🟠 Échéance proche
         </button>
 
-        <button
-          class="filter-btn"
-          data-filter="watch"
-        >
+        <button class="filter-btn" data-filter="watch">
           🟡 À surveiller
         </button>
 
-        <button
-          class="filter-btn"
-          data-filter="remind"
-        >
+        <button class="filter-btn" data-filter="remind">
           🔔 À relancer
         </button>
 
-        <button
-          class="filter-btn"
-          data-filter="urgent"
-        >
+        <button class="filter-btn" data-filter="urgent">
           ⚡ Urgentes
         </button>
 
-        <button
-          class="filter-btn"
-          data-filter="week"
-        >
+        <button class="filter-btn" data-filter="week">
           📅 Cette semaine
         </button>
 
@@ -1149,10 +975,7 @@
         Contributions à traiter
       </div>
 
-      <div
-        id="results-count"
-        class="results-count"
-      >
+      <div id="results-count" class="results-count">
         0 contribution
       </div>
 
@@ -1163,23 +986,6 @@
       id="contribution-list"
       class="contribution-list"
     ></section>
-
-
-    <div class="foot">
-
-      <span class="status">
-
-        <span class="dot"></span>
-
-        Données synchronisées avec Grist
-
-      </span>
-
-      <span>
-        Les filtres n’altèrent pas les données.
-      </span>
-
-    </div>
 
   </main>
 
@@ -1201,22 +1007,12 @@
     let quickFilter =
       "all";
 
-    let currentRole =
-      "";
-
     let canRecordReminder =
       false;
 
-    let toastTimer =
-      null;
+    let currentRole =
+      "";
 
-    let refreshRunning =
-      false;
-
-
-    /* =========================
-       OUTILS
-       ========================= */
 
     function clean(value) {
 
@@ -1251,48 +1047,6 @@
     }
 
 
-    function showToast(
-      message,
-      type = "success"
-    ) {
-
-      const toast =
-        $("toast");
-
-
-      clearTimeout(
-        toastTimer
-      );
-
-
-      toast.textContent =
-        message;
-
-
-      toast.className =
-        "toast " +
-        type +
-        " visible";
-
-
-      toastTimer =
-        setTimeout(
-          () => {
-
-            toast.className =
-              "toast " +
-              type;
-
-          },
-          3500
-        );
-    }
-
-
-    /* =========================
-       TABLE GRIST -> LIGNES
-       ========================= */
-
     function tableToRows(table) {
 
       if (!table) {
@@ -1300,9 +1054,7 @@
       }
 
 
-      if (
-        Array.isArray(table)
-      ) {
+      if (Array.isArray(table)) {
         return table;
       }
 
@@ -1317,7 +1069,7 @@
         (id, index) => {
 
           const row = {
-            id: id
+            id
           };
 
 
@@ -1326,23 +1078,19 @@
             of Object.keys(table)
           ) {
 
-            if (
-              column === "id"
-            ) {
+            if (column === "id") {
               continue;
             }
 
 
-            const values =
-              table[column];
-
-
             if (
-              Array.isArray(values)
+              Array.isArray(
+                table[column]
+              )
             ) {
 
               row[column] =
-                values[index];
+                table[column][index];
             }
           }
 
@@ -1355,187 +1103,26 @@
 
     function makeCodeMap(rows) {
 
-      const map =
+      const result =
         new Map();
 
 
-      for (
-        const row
-        of rows
-      ) {
+      for (const row of rows) {
 
-        map.set(
+        result.set(
           Number(row.id),
           text(row.Code)
         );
       }
 
 
-      return map;
+      return result;
     }
 
 
     /* =========================
-       CHARGEMENT CONTRIBUTIONS
-       ========================= */
-
-    async function refreshContributions() {
-
-      if (
-        refreshRunning
-      ) {
-        return;
-      }
-
-
-      refreshRunning =
-        true;
-
-
-      try {
-
-        /*
-         * IMPORTANT :
-         * on ne dépend plus de onRecords()
-         * pour les colonnes techniques.
-         *
-         * fetchTable récupère toute la table,
-         * notamment Rappel_a_faire.
-         */
-
-        const [
-          contributionsTable,
-          departementsTable,
-          bureauxTable
-        ] =
-          await Promise.all([
-            grist.docApi.fetchTable(
-              "CONTRIBUTIONS"
-            ),
-
-            grist.docApi.fetchTable(
-              "DEPARTEMENTS"
-            ),
-
-            grist.docApi.fetchTable(
-              "BUREAUX_ORIGINE"
-            )
-          ]);
-
-
-        const contributions =
-          tableToRows(
-            contributionsTable
-          );
-
-
-        const departements =
-          tableToRows(
-            departementsTable
-          );
-
-
-        const bureaux =
-          tableToRows(
-            bureauxTable
-          );
-
-
-        const departementCodes =
-          makeCodeMap(
-            departements
-          );
-
-
-        const bureauCodes =
-          makeCodeMap(
-            bureaux
-          );
-
-
-        allRecords =
-          contributions.map(
-            record => {
-
-              const result = {
-                ...record
-              };
-
-
-              /*
-               * fetchTable renvoie les références
-               * sous forme d'identifiant de ligne.
-               *
-               * On les reconvertit en Code afin
-               * de garder l'affichage Tâchtik.
-               */
-
-              if (
-                Number(
-                  record.Contributeur
-                )
-              ) {
-
-                result.Contributeur =
-                  departementCodes.get(
-                    Number(
-                      record.Contributeur
-                    )
-                  )
-                  ||
-                  "";
-              }
-
-
-              if (
-                Number(
-                  record.Bureau_origine
-                )
-              ) {
-
-                result.Bureau_origine =
-                  bureauCodes.get(
-                    Number(
-                      record.Bureau_origine
-                    )
-                  )
-                  ||
-                  "";
-              }
-
-
-              return result;
-            }
-          );
-
-
-        renderAll();
-
-      }
-      catch (error) {
-
-        console.error(
-          "Erreur chargement CONTRIBUTIONS :",
-          error
-        );
-
-
-        showToast(
-          "Impossible de charger toutes les données Grist.",
-          "error"
-        );
-
-      }
-      finally {
-
-        refreshRunning =
-          false;
-      }
-    }
-
-
-    /* =========================
-       IDENTIFICATION UTILISATEUR
+       PROFIL
+       Même mécanisme que Accueil
        ========================= */
 
     async function identifyUser() {
@@ -1608,7 +1195,7 @@
         ) {
 
           throw new Error(
-            "La ligne SESSION_WIDGET créée par Tâchtik n'a pas été retrouvée."
+            "La ligne de session créée par Tâchtik n'a pas pu être retrouvée."
           );
         }
 
@@ -1631,24 +1218,45 @@
           );
 
 
-        currentRole =
-          clean(
+        const role =
+          text(
             profile.Role
           );
 
 
+        const roleNormalized =
+          clean(role);
+
+
+        currentRole =
+          roleNormalized;
+
+
         canRecordReminder =
           (
-            currentRole
-              .startsWith(
-                "admin"
-              )
+            roleNormalized
+              .startsWith("admin")
 
             ||
 
-            currentRole
-              ===
-              "gestionnaire e1"
+            roleNormalized
+              === "gestionnaire e1"
+          );
+
+
+        $("profile-debug").textContent =
+          "👤 Profil détecté : "
+          +
+          (
+            role
+              ? role
+              : "aucun rôle"
+          )
+          +
+          (
+            canRecordReminder
+              ? " — rappel autorisé"
+              : " — rappel non autorisé"
           );
 
 
@@ -1678,7 +1286,7 @@
       catch (error) {
 
         console.error(
-          "Identification utilisateur impossible :",
+          "Identification impossible :",
           error
         );
 
@@ -1687,101 +1295,144 @@
           false;
 
 
+        $("profile-debug").textContent =
+          "⚠ Profil non identifié";
+
+
         renderAll();
       }
     }
 
 
     /* =========================
-       DATES
+       CONTRIBUTIONS
        ========================= */
 
-    function todayGristDate() {
+    async function loadContributions() {
 
-      const now =
-        new Date();
+      try {
+
+        const [
+          contributionsTable,
+          departementsTable,
+          bureauxTable
+        ] =
+          await Promise.all([
+            grist.docApi.fetchTable(
+              "CONTRIBUTIONS"
+            ),
+
+            grist.docApi.fetchTable(
+              "DEPARTEMENTS"
+            ),
+
+            grist.docApi.fetchTable(
+              "BUREAUX_ORIGINE"
+            )
+          ]);
 
 
-      return Date.UTC(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate()
-      ) / 1000;
-    }
+        const contributions =
+          tableToRows(
+            contributionsTable
+          );
 
 
-    function dateValue(value) {
+        const departements =
+          tableToRows(
+            departementsTable
+          );
 
-      if (
-        value == null
-        ||
-        value === ""
-      ) {
-        return null;
+
+        const bureaux =
+          tableToRows(
+            bureauxTable
+          );
+
+
+        const departementMap =
+          makeCodeMap(
+            departements
+          );
+
+
+        const bureauMap =
+          makeCodeMap(
+            bureaux
+          );
+
+
+        allRecords =
+          contributions.map(
+            record => {
+
+              const row = {
+                ...record
+              };
+
+
+              if (
+                Number(
+                  record.Contributeur
+                )
+              ) {
+
+                row.Contributeur =
+                  departementMap.get(
+                    Number(
+                      record.Contributeur
+                    )
+                  )
+                  || "";
+              }
+
+
+              if (
+                Number(
+                  record.Bureau_origine
+                )
+              ) {
+
+                row.Bureau_origine =
+                  bureauMap.get(
+                    Number(
+                      record.Bureau_origine
+                    )
+                  )
+                  || "";
+              }
+
+
+              return row;
+            }
+          );
+
+
+        renderAll();
+
       }
+      catch (error) {
 
-
-      if (
-        typeof value === "number"
-      ) {
-
-        return new Date(
-          value * 1000
+        console.error(
+          "Erreur chargement contributions :",
+          error
         );
       }
-
-
-      const date =
-        new Date(value);
-
-
-      return Number.isNaN(
-        date.getTime()
-      )
-        ? null
-        : date;
     }
 
-
-    function formatDate(value) {
-
-      const date =
-        dateValue(value);
-
-
-      if (!date) {
-        return "Non renseignée";
-      }
-
-
-      return new Intl.DateTimeFormat(
-        "fr-FR",
-        {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric"
-        }
-      )
-      .format(date);
-    }
-
-
-    /* =========================
-       ETATS
-       ========================= */
 
     function isTodo(record) {
 
-      const statut =
+      const value =
         clean(
           record.Statut
         );
 
 
       return (
-        statut === "à faire"
+        value === "à faire"
         ||
-        statut === "a faire"
+        value === "a faire"
       );
     }
 
@@ -1799,54 +1450,27 @@
 
     function isClose(record) {
 
-      const value =
-        clean(
-          record.Alerte
-        );
-
-
-      return (
-        value.includes(
-          "échéance proche"
-        )
-
-        ||
-
-        value.includes(
-          "echeance proche"
-        )
+      return clean(
+        record.Alerte
+      )
+      .includes(
+        "échéance proche"
       );
     }
 
 
     function isWatch(record) {
 
-      const value =
-        clean(
-          record.Alerte
-        );
-
-
-      return (
-        value.includes(
-          "à surveiller"
-        )
-
-        ||
-
-        value.includes(
-          "a surveiller"
-        )
+      return clean(
+        record.Alerte
+      )
+      .includes(
+        "surveiller"
       );
     }
 
 
     function needsReminder(record) {
-
-      /*
-       * Rappel_a_faire provient maintenant
-       * directement de fetchTable().
-       */
 
       return clean(
         record.Rappel_a_faire
@@ -1862,20 +1486,78 @@
       return clean(
         record.Priorite
       )
-      ===
-      "urgente";
+      === "urgente";
+    }
+
+
+    function dateValue(value) {
+
+      if (
+        value == null
+        ||
+        value === ""
+      ) {
+
+        return null;
+      }
+
+
+      if (
+        typeof value === "number"
+      ) {
+
+        return new Date(
+          value * 1000
+        );
+      }
+
+
+      const d =
+        new Date(value);
+
+
+      return Number.isNaN(
+        d.getTime()
+      )
+        ? null
+        : d;
+    }
+
+
+    function formatDate(value) {
+
+      const d =
+        dateValue(value);
+
+
+      if (!d) {
+
+        return "Non renseignée";
+      }
+
+
+      return new Intl.DateTimeFormat(
+        "fr-FR",
+        {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric"
+        }
+      )
+      .format(d);
     }
 
 
     function isThisWeek(record) {
 
-      const date =
+      const d =
         dateValue(
           record.Echeance
         );
 
 
-      if (!date) {
+      if (!d) {
+
         return false;
       }
 
@@ -1929,72 +1611,17 @@
 
 
       return (
-        date >= monday
+        d >= monday
         &&
-        date <= sunday
+        d <= sunday
       );
     }
 
 
-    /* =========================
-       TRI
-       ========================= */
-
-    function sortByDeadline(records) {
-
-      return [...records]
-        .sort(
-          (a, b) => {
-
-            const da =
-              dateValue(
-                a.Echeance
-              );
-
-
-            const db =
-              dateValue(
-                b.Echeance
-              );
-
-
-            if (
-              !da
-              &&
-              !db
-            ) {
-              return 0;
-            }
-
-
-            if (!da) {
-              return 1;
-            }
-
-
-            if (!db) {
-              return -1;
-            }
-
-
-            return (
-              da.getTime()
-              -
-              db.getTime()
-            );
-          }
-        );
-    }
-
-
-    /* =========================
-       LISTES
-       ========================= */
-
     function populateSelect(
       id,
       values,
-      firstLabel
+      label
     ) {
 
       const select =
@@ -2010,24 +1637,14 @@
           ...new Set(
             values
               .map(text)
-              .map(
-                value =>
-                  value.trim()
-              )
               .filter(Boolean)
           )
         ]
-        .sort(
-          (a, b) =>
-            a.localeCompare(
-              b,
-              "fr"
-            )
-        );
+        .sort();
 
 
       select.innerHTML =
-        `<option value="">${escapeHtml(firstLabel)}</option>`;
+        `<option value="">${label}</option>`;
 
 
       for (
@@ -2060,10 +1677,6 @@
     }
 
 
-    /* =========================
-       KPI
-       ========================= */
-
     function renderKpis() {
 
       const active =
@@ -2095,10 +1708,6 @@
     }
 
 
-    /* =========================
-       FILTRES
-       ========================= */
-
     function getFilteredRecords() {
 
       const search =
@@ -2125,169 +1734,161 @@
         );
 
 
-      return sortByDeadline(
+      return allRecords
 
-        allRecords
+        .filter(
+          isTodo
+        )
 
-          .filter(
-            isTodo
-          )
+        .filter(
+          record => {
 
-          .filter(
-            record => {
-
-              if (!search) {
-                return true;
-              }
-
-
-              const haystack =
-                [
-                  record.Numero,
-                  record.Titre,
-                  record.Demandeur,
-                  record.Description,
-                  record.Contributeur,
-                  record.Bureau_origine
-                ]
-                .map(clean)
-                .join(" ");
-
-
-              return haystack
-                .includes(
-                  search
-                );
-            }
-          )
-
-          .filter(
-            record => {
-
-              if (!priority) {
-                return true;
-              }
-
-
-              return (
-                clean(
-                  record.Priorite
-                )
-                ===
-                priority
-              );
-            }
-          )
-
-          .filter(
-            record => {
-
-              if (!department) {
-                return true;
-              }
-
-
-              return (
-                clean(
-                  record.Contributeur
-                )
-                ===
-                department
-              );
-            }
-          )
-
-          .filter(
-            record => {
-
-              if (!origin) {
-                return true;
-              }
-
-
-              return (
-                clean(
-                  record.Bureau_origine
-                )
-                ===
-                origin
-              );
-            }
-          )
-
-          .filter(
-            record => {
-
-              if (
-                quickFilter === "late"
-              ) {
-
-                return isLate(
-                  record
-                );
-              }
-
-
-              if (
-                quickFilter === "close"
-              ) {
-
-                return isClose(
-                  record
-                );
-              }
-
-
-              if (
-                quickFilter === "watch"
-              ) {
-
-                return isWatch(
-                  record
-                );
-              }
-
-
-              if (
-                quickFilter === "remind"
-              ) {
-
-                return needsReminder(
-                  record
-                );
-              }
-
-
-              if (
-                quickFilter === "urgent"
-              ) {
-
-                return isUrgent(
-                  record
-                );
-              }
-
-
-              if (
-                quickFilter === "week"
-              ) {
-
-                return isThisWeek(
-                  record
-                );
-              }
-
-
+            if (!search) {
               return true;
             }
-          )
-      );
+
+
+            return [
+              record.Numero,
+              record.Titre,
+              record.Description,
+              record.Demandeur,
+              record.Contributeur,
+              record.Bureau_origine
+            ]
+            .map(clean)
+            .join(" ")
+            .includes(search);
+          }
+        )
+
+        .filter(
+          record =>
+            !priority
+            ||
+            clean(
+              record.Priorite
+            )
+            === priority
+        )
+
+        .filter(
+          record =>
+            !department
+            ||
+            clean(
+              record.Contributeur
+            )
+            === department
+        )
+
+        .filter(
+          record =>
+            !origin
+            ||
+            clean(
+              record.Bureau_origine
+            )
+            === origin
+        )
+
+        .filter(
+          record => {
+
+            if (
+              quickFilter === "late"
+            ) {
+
+              return isLate(
+                record
+              );
+            }
+
+
+            if (
+              quickFilter === "close"
+            ) {
+
+              return isClose(
+                record
+              );
+            }
+
+
+            if (
+              quickFilter === "watch"
+            ) {
+
+              return isWatch(
+                record
+              );
+            }
+
+
+            if (
+              quickFilter === "remind"
+            ) {
+
+              return needsReminder(
+                record
+              );
+            }
+
+
+            if (
+              quickFilter === "urgent"
+            ) {
+
+              return isUrgent(
+                record
+              );
+            }
+
+
+            if (
+              quickFilter === "week"
+            ) {
+
+              return isThisWeek(
+                record
+              );
+            }
+
+
+            return true;
+          }
+        )
+
+        .sort(
+          (a, b) => {
+
+            const da =
+              dateValue(
+                a.Echeance
+              );
+
+
+            const db =
+              dateValue(
+                b.Echeance
+              );
+
+
+            if (!da) {
+              return 1;
+            }
+
+
+            if (!db) {
+              return -1;
+            }
+
+
+            return da - db;
+          }
+        );
     }
 
-
-    /* =========================
-       BADGES
-       ========================= */
 
     function alertBadge(record) {
 
@@ -2301,11 +1902,6 @@
         clean(value);
 
 
-      if (!value) {
-        return "";
-      }
-
-
       let cls =
         "blue";
 
@@ -2316,24 +1912,16 @@
         )
       ) {
 
-        cls =
-          "red";
+        cls = "red";
       }
 
       else if (
         normalized.includes(
           "échéance proche"
         )
-
-        ||
-
-        normalized.includes(
-          "echeance proche"
-        )
       ) {
 
-        cls =
-          "orange";
+        cls = "orange";
       }
 
       else if (
@@ -2342,26 +1930,23 @@
         )
       ) {
 
-        cls =
-          "yellow";
-      }
-
-      else if (
-        normalized.includes(
-          "fait"
-        )
-      ) {
-
-        cls =
-          "green";
+        cls = "yellow";
       }
 
 
-      return `
-        <span class="badge ${cls}">
-          ${escapeHtml(value)}
-        </span>
-      `;
+      return value
+        ? `<span class="badge ${cls}">${escapeHtml(value)}</span>`
+        : "";
+    }
+
+
+    function reminderBadge(record) {
+
+      return needsReminder(
+        record
+      )
+        ? `<span class="badge orange">🔔 À relancer</span>`
+        : "";
     }
 
 
@@ -2373,41 +1958,27 @@
         );
 
 
-      const normalized =
-        clean(value);
-
-
       if (!value) {
         return "";
       }
 
 
       let cls =
-        "blue";
+        "green";
 
 
       if (
-        normalized === "urgente"
+        clean(value) === "urgente"
       ) {
 
-        cls =
-          "violet";
+        cls = "violet";
       }
 
       else if (
-        normalized === "haute"
+        clean(value) === "haute"
       ) {
 
-        cls =
-          "orange";
-      }
-
-      else if (
-        normalized === "normale"
-      ) {
-
-        cls =
-          "green";
+        cls = "orange";
       }
 
 
@@ -2419,82 +1990,41 @@
     }
 
 
-    function reminderBadge(record) {
-
-      if (
-        !needsReminder(
-          record
-        )
-      ) {
-        return "";
-      }
-
-
-      return `
-        <span class="badge orange">
-          🔔 À relancer
-        </span>
-      `;
-    }
-
-
-    /* =========================
-       ECHEANCE
-       ========================= */
-
     function deadlineText(record) {
 
-      const days =
-        record.Jours_restants;
+      const n =
+        Number(
+          record.Jours_restants
+        );
 
 
       if (
-        days == null
-        ||
-        days === ""
+        Number.isNaN(n)
       ) {
+
         return "";
       }
 
 
-      const number =
-        Number(days);
-
-
-      if (
-        Number.isNaN(
-          number
-        )
-      ) {
-        return "";
-      }
-
-
-      if (
-        number < 0
-      ) {
-
-        const abs =
-          Math.abs(
-            number
-          );
-
+      if (n < 0) {
 
         return (
-          abs
+          Math.abs(n)
+          +
+          " jour"
           +
           (
-            abs > 1
-              ? " jours de retard"
-              : " jour de retard"
+            Math.abs(n) > 1
+              ? "s"
+              : ""
           )
+          +
+          " de retard"
         );
       }
 
 
-      if (
-        number === 0
-      ) {
+      if (n === 0) {
 
         return "Échéance aujourd’hui";
       }
@@ -2503,26 +2033,22 @@
       return (
         "Dans "
         +
-        number
+        n
+        +
+        " jour"
         +
         (
-          number > 1
-            ? " jours"
-            : " jour"
+          n > 1
+            ? "s"
+            : ""
         )
       );
     }
 
 
-    /* =========================
-       ACTION RAPPEL
-       ========================= */
-
     function reminderButton(record) {
 
       if (
-        !canRecordReminder
-        ||
         !needsReminder(
           record
         )
@@ -2532,80 +2058,44 @@
       }
 
 
-      return `
-        <div class="reminder-action">
-
-          <button
-            class="reminder-btn"
-            data-reminder-id="${Number(record.id)}"
-            type="button"
-          >
-            🔔 Rappel effectué
-          </button>
-
-        </div>
-      `;
-    }
-
-
-    async function recordReminder(
-      recordId,
-      button
-    ) {
-
       if (
         !canRecordReminder
       ) {
 
-        showToast(
-          "Vous n'avez pas l'autorisation d'enregistrer un rappel.",
-          "error"
-        );
-
-        return;
+        return "";
       }
 
 
-      const record =
-        allRecords.find(
-          item =>
-            Number(item.id)
-            ===
-            Number(recordId)
-        );
+      return `
+        <button
+          class="reminder-btn"
+          data-reminder-id="${Number(record.id)}"
+          type="button"
+        >
+          🔔 Rappel effectué
+        </button>
+      `;
+    }
 
 
-      if (
-        !record
-      ) {
+    function todayGristDate() {
 
-        showToast(
-          "Contribution introuvable.",
-          "error"
-        );
-
-        return;
-      }
+      const now =
+        new Date();
 
 
-      if (
-        !needsReminder(
-          record
-        )
-      ) {
-
-        showToast(
-          "Cette contribution ne nécessite plus de rappel.",
-          "error"
-        );
-
-        return;
-      }
+      return Date.UTC(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate()
+      ) / 1000;
+    }
 
 
-      const previousText =
-        button.textContent;
-
+    async function recordReminder(
+      id,
+      button
+    ) {
 
       button.disabled =
         true;
@@ -2621,7 +2111,7 @@
           [
             "UpdateRecord",
             "CONTRIBUTIONS",
-            Number(recordId),
+            Number(id),
             {
               Dernier_rappel:
                 todayGristDate()
@@ -2630,33 +2120,21 @@
         ]);
 
 
-        /*
-         * On laisse le temps à Grist de
-         * recalculer Rappel_a_faire.
-         */
-
         await new Promise(
           resolve =>
             setTimeout(
               resolve,
-              500
+              600
             )
         );
 
 
-        await refreshContributions();
-
-
-        showToast(
-          "Rappel enregistré pour aujourd'hui.",
-          "success"
-        );
+        await loadContributions();
 
       }
       catch (error) {
 
         console.error(
-          "Erreur rappel :",
           error
         );
 
@@ -2666,29 +2144,15 @@
 
 
         button.textContent =
-          previousText;
-
-
-        showToast(
-          "Le rappel n'a pas pu être enregistré. Vérifiez les droits Grist.",
-          "error"
-        );
+          "🔔 Rappel effectué";
       }
     }
 
-
-    /* =========================
-       AFFICHAGE
-       ========================= */
 
     function renderList() {
 
       const records =
         getFilteredRecords();
-
-
-      const list =
-        $("contribution-list");
 
 
       $("results-count").textContent =
@@ -2705,210 +2169,99 @@
         records.length === 0
       ) {
 
-        list.innerHTML = `
-          <div class="empty">
-
-            <div class="empty-icon">
-              ✓
+        $("contribution-list").innerHTML =
+          `
+            <div class="empty">
+              Aucune contribution trouvée.
             </div>
-
-            <div class="empty-title">
-              Aucune contribution trouvée
-            </div>
-
-            <div class="empty-text">
-              Modifiez les filtres ou la recherche pour afficher d’autres résultats.
-            </div>
-
-          </div>
-        `;
+          `;
 
 
         return;
       }
 
 
-      list.innerHTML =
-        records
-          .map(
-            record => {
+      $("contribution-list").innerHTML =
+        records.map(
+          record => `
+            <article class="contribution">
 
-              const numero =
-                escapeHtml(
-                  record.Numero || ""
-                );
+              <div class="contribution-main">
 
+                <div class="contribution-top">
 
-              const titre =
-                escapeHtml(
-                  record.Titre
-                  ||
-                  "Sans titre"
-                );
+                  <span class="number">
+                    ${escapeHtml(record.Numero)}
+                  </span>
 
+                  <span class="title">
+                    ${escapeHtml(record.Titre)}
+                  </span>
 
-              const description =
-                escapeHtml(
-                  record.Description || ""
-                );
+                </div>
 
 
-              const contributeur =
-                escapeHtml(
-                  record.Contributeur || ""
-                );
+                <div class="description">
+                  ${escapeHtml(record.Description)}
+                </div>
 
 
-              const origin =
-                escapeHtml(
-                  record.Bureau_origine || ""
-                );
+                <div class="meta">
+
+                  👤
+                  <strong>Contributeur :</strong>
+                  ${escapeHtml(record.Contributeur)}
+
+                  &nbsp;
+
+                  🏢
+                  <strong>Origine :</strong>
+                  ${escapeHtml(record.Bureau_origine)}
+
+                </div>
 
 
-              const demandeur =
-                escapeHtml(
-                  record.Demandeur || ""
-                );
+                <div class="badges">
+
+                  ${alertBadge(record)}
+
+                  ${reminderBadge(record)}
+
+                  ${priorityBadge(record)}
+
+                </div>
+
+              </div>
 
 
-              return `
-                <article class="contribution">
+              <div class="contribution-side">
 
-                  <div class="contribution-main">
+                <div class="deadline">
 
-                    <div class="contribution-top">
-
-                      <span class="number">
-                        ${numero}
-                      </span>
-
-                      <span class="title">
-                        ${titre}
-                      </span>
-
-                    </div>
-
-
-                    ${
-                      description
-                        ? `
-                          <div class="description">
-                            ${description}
-                          </div>
-                        `
-                        : ""
-                    }
-
-
-                    <div class="meta">
-
-                      ${
-                        contributeur
-                          ? `
-                            <span class="meta-item">
-                              👤
-                              <strong>
-                                Contributeur :
-                              </strong>
-                              ${contributeur}
-                            </span>
-                          `
-                          : ""
-                      }
-
-
-                      ${
-                        origin
-                          ? `
-                            <span class="meta-item">
-                              🏢
-                              <strong>
-                                Origine :
-                              </strong>
-                              ${origin}
-                            </span>
-                          `
-                          : ""
-                      }
-
-
-                      ${
-                        demandeur
-                          ? `
-                            <span class="meta-item">
-                              ✉️
-                              <strong>
-                                Demandeur :
-                              </strong>
-                              ${demandeur}
-                            </span>
-                          `
-                          : ""
-                      }
-
-                    </div>
-
-
-                    <div class="badges">
-
-                      ${alertBadge(record)}
-
-                      ${priorityBadge(record)}
-
-                      ${reminderBadge(record)}
-
-                    </div>
-
+                  <div class="deadline-label">
+                    Échéance
                   </div>
 
-
-                  <div class="contribution-side">
-
-                    <div class="deadline">
-
-                      <div class="deadline-label">
-                        Échéance
-                      </div>
-
-                      <div class="deadline-date">
-
-                        ${escapeHtml(
-                          formatDate(
-                            record.Echeance
-                          )
-                        )}
-
-                      </div>
-
-                      <div class="deadline-days">
-
-                        ${escapeHtml(
-                          deadlineText(
-                            record
-                          )
-                        )}
-
-                      </div>
-
-                    </div>
-
-
-                    ${reminderButton(record)}
-
+                  <div class="deadline-date">
+                    ${formatDate(record.Echeance)}
                   </div>
 
-                </article>
-              `;
-            }
-          )
-          .join("");
+                  <div class="deadline-days">
+                    ${deadlineText(record)}
+                  </div>
+
+                </div>
 
 
-      bindReminderButtons();
-    }
+                ${reminderButton(record)}
 
+              </div>
 
-    function bindReminderButtons() {
+            </article>
+          `
+        )
+        .join("");
+
 
       document
         .querySelectorAll(
@@ -2919,19 +2272,11 @@
 
             button.addEventListener(
               "click",
-              () => {
-
-                const id =
-                  Number(
-                    button.dataset.reminderId
-                  );
-
-
+              () =>
                 recordReminder(
-                  id,
+                  button.dataset.reminderId,
                   button
-                );
-              }
+                )
             );
           }
         );
@@ -2945,32 +2290,24 @@
 
       populateSelect(
         "department-filter",
-
         allRecords
-          .filter(
-            isTodo
-          )
+          .filter(isTodo)
           .map(
-            record =>
-              record.Contributeur
+            r =>
+              r.Contributeur
           ),
-
         "Tous les départements"
       );
 
 
       populateSelect(
         "origin-filter",
-
         allRecords
-          .filter(
-            isTodo
-          )
+          .filter(isTodo)
           .map(
-            record =>
-              record.Bureau_origine
+            r =>
+              r.Bureau_origine
           ),
-
         "Tous les bureaux d'origine"
       );
 
@@ -2978,10 +2315,6 @@
       renderList();
     }
 
-
-    /* =========================
-       EVENEMENTS
-       ========================= */
 
     function bindEvents() {
 
@@ -3033,18 +2366,14 @@
                     ".filter-btn"
                   )
                   .forEach(
-                    item =>
-                      item.classList
-                        .remove(
-                          "active"
-                        )
+                    element =>
+                      element.classList
+                        .remove("active")
                   );
 
 
                 button.classList
-                  .add(
-                    "active"
-                  );
+                  .add("active");
 
 
                 renderList();
@@ -3054,10 +2383,6 @@
         );
     }
 
-
-    /* =========================
-       INITIALISATION
-       ========================= */
 
     async function init() {
 
@@ -3069,27 +2394,18 @@
       bindEvents();
 
 
-      /*
-       * onRecords reste uniquement un signal
-       * indiquant qu'une donnée du widget
-       * a changé.
-       *
-       * Les vraies données sont ensuite
-       * relues avec fetchTable().
-       */
+      await loadContributions();
+
+
+      await identifyUser();
+
 
       grist.onRecords(
         async () => {
 
-          await refreshContributions();
+          await loadContributions();
         }
       );
-
-
-      await Promise.all([
-        identifyUser(),
-        refreshContributions()
-      ]);
     }
 
 
