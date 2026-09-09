@@ -68,10 +68,6 @@
       margin: 0 auto;
     }
 
-    /* ===========================
-       BANDEAU
-       =========================== */
-
     .hero {
       position: relative;
       overflow: hidden;
@@ -190,10 +186,6 @@
       line-height: 1.55;
     }
 
-    /* ===========================
-       PROFIL
-       =========================== */
-
     .profile-box {
       min-width: 220px;
 
@@ -234,10 +226,6 @@
         rgba(255, 255, 255, 0.75);
     }
 
-    /* ===========================
-       SECTIONS
-       =========================== */
-
     .section-head {
       display: flex;
 
@@ -261,10 +249,6 @@
 
       color: var(--muted);
     }
-
-    /* ===========================
-       KPI
-       =========================== */
 
     .kpis {
       display: grid;
@@ -376,10 +360,6 @@
       --accent: var(--violet);
       --soft: var(--violet-soft);
     }
-
-    /* ===========================
-       ACCÈS RAPIDES
-       =========================== */
 
     .quick-grid {
       display: grid;
@@ -496,14 +476,9 @@
         #8da1b2;
     }
 
-    /* Carte réservée à l'administrateur */
     .admin-only {
       display: none;
     }
-
-    /* ===========================
-       MESSAGES
-       =========================== */
 
     .message {
       display: none;
@@ -534,10 +509,6 @@
 
       color: #276947;
     }
-
-    /* ===========================
-       PIED
-       =========================== */
 
     .foot {
       display: flex;
@@ -584,10 +555,6 @@
       box-shadow:
         0 0 0 3px rgba(46, 148, 101, 0.12);
     }
-
-    /* ===========================
-       RESPONSIVE
-       =========================== */
 
     @media (max-width: 860px) {
 
@@ -649,10 +616,6 @@
 
   <main class="app">
 
-    <!-- ===========================
-         BANDEAU
-         =========================== -->
-
     <section class="hero">
 
       <div class="brand">
@@ -708,10 +671,6 @@
 
     </section>
 
-
-    <!-- ===========================
-         VUE D'ENSEMBLE
-         =========================== -->
 
     <div class="section-head">
 
@@ -814,10 +773,6 @@
     </section>
 
 
-    <!-- ===========================
-         ACCÈS RAPIDES
-         =========================== -->
-
     <div class="section-head">
 
       <h2 class="section-title">
@@ -832,8 +787,6 @@
 
 
     <section class="quick-grid">
-
-      <!-- CONTRIBUTIONS -->
 
       <a
         class="quick-card"
@@ -864,8 +817,6 @@
       </a>
 
 
-      <!-- NOUVELLE CONTRIBUTION -->
-
       <a
         class="quick-card"
         href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/14"
@@ -894,8 +845,6 @@
 
       </a>
 
-
-      <!-- À TRAITER & RELANCES -->
 
       <a
         class="quick-card reminder-link"
@@ -926,8 +875,6 @@
       </a>
 
 
-      <!-- CONTRIBUTIONS TERMINÉES -->
-
       <a
         class="quick-card finished-link"
         href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/10"
@@ -956,11 +903,6 @@
 
       </a>
 
-
-      <!-- GESTION DES UTILISATEURS
-           Caché par défaut.
-           Le JavaScript l'affiche uniquement
-           si Role == Administrateur. -->
 
       <a
         id="admin-users-link"
@@ -994,16 +936,8 @@
     </section>
 
 
-    <!-- ===========================
-         MESSAGE
-         =========================== -->
-
     <div id="message" class="message"></div>
 
-
-    <!-- ===========================
-         PIED
-         =========================== -->
 
     <div class="foot">
 
@@ -1040,10 +974,6 @@
       .toLowerCase();
 
 
-    /* ===========================================
-       MESSAGES
-       =========================================== */
-
     function showError(text) {
 
       const box =
@@ -1077,10 +1007,6 @@
 
     }
 
-
-    /* ===========================================
-       KPI
-       =========================================== */
 
     function renderContributions(records) {
 
@@ -1166,10 +1092,6 @@
     }
 
 
-    /* ===========================================
-       PROFIL + NAVIGATION SELON LE RÔLE
-       =========================================== */
-
     function renderProfile(profile) {
 
       if (!profile) {
@@ -1186,6 +1108,9 @@
 
       const role =
         profile.Role || "";
+
+      const roleNormalized =
+        clean(role);
 
       const service =
         profile.Service || "";
@@ -1237,9 +1162,9 @@
       }
 
       else if (
-        role === "Administrateur"
+        roleNormalized.startsWith("admin")
         ||
-        role === "Gestionnaire E1"
+        roleNormalized === "gestionnaire e1"
       ) {
 
         scope =
@@ -1253,10 +1178,14 @@
 
 
       /*
-       * NAVIGATION ADMINISTRATEUR
+       * Détection robuste du profil administrateur.
        *
-       * Gestion des utilisateurs reste cachée
-       * pour tous les autres rôles.
+       * Accepte notamment :
+       * - Administrateur
+       * - administrateur
+       * - ADMINISTRATEUR
+       * - espaces éventuels
+       * - petite variation du libellé commençant par "admin"
        */
 
       const usersLink =
@@ -1266,7 +1195,7 @@
       if (
         usersLink
         &&
-        role === "Administrateur"
+        roleNormalized.startsWith("admin")
       ) {
 
         usersLink.style.display =
@@ -1274,12 +1203,15 @@
 
       }
 
+      else if (usersLink) {
+
+        usersLink.style.display =
+          "none";
+
+      }
+
     }
 
-
-    /* ===========================================
-       CONVERSION fetchTable()
-       =========================================== */
 
     function tableToRows(table) {
 
@@ -1354,16 +1286,15 @@
     }
 
 
-    /* ===========================================
-       IDENTIFICATION
-       BASE STABLE v20
-       =========================================== */
+    /*
+     * IDENTIFICATION UTILISATEUR
+     *
+     * Base stable v20.
+     * Ne pas remplacer BulkRemoveRecord
+     * par RemoveRecord.
+     */
 
     async function identifyUser() {
-
-      /*
-       * 1. Lecture avant création
-       */
 
       const beforeTable =
         await grist.docApi.fetchTable(
@@ -1386,10 +1317,6 @@
         );
 
 
-      /*
-       * 2. Création de la session temporaire
-       */
-
       await grist.docApi.applyUserActions([
         [
           "AddRecord",
@@ -1400,10 +1327,6 @@
       ]);
 
 
-      /*
-       * 3. Attente du calcul des formules
-       */
-
       await new Promise(
         resolve =>
           setTimeout(
@@ -1412,10 +1335,6 @@
           )
       );
 
-
-      /*
-       * 4. Nouvelle lecture
-       */
 
       const afterTable =
         await grist.docApi.fetchTable(
@@ -1428,10 +1347,6 @@
           afterTable
         );
 
-
-      /*
-       * 5. Recherche de la nouvelle ligne
-       */
 
       const newRows =
         afterRows.filter(
@@ -1470,22 +1385,10 @@
         );
 
 
-      /*
-       * 6. Affichage du profil
-       */
-
       renderProfile(
         profile
       );
 
-
-      /*
-       * 7. Suppression de la session temporaire
-       *
-       * NE PAS REMPLACER PAR RemoveRecord.
-       * BulkRemoveRecord est la méthode validée
-       * dans notre version stable v20.
-       */
 
       try {
 
@@ -1526,10 +1429,6 @@
 
     }
 
-
-    /* ===========================================
-       INITIALISATION
-       =========================================== */
 
     async function init() {
 
