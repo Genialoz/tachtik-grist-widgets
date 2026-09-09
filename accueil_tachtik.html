@@ -68,6 +68,10 @@
       margin: 0 auto;
     }
 
+    /* ===========================
+       BANDEAU
+       =========================== */
+
     .hero {
       position: relative;
       overflow: hidden;
@@ -186,6 +190,10 @@
       line-height: 1.55;
     }
 
+    /* ===========================
+       PROFIL
+       =========================== */
+
     .profile-box {
       min-width: 220px;
 
@@ -226,6 +234,10 @@
         rgba(255, 255, 255, 0.75);
     }
 
+    /* ===========================
+       SECTIONS
+       =========================== */
+
     .section-head {
       display: flex;
 
@@ -249,6 +261,10 @@
 
       color: var(--muted);
     }
+
+    /* ===========================
+       KPI
+       =========================== */
 
     .kpis {
       display: grid;
@@ -361,6 +377,10 @@
       --soft: var(--violet-soft);
     }
 
+    /* ===========================
+       ACCÈS RAPIDES
+       =========================== */
+
     .quick-grid {
       display: grid;
 
@@ -441,6 +461,11 @@
         var(--green-soft);
     }
 
+    .quick-card.users-link .quick-icon {
+      background:
+        var(--violet-soft);
+    }
+
     .quick-content {
       min-width: 0;
     }
@@ -471,6 +496,15 @@
         #8da1b2;
     }
 
+    /* Carte réservée à l'administrateur */
+    .admin-only {
+      display: none;
+    }
+
+    /* ===========================
+       MESSAGES
+       =========================== */
+
     .message {
       display: none;
 
@@ -500,6 +534,10 @@
 
       color: #276947;
     }
+
+    /* ===========================
+       PIED
+       =========================== */
 
     .foot {
       display: flex;
@@ -546,6 +584,10 @@
       box-shadow:
         0 0 0 3px rgba(46, 148, 101, 0.12);
     }
+
+    /* ===========================
+       RESPONSIVE
+       =========================== */
 
     @media (max-width: 860px) {
 
@@ -607,6 +649,10 @@
 
   <main class="app">
 
+    <!-- ===========================
+         BANDEAU
+         =========================== -->
+
     <section class="hero">
 
       <div class="brand">
@@ -662,6 +708,10 @@
 
     </section>
 
+
+    <!-- ===========================
+         VUE D'ENSEMBLE
+         =========================== -->
 
     <div class="section-head">
 
@@ -764,6 +814,10 @@
     </section>
 
 
+    <!-- ===========================
+         ACCÈS RAPIDES
+         =========================== -->
+
     <div class="section-head">
 
       <h2 class="section-title">
@@ -778,6 +832,8 @@
 
 
     <section class="quick-grid">
+
+      <!-- CONTRIBUTIONS -->
 
       <a
         class="quick-card"
@@ -808,6 +864,8 @@
       </a>
 
 
+      <!-- NOUVELLE CONTRIBUTION -->
+
       <a
         class="quick-card"
         href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/14"
@@ -836,6 +894,8 @@
 
       </a>
 
+
+      <!-- À TRAITER & RELANCES -->
 
       <a
         class="quick-card reminder-link"
@@ -866,6 +926,8 @@
       </a>
 
 
+      <!-- CONTRIBUTIONS TERMINÉES -->
+
       <a
         class="quick-card finished-link"
         href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/10"
@@ -894,11 +956,54 @@
 
       </a>
 
+
+      <!-- GESTION DES UTILISATEURS
+           Caché par défaut.
+           Le JavaScript l'affiche uniquement
+           si Role == Administrateur. -->
+
+      <a
+        id="admin-users-link"
+        class="quick-card users-link admin-only"
+        href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/5"
+        target="_top"
+      >
+
+        <div class="quick-icon">
+          👥
+        </div>
+
+        <div class="quick-content">
+
+          <div class="quick-title">
+            Gestion des utilisateurs
+          </div>
+
+          <div class="quick-sub">
+            Gérer les utilisateurs, leurs rôles et leurs périmètres d’accès
+          </div>
+
+        </div>
+
+        <div class="quick-arrow">
+          ›
+        </div>
+
+      </a>
+
     </section>
 
 
+    <!-- ===========================
+         MESSAGE
+         =========================== -->
+
     <div id="message" class="message"></div>
 
+
+    <!-- ===========================
+         PIED
+         =========================== -->
 
     <div class="foot">
 
@@ -935,6 +1040,10 @@
       .toLowerCase();
 
 
+    /* ===========================================
+       MESSAGES
+       =========================================== */
+
     function showError(text) {
 
       const box =
@@ -968,6 +1077,10 @@
 
     }
 
+
+    /* ===========================================
+       KPI
+       =========================================== */
 
     function renderContributions(records) {
 
@@ -1053,6 +1166,10 @@
     }
 
 
+    /* ===========================================
+       PROFIL + NAVIGATION SELON LE RÔLE
+       =========================================== */
+
     function renderProfile(profile) {
 
       if (!profile) {
@@ -1134,8 +1251,35 @@
       $("profile-scope").textContent =
         scope;
 
+
+      /*
+       * NAVIGATION ADMINISTRATEUR
+       *
+       * Gestion des utilisateurs reste cachée
+       * pour tous les autres rôles.
+       */
+
+      const usersLink =
+        $("admin-users-link");
+
+
+      if (
+        usersLink
+        &&
+        role === "Administrateur"
+      ) {
+
+        usersLink.style.display =
+          "flex";
+
+      }
+
     }
 
+
+    /* ===========================================
+       CONVERSION fetchTable()
+       =========================================== */
 
     function tableToRows(table) {
 
@@ -1209,6 +1353,11 @@
 
     }
 
+
+    /* ===========================================
+       IDENTIFICATION
+       BASE STABLE v20
+       =========================================== */
 
     async function identifyUser() {
 
@@ -1333,8 +1482,9 @@
       /*
        * 7. Suppression de la session temporaire
        *
-       * IMPORTANT :
-       * BulkRemoveRecord attend une LISTE d'identifiants.
+       * NE PAS REMPLACER PAR RemoveRecord.
+       * BulkRemoveRecord est la méthode validée
+       * dans notre version stable v20.
        */
 
       try {
@@ -1376,6 +1526,10 @@
 
     }
 
+
+    /* ===========================================
+       INITIALISATION
+       =========================================== */
 
     async function init() {
 
