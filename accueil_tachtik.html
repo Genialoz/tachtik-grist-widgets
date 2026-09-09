@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <title>Tâchtik — Accueil</title>
 
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
@@ -50,6 +51,7 @@
         Roboto,
         Arial,
         sans-serif;
+
       color: var(--ink);
       background: var(--page);
     }
@@ -63,9 +65,15 @@
       margin: 0 auto;
     }
 
+
+    /* =========================================================
+       BANDEAU TÂCHTIK
+       ========================================================= */
+
     .hero {
       position: relative;
       overflow: hidden;
+
       background:
         linear-gradient(
           135deg,
@@ -73,271 +81,528 @@
           #245f9a 62%,
           #2f6fdd 100%
         );
+
       color: white;
+
       border-radius: 24px;
+
       padding: 26px 28px;
-      box-shadow: 0 16px 40px rgba(23, 61, 102, 0.18);
+
+      box-shadow:
+        0 16px 40px rgba(23, 61, 102, 0.18);
     }
 
     .hero::after {
       content: "";
+
       position: absolute;
+
       width: 250px;
       height: 250px;
+
       right: -70px;
       top: -110px;
+
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.08);
+
+      background:
+        rgba(255, 255, 255, 0.08);
     }
+
+
+    /* =========================================================
+       LOGO / NOM
+       ========================================================= */
 
     .brand {
       position: relative;
       z-index: 1;
+
       display: flex;
       align-items: center;
+
       gap: 12px;
+
       margin-bottom: 24px;
     }
 
     .brand-mark {
       width: 44px;
       height: 44px;
+
       display: grid;
       place-items: center;
+
       border-radius: 14px;
-      background: rgba(255, 255, 255, 0.16);
-      border: 1px solid rgba(255, 255, 255, 0.16);
+
+      background:
+        rgba(255, 255, 255, 0.16);
+
+      border:
+        1px solid rgba(255, 255, 255, 0.16);
+
       font-size: 22px;
-      backdrop-filter: blur(6px);
+
+      backdrop-filter:
+        blur(6px);
     }
 
     .brand-name {
       font-size: 21px;
       font-weight: 850;
+
       letter-spacing: 0.02em;
     }
 
     .brand-sub {
       margin-top: 2px;
+
       font-size: 12px;
-      color: rgba(255, 255, 255, 0.72);
+
+      color:
+        rgba(255, 255, 255, 0.72);
     }
+
+
+    /* =========================================================
+       TEXTE DU BANDEAU
+       ========================================================= */
 
     .hero-content {
       position: relative;
       z-index: 1;
+
       display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
+
+      justify-content:
+        space-between;
+
+      align-items:
+        flex-end;
+
       gap: 18px;
     }
 
     h1 {
       margin: 0;
+
       max-width: 760px;
-      font-size: clamp(25px, 4vw, 40px);
+
+      font-size:
+        clamp(25px, 4vw, 40px);
+
       line-height: 1.08;
-      letter-spacing: -0.035em;
+
+      letter-spacing:
+        -0.035em;
     }
 
     .intro {
-      margin: 10px 0 0;
-      max-width: 720px;
-      color: rgba(255, 255, 255, 0.78);
-      font-size: 14px;
-      line-height: 1.55;
+      margin:
+        10px 0 0;
+
+      max-width:
+        720px;
+
+      color:
+        rgba(255, 255, 255, 0.78);
+
+      font-size:
+        14px;
+
+      line-height:
+        1.55;
     }
 
     .role-chip {
-      flex: 0 0 auto;
-      padding: 9px 13px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 750;
-      color: white;
-      background: rgba(255, 255, 255, 0.14);
-      border: 1px solid rgba(255, 255, 255, 0.20);
-      white-space: nowrap;
+      flex:
+        0 0 auto;
+
+      padding:
+        9px 13px;
+
+      border-radius:
+        999px;
+
+      font-size:
+        12px;
+
+      font-weight:
+        750;
+
+      color:
+        white;
+
+      background:
+        rgba(255, 255, 255, 0.14);
+
+      border:
+        1px solid rgba(255, 255, 255, 0.20);
+
+      white-space:
+        nowrap;
     }
+
+
+    /* =========================================================
+       TITRE VUE D'ENSEMBLE
+       ========================================================= */
 
     .section-head {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+
+      justify-content:
+        space-between;
+
+      align-items:
+        center;
+
       gap: 16px;
-      margin: 24px 2px 12px;
+
+      margin:
+        24px 2px 12px;
     }
 
     .section-title {
       margin: 0;
-      font-size: 16px;
-      font-weight: 800;
+
+      font-size:
+        16px;
+
+      font-weight:
+        800;
     }
 
     .section-note {
-      font-size: 12px;
-      color: var(--muted);
+      font-size:
+        12px;
+
+      color:
+        var(--muted);
     }
+
+
+    /* =========================================================
+       KPI
+       ========================================================= */
 
     .kpis {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+
+      grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
       gap: 14px;
     }
 
     .kpi {
       position: relative;
+
       overflow: hidden;
-      min-height: 136px;
-      padding: 18px;
-      border-radius: 19px;
-      background: var(--surface);
-      border: 1px solid var(--line);
-      box-shadow: var(--shadow);
+
+      min-height:
+        136px;
+
+      padding:
+        18px;
+
+      border-radius:
+        19px;
+
+      background:
+        var(--surface);
+
+      border:
+        1px solid var(--line);
+
+      box-shadow:
+        var(--shadow);
     }
 
     .kpi::before {
       content: "";
+
       position: absolute;
+
       left: 0;
       top: 0;
       bottom: 0;
+
       width: 5px;
-      background: var(--accent);
+
+      background:
+        var(--accent);
     }
 
     .kpi-top {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
+
+      align-items:
+        center;
+
+      justify-content:
+        space-between;
+
       gap: 10px;
     }
 
     .kpi-icon {
       width: 42px;
       height: 42px;
+
       display: grid;
-      place-items: center;
-      border-radius: 13px;
-      background: var(--soft);
-      font-size: 20px;
+
+      place-items:
+        center;
+
+      border-radius:
+        13px;
+
+      background:
+        var(--soft);
+
+      font-size:
+        20px;
     }
 
     .kpi-value {
-      margin-top: 14px;
-      font-size: 36px;
-      line-height: 1;
-      font-weight: 900;
-      letter-spacing: -0.04em;
-      color: var(--accent);
+      margin-top:
+        14px;
+
+      font-size:
+        36px;
+
+      line-height:
+        1;
+
+      font-weight:
+        900;
+
+      letter-spacing:
+        -0.04em;
+
+      color:
+        var(--accent);
     }
 
     .kpi-label {
-      margin-top: 6px;
-      font-size: 13px;
-      font-weight: 800;
-      color: #3f576b;
+      margin-top:
+        6px;
+
+      font-size:
+        13px;
+
+      font-weight:
+        800;
+
+      color:
+        #3f576b;
     }
 
     .kpi-sub {
-      margin-top: 3px;
-      font-size: 11px;
-      color: var(--muted);
+      margin-top:
+        3px;
+
+      font-size:
+        11px;
+
+      color:
+        var(--muted);
     }
 
+
+    /* =========================================================
+       COULEURS DES CARTES
+       ========================================================= */
+
     .todo {
-      --accent: var(--blue);
-      --soft: var(--blue-soft);
+      --accent:
+        var(--blue);
+
+      --soft:
+        var(--blue-soft);
     }
 
     .late {
-      --accent: var(--red);
-      --soft: var(--red-soft);
+      --accent:
+        var(--red);
+
+      --soft:
+        var(--red-soft);
     }
 
     .remind {
-      --accent: var(--orange);
-      --soft: var(--orange-soft);
+      --accent:
+        var(--orange);
+
+      --soft:
+        var(--orange-soft);
     }
 
     .urgent {
-      --accent: var(--violet);
-      --soft: var(--violet-soft);
+      --accent:
+        var(--violet);
+
+      --soft:
+        var(--violet-soft);
     }
+
+
+    /* =========================================================
+       PIED DU WIDGET
+       ========================================================= */
 
     .foot {
       display: flex;
-      justify-content: space-between;
+
+      justify-content:
+        space-between;
+
       gap: 14px;
-      margin-top: 16px;
-      padding: 14px 16px;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.72);
-      border: 1px solid var(--line);
-      color: var(--muted);
-      font-size: 11px;
+
+      margin-top:
+        16px;
+
+      padding:
+        14px 16px;
+
+      border-radius:
+        16px;
+
+      background:
+        rgba(255, 255, 255, 0.72);
+
+      border:
+        1px solid var(--line);
+
+      color:
+        var(--muted);
+
+      font-size:
+        11px;
     }
 
     .status {
-      display: inline-flex;
-      align-items: center;
+      display:
+        inline-flex;
+
+      align-items:
+        center;
+
       gap: 7px;
     }
 
     .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 0 3px rgba(46, 148, 101, 0.12);
+      width:
+        8px;
+
+      height:
+        8px;
+
+      border-radius:
+        50%;
+
+      background:
+        var(--green);
+
+      box-shadow:
+        0 0 0 3px
+        rgba(46, 148, 101, 0.12);
     }
+
+
+    /* =========================================================
+       MESSAGE D'ERREUR
+       ========================================================= */
 
     .message {
-      display: none;
-      margin-top: 14px;
-      padding: 14px 16px;
-      border-radius: 14px;
-      background: #fff7e9;
-      border: 1px solid #f2d8a6;
-      color: #805c1f;
-      font-size: 13px;
+      display:
+        none;
+
+      margin-top:
+        14px;
+
+      padding:
+        14px 16px;
+
+      border-radius:
+        14px;
+
+      background:
+        #fff7e9;
+
+      border:
+        1px solid #f2d8a6;
+
+      color:
+        #805c1f;
+
+      font-size:
+        13px;
     }
 
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+
     @media (max-width: 860px) {
+
       .kpis {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
       }
 
       .hero-content {
-        align-items: flex-start;
-        flex-direction: column;
+        align-items:
+          flex-start;
+
+        flex-direction:
+          column;
       }
+
     }
 
+
     @media (max-width: 520px) {
+
       body {
-        padding: 10px;
+        padding:
+          10px;
       }
 
       .hero {
-        border-radius: 18px;
-        padding: 20px;
+        border-radius:
+          18px;
+
+        padding:
+          20px;
       }
 
       .kpis {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+          1fr;
       }
 
       .foot {
-        flex-direction: column;
+        flex-direction:
+          column;
       }
+
     }
+
   </style>
 </head>
+
 
 <body>
 
   <main class="app">
+
+
+    <!-- ======================================================
+         BANDEAU
+         ====================================================== -->
 
     <section class="hero">
 
@@ -348,6 +613,7 @@
         </div>
 
         <div>
+
           <div class="brand-name">
             TÂCHTIK
           </div>
@@ -355,9 +621,11 @@
           <div class="brand-sub">
             Suivi des contributions de la DGRH
           </div>
+
         </div>
 
       </div>
+
 
       <div class="hero-content">
 
@@ -374,6 +642,7 @@
 
         </div>
 
+
         <div class="role-chip">
           Vue adaptée à vos droits Grist
         </div>
@@ -382,6 +651,11 @@
 
     </section>
 
+
+
+    <!-- ======================================================
+         VUE D'ENSEMBLE
+         ====================================================== -->
 
     <div class="section-head">
 
@@ -396,17 +670,27 @@
     </div>
 
 
+
+    <!-- ======================================================
+         CARTES KPI
+         ====================================================== -->
+
     <section
       id="kpis"
       class="kpis"
     >
 
+
+      <!-- À TRAITER -->
+
       <article class="kpi todo">
 
         <div class="kpi-top">
+
           <div class="kpi-icon">
             📋
           </div>
+
         </div>
 
         <div
@@ -421,18 +705,23 @@
         </div>
 
         <div class="kpi-sub">
-          À faire ou en cours
+          Contributions à réaliser
         </div>
 
       </article>
 
 
+
+      <!-- EN RETARD -->
+
       <article class="kpi late">
 
         <div class="kpi-top">
+
           <div class="kpi-icon">
             ⏰
           </div>
+
         </div>
 
         <div
@@ -453,12 +742,17 @@
       </article>
 
 
+
+      <!-- À RELANCER -->
+
       <article class="kpi remind">
 
         <div class="kpi-top">
+
           <div class="kpi-icon">
             🔔
           </div>
+
         </div>
 
         <div
@@ -479,12 +773,17 @@
       </article>
 
 
+
+      <!-- URGENTES -->
+
       <article class="kpi urgent">
 
         <div class="kpi-top">
+
           <div class="kpi-icon">
             ⚡
           </div>
+
         </div>
 
         <div
@@ -507,6 +806,11 @@
     </section>
 
 
+
+    <!-- ======================================================
+         MESSAGE
+         ====================================================== -->
+
     <div
       id="message"
       class="message"
@@ -514,19 +818,25 @@
     </div>
 
 
+
+    <!-- ======================================================
+         PIED
+         ====================================================== -->
+
     <div class="foot">
 
       <span class="status">
 
-        <span class="dot"></span>
+        <span class="dot">
+        </span>
 
         Données synchronisées avec Grist
 
       </span>
 
       <span>
-        Les indicateurs se recalculent automatiquement lorsque
-        les contributions changent.
+        Les indicateurs se recalculent automatiquement
+        lorsque les contributions changent.
       </span>
 
     </div>
@@ -534,11 +844,20 @@
   </main>
 
 
+
+  <!-- ========================================================
+       JAVASCRIPT
+       ======================================================== -->
+
   <script>
 
     const $ = id =>
       document.getElementById(id);
 
+
+    /*
+      Normalise les valeurs provenant de Grist.
+    */
 
     const clean = value =>
       String(
@@ -550,6 +869,11 @@
       .toLowerCase();
 
 
+
+    /*
+      Calcul des indicateurs.
+    */
+
     function render(records) {
 
       const rows =
@@ -559,38 +883,57 @@
 
 
       let todo = 0;
+
       let late = 0;
+
       let remind = 0;
+
       let urgent = 0;
+
 
 
       for (const r of rows) {
 
+
         const statut =
           clean(r.Statut);
+
 
         const alerte =
           clean(r.Alerte);
 
+
         const rappel =
           clean(r.Rappel_a_faire);
+
 
         const priorite =
           clean(r.Priorite);
 
 
+
+        /*
+          À TRAITER
+
+          Désormais :
+          uniquement Statut = À faire
+        */
+
         if (
           statut === "à faire"
           ||
           statut === "a faire"
-          ||
-          statut === "en cours"
         ) {
 
           todo += 1;
 
         }
 
+
+
+        /*
+          EN RETARD
+        */
 
         if (
           alerte.includes("retard")
@@ -601,6 +944,11 @@
         }
 
 
+
+        /*
+          À RELANCER
+        */
+
         if (
           rappel.includes("relancer")
         ) {
@@ -609,6 +957,11 @@
 
         }
 
+
+
+        /*
+          URGENTES
+        */
 
         if (
           priorite === "urgente"
@@ -621,14 +974,22 @@
       }
 
 
+
+      /*
+        Mise à jour de l'affichage.
+      */
+
       $("kpi-todo").textContent =
         todo;
+
 
       $("kpi-late").textContent =
         late;
 
+
       $("kpi-remind").textContent =
         remind;
+
 
       $("kpi-urgent").textContent =
         urgent;
@@ -640,13 +1001,20 @@
     }
 
 
+
+    /*
+      Affichage d'une erreur.
+    */
+
     function showError(text) {
 
       const box =
         $("message");
 
+
       box.textContent =
         text;
+
 
       box.style.display =
         "block";
@@ -654,14 +1022,24 @@
     }
 
 
+
+    /*
+      Connexion à Grist.
+    */
+
     try {
 
       grist.ready({
-        requiredAccess: "read table"
+
+        requiredAccess:
+          "read table"
+
       });
 
 
+
       grist.onRecords(
+
         records => {
 
           try {
@@ -674,14 +1052,18 @@
 
             console.error(err);
 
+
             showError(
+
               "Impossible de calculer les indicateurs. " +
               "Vérifiez que le widget utilise la table CONTRIBUTIONS."
+
             );
 
           }
 
         }
+
       );
 
     }
@@ -690,8 +1072,11 @@
 
       console.error(err);
 
+
       showError(
+
         "Ce widget doit être ouvert depuis Grist."
+
       );
 
     }
