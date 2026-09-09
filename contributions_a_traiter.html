@@ -69,14 +69,23 @@
 
     button,
     input,
-    select {
+    select,
+    textarea {
       font: inherit;
+    }
+
+    button {
+      cursor: pointer;
     }
 
     .app {
       width: min(1280px, 100%);
       margin: 0 auto;
     }
+
+    /* =========================
+       HERO
+       ========================= */
 
     .hero {
       position: relative;
@@ -228,6 +237,10 @@
       font-weight: 750;
     }
 
+    /* =========================
+       KPI
+       ========================= */
+
     .kpis {
       display: grid;
 
@@ -325,6 +338,10 @@
       --soft: var(--violet-soft);
     }
 
+    /* =========================
+       FILTRES
+       ========================= */
+
     .panel {
       margin-top: 18px;
 
@@ -368,6 +385,8 @@
         1px solid #d9e4ed;
 
       border-radius: 12px;
+
+      background: white;
     }
 
     .quick-filters {
@@ -389,8 +408,6 @@
 
       background: white;
 
-      cursor: pointer;
-
       font-size: 11px;
       font-weight: 750;
     }
@@ -403,6 +420,10 @@
       border-color:
         var(--blue);
     }
+
+    /* =========================
+       LISTE
+       ========================= */
 
     .results-head {
       display: flex;
@@ -445,6 +466,9 @@
 
       border:
         1px solid var(--line);
+
+      box-shadow:
+        0 5px 16px rgba(21, 50, 75, 0.055);
     }
 
     .number {
@@ -467,6 +491,7 @@
       color: var(--muted);
 
       font-size: 12px;
+      line-height: 1.5;
     }
 
     .meta {
@@ -487,12 +512,19 @@
     }
 
     .badge {
+      display: inline-flex;
+      align-items: center;
+
       padding: 4px 8px;
 
       border-radius: 999px;
 
       font-size: 10px;
       font-weight: 800;
+
+      background: #f1f5f8;
+
+      color: #536b7e;
     }
 
     .badge.red {
@@ -520,8 +552,19 @@
       color: #267b55;
     }
 
+    .badge.blue {
+      background: var(--blue-soft);
+      color: #275db7;
+    }
+
     .contribution-side {
-      min-width: 185px;
+      min-width: 190px;
+
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+
+      gap: 10px;
 
       text-align: right;
     }
@@ -530,6 +573,8 @@
       font-size: 9px;
 
       color: var(--muted);
+
+      text-transform: uppercase;
     }
 
     .deadline-date {
@@ -546,25 +591,408 @@
       color: var(--muted);
     }
 
-    .reminder-btn {
-      margin-top: 16px;
+    .card-actions {
+      display: flex;
+      flex-direction: column;
 
+      gap: 7px;
+
+      margin-top: auto;
+    }
+
+    .detail-btn,
+    .reminder-btn {
       padding: 9px 12px;
 
+      border-radius: 11px;
+
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .detail-btn {
+      border:
+        1px solid #bfd0e0;
+
+      background: white;
+
+      color: var(--ink);
+    }
+
+    .detail-btn:hover {
+      background: #f5f8fb;
+    }
+
+    .reminder-btn {
       border:
         1px solid #e1a13b;
-
-      border-radius: 11px;
 
       background:
         var(--orange-soft);
 
       color: #9a620d;
+    }
 
-      font-size: 11px;
+    /* =========================
+       FICHE DETAIL
+       ========================= */
+
+    #detail-view {
+      display: none;
+    }
+
+    .detail-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+
+      gap: 12px;
+
+      margin-top: 18px;
+    }
+
+    .back-btn {
+      padding: 9px 13px;
+
+      border:
+        1px solid #d7e1e9;
+
+      border-radius: 11px;
+
+      background: white;
+
+      color: var(--ink);
+
+      font-weight: 750;
+    }
+
+    .detail-number {
+      color: var(--blue);
+
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .status-panel {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+
+      gap: 16px;
+
+      margin-top: 14px;
+
+      padding: 18px 20px;
+
+      border-radius: 18px;
+
+      background: white;
+
+      border:
+        1px solid var(--line);
+
+      box-shadow: var(--shadow);
+    }
+
+    .status-label {
+      color: var(--muted);
+
+      font-size: 10px;
+      font-weight: 750;
+
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .status-value {
+      margin-top: 5px;
+
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .status-value.todo-status {
+      color: var(--blue);
+    }
+
+    .status-value.done-status {
+      color: var(--green);
+    }
+
+    .status-action {
+      padding: 10px 15px;
+
+      border-radius: 12px;
+
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .mark-done {
+      border:
+        1px solid #6eb58f;
+
+      background: var(--green-soft);
+
+      color: #267b55;
+    }
+
+    .mark-todo {
+      border:
+        1px solid #9bb9eb;
+
+      background: var(--blue-soft);
+
+      color: #275db7;
+    }
+
+    .detail-card {
+      margin-top: 14px;
+
+      padding: 22px;
+
+      border-radius: 20px;
+
+      background: white;
+
+      border:
+        1px solid var(--line);
+
+      box-shadow: var(--shadow);
+    }
+
+    .detail-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+
+      gap: 15px;
+
+      padding-bottom: 18px;
+
+      border-bottom:
+        1px solid var(--line);
+    }
+
+    .detail-title {
+      margin: 4px 0 0;
+
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    .edit-btn {
+      padding: 10px 14px;
+
+      border:
+        1px solid #a9c0e7;
+
+      border-radius: 11px;
+
+      background: var(--blue-soft);
+
+      color: #275db7;
+
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .detail-grid {
+      display: grid;
+
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+      gap: 18px 22px;
+
+      margin-top: 20px;
+    }
+
+    .detail-field.full {
+      grid-column:
+        1 / -1;
+    }
+
+    .field-label {
+      margin-bottom: 6px;
+
+      color: var(--muted);
+
+      font-size: 10px;
       font-weight: 800;
 
-      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .field-value {
+      min-height: 20px;
+
+      color: var(--ink);
+
+      font-size: 13px;
+      line-height: 1.5;
+
+      white-space: pre-wrap;
+    }
+
+    .technical-panel {
+      margin-top: 22px;
+
+      padding-top: 18px;
+
+      border-top:
+        1px solid var(--line);
+    }
+
+    .technical-title {
+      margin-bottom: 12px;
+
+      font-size: 12px;
+      font-weight: 850;
+
+      color: var(--muted);
+    }
+
+    .technical-grid {
+      display: grid;
+
+      grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+      gap: 12px;
+    }
+
+    .technical-item {
+      padding: 11px 12px;
+
+      border-radius: 11px;
+
+      background: #f7fafc;
+    }
+
+    .technical-item strong {
+      display: block;
+
+      margin-bottom: 4px;
+
+      color: var(--muted);
+
+      font-size: 9px;
+
+      text-transform: uppercase;
+    }
+
+    .technical-item span {
+      font-size: 11px;
+    }
+
+    /* =========================
+       MODE MODIFICATION
+       ========================= */
+
+    .edit-form {
+      display: none;
+
+      margin-top: 20px;
+    }
+
+    .edit-grid {
+      display: grid;
+
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+      gap: 17px 20px;
+    }
+
+    .form-group.full {
+      grid-column:
+        1 / -1;
+    }
+
+    .form-label {
+      display: block;
+
+      margin-bottom: 6px;
+
+      color: var(--muted);
+
+      font-size: 10px;
+      font-weight: 800;
+
+      text-transform: uppercase;
+    }
+
+    .form-control {
+      width: 100%;
+
+      padding: 10px 11px;
+
+      border:
+        1px solid #d5e0e8;
+
+      border-radius: 11px;
+
+      background: #fbfdff;
+
+      color: var(--ink);
+
+      outline: none;
+    }
+
+    textarea.form-control {
+      min-height: 110px;
+
+      resize: vertical;
+    }
+
+    .form-control:focus {
+      border-color: #8fb1ea;
+
+      box-shadow:
+        0 0 0 3px rgba(47, 111, 221, .09);
+    }
+
+    .edit-actions {
+      display: flex;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+
+      gap: 9px;
+
+      margin-top: 20px;
+    }
+
+    .cancel-btn,
+    .save-btn {
+      padding: 10px 15px;
+
+      border-radius: 11px;
+
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .cancel-btn {
+      border:
+        1px solid #d5e0e8;
+
+      background: white;
+
+      color: var(--ink);
+    }
+
+    .save-btn {
+      border:
+        1px solid var(--blue);
+
+      background: var(--blue);
+
+      color: white;
     }
 
     .empty {
@@ -582,6 +1010,33 @@
       border-radius: 18px;
     }
 
+    .toast {
+      position: fixed;
+
+      right: 22px;
+      bottom: 22px;
+
+      z-index: 999;
+
+      display: none;
+
+      max-width: 360px;
+
+      padding: 12px 15px;
+
+      border-radius: 12px;
+
+      background: #15324b;
+
+      color: white;
+
+      box-shadow:
+        0 10px 30px rgba(21, 50, 75, .25);
+
+      font-size: 12px;
+      font-weight: 750;
+    }
+
     @media (max-width: 850px) {
 
       .kpis {
@@ -595,7 +1050,21 @@
       }
 
       .contribution-side {
+        align-items: flex-start;
+
         text-align: left;
+      }
+
+      .detail-grid,
+      .edit-grid,
+      .technical-grid {
+        grid-template-columns:
+          1fr;
+      }
+
+      .detail-field.full,
+      .form-group.full {
+        grid-column: auto;
       }
     }
   </style>
@@ -605,225 +1074,754 @@
 
   <main class="app">
 
-    <section class="hero">
+    <!-- =========================
+         VUE LISTE
+         ========================= -->
 
-      <div class="hero-top">
+    <div id="list-view">
 
-        <div class="brand">
+      <section class="hero">
 
-          <div class="brand-mark">
-            ✓
+        <div class="hero-top">
+
+          <div class="brand">
+
+            <div class="brand-mark">
+              ✓
+            </div>
+
+            <div>
+
+              <div class="brand-name">
+                TÂCHTIK
+              </div>
+
+              <div class="brand-sub">
+                Suivi des contributions de la DGRH
+              </div>
+
+            </div>
+
           </div>
 
-          <div>
+          <a
+            class="home-link"
+            href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH"
+            target="_top"
+          >
+            ← Retour
+          </a>
 
-            <div class="brand-name">
-              TÂCHTIK
-            </div>
+        </div>
 
-            <div class="brand-sub">
-              Suivi des contributions de la DGRH
-            </div>
+        <div class="hero-content">
 
+          <h1>
+            À traiter & relances
+          </h1>
+
+          <p>
+            Suivez les contributions en cours,
+            les échéances et les relances à effectuer.
+          </p>
+
+          <div
+            id="profile-debug"
+            class="profile-debug"
+          >
+            Identification…
           </div>
 
         </div>
 
-        <a
-          class="home-link"
-          href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH"
-          target="_top"
-        >
-          ← Retour
-        </a>
+      </section>
 
-      </div>
 
-      <div class="hero-content">
+      <section class="kpis">
 
-        <h1>
-          À traiter & relances
-        </h1>
+        <article class="kpi todo">
 
-        <p>
-          Suivez les contributions en cours,
-          les échéances et les relances à effectuer.
-        </p>
+          <div class="kpi-top">
+            <span class="kpi-icon">📋</span>
+            À traiter
+          </div>
+
+          <div
+            id="kpi-todo"
+            class="kpi-value"
+          >
+            0
+          </div>
+
+        </article>
+
+
+        <article class="kpi late">
+
+          <div class="kpi-top">
+            <span class="kpi-icon">⏰</span>
+            En retard
+          </div>
+
+          <div
+            id="kpi-late"
+            class="kpi-value"
+          >
+            0
+          </div>
+
+        </article>
+
+
+        <article class="kpi remind">
+
+          <div class="kpi-top">
+            <span class="kpi-icon">🔔</span>
+            À relancer
+          </div>
+
+          <div
+            id="kpi-remind"
+            class="kpi-value"
+          >
+            0
+          </div>
+
+        </article>
+
+
+        <article class="kpi urgent">
+
+          <div class="kpi-top">
+            <span class="kpi-icon">⚡</span>
+            Urgentes
+          </div>
+
+          <div
+            id="kpi-urgent"
+            class="kpi-value"
+          >
+            0
+          </div>
+
+        </article>
+
+      </section>
+
+
+      <section class="panel">
+
+        <div class="toolbar">
+
+          <input
+            id="search"
+            class="search"
+            type="search"
+            placeholder="🔎 Rechercher..."
+          >
+
+
+          <select
+            id="priority-filter"
+            class="select"
+          >
+
+            <option value="">
+              Toutes les priorités
+            </option>
+
+            <option value="normale">
+              Normale
+            </option>
+
+            <option value="haute">
+              Haute
+            </option>
+
+            <option value="urgente">
+              Urgente
+            </option>
+
+          </select>
+
+
+          <select
+            id="department-filter"
+            class="select"
+          >
+
+            <option value="">
+              Tous les départements
+            </option>
+
+          </select>
+
+
+          <select
+            id="origin-filter"
+            class="select"
+          >
+
+            <option value="">
+              Tous les bureaux
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="quick-filters">
+
+          <button
+            class="filter-btn active"
+            data-filter="all"
+          >
+            Toutes
+          </button>
+
+          <button
+            class="filter-btn"
+            data-filter="late"
+          >
+            🔴 En retard
+          </button>
+
+          <button
+            class="filter-btn"
+            data-filter="close"
+          >
+            🟠 Échéance proche
+          </button>
+
+          <button
+            class="filter-btn"
+            data-filter="watch"
+          >
+            🟡 À surveiller
+          </button>
+
+          <button
+            class="filter-btn"
+            data-filter="remind"
+          >
+            🔔 À relancer
+          </button>
+
+          <button
+            class="filter-btn"
+            data-filter="urgent"
+          >
+            ⚡ Urgentes
+          </button>
+
+          <button
+            class="filter-btn"
+            data-filter="week"
+          >
+            📅 Cette semaine
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <div class="results-head">
+
+        <div class="results-title">
+          Contributions
+        </div>
 
         <div
-          id="profile-debug"
-          class="profile-debug"
+          id="results-count"
+          class="results-count"
         >
-          Identification…
+          0 contribution
         </div>
 
       </div>
 
-    </section>
 
-    <section class="kpis">
-
-      <article class="kpi todo">
-        <div class="kpi-top">
-          <span class="kpi-icon">📋</span>
-          À traiter
-        </div>
-
-        <div id="kpi-todo" class="kpi-value">
-          0
-        </div>
-      </article>
-
-      <article class="kpi late">
-        <div class="kpi-top">
-          <span class="kpi-icon">⏰</span>
-          En retard
-        </div>
-
-        <div id="kpi-late" class="kpi-value">
-          0
-        </div>
-      </article>
-
-      <article class="kpi remind">
-        <div class="kpi-top">
-          <span class="kpi-icon">🔔</span>
-          À relancer
-        </div>
-
-        <div id="kpi-remind" class="kpi-value">
-          0
-        </div>
-      </article>
-
-      <article class="kpi urgent">
-        <div class="kpi-top">
-          <span class="kpi-icon">⚡</span>
-          Urgentes
-        </div>
-
-        <div id="kpi-urgent" class="kpi-value">
-          0
-        </div>
-      </article>
-
-    </section>
-
-    <section class="panel">
-
-      <div class="toolbar">
-
-        <input
-          id="search"
-          class="search"
-          type="search"
-          placeholder="🔎 Rechercher..."
-        >
-
-        <select
-          id="priority-filter"
-          class="select"
-        >
-          <option value="">
-            Toutes les priorités
-          </option>
-
-          <option value="normale">
-            Normale
-          </option>
-
-          <option value="haute">
-            Haute
-          </option>
-
-          <option value="urgente">
-            Urgente
-          </option>
-        </select>
-
-        <select
-          id="department-filter"
-          class="select"
-        >
-          <option value="">
-            Tous les départements
-          </option>
-        </select>
-
-        <select
-          id="origin-filter"
-          class="select"
-        >
-          <option value="">
-            Tous les bureaux
-          </option>
-        </select>
-
-      </div>
-
-      <div class="quick-filters">
-
-        <button class="filter-btn active" data-filter="all">
-          Toutes
-        </button>
-
-        <button class="filter-btn" data-filter="late">
-          🔴 En retard
-        </button>
-
-        <button class="filter-btn" data-filter="close">
-          🟠 Échéance proche
-        </button>
-
-        <button class="filter-btn" data-filter="watch">
-          🟡 À surveiller
-        </button>
-
-        <button class="filter-btn" data-filter="remind">
-          🔔 À relancer
-        </button>
-
-        <button class="filter-btn" data-filter="urgent">
-          ⚡ Urgentes
-        </button>
-
-        <button class="filter-btn" data-filter="week">
-          📅 Cette semaine
-        </button>
-
-      </div>
-
-    </section>
-
-    <div class="results-head">
-
-      <div class="results-title">
-        Contributions
-      </div>
-
-      <div
-        id="results-count"
-        class="results-count"
-      >
-        0 contribution
-      </div>
+      <section
+        id="contribution-list"
+        class="contribution-list"
+      ></section>
 
     </div>
 
-    <section
-      id="contribution-list"
-      class="contribution-list"
-    ></section>
+
+    <!-- =========================
+         VUE DETAIL
+         ========================= -->
+
+    <div id="detail-view">
+
+      <div class="detail-toolbar">
+
+        <button
+          id="back-list-btn"
+          class="back-btn"
+          type="button"
+        >
+          ← Retour à la liste
+        </button>
+
+        <div
+          id="detail-number"
+          class="detail-number"
+        ></div>
+
+      </div>
+
+
+      <section class="status-panel">
+
+        <div>
+
+          <div class="status-label">
+            Statut de la contribution
+          </div>
+
+          <div
+            id="detail-status"
+            class="status-value"
+          ></div>
+
+        </div>
+
+
+        <button
+          id="status-action-btn"
+          class="status-action"
+          type="button"
+        ></button>
+
+      </section>
+
+
+      <section class="detail-card">
+
+        <div class="detail-heading">
+
+          <div>
+
+            <div class="field-label">
+              Contribution
+            </div>
+
+            <h2
+              id="detail-title"
+              class="detail-title"
+            ></h2>
+
+          </div>
+
+
+          <button
+            id="edit-btn"
+            class="edit-btn"
+            type="button"
+          >
+            ✏️ Modifier
+          </button>
+
+        </div>
+
+
+        <!-- CONSULTATION -->
+
+        <div id="detail-content">
+
+          <div class="detail-grid">
+
+            <div class="detail-field full">
+
+              <div class="field-label">
+                Description
+              </div>
+
+              <div
+                id="detail-description"
+                class="field-value"
+              ></div>
+
+            </div>
+
+
+            <div class="detail-field">
+
+              <div class="field-label">
+                Demandeur
+              </div>
+
+              <div
+                id="detail-demandeur"
+                class="field-value"
+              ></div>
+
+            </div>
+
+
+            <div class="detail-field">
+
+              <div class="field-label">
+                Contributeur
+              </div>
+
+              <div
+                id="detail-contributeur"
+                class="field-value"
+              ></div>
+
+            </div>
+
+
+            <div class="detail-field">
+
+              <div class="field-label">
+                Bureau d'origine
+              </div>
+
+              <div
+                id="detail-bureau"
+                class="field-value"
+              ></div>
+
+            </div>
+
+
+            <div class="detail-field">
+
+              <div class="field-label">
+                Priorité
+              </div>
+
+              <div
+                id="detail-priorite"
+                class="field-value"
+              ></div>
+
+            </div>
+
+
+            <div class="detail-field">
+
+              <div class="field-label">
+                Date d'attribution
+              </div>
+
+              <div
+                id="detail-attribution"
+                class="field-value"
+              ></div>
+
+            </div>
+
+
+            <div class="detail-field">
+
+              <div class="field-label">
+                Échéance
+              </div>
+
+              <div
+                id="detail-echeance"
+                class="field-value"
+              ></div>
+
+            </div>
+
+
+            <div class="detail-field full">
+
+              <div class="field-label">
+                Commentaire
+              </div>
+
+              <div
+                id="detail-commentaire"
+                class="field-value"
+              ></div>
+
+            </div>
+
+          </div>
+
+
+          <div class="technical-panel">
+
+            <div class="technical-title">
+              Suivi
+            </div>
+
+            <div class="technical-grid">
+
+              <div class="technical-item">
+
+                <strong>
+                  Alerte
+                </strong>
+
+                <span id="detail-alerte"></span>
+
+              </div>
+
+
+              <div class="technical-item">
+
+                <strong>
+                  Jours restants
+                </strong>
+
+                <span id="detail-jours"></span>
+
+              </div>
+
+
+              <div class="technical-item">
+
+                <strong>
+                  Rappel
+                </strong>
+
+                <span id="detail-rappel"></span>
+
+              </div>
+
+
+              <div class="technical-item">
+
+                <strong>
+                  Dernier rappel
+                </strong>
+
+                <span id="detail-dernier-rappel"></span>
+
+              </div>
+
+
+              <div class="technical-item">
+
+                <strong>
+                  Finalisation
+                </strong>
+
+                <span id="detail-finalisation"></span>
+
+              </div>
+
+
+              <div class="technical-item">
+
+                <strong>
+                  Source
+                </strong>
+
+                <span id="detail-source"></span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- MODIFICATION -->
+
+        <div
+          id="edit-form"
+          class="edit-form"
+        >
+
+          <div class="edit-grid">
+
+            <div class="form-group full">
+
+              <label
+                class="form-label"
+                for="edit-title"
+              >
+                Titre
+              </label>
+
+              <input
+                id="edit-title"
+                class="form-control"
+                type="text"
+              >
+
+            </div>
+
+
+            <div class="form-group full">
+
+              <label
+                class="form-label"
+                for="edit-description"
+              >
+                Description
+              </label>
+
+              <textarea
+                id="edit-description"
+                class="form-control"
+              ></textarea>
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label
+                class="form-label"
+                for="edit-demandeur"
+              >
+                Demandeur
+              </label>
+
+              <input
+                id="edit-demandeur"
+                class="form-control"
+                type="text"
+              >
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label
+                class="form-label"
+                for="edit-contributeur"
+              >
+                Contributeur
+              </label>
+
+              <select
+                id="edit-contributeur"
+                class="form-control"
+              ></select>
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label
+                class="form-label"
+                for="edit-echeance"
+              >
+                Échéance
+              </label>
+
+              <input
+                id="edit-echeance"
+                class="form-control"
+                type="date"
+              >
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label
+                class="form-label"
+                for="edit-priorite"
+              >
+                Priorité
+              </label>
+
+              <select
+                id="edit-priorite"
+                class="form-control"
+              >
+
+                <option value="Normale">
+                  Normale
+                </option>
+
+                <option value="Haute">
+                  Haute
+                </option>
+
+                <option value="Urgente">
+                  Urgente
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="form-group full">
+
+              <label
+                class="form-label"
+                for="edit-commentaire"
+              >
+                Commentaire
+              </label>
+
+              <textarea
+                id="edit-commentaire"
+                class="form-control"
+              ></textarea>
+
+            </div>
+
+          </div>
+
+
+          <div class="edit-actions">
+
+            <button
+              id="cancel-edit-btn"
+              class="cancel-btn"
+              type="button"
+            >
+              Annuler
+            </button>
+
+            <button
+              id="save-edit-btn"
+              class="save-btn"
+              type="button"
+            >
+              💾 Enregistrer
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
 
   </main>
 
+
+  <div
+    id="toast"
+    class="toast"
+  ></div>
+
+
   <script>
 
-    const $ = id =>
-      document.getElementById(id);
+    const $ =
+      id =>
+        document.getElementById(id);
 
 
     let allRecords =
+      [];
+
+    let departmentRows =
       [];
 
     let quickFilter =
@@ -831,6 +1829,23 @@
 
     let canRecordReminder =
       false;
+
+    let canEdit =
+      false;
+
+    let currentRole =
+      "";
+
+    let selectedRecordId =
+      null;
+
+    let toastTimer =
+      null;
+
+
+    /* =========================
+       OUTILS
+       ========================= */
 
 
     function clean(value) {
@@ -922,6 +1937,39 @@
     }
 
 
+    function showToast(message) {
+
+      const toast =
+        $("toast");
+
+      toast.textContent =
+        message;
+
+      toast.style.display =
+        "block";
+
+      clearTimeout(
+        toastTimer
+      );
+
+      toastTimer =
+        setTimeout(
+          () => {
+
+            toast.style.display =
+              "none";
+
+          },
+          2600
+        );
+    }
+
+
+    /* =========================
+       IDENTIFICATION
+       ========================= */
+
+
     async function identifyUser() {
 
       try {
@@ -941,6 +1989,7 @@
             )
           );
 
+
         await grist.docApi.applyUserActions([
           [
             "AddRecord",
@@ -950,6 +1999,7 @@
           ]
         ]);
 
+
         await new Promise(
           resolve =>
             setTimeout(
@@ -958,12 +2008,14 @@
             )
         );
 
+
         const after =
           tableToRows(
             await grist.docApi.fetchTable(
               "SESSION_WIDGET"
             )
           );
+
 
         const rows =
           after.filter(
@@ -973,6 +2025,7 @@
               )
           );
 
+
         rows.sort(
           (a, b) =>
             Number(b.id)
@@ -980,14 +2033,18 @@
             Number(a.id)
         );
 
+
         const profile =
           rows[0];
 
+
         if (!profile) {
+
           throw new Error(
             "Profil absent"
           );
         }
+
 
         const role =
           text(
@@ -997,6 +2054,11 @@
         const normalized =
           clean(role);
 
+
+        currentRole =
+          normalized;
+
+
         canRecordReminder =
           normalized.startsWith(
             "admin"
@@ -1005,23 +2067,46 @@
           normalized ===
             "gestionnaire e1";
 
+
+        canEdit =
+          normalized.startsWith(
+            "admin"
+          )
+          ||
+          normalized ===
+            "gestionnaire e1";
+
+
         $("profile-debug")
           .textContent =
           "👤 "
           +
           role;
 
-        await grist.docApi.applyUserActions([
-          [
-            "BulkRemoveRecord",
-            "SESSION_WIDGET",
+
+        try {
+
+          await grist.docApi.applyUserActions([
             [
-              Number(
-                profile.id
-              )
+              "BulkRemoveRecord",
+              "SESSION_WIDGET",
+              [
+                Number(
+                  profile.id
+                )
+              ]
             ]
-          ]
-        ]);
+          ]);
+
+        }
+        catch (
+          cleanupError
+        ) {
+
+          console.error(
+            cleanupError
+          );
+        }
 
       }
       catch (error) {
@@ -1030,13 +2115,25 @@
           error
         );
 
+        canRecordReminder =
+          false;
+
+        canEdit =
+          false;
+
         $("profile-debug")
           .textContent =
           "⚠ Profil non identifié";
       }
 
+
       renderAll();
     }
+
+
+    /* =========================
+       CHARGEMENT
+       ========================= */
 
 
     async function loadContributions() {
@@ -1047,6 +2144,7 @@
         bureauTable
       ] =
         await Promise.all([
+
           grist.docApi.fetchTable(
             "CONTRIBUTIONS"
           ),
@@ -1058,14 +2156,21 @@
           grist.docApi.fetchTable(
             "BUREAUX_ORIGINE"
           )
+
         ]);
+
+
+      departmentRows =
+        tableToRows(
+          departmentTable
+        );
+
 
       const departments =
         makeCodeMap(
-          tableToRows(
-            departmentTable
-          )
+          departmentRows
         );
+
 
       const bureaux =
         makeCodeMap(
@@ -1073,6 +2178,7 @@
             bureauTable
           )
         );
+
 
       allRecords =
         tableToRows(
@@ -1082,45 +2188,74 @@
           row => {
 
             const result = {
-              ...row
+              ...row,
+
+              _ContributeurId:
+                Number(
+                  row.Contributeur
+                )
+                || null,
+
+              _BureauId:
+                Number(
+                  row.Bureau_origine
+                )
+                || null
             };
 
+
             if (
-              Number(
-                row.Contributeur
-              )
+              result._ContributeurId
             ) {
 
               result.Contributeur =
                 departments.get(
-                  Number(
-                    row.Contributeur
-                  )
+                  result._ContributeurId
                 )
                 || "";
             }
 
+
             if (
-              Number(
-                row.Bureau_origine
-              )
+              result._BureauId
             ) {
 
               result.Bureau_origine =
                 bureaux.get(
-                  Number(
-                    row.Bureau_origine
-                  )
+                  result._BureauId
                 )
                 || "";
             }
+
 
             return result;
           }
         );
 
+
       renderAll();
+
+
+      if (
+        selectedRecordId !== null
+      ) {
+
+        const selected =
+          getSelectedRecord();
+
+        if (selected) {
+
+          renderDetail(
+            selected
+          );
+        }
+      }
     }
+
+
+    /* =========================
+       ETATS
+       ========================= */
 
 
     function isTodo(record) {
@@ -1200,6 +2335,11 @@
     }
 
 
+    /* =========================
+       KPI
+       ========================= */
+
+
     function renderKpis() {
 
       $("kpi-todo")
@@ -1210,6 +2350,7 @@
           )
           .length;
 
+
       $("kpi-late")
         .textContent =
         allRecords
@@ -1218,6 +2359,7 @@
           )
           .length;
 
+
       $("kpi-remind")
         .textContent =
         allRecords
@@ -1225,6 +2367,7 @@
             needsReminder
           )
           .length;
+
 
       $("kpi-urgent")
         .textContent =
@@ -1236,11 +2379,17 @@
     }
 
 
+    /* =========================
+       DATES
+       ========================= */
+
+
     function dateValue(value) {
 
       if (!value) {
         return null;
       }
+
 
       if (
         typeof value ===
@@ -1251,6 +2400,7 @@
           value * 1000
         );
       }
+
 
       return new Date(
         value
@@ -1263,14 +2413,100 @@
       const date =
         dateValue(value);
 
+
       if (!date) {
         return "";
       }
+
 
       return new Intl.DateTimeFormat(
         "fr-FR"
       )
       .format(date);
+    }
+
+
+    function dateToInput(value) {
+
+      const date =
+        dateValue(value);
+
+
+      if (!date) {
+        return "";
+      }
+
+
+      const year =
+        date.getUTCFullYear();
+
+      const month =
+        String(
+          date.getUTCMonth()
+          +
+          1
+        )
+        .padStart(
+          2,
+          "0"
+        );
+
+      const day =
+        String(
+          date.getUTCDate()
+        )
+        .padStart(
+          2,
+          "0"
+        );
+
+
+      return (
+        year
+        +
+        "-"
+        +
+        month
+        +
+        "-"
+        +
+        day
+      );
+    }
+
+
+    function inputToGristDate(value) {
+
+      if (!value) {
+        return null;
+      }
+
+
+      const parts =
+        value
+          .split("-")
+          .map(Number);
+
+
+      return Date.UTC(
+        parts[0],
+        parts[1] - 1,
+        parts[2]
+      ) / 1000;
+    }
+
+
+    function todayGristDate() {
+
+      const now =
+        new Date();
+
+
+      return Date.UTC(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate()
+      ) / 1000;
     }
 
 
@@ -1281,18 +2517,25 @@
           record.Echeance
         );
 
+
       if (!date) {
         return false;
       }
 
+
       const now =
         new Date();
+
 
       const monday =
         new Date(now);
 
+
       const day =
-        now.getDay() || 7;
+        now.getDay()
+        ||
+        7;
+
 
       monday.setDate(
         now.getDate()
@@ -1302,6 +2545,7 @@
         1
       );
 
+
       monday.setHours(
         0,
         0,
@@ -1309,14 +2553,19 @@
         0
       );
 
+
       const sunday =
-        new Date(monday);
+        new Date(
+          monday
+        );
+
 
       sunday.setDate(
         monday.getDate()
         +
         6
       );
+
 
       sunday.setHours(
         23,
@@ -1325,12 +2574,18 @@
         999
       );
 
+
       return (
         date >= monday
         &&
         date <= sunday
       );
     }
+
+
+    /* =========================
+       FILTRES
+       ========================= */
 
 
     function resetSecondaryFilters() {
@@ -1352,15 +2607,10 @@
     function getFilteredRecords() {
 
       let records =
-        [...allRecords];
+        [
+          ...allRecords
+        ];
 
-
-      /*
-       * V17 :
-       * chaque filtre rapide utilise
-       * exactement la même population
-       * que son KPI.
-       */
 
       if (
         quickFilter === "all"
@@ -1433,25 +2683,23 @@
       }
 
 
-      /*
-       * Les filtres secondaires
-       * ne s'appliquent qu'après.
-       */
-
       const search =
         clean(
           $("search").value
         );
+
 
       const priority =
         clean(
           $("priority-filter").value
         );
 
+
       const department =
         clean(
           $("department-filter").value
         );
+
 
       const origin =
         clean(
@@ -1527,6 +2775,11 @@
     }
 
 
+    /* =========================
+       SELECTS
+       ========================= */
+
+
     function populateSelect(
       id,
       values,
@@ -1536,8 +2789,10 @@
       const select =
         $(id);
 
+
       const current =
         select.value;
+
 
       const unique =
         [
@@ -1549,8 +2804,10 @@
         ]
         .sort();
 
+
       select.innerHTML =
         `<option value="">${label}</option>`;
+
 
       for (
         const value
@@ -1562,20 +2819,89 @@
             "option"
           );
 
+
         option.value =
-          clean(value);
+          clean(
+            value
+          );
+
 
         option.textContent =
           value;
+
 
         select.appendChild(
           option
         );
       }
 
+
       select.value =
         current;
     }
+
+
+    function populateDepartmentEditSelect() {
+
+      const select =
+        $("edit-contributeur");
+
+
+      select.innerHTML =
+        "";
+
+
+      const sorted =
+        [
+          ...departmentRows
+        ]
+        .sort(
+          (a, b) =>
+            text(
+              a.Code
+            )
+            .localeCompare(
+              text(
+                b.Code
+            ),
+            "fr"
+          )
+        );
+
+
+      for (
+        const row
+        of sorted
+      ) {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+
+        option.value =
+          Number(
+            row.id
+          );
+
+
+        option.textContent =
+          text(
+            row.Code
+          );
+
+
+        select.appendChild(
+          option
+        );
+      }
+    }
+
+
+    /* =========================
+       BADGES
+       ========================= */
 
 
     function alertBadge(record) {
@@ -1585,17 +2911,23 @@
           record.Alerte
         );
 
+
       const normal =
-        clean(value);
+        clean(
+          value
+        );
+
 
       let css =
         "green";
+
 
       if (
         normal.includes(
           "retard"
         )
       ) {
+
         css =
           "red";
       }
@@ -1605,6 +2937,7 @@
           "proche"
         )
       ) {
+
         css =
           "orange";
       }
@@ -1614,12 +2947,18 @@
           "surveiller"
         )
       ) {
+
         css =
           "yellow";
       }
 
+
       return value
-        ? `<span class="badge ${css}">${escapeHtml(value)}</span>`
+        ? `
+            <span class="badge ${css}">
+              ${escapeHtml(value)}
+            </span>
+          `
         : "";
     }
 
@@ -1629,7 +2968,11 @@
       return needsReminder(
         record
       )
-        ? `<span class="badge orange">🔔 À relancer</span>`
+        ? `
+            <span class="badge orange">
+              🔔 À relancer
+            </span>
+          `
         : "";
     }
 
@@ -1641,30 +2984,40 @@
           record.Priorite
         );
 
+
       if (!priority) {
         return "";
       }
 
+
       let css =
         "green";
 
+
       if (
-        clean(priority)
+        clean(
+          priority
+        )
         ===
         "urgente"
       ) {
+
         css =
           "violet";
       }
 
       else if (
-        clean(priority)
+        clean(
+          priority
+        )
         ===
         "haute"
       ) {
+
         css =
           "orange";
       }
+
 
       return `
         <span class="badge ${css}">
@@ -1672,6 +3025,11 @@
         </span>
       `;
     }
+
+
+    /* =========================
+       RAPPEL
+       ========================= */
 
 
     function reminderButton(record) {
@@ -1687,10 +3045,12 @@
         return "";
       }
 
+
       return `
         <button
           class="reminder-btn"
-          data-id="${Number(record.id)}"
+          data-reminder-id="${Number(record.id)}"
+          type="button"
         >
           🔔 Enregistrer le rappel
         </button>
@@ -1698,51 +3058,66 @@
     }
 
 
-    function todayGristDate() {
-
-      const now =
-        new Date();
-
-      return Date.UTC(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate()
-      ) / 1000;
-    }
-
-
     async function recordReminder(
       id
     ) {
 
-      await grist.docApi.applyUserActions([
-        [
-          "UpdateRecord",
-          "CONTRIBUTIONS",
-          Number(id),
-          {
-            Dernier_rappel:
-              todayGristDate()
-          }
-        ]
-      ]);
+      try {
 
-      await new Promise(
-        resolve =>
-          setTimeout(
-            resolve,
-            700
-          )
-      );
+        await grist.docApi.applyUserActions([
+          [
+            "UpdateRecord",
+            "CONTRIBUTIONS",
+            Number(id),
+            {
+              Dernier_rappel:
+                todayGristDate()
+            }
+          ]
+        ]);
 
-      await loadContributions();
+
+        showToast(
+          "✓ Rappel enregistré"
+        );
+
+
+        await new Promise(
+          resolve =>
+            setTimeout(
+              resolve,
+              500
+            )
+        );
+
+
+        await loadContributions();
+
+      }
+      catch (error) {
+
+        console.error(
+          error
+        );
+
+
+        showToast(
+          "Impossible d'enregistrer le rappel."
+        );
+      }
     }
+
+
+    /* =========================
+       LISTE
+       ========================= */
 
 
     function renderList() {
 
       const records =
         getFilteredRecords();
+
 
       $("results-count")
         .textContent =
@@ -1773,68 +3148,130 @@
 
       $("contribution-list")
         .innerHTML =
-        records.map(
-          record => `
-            <article class="contribution">
+        records
+          .map(
+            record => `
 
-              <div>
+              <article class="contribution">
 
                 <div>
-                  <span class="number">
-                    ${escapeHtml(record.Numero)}
-                  </span>
 
-                  <span class="title">
-                    ${escapeHtml(record.Titre)}
-                  </span>
+                  <div>
+
+                    <span class="number">
+                      ${escapeHtml(record.Numero)}
+                    </span>
+
+                    <span class="title">
+                      ${escapeHtml(record.Titre)}
+                    </span>
+
+                  </div>
+
+
+                  <div class="description">
+                    ${escapeHtml(record.Description)}
+                  </div>
+
+
+                  <div class="meta">
+
+                    👤
+                    ${escapeHtml(record.Contributeur)}
+
+                    &nbsp;&nbsp;
+
+                    🏢
+                    ${escapeHtml(record.Bureau_origine)}
+
+                  </div>
+
+
+                  <div class="badges">
+
+                    ${alertBadge(record)}
+
+                    ${reminderBadge(record)}
+
+                    ${priorityBadge(record)}
+
+                  </div>
+
                 </div>
 
-                <div class="description">
-                  ${escapeHtml(record.Description)}
+
+                <div class="contribution-side">
+
+                  <div>
+
+                    <div class="deadline-label">
+                      Échéance
+                    </div>
+
+                    <div class="deadline-date">
+                      ${formatDate(record.Echeance)}
+                    </div>
+
+                    <div class="deadline-days">
+
+                      ${
+                        record.Jours_restants
+                        == null
+                          ? ""
+                          : record.Jours_restants
+                            + " jour(s)"
+                      }
+
+                    </div>
+
+                  </div>
+
+
+                  <div class="card-actions">
+
+                    <button
+                      class="detail-btn"
+                      data-detail-id="${Number(record.id)}"
+                      type="button"
+                    >
+                      👁 Voir le détail
+                    </button>
+
+                    ${reminderButton(record)}
+
+                  </div>
+
                 </div>
 
-                <div class="meta">
-                  👤 ${escapeHtml(record.Contributeur)}
-                  &nbsp;&nbsp;
-                  🏢 ${escapeHtml(record.Bureau_origine)}
-                </div>
+              </article>
 
-                <div class="badges">
-                  ${alertBadge(record)}
-                  ${reminderBadge(record)}
-                  ${priorityBadge(record)}
-                </div>
+            `
+          )
+          .join("");
 
-              </div>
 
-              <div class="contribution-side">
-
-                <div class="deadline-label">
-                  Échéance
-                </div>
-
-                <div class="deadline-date">
-                  ${formatDate(record.Echeance)}
-                </div>
-
-                <div class="deadline-days">
-                  ${
-                    record.Jours_restants
-                    == null
-                      ? ""
-                      : record.Jours_restants
-                        + " jour(s)"
-                  }
-                </div>
-
-                ${reminderButton(record)}
-
-              </div>
-
-            </article>
-          `
+      document
+        .querySelectorAll(
+          ".detail-btn"
         )
-        .join("");
+        .forEach(
+          button => {
+
+            button.addEventListener(
+              "click",
+              () => {
+
+                openDetail(
+                  Number(
+                    button.dataset.detailId
+                  )
+                );
+
+              }
+            );
+
+          }
+        );
 
 
       document
@@ -1846,19 +3283,674 @@
 
             button.addEventListener(
               "click",
-              () =>
+              () => {
+
                 recordReminder(
-                  button.dataset.id
-                )
+                  Number(
+                    button.dataset.reminderId
+                  )
+                );
+
+              }
             );
+
           }
         );
     }
 
 
+    /* =========================
+       DETAIL
+       ========================= */
+
+
+    function getSelectedRecord() {
+
+      return allRecords.find(
+        record =>
+          Number(
+            record.id
+          )
+          ===
+          Number(
+            selectedRecordId
+          )
+      );
+    }
+
+
+    function openDetail(
+      recordId
+    ) {
+
+      selectedRecordId =
+        Number(
+          recordId
+        );
+
+
+      const record =
+        getSelectedRecord();
+
+
+      if (!record) {
+        return;
+      }
+
+
+      $("list-view")
+        .style.display =
+        "none";
+
+
+      $("detail-view")
+        .style.display =
+        "block";
+
+
+      exitEditMode();
+
+
+      renderDetail(
+        record
+      );
+
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
+
+
+    function closeDetail() {
+
+      selectedRecordId =
+        null;
+
+
+      $("detail-view")
+        .style.display =
+        "none";
+
+
+      $("list-view")
+        .style.display =
+        "block";
+
+
+      exitEditMode();
+
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
+
+
+    function renderDetail(
+      record
+    ) {
+
+      $("detail-number")
+        .textContent =
+        text(
+          record.Numero
+        );
+
+
+      $("detail-title")
+        .textContent =
+        text(
+          record.Titre
+        );
+
+
+      $("detail-description")
+        .textContent =
+        text(
+          record.Description
+        )
+        ||
+        "—";
+
+
+      $("detail-demandeur")
+        .textContent =
+        text(
+          record.Demandeur
+        )
+        ||
+        "—";
+
+
+      $("detail-contributeur")
+        .textContent =
+        text(
+          record.Contributeur
+        )
+        ||
+        "—";
+
+
+      $("detail-bureau")
+        .textContent =
+        text(
+          record.Bureau_origine
+        )
+        ||
+        "—";
+
+
+      $("detail-priorite")
+        .textContent =
+        text(
+          record.Priorite
+        )
+        ||
+        "—";
+
+
+      $("detail-attribution")
+        .textContent =
+        formatDate(
+          record.Date_attribution
+        )
+        ||
+        "—";
+
+
+      $("detail-echeance")
+        .textContent =
+        formatDate(
+          record.Echeance
+        )
+        ||
+        "—";
+
+
+      $("detail-commentaire")
+        .textContent =
+        text(
+          record.Commentaire
+        )
+        ||
+        "—";
+
+
+      $("detail-alerte")
+        .textContent =
+        text(
+          record.Alerte
+        )
+        ||
+        "—";
+
+
+      $("detail-jours")
+        .textContent =
+        record.Jours_restants
+        == null
+          ? "—"
+          : text(
+              record.Jours_restants
+            );
+
+
+      $("detail-rappel")
+        .textContent =
+        text(
+          record.Rappel_a_faire
+        )
+        ||
+        "Aucun rappel nécessaire";
+
+
+      $("detail-dernier-rappel")
+        .textContent =
+        formatDate(
+          record.Dernier_rappel
+        )
+        ||
+        "—";
+
+
+      $("detail-finalisation")
+        .textContent =
+        formatDate(
+          record.Date_finalisation
+        )
+        ||
+        "—";
+
+
+      $("detail-source")
+        .textContent =
+        text(
+          record.Source
+        )
+        ||
+        "—";
+
+
+      const status =
+        $("detail-status");
+
+
+      const statusButton =
+        $("status-action-btn");
+
+
+      if (
+        isTodo(
+          record
+        )
+      ) {
+
+        status.textContent =
+          "🔵 À faire";
+
+
+        status.className =
+          "status-value todo-status";
+
+
+        statusButton.textContent =
+          "✓ Marquer comme fait";
+
+
+        statusButton.className =
+          "status-action mark-done";
+
+
+        statusButton.style.display =
+          canEdit
+            ? "inline-flex"
+            : "none";
+
+      }
+      else {
+
+        status.textContent =
+          "🟢 Fait";
+
+
+        status.className =
+          "status-value done-status";
+
+
+        statusButton.textContent =
+          "↩ Remettre à faire";
+
+
+        statusButton.className =
+          "status-action mark-todo";
+
+
+        statusButton.style.display =
+          canEdit
+            ? "inline-flex"
+            : "none";
+      }
+
+
+      $("edit-btn")
+        .style.display =
+        canEdit
+          ? "inline-flex"
+          : "none";
+    }
+
+
+    /* =========================
+       CHANGEMENT RAPIDE STATUT
+       ========================= */
+
+
+    async function toggleStatus() {
+
+      const record =
+        getSelectedRecord();
+
+
+      if (
+        !record
+        ||
+        !canEdit
+      ) {
+        return;
+      }
+
+
+      const newStatus =
+        isTodo(
+          record
+        )
+          ? "Fait"
+          : "À faire";
+
+
+      try {
+
+        $("status-action-btn")
+          .disabled =
+          true;
+
+
+        await grist.docApi.applyUserActions([
+          [
+            "UpdateRecord",
+            "CONTRIBUTIONS",
+            Number(
+              record.id
+            ),
+            {
+              Statut:
+                newStatus
+            }
+          ]
+        ]);
+
+
+        showToast(
+          newStatus === "Fait"
+            ? "✓ Contribution marquée comme faite"
+            : "↩ Contribution remise à faire"
+        );
+
+
+        await new Promise(
+          resolve =>
+            setTimeout(
+              resolve,
+              500
+            )
+        );
+
+
+        await loadContributions();
+
+      }
+      catch (error) {
+
+        console.error(
+          error
+        );
+
+
+        showToast(
+          "Impossible de modifier le statut."
+        );
+
+      }
+      finally {
+
+        $("status-action-btn")
+          .disabled =
+          false;
+      }
+    }
+
+
+    /* =========================
+       MODIFICATION
+       ========================= */
+
+
+    function enterEditMode() {
+
+      const record =
+        getSelectedRecord();
+
+
+      if (
+        !record
+        ||
+        !canEdit
+      ) {
+        return;
+      }
+
+
+      populateDepartmentEditSelect();
+
+
+      $("edit-title").value =
+        text(
+          record.Titre
+        );
+
+
+      $("edit-description").value =
+        text(
+          record.Description
+        );
+
+
+      $("edit-demandeur").value =
+        text(
+          record.Demandeur
+        );
+
+
+      $("edit-contributeur").value =
+        record._ContributeurId
+        ||
+        "";
+
+
+      $("edit-echeance").value =
+        dateToInput(
+          record.Echeance
+        );
+
+
+      $("edit-priorite").value =
+        text(
+          record.Priorite
+        )
+        ||
+        "Normale";
+
+
+      $("edit-commentaire").value =
+        text(
+          record.Commentaire
+        );
+
+
+      $("detail-content")
+        .style.display =
+        "none";
+
+
+      $("edit-form")
+        .style.display =
+        "block";
+
+
+      $("edit-btn")
+        .style.display =
+        "none";
+    }
+
+
+    function exitEditMode() {
+
+      $("detail-content")
+        .style.display =
+        "block";
+
+
+      $("edit-form")
+        .style.display =
+        "none";
+
+
+      if (
+        canEdit
+      ) {
+
+        $("edit-btn")
+          .style.display =
+          "inline-flex";
+      }
+    }
+
+
+    async function saveEdit() {
+
+      const record =
+        getSelectedRecord();
+
+
+      if (
+        !record
+        ||
+        !canEdit
+      ) {
+        return;
+      }
+
+
+      const title =
+        $("edit-title")
+          .value
+          .trim();
+
+
+      if (!title) {
+
+        showToast(
+          "Le titre est obligatoire."
+        );
+
+        return;
+      }
+
+
+      const contributorId =
+        Number(
+          $("edit-contributeur")
+            .value
+        );
+
+
+      if (!contributorId) {
+
+        showToast(
+          "Le contributeur est obligatoire."
+        );
+
+        return;
+      }
+
+
+      const values = {
+
+        Titre:
+          title,
+
+        Description:
+          $("edit-description")
+            .value
+            .trim(),
+
+        Demandeur:
+          $("edit-demandeur")
+            .value
+            .trim(),
+
+        Contributeur:
+          contributorId,
+
+        Echeance:
+          inputToGristDate(
+            $("edit-echeance")
+              .value
+          ),
+
+        Priorite:
+          $("edit-priorite")
+            .value,
+
+        Commentaire:
+          $("edit-commentaire")
+            .value
+            .trim()
+      };
+
+
+      try {
+
+        $("save-edit-btn")
+          .disabled =
+          true;
+
+
+        await grist.docApi.applyUserActions([
+          [
+            "UpdateRecord",
+            "CONTRIBUTIONS",
+            Number(
+              record.id
+            ),
+            values
+          ]
+        ]);
+
+
+        showToast(
+          "✓ Contribution mise à jour"
+        );
+
+
+        exitEditMode();
+
+
+        await new Promise(
+          resolve =>
+            setTimeout(
+              resolve,
+              500
+            )
+        );
+
+
+        await loadContributions();
+
+      }
+      catch (error) {
+
+        console.error(
+          error
+        );
+
+
+        showToast(
+          "Impossible d'enregistrer les modifications."
+        );
+
+      }
+      finally {
+
+        $("save-edit-btn")
+          .disabled =
+          false;
+      }
+    }
+
+
+    /* =========================
+       RENDU GLOBAL
+       ========================= */
+
+
     function renderAll() {
 
       renderKpis();
+
 
       populateSelect(
         "department-filter",
@@ -1869,6 +3961,7 @@
         "Tous les départements"
       );
 
+
       populateSelect(
         "origin-filter",
         allRecords.map(
@@ -1878,8 +3971,14 @@
         "Tous les bureaux"
       );
 
+
       renderList();
     }
+
+
+    /* =========================
+       EVENEMENTS
+       ========================= */
 
 
     function bindEvents() {
@@ -1890,17 +3989,20 @@
           renderList
         );
 
+
       $("priority-filter")
         .addEventListener(
           "change",
           renderList
         );
 
+
       $("department-filter")
         .addEventListener(
           "change",
           renderList
         );
+
 
       $("origin-filter")
         .addEventListener(
@@ -1919,13 +4021,6 @@
             button.addEventListener(
               "click",
               () => {
-
-                /*
-                 * IMPORTANT V17 :
-                 * le clic sur un filtre rapide
-                 * remet tous les autres filtres
-                 * à zéro.
-                 */
 
                 resetSecondaryFilters();
 
@@ -1954,11 +4049,53 @@
 
 
                 renderList();
+
               }
             );
+
           }
         );
+
+
+      $("back-list-btn")
+        .addEventListener(
+          "click",
+          closeDetail
+        );
+
+
+      $("status-action-btn")
+        .addEventListener(
+          "click",
+          toggleStatus
+        );
+
+
+      $("edit-btn")
+        .addEventListener(
+          "click",
+          enterEditMode
+        );
+
+
+      $("cancel-edit-btn")
+        .addEventListener(
+          "click",
+          exitEditMode
+        );
+
+
+      $("save-edit-btn")
+        .addEventListener(
+          "click",
+          saveEdit
+        );
     }
+
+
+    /* =========================
+       INITIALISATION
+       ========================= */
 
 
     async function init() {
@@ -1968,15 +4105,22 @@
           "full"
       });
 
+
       bindEvents();
+
 
       await loadContributions();
 
+
       await identifyUser();
 
+
       grist.onRecords(
-        async () =>
-          await loadContributions()
+        async () => {
+
+          await loadContributions();
+
+        }
       );
     }
 
