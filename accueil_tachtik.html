@@ -41,7 +41,6 @@
     body {
       margin: 0;
       min-height: 100%;
-
       font-family:
         Inter,
         ui-sans-serif,
@@ -66,10 +65,6 @@
       margin: 0 auto;
     }
 
-    /* =========================================================
-       BANDEAU
-       ========================================================= */
-
     .hero {
       position: relative;
       overflow: hidden;
@@ -84,7 +79,6 @@
 
       color: white;
       border-radius: 24px;
-
       padding: 26px 28px;
 
       box-shadow:
@@ -146,11 +140,8 @@
 
     .brand-sub {
       margin-top: 2px;
-
       font-size: 12px;
-
-      color:
-        rgba(255, 255, 255, 0.72);
+      color: rgba(255, 255, 255, 0.72);
     }
 
     .hero-content {
@@ -158,28 +149,21 @@
       z-index: 1;
 
       display: flex;
-
-      justify-content:
-        space-between;
-
-      align-items:
-        flex-end;
+      justify-content: space-between;
+      align-items: flex-end;
 
       gap: 18px;
     }
 
     .welcome {
       margin: 0;
-
       max-width: 760px;
 
       font-size:
         clamp(25px, 4vw, 40px);
 
       line-height: 1.08;
-
-      letter-spacing:
-        -0.035em;
+      letter-spacing: -0.035em;
     }
 
     .intro {
@@ -191,13 +175,8 @@
         rgba(255, 255, 255, 0.78);
 
       font-size: 14px;
-
       line-height: 1.55;
     }
-
-    /* =========================================================
-       PROFIL
-       ========================================================= */
 
     .profile-box {
       min-width: 220px;
@@ -211,15 +190,11 @@
 
       border:
         1px solid rgba(255, 255, 255, 0.18);
-
-      backdrop-filter: blur(8px);
     }
 
     .profile-label {
       font-size: 10px;
-
       text-transform: uppercase;
-
       letter-spacing: 0.08em;
 
       color:
@@ -230,7 +205,6 @@
       margin-top: 5px;
 
       font-size: 14px;
-
       font-weight: 800;
     }
 
@@ -243,30 +217,20 @@
         rgba(255, 255, 255, 0.75);
     }
 
-    /* =========================================================
-       VUE D'ENSEMBLE
-       ========================================================= */
-
     .section-head {
       display: flex;
-
-      justify-content:
-        space-between;
-
-      align-items:
-        center;
+      justify-content: space-between;
+      align-items: center;
 
       gap: 16px;
 
-      margin:
-        24px 2px 12px;
+      margin: 24px 2px 12px;
     }
 
     .section-title {
       margin: 0;
 
       font-size: 16px;
-
       font-weight: 800;
     }
 
@@ -274,10 +238,6 @@
       font-size: 12px;
       color: var(--muted);
     }
-
-    /* =========================================================
-       KPI
-       ========================================================= */
 
     .kpis {
       display: grid;
@@ -342,7 +302,6 @@
       margin-top: 14px;
 
       font-size: 36px;
-
       line-height: 1;
 
       font-weight: 900;
@@ -358,7 +317,6 @@
       margin-top: 6px;
 
       font-size: 13px;
-
       font-weight: 800;
 
       color: #3f576b;
@@ -368,9 +326,7 @@
       margin-top: 3px;
 
       font-size: 11px;
-
-      color:
-        var(--muted);
+      color: var(--muted);
     }
 
     .todo {
@@ -393,15 +349,43 @@
       --soft: var(--violet-soft);
     }
 
-    /* =========================================================
-       PIED
-       ========================================================= */
+    .message {
+      display: none;
+
+      margin-top: 14px;
+
+      padding: 14px 16px;
+
+      border-radius: 14px;
+
+      font-size: 13px;
+    }
+
+    .message.success {
+      display: block;
+
+      background: #edf9f2;
+
+      border:
+        1px solid #b9e3ca;
+
+      color: #256a46;
+    }
+
+    .message.error {
+      display: block;
+
+      background: #fff1f3;
+
+      border:
+        1px solid #efbcc3;
+
+      color: #9a3441;
+    }
 
     .foot {
       display: flex;
-
-      justify-content:
-        space-between;
+      justify-content: space-between;
 
       gap: 14px;
 
@@ -440,26 +424,6 @@
 
       box-shadow:
         0 0 0 3px rgba(46,148,101,.12);
-    }
-
-    .message {
-      display: none;
-
-      margin-top: 14px;
-
-      padding:
-        14px 16px;
-
-      border-radius: 14px;
-
-      background: #fff7e9;
-
-      border:
-        1px solid #f2d8a6;
-
-      color: #805c1f;
-
-      font-size: 13px;
     }
 
     @media (max-width: 860px) {
@@ -721,28 +685,28 @@
       const box =
         $("message");
 
+      box.className =
+        "message error";
+
       box.textContent =
         text;
 
-      box.style.display =
-        "block";
-
     }
 
 
-    function hideError() {
+    function showSuccess(text) {
 
-      $("message").style.display =
-        "none";
+      const box =
+        $("message");
+
+      box.className =
+        "message success";
+
+      box.textContent =
+        text;
 
     }
 
-
-    /*
-      ==========================================================
-      KPI CONTRIBUTIONS
-      ==========================================================
-    */
 
     function renderContributions(records) {
 
@@ -819,12 +783,6 @@
 
     }
 
-
-    /*
-      ==========================================================
-      AFFICHAGE DU PROFIL
-      ==========================================================
-    */
 
     function renderProfile(profile) {
 
@@ -911,108 +869,144 @@
     }
 
 
-    /*
-      ==========================================================
-      IDENTIFICATION UTILISATEUR
+    function tableToRows(table) {
 
-      1. Création d'une ligne dans SESSION_WIDGET
-      2. Les formules de déclenchement Grist remplissent Email
-         et Horodatage.
-      3. Les formules classiques remplissent Nom / Role /
-         Service / Sous_direction / Departement.
-      4. On relit SESSION_WIDGET.
-      ==========================================================
-    */
+      if (!table || !Array.isArray(table.id)) {
+        return [];
+      }
+
+      const rows = [];
+
+      for (let i = 0; i < table.id.length; i++) {
+
+        rows.push({
+
+          id:
+            table.id[i],
+
+          Email:
+            table.Email
+              ? table.Email[i]
+              : "",
+
+          Nom:
+            table.Nom
+              ? table.Nom[i]
+              : "",
+
+          Role:
+            table.Role
+              ? table.Role[i]
+              : "",
+
+          Service:
+            table.Service
+              ? table.Service[i]
+              : "",
+
+          Sous_direction:
+            table.Sous_direction
+              ? table.Sous_direction[i]
+              : "",
+
+          Departement:
+            table.Departement
+              ? table.Departement[i]
+              : "",
+
+          Horodatage:
+            table.Horodatage
+              ? table.Horodatage[i]
+              : null
+
+        });
+
+      }
+
+      return rows;
+
+    }
+
 
     async function identifyUser() {
 
       /*
-        On crée une ligne vide.
-        Les formules de déclenchement Grist font le reste.
+        Création d'une ligne technique.
       */
 
-      const result =
-        await grist.docApi.applyUserActions([
-          [
-            "AddRecord",
-            "SESSION_WIDGET",
-            null,
-            {}
-          ]
-        ]);
+      await grist.docApi.applyUserActions([
+        [
+          "AddRecord",
+          "SESSION_WIDGET",
+          null,
+          {}
+        ]
+      ]);
 
 
       /*
-        Petit délai pour laisser Grist recalculer
-        les colonnes dépendantes.
+        Petit délai pour laisser les formules
+        de déclenchement et les formules classiques
+        se recalculer.
       */
 
       await new Promise(
         resolve =>
-          setTimeout(resolve, 250)
+          setTimeout(resolve, 500)
       );
 
 
-      const sessionRows =
+      /*
+        Lecture de SESSION_WIDGET.
+      */
+
+      const rawTable =
         await grist.docApi.fetchTable(
           "SESSION_WIDGET"
         );
 
 
-      if (
-        !Array.isArray(sessionRows)
-        ||
-        sessionRows.length === 0
-      ) {
+      const rows =
+        tableToRows(rawTable);
+
+
+      if (rows.length === 0) {
 
         throw new Error(
-          "Aucune session trouvée"
+          "SESSION_WIDGET ne contient aucune ligne lisible."
         );
 
       }
 
 
       /*
-        La ligne que nous venons de créer
-        est normalement la dernière.
+        On prend la dernière ligne créée.
       */
 
       const profile =
-        sessionRows[
-          sessionRows.length - 1
+        rows[
+          rows.length - 1
         ];
 
 
       renderProfile(profile);
 
+
+      showSuccess(
+        "Profil identifié avec succès."
+      );
+
     }
 
-
-    /*
-      ==========================================================
-      INITIALISATION
-      ==========================================================
-    */
 
     async function init() {
 
       try {
 
-        /*
-          Accès complet nécessaire :
-          lecture de plusieurs tables
-          + écriture dans SESSION_WIDGET.
-        */
-
         grist.ready({
           requiredAccess: "full"
         });
 
-
-        /*
-          KPI calculés à partir de la table
-          CONTRIBUTIONS sélectionnée dans le widget.
-        */
 
         grist.onRecords(
           records => {
@@ -1027,24 +1021,13 @@
 
               console.error(err);
 
-              showError(
-                "Impossible de calculer les indicateurs."
-              );
-
             }
 
           }
         );
 
 
-        /*
-          Identification de l'utilisateur.
-        */
-
         await identifyUser();
-
-
-        hideError();
 
       }
 
@@ -1058,8 +1041,12 @@
 
 
         showError(
-          "Tâchtik n'a pas pu identifier le profil utilisateur. " +
-          "Vérifiez l'accès complet du widget et la table SESSION_WIDGET."
+          "Tâchtik n'a pas pu lire le profil utilisateur : " +
+          (
+            err && err.message
+              ? err.message
+              : String(err)
+          )
         );
 
       }
