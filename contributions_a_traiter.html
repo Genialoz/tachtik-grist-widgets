@@ -1,233 +1,1990 @@
-function getFilteredRecords() {
+<!DOCTYPE html>
+<html lang="fr">
 
-  const search =
-    clean(
-      $("search").value
-    );
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  const priority =
-    clean(
-      $("priority-filter").value
-    );
+  <title>Tâchtik — À traiter & relances</title>
 
-  const department =
-    clean(
-      $("department-filter").value
-    );
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
 
-  const origin =
-    clean(
-      $("origin-filter").value
-    );
+  <style>
+    :root {
+      --ink: #15324b;
+      --muted: #6f8190;
+      --line: #e3ebf2;
+      --surface: #ffffff;
+      --page: #f5f8fb;
+
+      --blue: #2f6fdd;
+      --blue-soft: #eef4ff;
+
+      --red: #d94a59;
+      --red-soft: #fff1f3;
+
+      --orange: #df8f18;
+      --orange-soft: #fff6e8;
+
+      --violet: #7857d6;
+      --violet-soft: #f3efff;
+
+      --green: #2e9465;
+      --green-soft: #edf9f2;
+
+      --yellow: #c99b24;
+      --yellow-soft: #fff9e7;
+
+      --shadow:
+        0 10px 28px rgba(21, 50, 75, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+
+      color: var(--ink);
+      background: var(--page);
+    }
+
+    body {
+      padding: 20px;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .app {
+      width: min(1280px, 100%);
+      margin: 0 auto;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+
+      padding: 24px 26px;
+
+      color: white;
+
+      border-radius: 24px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #173d66 0%,
+          #245f9a 62%,
+          #2f6fdd 100%
+        );
+
+      box-shadow:
+        0 16px 40px rgba(23, 61, 102, 0.18);
+    }
+
+    .hero::after {
+      content: "";
+
+      position: absolute;
+
+      width: 260px;
+      height: 260px;
+
+      right: -80px;
+      top: -120px;
+
+      border-radius: 50%;
+
+      background:
+        rgba(255, 255, 255, 0.08);
+    }
+
+    .hero-top {
+      position: relative;
+      z-index: 1;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+
+      display: grid;
+      place-items: center;
+
+      border-radius: 14px;
+
+      background:
+        rgba(255, 255, 255, 0.16);
+
+      border:
+        1px solid rgba(255, 255, 255, 0.16);
+
+      font-size: 22px;
+    }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 850;
+    }
+
+    .brand-sub {
+      margin-top: 2px;
+
+      font-size: 11px;
+
+      color:
+        rgba(255, 255, 255, 0.72);
+    }
+
+    .home-link {
+      position: relative;
+      z-index: 2;
+
+      padding: 9px 13px;
+
+      color: white;
+      text-decoration: none;
+
+      border-radius: 11px;
+
+      background:
+        rgba(255, 255, 255, 0.13);
+
+      border:
+        1px solid rgba(255, 255, 255, 0.17);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+
+      margin-top: 25px;
+    }
+
+    .hero h1 {
+      margin: 0;
+
+      font-size:
+        clamp(26px, 4vw, 38px);
+    }
+
+    .hero p {
+      margin: 9px 0 0;
+
+      max-width: 720px;
+
+      color:
+        rgba(255, 255, 255, 0.76);
+
+      font-size: 13px;
+    }
+
+    .profile-debug {
+      display: inline-flex;
+
+      margin-top: 14px;
+
+      padding: 7px 11px;
+
+      border-radius: 10px;
+
+      background:
+        rgba(255, 255, 255, 0.13);
+
+      border:
+        1px solid rgba(255, 255, 255, 0.18);
+
+      font-size: 11px;
+      font-weight: 750;
+    }
+
+    .kpis {
+      display: grid;
+
+      grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+      gap: 13px;
+
+      margin-top: 18px;
+    }
+
+    .kpi {
+      position: relative;
+
+      padding: 16px 17px;
+
+      min-height: 112px;
+
+      border-radius: 18px;
+
+      background: white;
+
+      border:
+        1px solid var(--line);
+
+      box-shadow:
+        var(--shadow);
+    }
+
+    .kpi::before {
+      content: "";
+
+      position: absolute;
+
+      left: 0;
+      top: 0;
+      bottom: 0;
+
+      width: 5px;
+
+      background:
+        var(--accent);
+    }
+
+    .kpi-top {
+      display: flex;
+      align-items: center;
+
+      gap: 9px;
+
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .kpi-icon {
+      width: 33px;
+      height: 33px;
+
+      display: grid;
+      place-items: center;
+
+      border-radius: 10px;
+
+      background:
+        var(--soft);
+    }
+
+    .kpi-value {
+      margin-top: 11px;
+
+      font-size: 29px;
+      font-weight: 900;
+
+      color:
+        var(--accent);
+    }
+
+    .todo {
+      --accent: var(--blue);
+      --soft: var(--blue-soft);
+    }
+
+    .late {
+      --accent: var(--red);
+      --soft: var(--red-soft);
+    }
+
+    .remind {
+      --accent: var(--orange);
+      --soft: var(--orange-soft);
+    }
+
+    .urgent {
+      --accent: var(--violet);
+      --soft: var(--violet-soft);
+    }
+
+    .panel {
+      margin-top: 18px;
+
+      padding: 17px;
+
+      border-radius: 19px;
+
+      background: white;
+
+      border:
+        1px solid var(--line);
+
+      box-shadow:
+        var(--shadow);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+
+      gap: 10px;
+    }
+
+    .search {
+      flex: 1 1 300px;
+
+      padding: 11px 13px;
+
+      border:
+        1px solid #d9e4ed;
+
+      border-radius: 12px;
+    }
+
+    .select {
+      min-width: 155px;
+
+      padding: 11px 12px;
+
+      border:
+        1px solid #d9e4ed;
+
+      border-radius: 12px;
+    }
+
+    .quick-filters {
+      display: flex;
+      flex-wrap: wrap;
+
+      gap: 8px;
+
+      margin-top: 13px;
+    }
+
+    .filter-btn {
+      padding: 8px 12px;
+
+      border:
+        1px solid #dbe5ed;
+
+      border-radius: 999px;
+
+      background: white;
+
+      cursor: pointer;
+
+      font-size: 11px;
+      font-weight: 750;
+    }
+
+    .filter-btn.active {
+      color: white;
+
+      background: var(--blue);
+
+      border-color:
+        var(--blue);
+    }
+
+    .results-head {
+      display: flex;
+      justify-content: space-between;
+
+      margin:
+        20px 2px 10px;
+    }
+
+    .results-title {
+      font-size: 15px;
+      font-weight: 850;
+    }
+
+    .results-count {
+      color: var(--muted);
+
+      font-size: 11px;
+    }
+
+    .contribution-list {
+      display: grid;
+
+      gap: 10px;
+    }
+
+    .contribution {
+      display: grid;
+
+      grid-template-columns:
+        minmax(0, 1fr) auto;
+
+      gap: 16px;
+
+      padding: 17px 18px;
+
+      border-radius: 17px;
+
+      background: white;
+
+      border:
+        1px solid var(--line);
+    }
+
+    .number {
+      font-size: 11px;
+      font-weight: 850;
+
+      color: var(--blue);
+    }
+
+    .title {
+      margin-left: 8px;
+
+      font-size: 15px;
+      font-weight: 850;
+    }
+
+    .description {
+      margin-top: 7px;
+
+      color: var(--muted);
+
+      font-size: 12px;
+    }
+
+    .meta {
+      margin-top: 12px;
+
+      font-size: 11px;
+
+      color: #617688;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+
+      gap: 6px;
+
+      margin-top: 11px;
+    }
+
+    .badge {
+      padding: 4px 8px;
+
+      border-radius: 999px;
+
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .badge.red {
+      background: var(--red-soft);
+      color: #b23a49;
+    }
+
+    .badge.orange {
+      background: var(--orange-soft);
+      color: #a76912;
+    }
+
+    .badge.yellow {
+      background: var(--yellow-soft);
+      color: #8a6c16;
+    }
+
+    .badge.violet {
+      background: var(--violet-soft);
+      color: #6444bc;
+    }
+
+    .badge.green {
+      background: var(--green-soft);
+      color: #267b55;
+    }
+
+    .contribution-side {
+      min-width: 185px;
+
+      text-align: right;
+    }
+
+    .deadline-label {
+      font-size: 9px;
+
+      color: var(--muted);
+    }
+
+    .deadline-date {
+      margin-top: 3px;
+
+      font-weight: 850;
+    }
+
+    .deadline-days {
+      margin-top: 3px;
+
+      font-size: 10px;
+
+      color: var(--muted);
+    }
+
+    .reminder-btn {
+      margin-top: 16px;
+
+      padding: 9px 12px;
+
+      border:
+        1px solid #e1a13b;
+
+      border-radius: 11px;
+
+      background:
+        var(--orange-soft);
+
+      color: #9a620d;
+
+      font-size: 11px;
+      font-weight: 800;
+
+      cursor: pointer;
+    }
+
+    .empty {
+      padding: 40px;
+
+      text-align: center;
+
+      color: var(--muted);
+
+      background: white;
+
+      border:
+        1px dashed #cad8e3;
+
+      border-radius: 18px;
+    }
+
+    @media (max-width: 850px) {
+
+      .kpis {
+        grid-template-columns:
+          repeat(2, 1fr);
+      }
+
+      .contribution {
+        grid-template-columns:
+          1fr;
+      }
+
+      .contribution-side {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="app">
+
+    <section class="hero">
+
+      <div class="hero-top">
+
+        <div class="brand">
+
+          <div class="brand-mark">
+            ✓
+          </div>
+
+          <div>
+
+            <div class="brand-name">
+              TÂCHTIK
+            </div>
+
+            <div class="brand-sub">
+              Suivi des contributions de la DGRH
+            </div>
+
+          </div>
+
+        </div>
+
+        <a
+          class="home-link"
+          href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH"
+          target="_top"
+        >
+          ← Retour
+        </a>
+
+      </div>
+
+      <div class="hero-content">
+
+        <h1>
+          À traiter & relances
+        </h1>
+
+        <p>
+          Suivez les contributions en cours,
+          les échéances et les relances à effectuer.
+        </p>
+
+        <div
+          id="profile-debug"
+          class="profile-debug"
+        >
+          Identification…
+        </div>
+
+      </div>
+
+    </section>
+
+    <section class="kpis">
+
+      <article class="kpi todo">
+        <div class="kpi-top">
+          <span class="kpi-icon">📋</span>
+          À traiter
+        </div>
+
+        <div id="kpi-todo" class="kpi-value">
+          0
+        </div>
+      </article>
+
+      <article class="kpi late">
+        <div class="kpi-top">
+          <span class="kpi-icon">⏰</span>
+          En retard
+        </div>
+
+        <div id="kpi-late" class="kpi-value">
+          0
+        </div>
+      </article>
+
+      <article class="kpi remind">
+        <div class="kpi-top">
+          <span class="kpi-icon">🔔</span>
+          À relancer
+        </div>
+
+        <div id="kpi-remind" class="kpi-value">
+          0
+        </div>
+      </article>
+
+      <article class="kpi urgent">
+        <div class="kpi-top">
+          <span class="kpi-icon">⚡</span>
+          Urgentes
+        </div>
+
+        <div id="kpi-urgent" class="kpi-value">
+          0
+        </div>
+      </article>
+
+    </section>
+
+    <section class="panel">
+
+      <div class="toolbar">
+
+        <input
+          id="search"
+          class="search"
+          type="search"
+          placeholder="🔎 Rechercher..."
+        >
+
+        <select
+          id="priority-filter"
+          class="select"
+        >
+          <option value="">
+            Toutes les priorités
+          </option>
+
+          <option value="normale">
+            Normale
+          </option>
+
+          <option value="haute">
+            Haute
+          </option>
+
+          <option value="urgente">
+            Urgente
+          </option>
+        </select>
+
+        <select
+          id="department-filter"
+          class="select"
+        >
+          <option value="">
+            Tous les départements
+          </option>
+        </select>
+
+        <select
+          id="origin-filter"
+          class="select"
+        >
+          <option value="">
+            Tous les bureaux
+          </option>
+        </select>
+
+      </div>
+
+      <div class="quick-filters">
+
+        <button class="filter-btn active" data-filter="all">
+          Toutes
+        </button>
+
+        <button class="filter-btn" data-filter="late">
+          🔴 En retard
+        </button>
+
+        <button class="filter-btn" data-filter="close">
+          🟠 Échéance proche
+        </button>
+
+        <button class="filter-btn" data-filter="watch">
+          🟡 À surveiller
+        </button>
+
+        <button class="filter-btn" data-filter="remind">
+          🔔 À relancer
+        </button>
+
+        <button class="filter-btn" data-filter="urgent">
+          ⚡ Urgentes
+        </button>
+
+        <button class="filter-btn" data-filter="week">
+          📅 Cette semaine
+        </button>
+
+      </div>
+
+    </section>
+
+    <div class="results-head">
+
+      <div class="results-title">
+        Contributions
+      </div>
+
+      <div
+        id="results-count"
+        class="results-count"
+      >
+        0 contribution
+      </div>
+
+    </div>
+
+    <section
+      id="contribution-list"
+      class="contribution-list"
+    ></section>
+
+  </main>
+
+  <script>
+
+    const $ = id =>
+      document.getElementById(id);
 
 
-  /*
-   * V16
-   *
-   * "Toutes" = contributions À faire.
-   *
-   * Les filtres rapides utilisent toutes les contributions
-   * afin d'être strictement cohérents avec les KPI.
-   */
+    let allRecords =
+      [];
 
-  let records =
-    [...allRecords];
+    let quickFilter =
+      "all";
+
+    let canRecordReminder =
+      false;
 
 
-  if (
-    quickFilter === "all"
-  ) {
+    function clean(value) {
 
-    records =
-      records.filter(
-        isTodo
+      return String(
+        value == null
+          ? ""
+          : value
+      )
+      .trim()
+      .toLowerCase();
+    }
+
+
+    function text(value) {
+
+      return String(
+        value == null
+          ? ""
+          : value
       );
-  }
+    }
 
-  else if (
-    quickFilter === "late"
-  ) {
 
-    records =
-      records.filter(
-        isLate
+    function escapeHtml(value) {
+
+      return text(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+
+    function tableToRows(table) {
+
+      if (!table) {
+        return [];
+      }
+
+      const ids =
+        table.id || [];
+
+      return ids.map(
+        (id, index) => {
+
+          const row = {
+            id
+          };
+
+          for (
+            const column
+            of Object.keys(table)
+          ) {
+
+            if (
+              column === "id"
+            ) {
+              continue;
+            }
+
+            row[column] =
+              table[column][index];
+          }
+
+          return row;
+        }
       );
-  }
-
-  else if (
-    quickFilter === "close"
-  ) {
-
-    records =
-      records.filter(
-        isClose
-      );
-  }
-
-  else if (
-    quickFilter === "watch"
-  ) {
-
-    records =
-      records.filter(
-        isWatch
-      );
-  }
-
-  else if (
-    quickFilter === "remind"
-  ) {
-
-    records =
-      records.filter(
-        needsReminder
-      );
-  }
-
-  else if (
-    quickFilter === "urgent"
-  ) {
-
-    records =
-      records.filter(
-        isUrgent
-      );
-  }
-
-  else if (
-    quickFilter === "week"
-  ) {
-
-    records =
-      records.filter(
-        isThisWeek
-      );
-  }
+    }
 
 
-  records =
-    records.filter(
-      record => {
+    function makeCodeMap(rows) {
 
-        if (!search) {
-          return true;
+      const map =
+        new Map();
+
+      for (
+        const row
+        of rows
+      ) {
+
+        map.set(
+          Number(row.id),
+          text(row.Code)
+        );
+      }
+
+      return map;
+    }
+
+
+    async function identifyUser() {
+
+      try {
+
+        const before =
+          tableToRows(
+            await grist.docApi.fetchTable(
+              "SESSION_WIDGET"
+            )
+          );
+
+        const ids =
+          new Set(
+            before.map(
+              row =>
+                Number(row.id)
+            )
+          );
+
+        await grist.docApi.applyUserActions([
+          [
+            "AddRecord",
+            "SESSION_WIDGET",
+            null,
+            {}
+          ]
+        ]);
+
+        await new Promise(
+          resolve =>
+            setTimeout(
+              resolve,
+              800
+            )
+        );
+
+        const after =
+          tableToRows(
+            await grist.docApi.fetchTable(
+              "SESSION_WIDGET"
+            )
+          );
+
+        const rows =
+          after.filter(
+            row =>
+              !ids.has(
+                Number(row.id)
+              )
+          );
+
+        rows.sort(
+          (a, b) =>
+            Number(b.id)
+            -
+            Number(a.id)
+        );
+
+        const profile =
+          rows[0];
+
+        if (!profile) {
+          throw new Error(
+            "Profil absent"
+          );
         }
 
-        const haystack =
-          [
-            record.Numero,
-            record.Titre,
-            record.Description,
-            record.Demandeur,
-            record.Contributeur,
-            record.Bureau_origine
-          ]
-          .map(clean)
-          .join(" ");
+        const role =
+          text(
+            profile.Role
+          );
 
-        return haystack
-          .includes(
-            search
+        const normalized =
+          clean(role);
+
+        canRecordReminder =
+          normalized.startsWith(
+            "admin"
+          )
+          ||
+          normalized ===
+            "gestionnaire e1";
+
+        $("profile-debug")
+          .textContent =
+          "👤 "
+          +
+          role;
+
+        await grist.docApi.applyUserActions([
+          [
+            "BulkRemoveRecord",
+            "SESSION_WIDGET",
+            [
+              Number(
+                profile.id
+              )
+            ]
+          ]
+        ]);
+
+      }
+      catch (error) {
+
+        console.error(
+          error
+        );
+
+        $("profile-debug")
+          .textContent =
+          "⚠ Profil non identifié";
+      }
+
+      renderAll();
+    }
+
+
+    async function loadContributions() {
+
+      const [
+        contributionTable,
+        departmentTable,
+        bureauTable
+      ] =
+        await Promise.all([
+          grist.docApi.fetchTable(
+            "CONTRIBUTIONS"
+          ),
+
+          grist.docApi.fetchTable(
+            "DEPARTEMENTS"
+          ),
+
+          grist.docApi.fetchTable(
+            "BUREAUX_ORIGINE"
+          )
+        ]);
+
+      const departments =
+        makeCodeMap(
+          tableToRows(
+            departmentTable
+          )
+        );
+
+      const bureaux =
+        makeCodeMap(
+          tableToRows(
+            bureauTable
+          )
+        );
+
+      allRecords =
+        tableToRows(
+          contributionTable
+        )
+        .map(
+          row => {
+
+            const result = {
+              ...row
+            };
+
+            if (
+              Number(
+                row.Contributeur
+              )
+            ) {
+
+              result.Contributeur =
+                departments.get(
+                  Number(
+                    row.Contributeur
+                  )
+                )
+                || "";
+            }
+
+            if (
+              Number(
+                row.Bureau_origine
+              )
+            ) {
+
+              result.Bureau_origine =
+                bureaux.get(
+                  Number(
+                    row.Bureau_origine
+                  )
+                )
+                || "";
+            }
+
+            return result;
+          }
+        );
+
+      renderAll();
+    }
+
+
+    function isTodo(record) {
+
+      const status =
+        clean(
+          record.Statut
+        );
+
+      return (
+        status === "à faire"
+        ||
+        status === "a faire"
+      );
+    }
+
+
+    function isLate(record) {
+
+      return clean(
+        record.Alerte
+      )
+      .includes(
+        "retard"
+      );
+    }
+
+
+    function isClose(record) {
+
+      const value =
+        clean(
+          record.Alerte
+        );
+
+      return (
+        value.includes(
+          "échéance proche"
+        )
+        ||
+        value.includes(
+          "echeance proche"
+        )
+      );
+    }
+
+
+    function isWatch(record) {
+
+      return clean(
+        record.Alerte
+      )
+      .includes(
+        "surveiller"
+      );
+    }
+
+
+    function needsReminder(record) {
+
+      return clean(
+        record.Rappel_a_faire
+      )
+      .includes(
+        "relancer"
+      );
+    }
+
+
+    function isUrgent(record) {
+
+      return clean(
+        record.Priorite
+      )
+      ===
+      "urgente";
+    }
+
+
+    function renderKpis() {
+
+      $("kpi-todo")
+        .textContent =
+        allRecords
+          .filter(
+            isTodo
+          )
+          .length;
+
+      $("kpi-late")
+        .textContent =
+        allRecords
+          .filter(
+            isLate
+          )
+          .length;
+
+      $("kpi-remind")
+        .textContent =
+        allRecords
+          .filter(
+            needsReminder
+          )
+          .length;
+
+      $("kpi-urgent")
+        .textContent =
+        allRecords
+          .filter(
+            isUrgent
+          )
+          .length;
+    }
+
+
+    function dateValue(value) {
+
+      if (!value) {
+        return null;
+      }
+
+      if (
+        typeof value ===
+        "number"
+      ) {
+
+        return new Date(
+          value * 1000
+        );
+      }
+
+      return new Date(
+        value
+      );
+    }
+
+
+    function formatDate(value) {
+
+      const date =
+        dateValue(value);
+
+      if (!date) {
+        return "";
+      }
+
+      return new Intl.DateTimeFormat(
+        "fr-FR"
+      )
+      .format(date);
+    }
+
+
+    function isThisWeek(record) {
+
+      const date =
+        dateValue(
+          record.Echeance
+        );
+
+      if (!date) {
+        return false;
+      }
+
+      const now =
+        new Date();
+
+      const monday =
+        new Date(now);
+
+      const day =
+        now.getDay() || 7;
+
+      monday.setDate(
+        now.getDate()
+        -
+        day
+        +
+        1
+      );
+
+      monday.setHours(
+        0,
+        0,
+        0,
+        0
+      );
+
+      const sunday =
+        new Date(monday);
+
+      sunday.setDate(
+        monday.getDate()
+        +
+        6
+      );
+
+      sunday.setHours(
+        23,
+        59,
+        59,
+        999
+      );
+
+      return (
+        date >= monday
+        &&
+        date <= sunday
+      );
+    }
+
+
+    function resetSecondaryFilters() {
+
+      $("search").value =
+        "";
+
+      $("priority-filter").value =
+        "";
+
+      $("department-filter").value =
+        "";
+
+      $("origin-filter").value =
+        "";
+    }
+
+
+    function getFilteredRecords() {
+
+      let records =
+        [...allRecords];
+
+
+      /*
+       * V17 :
+       * chaque filtre rapide utilise
+       * exactement la même population
+       * que son KPI.
+       */
+
+      if (
+        quickFilter === "all"
+      ) {
+
+        records =
+          records.filter(
+            isTodo
           );
       }
-    );
+
+      else if (
+        quickFilter === "late"
+      ) {
+
+        records =
+          records.filter(
+            isLate
+          );
+      }
+
+      else if (
+        quickFilter === "close"
+      ) {
+
+        records =
+          records.filter(
+            isClose
+          );
+      }
+
+      else if (
+        quickFilter === "watch"
+      ) {
+
+        records =
+          records.filter(
+            isWatch
+          );
+      }
+
+      else if (
+        quickFilter === "remind"
+      ) {
+
+        records =
+          records.filter(
+            needsReminder
+          );
+      }
+
+      else if (
+        quickFilter === "urgent"
+      ) {
+
+        records =
+          records.filter(
+            isUrgent
+          );
+      }
+
+      else if (
+        quickFilter === "week"
+      ) {
+
+        records =
+          records.filter(
+            isThisWeek
+          );
+      }
 
 
-  records =
-    records.filter(
-      record => {
+      /*
+       * Les filtres secondaires
+       * ne s'appliquent qu'après.
+       */
 
-        if (!priority) {
-          return true;
-        }
+      const search =
+        clean(
+          $("search").value
+        );
 
-        return (
-          clean(
-            record.Priorite
+      const priority =
+        clean(
+          $("priority-filter").value
+        );
+
+      const department =
+        clean(
+          $("department-filter").value
+        );
+
+      const origin =
+        clean(
+          $("origin-filter").value
+        );
+
+
+      if (search) {
+
+        records =
+          records.filter(
+            record =>
+              [
+                record.Numero,
+                record.Titre,
+                record.Description,
+                record.Demandeur,
+                record.Contributeur,
+                record.Bureau_origine
+              ]
+              .map(clean)
+              .join(" ")
+              .includes(
+                search
+              )
+          );
+      }
+
+
+      if (priority) {
+
+        records =
+          records.filter(
+            record =>
+              clean(
+                record.Priorite
+              )
+              ===
+              priority
+          );
+      }
+
+
+      if (department) {
+
+        records =
+          records.filter(
+            record =>
+              clean(
+                record.Contributeur
+              )
+              ===
+              department
+          );
+      }
+
+
+      if (origin) {
+
+        records =
+          records.filter(
+            record =>
+              clean(
+                record.Bureau_origine
+              )
+              ===
+              origin
+          );
+      }
+
+
+      return records;
+    }
+
+
+    function populateSelect(
+      id,
+      values,
+      label
+    ) {
+
+      const select =
+        $(id);
+
+      const current =
+        select.value;
+
+      const unique =
+        [
+          ...new Set(
+            values.filter(
+              Boolean
+            )
           )
-          ===
-          priority
+        ]
+        .sort();
+
+      select.innerHTML =
+        `<option value="">${label}</option>`;
+
+      for (
+        const value
+        of unique
+      ) {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value =
+          clean(value);
+
+        option.textContent =
+          value;
+
+        select.appendChild(
+          option
         );
       }
-    );
+
+      select.value =
+        current;
+    }
 
 
-  records =
-    records.filter(
-      record => {
+    function alertBadge(record) {
 
-        if (!department) {
-          return true;
-        }
-
-        return (
-          clean(
-            record.Contributeur
-          )
-          ===
-          department
+      const value =
+        text(
+          record.Alerte
         );
+
+      const normal =
+        clean(value);
+
+      let css =
+        "green";
+
+      if (
+        normal.includes(
+          "retard"
+        )
+      ) {
+        css =
+          "red";
       }
-    );
 
-
-  records =
-    records.filter(
-      record => {
-
-        if (!origin) {
-          return true;
-        }
-
-        return (
-          clean(
-            record.Bureau_origine
-          )
-          ===
-          origin
-        );
+      else if (
+        normal.includes(
+          "proche"
+        )
+      ) {
+        css =
+          "orange";
       }
-    );
+
+      else if (
+        normal.includes(
+          "surveiller"
+        )
+      ) {
+        css =
+          "yellow";
+      }
+
+      return value
+        ? `<span class="badge ${css}">${escapeHtml(value)}</span>`
+        : "";
+    }
 
 
-  records.sort(
-    (a, b) => {
+    function reminderBadge(record) {
 
-      const da =
-        dateValue(
-          a.Echeance
+      return needsReminder(
+        record
+      )
+        ? `<span class="badge orange">🔔 À relancer</span>`
+        : "";
+    }
+
+
+    function priorityBadge(record) {
+
+      const priority =
+        text(
+          record.Priorite
         );
 
-      const db =
-        dateValue(
-          b.Echeance
+      if (!priority) {
+        return "";
+      }
+
+      let css =
+        "green";
+
+      if (
+        clean(priority)
+        ===
+        "urgente"
+      ) {
+        css =
+          "violet";
+      }
+
+      else if (
+        clean(priority)
+        ===
+        "haute"
+      ) {
+        css =
+          "orange";
+      }
+
+      return `
+        <span class="badge ${css}">
+          Priorité ${escapeHtml(priority)}
+        </span>
+      `;
+    }
+
+
+    function reminderButton(record) {
+
+      if (
+        !canRecordReminder
+        ||
+        !needsReminder(
+          record
+        )
+      ) {
+
+        return "";
+      }
+
+      return `
+        <button
+          class="reminder-btn"
+          data-id="${Number(record.id)}"
+        >
+          🔔 Rappel effectué
+        </button>
+      `;
+    }
+
+
+    function todayGristDate() {
+
+      const now =
+        new Date();
+
+      return Date.UTC(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate()
+      ) / 1000;
+    }
+
+
+    async function recordReminder(
+      id
+    ) {
+
+      await grist.docApi.applyUserActions([
+        [
+          "UpdateRecord",
+          "CONTRIBUTIONS",
+          Number(id),
+          {
+            Dernier_rappel:
+              todayGristDate()
+          }
+        ]
+      ]);
+
+      await new Promise(
+        resolve =>
+          setTimeout(
+            resolve,
+            700
+          )
+      );
+
+      await loadContributions();
+    }
+
+
+    function renderList() {
+
+      const records =
+        getFilteredRecords();
+
+      $("results-count")
+        .textContent =
+        records.length
+        +
+        (
+          records.length > 1
+            ? " contributions"
+            : " contribution"
         );
 
 
       if (
-        !da
-        &&
-        !db
+        records.length === 0
       ) {
-        return 0;
+
+        $("contribution-list")
+          .innerHTML =
+          `
+            <div class="empty">
+              Aucune contribution trouvée.
+            </div>
+          `;
+
+        return;
       }
 
-      if (!da) {
-        return 1;
-      }
 
-      if (!db) {
-        return -1;
-      }
+      $("contribution-list")
+        .innerHTML =
+        records.map(
+          record => `
+            <article class="contribution">
 
-      return (
-        da.getTime()
-        -
-        db.getTime()
+              <div>
+
+                <div>
+                  <span class="number">
+                    ${escapeHtml(record.Numero)}
+                  </span>
+
+                  <span class="title">
+                    ${escapeHtml(record.Titre)}
+                  </span>
+                </div>
+
+                <div class="description">
+                  ${escapeHtml(record.Description)}
+                </div>
+
+                <div class="meta">
+                  👤 ${escapeHtml(record.Contributeur)}
+                  &nbsp;&nbsp;
+                  🏢 ${escapeHtml(record.Bureau_origine)}
+                </div>
+
+                <div class="badges">
+                  ${alertBadge(record)}
+                  ${reminderBadge(record)}
+                  ${priorityBadge(record)}
+                </div>
+
+              </div>
+
+              <div class="contribution-side">
+
+                <div class="deadline-label">
+                  Échéance
+                </div>
+
+                <div class="deadline-date">
+                  ${formatDate(record.Echeance)}
+                </div>
+
+                <div class="deadline-days">
+                  ${
+                    record.Jours_restants
+                    == null
+                      ? ""
+                      : record.Jours_restants
+                        + " jour(s)"
+                  }
+                </div>
+
+                ${reminderButton(record)}
+
+              </div>
+
+            </article>
+          `
+        )
+        .join("");
+
+
+      document
+        .querySelectorAll(
+          ".reminder-btn"
+        )
+        .forEach(
+          button => {
+
+            button.addEventListener(
+              "click",
+              () =>
+                recordReminder(
+                  button.dataset.id
+                )
+            );
+          }
+        );
+    }
+
+
+    function renderAll() {
+
+      renderKpis();
+
+      populateSelect(
+        "department-filter",
+        allRecords.map(
+          record =>
+            record.Contributeur
+        ),
+        "Tous les départements"
+      );
+
+      populateSelect(
+        "origin-filter",
+        allRecords.map(
+          record =>
+            record.Bureau_origine
+        ),
+        "Tous les bureaux"
+      );
+
+      renderList();
+    }
+
+
+    function bindEvents() {
+
+      $("search")
+        .addEventListener(
+          "input",
+          renderList
+        );
+
+      $("priority-filter")
+        .addEventListener(
+          "change",
+          renderList
+        );
+
+      $("department-filter")
+        .addEventListener(
+          "change",
+          renderList
+        );
+
+      $("origin-filter")
+        .addEventListener(
+          "change",
+          renderList
+        );
+
+
+      document
+        .querySelectorAll(
+          ".filter-btn"
+        )
+        .forEach(
+          button => {
+
+            button.addEventListener(
+              "click",
+              () => {
+
+                /*
+                 * IMPORTANT V17 :
+                 * le clic sur un filtre rapide
+                 * remet tous les autres filtres
+                 * à zéro.
+                 */
+
+                resetSecondaryFilters();
+
+
+                quickFilter =
+                  button.dataset.filter;
+
+
+                document
+                  .querySelectorAll(
+                    ".filter-btn"
+                  )
+                  .forEach(
+                    item =>
+                      item.classList
+                        .remove(
+                          "active"
+                        )
+                  );
+
+
+                button.classList
+                  .add(
+                    "active"
+                  );
+
+
+                renderList();
+              }
+            );
+          }
+        );
+    }
+
+
+    async function init() {
+
+      grist.ready({
+        requiredAccess:
+          "full"
+      });
+
+      bindEvents();
+
+      await loadContributions();
+
+      await identifyUser();
+
+      grist.onRecords(
+        async () =>
+          await loadContributions()
       );
     }
-  );
 
 
-  return records;
-}
+    init();
+
+  </script>
+
+</body>
+
+</html>
