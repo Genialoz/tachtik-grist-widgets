@@ -2,8 +2,8 @@
 <html lang="fr">
 
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>Tâchtik — Accueil</title>
 
@@ -42,7 +42,6 @@
     body {
       margin: 0;
       min-height: 100%;
-
       font-family:
         Inter,
         ui-sans-serif,
@@ -67,9 +66,9 @@
       margin: 0 auto;
     }
 
-    /* =========================================================
+    /* ===========================
        BANDEAU
-       ========================================================= */
+       =========================== */
 
     .hero {
       position: relative;
@@ -86,7 +85,6 @@
       color: white;
 
       border-radius: 24px;
-
       padding: 26px 28px;
 
       box-shadow:
@@ -109,10 +107,6 @@
       background:
         rgba(255, 255, 255, 0.08);
     }
-
-    /* =========================================================
-       MARQUE
-       ========================================================= */
 
     .brand {
       position: relative;
@@ -147,7 +141,6 @@
     .brand-name {
       font-size: 21px;
       font-weight: 850;
-
       letter-spacing: 0.02em;
     }
 
@@ -160,10 +153,6 @@
         rgba(255, 255, 255, 0.72);
     }
 
-    /* =========================================================
-       BIENVENUE
-       ========================================================= */
-
     .hero-content {
       position: relative;
       z-index: 1;
@@ -171,7 +160,6 @@
       display: flex;
 
       justify-content: space-between;
-
       align-items: flex-end;
 
       gap: 18px;
@@ -186,41 +174,31 @@
         clamp(25px, 4vw, 40px);
 
       line-height: 1.08;
-
-      letter-spacing:
-        -0.035em;
+      letter-spacing: -0.035em;
     }
 
     .intro {
-      margin:
-        10px 0 0;
+      margin: 10px 0 0;
 
-      max-width:
-        720px;
+      max-width: 720px;
 
       color:
         rgba(255, 255, 255, 0.78);
 
-      font-size:
-        14px;
-
-      line-height:
-        1.55;
+      font-size: 14px;
+      line-height: 1.55;
     }
 
-    /* =========================================================
+    /* ===========================
        PROFIL
-       ========================================================= */
+       =========================== */
 
     .profile-box {
-      min-width:
-        220px;
+      min-width: 220px;
 
-      padding:
-        14px 16px;
+      padding: 14px 16px;
 
-      border-radius:
-        18px;
+      border-radius: 18px;
 
       background:
         rgba(255, 255, 255, 0.13);
@@ -230,114 +208,83 @@
     }
 
     .profile-label {
-      font-size:
-        10px;
+      font-size: 10px;
 
-      text-transform:
-        uppercase;
-
-      letter-spacing:
-        0.08em;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
 
       color:
         rgba(255, 255, 255, 0.62);
     }
 
     .profile-role {
-      margin-top:
-        5px;
+      margin-top: 5px;
 
-      font-size:
-        14px;
-
-      font-weight:
-        800;
+      font-size: 14px;
+      font-weight: 800;
     }
 
     .profile-scope {
-      margin-top:
-        4px;
+      margin-top: 4px;
 
-      font-size:
-        11px;
+      font-size: 11px;
 
       color:
         rgba(255, 255, 255, 0.75);
     }
 
-    /* =========================================================
-       TITRE
-       ========================================================= */
+    /* ===========================
+       SECTIONS
+       =========================== */
 
     .section-head {
-      display:
-        flex;
+      display: flex;
 
-      justify-content:
-        space-between;
+      justify-content: space-between;
+      align-items: center;
 
-      align-items:
-        center;
+      gap: 16px;
 
-      gap:
-        16px;
-
-      margin:
-        24px 2px 12px;
+      margin: 24px 2px 12px;
     }
 
     .section-title {
-      margin:
-        0;
+      margin: 0;
 
-      font-size:
-        16px;
-
-      font-weight:
-        800;
+      font-size: 16px;
+      font-weight: 800;
     }
 
     .section-note {
-      font-size:
-        12px;
+      font-size: 12px;
 
-      color:
-        var(--muted);
+      color: var(--muted);
     }
 
-    /* =========================================================
+    /* ===========================
        KPI
-       ========================================================= */
+       =========================== */
 
     .kpis {
-      display:
-        grid;
+      display: grid;
 
       grid-template-columns:
         repeat(4, minmax(0, 1fr));
 
-      gap:
-        14px;
+      gap: 14px;
     }
 
     .kpi {
-      position:
-        relative;
+      position: relative;
+      overflow: hidden;
 
-      overflow:
-        hidden;
+      min-height: 136px;
 
-      min-height:
-        136px;
+      padding: 18px;
 
-      padding:
-        18px;
+      border-radius: 19px;
 
-      border-radius:
-        19px;
-
-      background:
-        var(--surface);
+      background: var(--surface);
 
       border:
         1px solid var(--line);
@@ -347,180 +294,138 @@
     }
 
     .kpi::before {
-      content:
-        "";
+      content: "";
 
-      position:
-        absolute;
+      position: absolute;
 
-      left:
-        0;
+      left: 0;
+      top: 0;
+      bottom: 0;
 
-      top:
-        0;
-
-      bottom:
-        0;
-
-      width:
-        5px;
+      width: 5px;
 
       background:
         var(--accent);
     }
 
     .kpi-icon {
-      width:
-        42px;
+      width: 42px;
+      height: 42px;
 
-      height:
-        42px;
+      display: grid;
+      place-items: center;
 
-      display:
-        grid;
-
-      place-items:
-        center;
-
-      border-radius:
-        13px;
+      border-radius: 13px;
 
       background:
         var(--soft);
 
-      font-size:
-        20px;
+      font-size: 20px;
     }
 
     .kpi-value {
-      margin-top:
-        14px;
+      margin-top: 14px;
 
-      font-size:
-        36px;
+      font-size: 36px;
 
-      line-height:
-        1;
+      line-height: 1;
 
-      font-weight:
-        900;
+      font-weight: 900;
 
-      letter-spacing:
-        -0.04em;
+      letter-spacing: -0.04em;
 
       color:
         var(--accent);
     }
 
     .kpi-label {
-      margin-top:
-        6px;
+      margin-top: 6px;
 
-      font-size:
-        13px;
+      font-size: 13px;
+      font-weight: 800;
 
-      font-weight:
-        800;
-
-      color:
-        #3f576b;
+      color: #3f576b;
     }
 
     .kpi-sub {
-      margin-top:
-        3px;
+      margin-top: 3px;
 
-      font-size:
-        11px;
+      font-size: 11px;
 
       color:
         var(--muted);
     }
 
     .todo {
-      --accent:
-        var(--blue);
-
-      --soft:
-        var(--blue-soft);
+      --accent: var(--blue);
+      --soft: var(--blue-soft);
     }
 
     .late {
-      --accent:
-        var(--red);
-
-      --soft:
-        var(--red-soft);
+      --accent: var(--red);
+      --soft: var(--red-soft);
     }
 
     .remind {
-      --accent:
-        var(--orange);
-
-      --soft:
-        var(--orange-soft);
+      --accent: var(--orange);
+      --soft: var(--orange-soft);
     }
 
     .urgent {
-      --accent:
-        var(--violet);
-
-      --soft:
-        var(--violet-soft);
+      --accent: var(--violet);
+      --soft: var(--violet-soft);
     }
 
-    /* =========================================================
-       MESSAGE
-       ========================================================= */
+    /* ===========================
+       MESSAGES
+       =========================== */
 
     .message {
-      display:
-        none;
+      display: none;
 
-      margin-top:
-        14px;
+      margin-top: 14px;
 
-      padding:
-        14px 16px;
+      padding: 14px 16px;
 
-      border-radius:
-        14px;
+      border-radius: 14px;
 
-      background:
-        #fff1f3;
+      font-size: 13px;
+    }
+
+    .message-error {
+      background: #fff1f3;
 
       border:
         1px solid #efbcc3;
 
-      color:
-        #9a3441;
-
-      font-size:
-        13px;
+      color: #9a3441;
     }
 
-    /* =========================================================
+    .message-success {
+      background: #eefaf4;
+
+      border:
+        1px solid #b9e2cc;
+
+      color: #276947;
+    }
+
+    /* ===========================
        PIED
-       ========================================================= */
+       =========================== */
 
     .foot {
-      display:
-        flex;
+      display: flex;
 
-      justify-content:
-        space-between;
+      justify-content: space-between;
 
-      gap:
-        14px;
+      gap: 14px;
 
-      margin-top:
-        16px;
+      margin-top: 16px;
 
-      padding:
-        14px 16px;
+      padding: 14px 16px;
 
-      border-radius:
-        16px;
+      border-radius: 16px;
 
       background:
         rgba(255, 255, 255, 0.72);
@@ -531,41 +436,33 @@
       color:
         var(--muted);
 
-      font-size:
-        11px;
+      font-size: 11px;
     }
 
     .status {
-      display:
-        inline-flex;
+      display: inline-flex;
 
-      align-items:
-        center;
+      align-items: center;
 
-      gap:
-        7px;
+      gap: 7px;
     }
 
     .dot {
-      width:
-        8px;
+      width: 8px;
+      height: 8px;
 
-      height:
-        8px;
-
-      border-radius:
-        50%;
+      border-radius: 50%;
 
       background:
         var(--green);
 
       box-shadow:
-        0 0 0 3px rgba(46,148,101,.12);
+        0 0 0 3px rgba(46, 148, 101, 0.12);
     }
 
-    /* =========================================================
+    /* ===========================
        RESPONSIVE
-       ========================================================= */
+       =========================== */
 
     @media (max-width: 860px) {
 
@@ -575,16 +472,12 @@
       }
 
       .hero-content {
-        align-items:
-          flex-start;
-
-        flex-direction:
-          column;
+        align-items: flex-start;
+        flex-direction: column;
       }
 
       .profile-box {
-        width:
-          100%;
+        width: 100%;
       }
 
     }
@@ -592,40 +485,29 @@
     @media (max-width: 520px) {
 
       body {
-        padding:
-          10px;
+        padding: 10px;
       }
 
       .hero {
-        border-radius:
-          18px;
-
-        padding:
-          20px;
+        border-radius: 18px;
+        padding: 20px;
       }
 
       .kpis {
-        grid-template-columns:
-          1fr;
+        grid-template-columns: 1fr;
       }
 
       .foot {
-        flex-direction:
-          column;
+        flex-direction: column;
       }
 
     }
-
   </style>
 </head>
 
 <body>
 
   <main class="app">
-
-    <!-- ======================================================
-         BANDEAU
-         ====================================================== -->
 
     <section class="hero">
 
@@ -683,8 +565,7 @@
           <div
             id="profile-scope"
             class="profile-scope"
-          >
-          </div>
+          ></div>
 
         </div>
 
@@ -692,9 +573,6 @@
 
     </section>
 
-    <!-- ======================================================
-         VUE D'ENSEMBLE
-         ====================================================== -->
 
     <div class="section-head">
 
@@ -708,9 +586,6 @@
 
     </div>
 
-    <!-- ======================================================
-         KPI
-         ====================================================== -->
 
     <section class="kpis">
 
@@ -737,6 +612,7 @@
 
       </article>
 
+
       <article class="kpi late">
 
         <div class="kpi-icon">
@@ -760,6 +636,7 @@
 
       </article>
 
+
       <article class="kpi remind">
 
         <div class="kpi-icon">
@@ -782,6 +659,7 @@
         </div>
 
       </article>
+
 
       <article class="kpi urgent">
 
@@ -808,19 +686,12 @@
 
     </section>
 
-    <!-- ======================================================
-         MESSAGE D'ERREUR
-         ====================================================== -->
 
     <div
       id="message"
       class="message"
-    >
-    </div>
+    ></div>
 
-    <!-- ======================================================
-         PIED
-         ====================================================== -->
 
     <div class="foot">
 
@@ -839,6 +710,7 @@
     </div>
 
   </main>
+
 
   <script>
 
@@ -861,6 +733,9 @@
       const box =
         $("message");
 
+      box.className =
+        "message message-error";
+
       box.textContent =
         text;
 
@@ -870,9 +745,26 @@
     }
 
 
-    /* =========================================================
-       KPI CONTRIBUTIONS
-       ========================================================= */
+    function showSuccess(text) {
+
+      const box =
+        $("message");
+
+      box.className =
+        "message message-success";
+
+      box.textContent =
+        text;
+
+      box.style.display =
+        "block";
+
+    }
+
+
+    /* ===========================================
+       KPI
+       =========================================== */
 
     function renderContributions(records) {
 
@@ -946,14 +838,11 @@
       $("kpi-todo").textContent =
         todo;
 
-
       $("kpi-late").textContent =
         late;
 
-
       $("kpi-remind").textContent =
         remind;
-
 
       $("kpi-urgent").textContent =
         urgent;
@@ -961,9 +850,9 @@
     }
 
 
-    /* =========================================================
-       AFFICHAGE PROFIL
-       ========================================================= */
+    /* ===========================================
+       PROFIL
+       =========================================== */
 
     function renderProfile(profile) {
 
@@ -979,18 +868,14 @@
       const nom =
         profile.Nom || "";
 
-
       const role =
         profile.Role || "";
-
 
       const service =
         profile.Service || "";
 
-
       const sousDirection =
         profile.Sous_direction || "";
-
 
       const departement =
         profile.Departement || "";
@@ -1053,9 +938,9 @@
     }
 
 
-    /* =========================================================
-       CONVERSION TABLE GRIST -> LIGNES
-       ========================================================= */
+    /* ===========================================
+       CONVERSION DU RETOUR fetchTable()
+       =========================================== */
 
     function tableToRows(table) {
 
@@ -1070,8 +955,7 @@
       }
 
 
-      const rows =
-        [];
+      const rows = [];
 
 
       for (
@@ -1085,42 +969,35 @@
           id:
             table.id[i],
 
-
           Email:
             table.Email
               ? table.Email[i]
               : "",
-
 
           Nom:
             table.Nom
               ? table.Nom[i]
               : "",
 
-
           Role:
             table.Role
               ? table.Role[i]
               : "",
-
 
           Service:
             table.Service
               ? table.Service[i]
               : "",
 
-
           Sous_direction:
             table.Sous_direction
               ? table.Sous_direction[i]
               : "",
 
-
           Departement:
             table.Departement
               ? table.Departement[i]
               : "",
-
 
           Horodatage:
             table.Horodatage
@@ -1137,18 +1014,14 @@
     }
 
 
-    /* =========================================================
-       IDENTIFICATION UTILISATEUR
-       ========================================================= */
+    /* ===========================================
+       IDENTIFICATION
+       =========================================== */
 
     async function identifyUser() {
 
-      let profile =
-        null;
-
-
       /*
-        1. Création d'une ligne technique
+        1. Création d'une ligne technique.
       */
 
       await grist.docApi.applyUserActions([
@@ -1162,24 +1035,24 @@
 
 
       /*
-        2. Attente pour laisser Grist
-           calculer les formules
+        2. Attente pour laisser Grist calculer
+           les formules et formules de déclenchement.
       */
 
       await new Promise(
         resolve =>
           setTimeout(
             resolve,
-            600
+            800
           )
       );
 
 
       /*
-        3. Lecture SESSION_WIDGET
+        3. Lecture de SESSION_WIDGET.
       */
 
-      const table =
+      const rawTable =
         await grist.docApi.fetchTable(
           "SESSION_WIDGET"
         );
@@ -1187,7 +1060,7 @@
 
       const rows =
         tableToRows(
-          table
+          rawTable
         );
 
 
@@ -1196,45 +1069,24 @@
       ) {
 
         throw new Error(
-          "Aucune ligne SESSION_WIDGET disponible."
+          "SESSION_WIDGET ne contient aucune ligne lisible."
         );
 
       }
 
 
       /*
-        4. On récupère la ligne ayant
-           l'identifiant le plus élevé
+        4. On prend la dernière ligne disponible.
       */
 
-      profile =
-        rows.reduce(
-
-          (latest, row) =>
-
-            !latest
-            ||
-            row.id > latest.id
-
-              ? row
-              : latest,
-
-          null
-
-        );
-
-
-      if (!profile) {
-
-        throw new Error(
-          "Impossible de déterminer le profil."
-        );
-
-      }
+      const profile =
+        rows[
+          rows.length - 1
+        ];
 
 
       /*
-        5. Affichage du profil
+        5. Affichage.
       */
 
       renderProfile(
@@ -1242,43 +1094,16 @@
       );
 
 
-      /*
-        6. Suppression de la ligne temporaire
-      */
-
-      try {
-
-        await grist.docApi.applyUserActions([
-          [
-            "RemoveRecord",
-            "SESSION_WIDGET",
-            profile.id
-          ]
-        ]);
-
-
-        console.log(
-          "SESSION_WIDGET nettoyée :",
-          profile.id
-        );
-
-      }
-
-      catch (cleanupError) {
-
-        console.warn(
-          "Impossible de supprimer la ligne SESSION_WIDGET :",
-          cleanupError
-        );
-
-      }
+      showSuccess(
+        "Profil identifié avec succès."
+      );
 
     }
 
 
-    /* =========================================================
+    /* ===========================================
        INITIALISATION
-       ========================================================= */
+       =========================================== */
 
     async function init() {
 
@@ -1335,7 +1160,12 @@
 
 
         showError(
-          "Impossible d’identifier votre profil Tâchtik."
+          "Tâchtik n'a pas pu lire le profil utilisateur : " +
+          (
+            err && err.message
+              ? err.message
+              : String(err)
+          )
         );
 
       }
@@ -1348,4 +1178,5 @@
   </script>
 
 </body>
+
 </html>
