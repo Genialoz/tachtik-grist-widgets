@@ -956,6 +956,31 @@
       margin-top: 10px;
     }
 
+    .mail-history-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 10px;
+      padding: 8px 11px;
+      border: 1px solid #d9e5ed;
+      border-radius: 10px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 10px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .mail-history-toggle:hover {
+      background: #f6fafc;
+    }
+
+    .mail-history[hidden] {
+      display: none !important;
+    }
+
     .mail-history-item {
       display: grid;
       grid-template-columns: minmax(150px, .8fr) minmax(0, 1.7fr) auto;
@@ -1875,7 +1900,11 @@
 
             <div id="mail-summary" class="mail-summary"></div>
 
-            <div id="mail-history" class="mail-history"></div>
+            <button id="mail-history-toggle" class="mail-history-toggle" type="button" hidden>
+              📜 Voir l’historique complet
+            </button>
+
+            <div id="mail-history" class="mail-history" hidden></div>
 
           </div>
 
@@ -3287,16 +3316,25 @@
         </div>
       `;
 
+      const historyEl = $("mail-history");
+      const toggleEl = $("mail-history-toggle");
+
+      // L’historique détaillé est volontairement replié à chaque ouverture
+      // d’une contribution. Le résumé reste toujours visible.
+      historyEl.hidden = true;
+
       if (history.length === 0) {
-        $("mail-history").innerHTML = `
-          <div class="mail-history-empty">
-            Aucun envoi ni aucune relance enregistré dans l'historique.
-          </div>
-        `;
+        toggleEl.hidden = true;
+        toggleEl.textContent = "📜 Voir l’historique complet";
+        historyEl.innerHTML = "";
         return;
       }
 
-      $("mail-history").innerHTML = history.map(row => {
+      toggleEl.hidden = false;
+      toggleEl.textContent = `📜 Voir l’historique complet (${history.length})`;
+      toggleEl.setAttribute("aria-expanded", "false");
+
+      historyEl.innerHTML = history.map(row => {
         const rawType = text(row.Type_envoi) || "Envoi";
         const normalizedType = normalizeText(rawType);
         const typeLabel = normalizedType === "relance" ? "🔔 Relance" : normalizedType === "envoi initial" ? "📨 Envoi initial" : rawType;
@@ -3326,6 +3364,16 @@
           </div>
         `;
       }).join("");
+
+      toggleEl.onclick = () => {
+        const willOpen = historyEl.hidden;
+        historyEl.hidden = !willOpen;
+        toggleEl.setAttribute("aria-expanded", willOpen ? "true" : "false");
+        toggleEl.textContent = willOpen
+          ? "▴ Masquer l’historique"
+          : `📜 Voir l’historique complet (${history.length})`;
+      };
+
     }
 
     /* =========================
