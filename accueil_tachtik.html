@@ -41,6 +41,7 @@
     body {
       margin: 0;
       min-height: 100%;
+
       font-family:
         Inter,
         ui-sans-serif,
@@ -82,7 +83,9 @@
         );
 
       color: white;
+
       border-radius: 24px;
+
       padding: 26px 28px;
 
       box-shadow:
@@ -106,12 +109,17 @@
         rgba(255, 255, 255, 0.08);
     }
 
+    /* =========================================================
+       MARQUE
+       ========================================================= */
+
     .brand {
       position: relative;
       z-index: 1;
 
       display: flex;
       align-items: center;
+
       gap: 12px;
 
       margin-bottom: 22px;
@@ -138,6 +146,7 @@
     .brand-name {
       font-size: 21px;
       font-weight: 850;
+
       letter-spacing: 0.02em;
     }
 
@@ -150,13 +159,21 @@
         rgba(255, 255, 255, 0.72);
     }
 
+    /* =========================================================
+       BIENVENUE
+       ========================================================= */
+
     .hero-content {
       position: relative;
       z-index: 1;
 
       display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
+
+      justify-content:
+        space-between;
+
+      align-items:
+        flex-end;
 
       gap: 18px;
     }
@@ -170,19 +187,26 @@
         clamp(25px, 4vw, 40px);
 
       line-height: 1.08;
-      letter-spacing: -0.035em;
+
+      letter-spacing:
+        -0.035em;
     }
 
     .intro {
-      margin: 10px 0 0;
+      margin:
+        10px 0 0;
 
-      max-width: 720px;
+      max-width:
+        720px;
 
       color:
         rgba(255, 255, 255, 0.78);
 
-      font-size: 14px;
-      line-height: 1.55;
+      font-size:
+        14px;
+
+      line-height:
+        1.55;
     }
 
     /* =========================================================
@@ -190,11 +214,14 @@
        ========================================================= */
 
     .profile-box {
-      min-width: 220px;
+      min-width:
+        220px;
 
-      padding: 14px 16px;
+      padding:
+        14px 16px;
 
-      border-radius: 18px;
+      border-radius:
+        18px;
 
       background:
         rgba(255, 255, 255, 0.13);
@@ -204,55 +231,79 @@
     }
 
     .profile-label {
-      font-size: 10px;
+      font-size:
+        10px;
 
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        0.08em;
 
       color:
         rgba(255, 255, 255, 0.62);
     }
 
     .profile-role {
-      margin-top: 5px;
+      margin-top:
+        5px;
 
-      font-size: 14px;
-      font-weight: 800;
+      font-size:
+        14px;
+
+      font-weight:
+        800;
     }
 
     .profile-scope {
-      margin-top: 4px;
+      margin-top:
+        4px;
 
-      font-size: 11px;
+      font-size:
+        11px;
 
       color:
         rgba(255, 255, 255, 0.75);
     }
 
     /* =========================================================
-       TITRE KPI
+       TITRE VUE D'ENSEMBLE
        ========================================================= */
 
     .section-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      display:
+        flex;
 
-      gap: 16px;
+      justify-content:
+        space-between;
 
-      margin: 24px 2px 12px;
+      align-items:
+        center;
+
+      gap:
+        16px;
+
+      margin:
+        24px 2px 12px;
     }
 
     .section-title {
-      margin: 0;
+      margin:
+        0;
 
-      font-size: 16px;
-      font-weight: 800;
+      font-size:
+        16px;
+
+      font-weight:
+        800;
     }
 
     .section-note {
-      font-size: 12px;
-      color: var(--muted);
+      font-size:
+        12px;
+
+      color:
+        var(--muted);
     }
 
     /* =========================================================
@@ -260,107 +311,163 @@
        ========================================================= */
 
     .kpis {
-      display: grid;
+      display:
+        grid;
 
       grid-template-columns:
         repeat(4, minmax(0, 1fr));
 
-      gap: 14px;
+      gap:
+        14px;
     }
 
     .kpi {
-      position: relative;
-      overflow: hidden;
+      position:
+        relative;
 
-      min-height: 136px;
+      overflow:
+        hidden;
 
-      padding: 18px;
+      min-height:
+        136px;
 
-      border-radius: 19px;
+      padding:
+        18px;
 
-      background: var(--surface);
+      border-radius:
+        19px;
 
-      border: 1px solid var(--line);
+      background:
+        var(--surface);
 
-      box-shadow: var(--shadow);
+      border:
+        1px solid var(--line);
+
+      box-shadow:
+        var(--shadow);
     }
 
     .kpi::before {
-      content: "";
+      content:
+        "";
 
-      position: absolute;
+      position:
+        absolute;
 
-      left: 0;
-      top: 0;
-      bottom: 0;
+      left:
+        0;
 
-      width: 5px;
+      top:
+        0;
 
-      background: var(--accent);
+      bottom:
+        0;
+
+      width:
+        5px;
+
+      background:
+        var(--accent);
     }
 
     .kpi-icon {
-      width: 42px;
-      height: 42px;
+      width:
+        42px;
 
-      display: grid;
-      place-items: center;
+      height:
+        42px;
 
-      border-radius: 13px;
+      display:
+        grid;
 
-      background: var(--soft);
+      place-items:
+        center;
 
-      font-size: 20px;
+      border-radius:
+        13px;
+
+      background:
+        var(--soft);
+
+      font-size:
+        20px;
     }
 
     .kpi-value {
-      margin-top: 14px;
+      margin-top:
+        14px;
 
-      font-size: 36px;
-      line-height: 1;
+      font-size:
+        36px;
 
-      font-weight: 900;
+      line-height:
+        1;
 
-      letter-spacing: -0.04em;
+      font-weight:
+        900;
 
-      color: var(--accent);
+      letter-spacing:
+        -0.04em;
+
+      color:
+        var(--accent);
     }
 
     .kpi-label {
-      margin-top: 6px;
+      margin-top:
+        6px;
 
-      font-size: 13px;
-      font-weight: 800;
+      font-size:
+        13px;
 
-      color: #3f576b;
+      font-weight:
+        800;
+
+      color:
+        #3f576b;
     }
 
     .kpi-sub {
-      margin-top: 3px;
+      margin-top:
+        3px;
 
-      font-size: 11px;
+      font-size:
+        11px;
 
-      color: var(--muted);
+      color:
+        var(--muted);
     }
 
     .todo {
-      --accent: var(--blue);
-      --soft: var(--blue-soft);
+      --accent:
+        var(--blue);
+
+      --soft:
+        var(--blue-soft);
     }
 
     .late {
-      --accent: var(--red);
-      --soft: var(--red-soft);
+      --accent:
+        var(--red);
+
+      --soft:
+        var(--red-soft);
     }
 
     .remind {
-      --accent: var(--orange);
-      --soft: var(--orange-soft);
+      --accent:
+        var(--orange);
+
+      --soft:
+        var(--orange-soft);
     }
 
     .urgent {
-      --accent: var(--violet);
-      --soft: var(--violet-soft);
+      --accent:
+        var(--violet);
+
+      --soft:
+        var(--violet-soft);
     }
 
     /* =========================================================
@@ -368,22 +475,29 @@
        ========================================================= */
 
     .message {
-      display: none;
+      display:
+        none;
 
-      margin-top: 14px;
+      margin-top:
+        14px;
 
-      padding: 14px 16px;
+      padding:
+        14px 16px;
 
-      border-radius: 14px;
+      border-radius:
+        14px;
 
-      background: #fff1f3;
+      background:
+        #fff1f3;
 
       border:
         1px solid #efbcc3;
 
-      color: #9a3441;
+      color:
+        #9a3441;
 
-      font-size: 13px;
+      font-size:
+        13px;
     }
 
     /* =========================================================
@@ -391,17 +505,23 @@
        ========================================================= */
 
     .foot {
-      display: flex;
-      justify-content: space-between;
+      display:
+        flex;
 
-      gap: 14px;
+      justify-content:
+        space-between;
 
-      margin-top: 16px;
+      gap:
+        14px;
+
+      margin-top:
+        16px;
 
       padding:
         14px 16px;
 
-      border-radius: 16px;
+      border-radius:
+        16px;
 
       background:
         rgba(255, 255, 255, 0.72);
@@ -409,24 +529,36 @@
       border:
         1px solid var(--line);
 
-      color: var(--muted);
+      color:
+        var(--muted);
 
-      font-size: 11px;
+      font-size:
+        11px;
     }
 
     .status {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
+      display:
+        inline-flex;
+
+      align-items:
+        center;
+
+      gap:
+        7px;
     }
 
     .dot {
-      width: 8px;
-      height: 8px;
+      width:
+        8px;
 
-      border-radius: 50%;
+      height:
+        8px;
 
-      background: var(--green);
+      border-radius:
+        50%;
+
+      background:
+        var(--green);
 
       box-shadow:
         0 0 0 3px rgba(46,148,101,.12);
@@ -437,45 +569,64 @@
        ========================================================= */
 
     @media (max-width: 860px) {
+
       .kpis {
         grid-template-columns:
           repeat(2, minmax(0, 1fr));
       }
 
       .hero-content {
-        align-items: flex-start;
-        flex-direction: column;
+        align-items:
+          flex-start;
+
+        flex-direction:
+          column;
       }
 
       .profile-box {
-        width: 100%;
+        width:
+          100%;
       }
+
     }
 
     @media (max-width: 520px) {
+
       body {
-        padding: 10px;
+        padding:
+          10px;
       }
 
       .hero {
-        border-radius: 18px;
-        padding: 20px;
+        border-radius:
+          18px;
+
+        padding:
+          20px;
       }
 
       .kpis {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+          1fr;
       }
 
       .foot {
-        flex-direction: column;
+        flex-direction:
+          column;
       }
+
     }
+
   </style>
 </head>
 
 <body>
 
   <main class="app">
+
+    <!-- ======================================================
+         BANDEAU
+         ====================================================== -->
 
     <section class="hero">
 
@@ -542,6 +693,10 @@
 
     </section>
 
+    <!-- ======================================================
+         VUE D'ENSEMBLE
+         ====================================================== -->
+
     <div class="section-head">
 
       <h2 class="section-title">
@@ -553,6 +708,10 @@
       </div>
 
     </div>
+
+    <!-- ======================================================
+         KPI
+         ====================================================== -->
 
     <section class="kpis">
 
@@ -650,11 +809,19 @@
 
     </section>
 
+    <!-- ======================================================
+         MESSAGE D'ERREUR
+         ====================================================== -->
+
     <div
       id="message"
       class="message"
     >
     </div>
+
+    <!-- ======================================================
+         PIED
+         ====================================================== -->
 
     <div class="foot">
 
@@ -704,11 +871,9 @@
     }
 
 
-    /*
-      ==========================================================
-      KPI
-      ==========================================================
-    */
+    /* =========================================================
+       KPI CONTRIBUTIONS
+       ========================================================= */
 
     function renderContributions(records) {
 
@@ -739,33 +904,57 @@
           clean(r.Priorite);
 
 
+        /*
+          À traiter = statut À faire uniquement
+        */
+
         if (
           statut === "à faire"
           ||
           statut === "a faire"
         ) {
-          todo++;
+
+          todo += 1;
+
         }
 
+
+        /*
+          En retard
+        */
 
         if (
           alerte.includes("retard")
         ) {
-          late++;
+
+          late += 1;
+
         }
 
+
+        /*
+          À relancer
+        */
 
         if (
           rappel.includes("relancer")
         ) {
-          remind++;
+
+          remind += 1;
+
         }
 
+
+        /*
+          Urgentes
+        */
 
         if (
           priorite === "urgente"
         ) {
-          urgent++;
+
+          urgent += 1;
+
         }
 
       }
@@ -774,11 +963,14 @@
       $("kpi-todo").textContent =
         todo;
 
+
       $("kpi-late").textContent =
         late;
 
+
       $("kpi-remind").textContent =
         remind;
+
 
       $("kpi-urgent").textContent =
         urgent;
@@ -786,29 +978,42 @@
     }
 
 
-    /*
-      ==========================================================
-      AFFICHAGE PROFIL
-      ==========================================================
-    */
+    /* =========================================================
+       AFFICHAGE PROFIL
+       ========================================================= */
 
     function renderProfile(profile) {
+
+      if (!profile) {
+        throw new Error(
+          "Profil absent."
+        );
+      }
+
 
       const nom =
         profile.Nom || "";
 
+
       const role =
         profile.Role || "";
+
 
       const service =
         profile.Service || "";
 
+
       const sousDirection =
         profile.Sous_direction || "";
+
 
       const departement =
         profile.Departement || "";
 
+
+      /*
+        Nom utilisateur
+      */
 
       if (nom) {
 
@@ -818,9 +1023,17 @@
       }
 
 
+      /*
+        Rôle
+      */
+
       $("profile-role").textContent =
         role || "Profil Tâchtik";
 
+
+      /*
+        Périmètre
+      */
 
       let scope = "";
 
@@ -828,21 +1041,24 @@
       if (departement) {
 
         scope =
-          "Département " + departement;
+          "Département " +
+          departement;
 
       }
 
       else if (sousDirection) {
 
         scope =
-          "Sous-direction " + sousDirection;
+          "Sous-direction " +
+          sousDirection;
 
       }
 
       else if (service) {
 
         scope =
-          "Service " + service;
+          "Service " +
+          service;
 
       }
 
@@ -864,16 +1080,102 @@
     }
 
 
-    /*
-      ==========================================================
-      IDENTIFICATION
-      ==========================================================
-    */
+    /* =========================================================
+       CONVERSION TABLE GRIST -> LIGNES
+       ========================================================= */
+
+    function tableToRows(table) {
+
+      if (
+        !table
+        ||
+        !Array.isArray(table.id)
+      ) {
+
+        return [];
+
+      }
+
+
+      const rows =
+        [];
+
+
+      for (
+        let i = 0;
+        i < table.id.length;
+        i++
+      ) {
+
+        rows.push({
+
+          id:
+            table.id[i],
+
+
+          Email:
+            table.Email
+              ? table.Email[i]
+              : "",
+
+
+          Nom:
+            table.Nom
+              ? table.Nom[i]
+              : "",
+
+
+          Role:
+            table.Role
+              ? table.Role[i]
+              : "",
+
+
+          Service:
+            table.Service
+              ? table.Service[i]
+              : "",
+
+
+          Sous_direction:
+            table.Sous_direction
+              ? table.Sous_direction[i]
+              : "",
+
+
+          Departement:
+            table.Departement
+              ? table.Departement[i]
+              : "",
+
+
+          Horodatage:
+            table.Horodatage
+              ? table.Horodatage[i]
+              : null
+
+        });
+
+      }
+
+
+      return rows;
+
+    }
+
+
+    /* =========================================================
+       IDENTIFICATION UTILISATEUR
+       ========================================================= */
 
     async function identifyUser() {
 
+      let profile =
+        null;
+
+
       /*
-        Création de la ligne temporaire.
+        1. Création d'une ligne technique
       */
 
       await grist.docApi.applyUserActions([
@@ -887,71 +1189,88 @@
 
 
       /*
-        On laisse Grist calculer les formules.
+        2. Petite attente pour laisser Grist
+           calculer les formules
       */
 
       await new Promise(
         resolve =>
-          setTimeout(resolve, 500)
+          setTimeout(
+            resolve,
+            600
+          )
       );
 
 
       /*
-        Lecture de SESSION_WIDGET.
+        3. Lecture de SESSION_WIDGET
       */
 
-      const rows =
+      const table =
         await grist.docApi.fetchTable(
           "SESSION_WIDGET"
         );
 
 
+      const rows =
+        tableToRows(
+          table
+        );
+
+
       if (
-        !Array.isArray(rows)
-        ||
         rows.length === 0
       ) {
 
         throw new Error(
-          "Aucun profil trouvé."
+          "Aucune ligne SESSION_WIDGET disponible."
         );
 
       }
 
 
       /*
-        On cherche la ligne avec l'id le plus élevé.
-        Il s'agit de la ligne temporaire créée à l'instant.
+        4. On récupère la ligne ayant
+           l'identifiant le plus élevé
       */
 
-      const profile =
+      profile =
         rows.reduce(
+
           (latest, row) =>
-            !latest || row.id > latest.id
+
+            !latest
+            ||
+            row.id > latest.id
+
               ? row
               : latest,
+
           null
+
         );
 
 
       if (!profile) {
 
         throw new Error(
-          "Profil introuvable."
+          "Impossible de déterminer le profil."
         );
 
       }
 
 
       /*
-        Affichage.
+        5. Affichage du profil
       */
 
-      renderProfile(profile);
+      renderProfile(
+        profile
+      );
 
 
       /*
-        Suppression immédiate de la ligne temporaire.
+        6. Suppression de la ligne temporaire
       */
 
       try {
@@ -964,17 +1283,18 @@
           ]
         ]);
 
+
+        console.log(
+          "SESSION_WIDGET nettoyée :",
+          profile.id
+        );
+
       }
 
       catch (cleanupError) {
 
-        /*
-          Le profil fonctionne même si le nettoyage échoue.
-          On ne bloque donc pas l'accueil.
-        */
-
         console.warn(
-          "Nettoyage SESSION_WIDGET impossible :",
+          "Impossible de supprimer la ligne SESSION_WIDGET :",
           cleanupError
         );
 
@@ -983,33 +1303,48 @@
     }
 
 
-    /*
-      ==========================================================
-      INITIALISATION
-      ==========================================================
-    */
+    /* =========================================================
+       INITIALISATION
+       ========================================================= */
 
     async function init() {
 
       try {
 
+        /*
+          Le widget utilise :
+          - CONTRIBUTIONS
+          - SESSION_WIDGET
+          - écriture puis suppression de session
+        */
+
         grist.ready({
-          requiredAccess: "full"
+          requiredAccess:
+            "full"
         });
 
+
+        /*
+          KPI
+        */
 
         grist.onRecords(
           records => {
 
             try {
 
-              renderContributions(records);
+              renderContributions(
+                records
+              );
 
             }
 
             catch (err) {
 
-              console.error(err);
+              console.error(
+                "Erreur KPI :",
+                err
+              );
 
             }
 
@@ -1017,17 +1352,28 @@
         );
 
 
+        /*
+          Identification utilisateur
+        */
+
         await identifyUser();
 
       }
 
       catch (err) {
 
-        console.error(err);
+        console.error(
+          "Erreur identification :",
+          err
+        );
 
 
         $("profile-role").textContent =
           "Identification impossible";
+
+
+        $("profile-scope").textContent =
+          "";
 
 
         showError(
