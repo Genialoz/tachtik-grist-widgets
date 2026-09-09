@@ -633,10 +633,7 @@
 
         <div>
 
-          <h1
-            id="welcome"
-            class="welcome"
-          >
+          <h1 id="welcome" class="welcome">
             Bienvenue dans votre espace de suivi
           </h1>
 
@@ -653,17 +650,11 @@
             Votre profil
           </div>
 
-          <div
-            id="profile-role"
-            class="profile-role"
-          >
+          <div id="profile-role" class="profile-role">
             Identification...
           </div>
 
-          <div
-            id="profile-scope"
-            class="profile-scope"
-          ></div>
+          <div id="profile-scope" class="profile-scope"></div>
 
         </div>
 
@@ -906,10 +897,7 @@
     </section>
 
 
-    <div
-      id="message"
-      class="message"
-    ></div>
+    <div id="message" class="message"></div>
 
 
     <div class="foot">
@@ -1225,8 +1213,7 @@
     async function identifyUser() {
 
       /*
-       * ÉTAPE 1
-       * Lire SESSION_WIDGET avant la création.
+       * 1. Lecture avant création
        */
 
       const beforeTable =
@@ -1251,8 +1238,7 @@
 
 
       /*
-       * ÉTAPE 2
-       * Créer une ligne temporaire.
+       * 2. Création de la session temporaire
        */
 
       await grist.docApi.applyUserActions([
@@ -1266,9 +1252,7 @@
 
 
       /*
-       * ÉTAPE 3
-       * Attendre que Grist renseigne Email,
-       * Nom, rôle et périmètre.
+       * 3. Attente du calcul des formules
        */
 
       await new Promise(
@@ -1281,8 +1265,7 @@
 
 
       /*
-       * ÉTAPE 4
-       * Relire SESSION_WIDGET.
+       * 4. Nouvelle lecture
        */
 
       const afterTable =
@@ -1298,9 +1281,7 @@
 
 
       /*
-       * ÉTAPE 5
-       * Repérer les lignes qui n'existaient
-       * pas avant AddRecord.
+       * 5. Recherche de la nouvelle ligne
        */
 
       const newRows =
@@ -1323,11 +1304,6 @@
       }
 
 
-      /*
-       * S'il y en a plusieurs, on choisit
-       * celle ayant l'identifiant le plus élevé.
-       */
-
       newRows.sort(
         (a, b) =>
           Number(b.id) -
@@ -1340,19 +1316,13 @@
 
 
       const sessionRowId =
-        profile.id;
-
-
-      console.log(
-        "SESSION_WIDGET créée :",
-        sessionRowId,
-        profile
-      );
+        Number(
+          profile.id
+        );
 
 
       /*
-       * ÉTAPE 6
-       * Afficher le profil.
+       * 6. Affichage du profil
        */
 
       renderProfile(
@@ -1361,24 +1331,25 @@
 
 
       /*
-       * ÉTAPE 7
-       * Supprimer exactement la ligne
-       * utilisée pour cette identification.
+       * 7. Suppression de la session temporaire
+       *
+       * IMPORTANT :
+       * BulkRemoveRecord attend une LISTE d'identifiants.
        */
 
       try {
 
         await grist.docApi.applyUserActions([
           [
-            "RemoveRecord",
+            "BulkRemoveRecord",
             "SESSION_WIDGET",
-            sessionRowId
+            [sessionRowId]
           ]
         ]);
 
 
         console.log(
-          "SESSION_WIDGET supprimée :",
+          "Session temporaire supprimée :",
           sessionRowId
         );
 
@@ -1392,7 +1363,7 @@
       catch (cleanupError) {
 
         console.error(
-          "ERREUR SUPPRESSION SESSION_WIDGET :",
+          "Suppression SESSION_WIDGET impossible :",
           cleanupError
         );
 
