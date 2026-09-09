@@ -41,6 +41,7 @@
     body {
       margin: 0;
       min-height: 100%;
+
       font-family:
         Inter,
         ui-sans-serif,
@@ -65,9 +66,8 @@
       margin: 0 auto;
     }
 
-
     /* =========================================================
-       BANDEAU TÂCHTIK
+       BANDEAU
        ========================================================= */
 
     .hero {
@@ -83,7 +83,6 @@
         );
 
       color: white;
-
       border-radius: 24px;
 
       padding: 26px 28px;
@@ -109,11 +108,6 @@
         rgba(255, 255, 255, 0.08);
     }
 
-
-    /* =========================================================
-       LOGO / NOM
-       ========================================================= */
-
     .brand {
       position: relative;
       z-index: 1;
@@ -123,7 +117,7 @@
 
       gap: 12px;
 
-      margin-bottom: 24px;
+      margin-bottom: 22px;
     }
 
     .brand-mark {
@@ -142,15 +136,11 @@
         1px solid rgba(255, 255, 255, 0.16);
 
       font-size: 22px;
-
-      backdrop-filter:
-        blur(6px);
     }
 
     .brand-name {
       font-size: 21px;
       font-weight: 850;
-
       letter-spacing: 0.02em;
     }
 
@@ -162,11 +152,6 @@
       color:
         rgba(255, 255, 255, 0.72);
     }
-
-
-    /* =========================================================
-       TEXTE DU BANDEAU
-       ========================================================= */
 
     .hero-content {
       position: relative;
@@ -183,7 +168,7 @@
       gap: 18px;
     }
 
-    h1 {
+    .welcome {
       margin: 0;
 
       max-width: 760px;
@@ -198,54 +183,68 @@
     }
 
     .intro {
-      margin:
-        10px 0 0;
+      margin: 10px 0 0;
 
-      max-width:
-        720px;
+      max-width: 720px;
 
       color:
         rgba(255, 255, 255, 0.78);
 
-      font-size:
-        14px;
+      font-size: 14px;
 
-      line-height:
-        1.55;
+      line-height: 1.55;
     }
-
-    .role-chip {
-      flex:
-        0 0 auto;
-
-      padding:
-        9px 13px;
-
-      border-radius:
-        999px;
-
-      font-size:
-        12px;
-
-      font-weight:
-        750;
-
-      color:
-        white;
-
-      background:
-        rgba(255, 255, 255, 0.14);
-
-      border:
-        1px solid rgba(255, 255, 255, 0.20);
-
-      white-space:
-        nowrap;
-    }
-
 
     /* =========================================================
-       TITRE VUE D'ENSEMBLE
+       PROFIL
+       ========================================================= */
+
+    .profile-box {
+      min-width: 220px;
+
+      padding: 14px 16px;
+
+      border-radius: 18px;
+
+      background:
+        rgba(255, 255, 255, 0.13);
+
+      border:
+        1px solid rgba(255, 255, 255, 0.18);
+
+      backdrop-filter: blur(8px);
+    }
+
+    .profile-label {
+      font-size: 10px;
+
+      text-transform: uppercase;
+
+      letter-spacing: 0.08em;
+
+      color:
+        rgba(255, 255, 255, 0.62);
+    }
+
+    .profile-role {
+      margin-top: 5px;
+
+      font-size: 14px;
+
+      font-weight: 800;
+    }
+
+    .profile-scope {
+      margin-top: 4px;
+
+      font-size: 11px;
+
+      color:
+        rgba(255, 255, 255, 0.75);
+    }
+
+    /* =========================================================
+       VUE D'ENSEMBLE
        ========================================================= */
 
     .section-head {
@@ -266,21 +265,15 @@
     .section-title {
       margin: 0;
 
-      font-size:
-        16px;
+      font-size: 16px;
 
-      font-weight:
-        800;
+      font-weight: 800;
     }
 
     .section-note {
-      font-size:
-        12px;
-
-      color:
-        var(--muted);
+      font-size: 12px;
+      color: var(--muted);
     }
-
 
     /* =========================================================
        KPI
@@ -297,17 +290,13 @@
 
     .kpi {
       position: relative;
-
       overflow: hidden;
 
-      min-height:
-        136px;
+      min-height: 136px;
 
-      padding:
-        18px;
+      padding: 18px;
 
-      border-radius:
-        19px;
+      border-radius: 19px;
 
       background:
         var(--surface);
@@ -334,49 +323,29 @@
         var(--accent);
     }
 
-    .kpi-top {
-      display: flex;
-
-      align-items:
-        center;
-
-      justify-content:
-        space-between;
-
-      gap: 10px;
-    }
-
     .kpi-icon {
       width: 42px;
       height: 42px;
 
       display: grid;
+      place-items: center;
 
-      place-items:
-        center;
-
-      border-radius:
-        13px;
+      border-radius: 13px;
 
       background:
         var(--soft);
 
-      font-size:
-        20px;
+      font-size: 20px;
     }
 
     .kpi-value {
-      margin-top:
-        14px;
+      margin-top: 14px;
 
-      font-size:
-        36px;
+      font-size: 36px;
 
-      line-height:
-        1;
+      line-height: 1;
 
-      font-weight:
-        900;
+      font-weight: 900;
 
       letter-spacing:
         -0.04em;
@@ -386,70 +355,46 @@
     }
 
     .kpi-label {
-      margin-top:
-        6px;
+      margin-top: 6px;
 
-      font-size:
-        13px;
+      font-size: 13px;
 
-      font-weight:
-        800;
+      font-weight: 800;
 
-      color:
-        #3f576b;
+      color: #3f576b;
     }
 
     .kpi-sub {
-      margin-top:
-        3px;
+      margin-top: 3px;
 
-      font-size:
-        11px;
+      font-size: 11px;
 
       color:
         var(--muted);
     }
 
-
-    /* =========================================================
-       COULEURS DES CARTES
-       ========================================================= */
-
     .todo {
-      --accent:
-        var(--blue);
-
-      --soft:
-        var(--blue-soft);
+      --accent: var(--blue);
+      --soft: var(--blue-soft);
     }
 
     .late {
-      --accent:
-        var(--red);
-
-      --soft:
-        var(--red-soft);
+      --accent: var(--red);
+      --soft: var(--red-soft);
     }
 
     .remind {
-      --accent:
-        var(--orange);
-
-      --soft:
-        var(--orange-soft);
+      --accent: var(--orange);
+      --soft: var(--orange-soft);
     }
 
     .urgent {
-      --accent:
-        var(--violet);
-
-      --soft:
-        var(--violet-soft);
+      --accent: var(--violet);
+      --soft: var(--violet-soft);
     }
 
-
     /* =========================================================
-       PIED DU WIDGET
+       PIED
        ========================================================= */
 
     .foot {
@@ -460,14 +405,12 @@
 
       gap: 14px;
 
-      margin-top:
-        16px;
+      margin-top: 16px;
 
       padding:
         14px 16px;
 
-      border-radius:
-        16px;
+      border-radius: 16px;
 
       background:
         rgba(255, 255, 255, 0.72);
@@ -478,131 +421,87 @@
       color:
         var(--muted);
 
-      font-size:
-        11px;
+      font-size: 11px;
     }
 
     .status {
-      display:
-        inline-flex;
-
-      align-items:
-        center;
-
+      display: inline-flex;
+      align-items: center;
       gap: 7px;
     }
 
     .dot {
-      width:
-        8px;
+      width: 8px;
+      height: 8px;
 
-      height:
-        8px;
+      border-radius: 50%;
 
-      border-radius:
-        50%;
-
-      background:
-        var(--green);
+      background: var(--green);
 
       box-shadow:
-        0 0 0 3px
-        rgba(46, 148, 101, 0.12);
+        0 0 0 3px rgba(46,148,101,.12);
     }
 
-
-    /* =========================================================
-       MESSAGE D'ERREUR
-       ========================================================= */
-
     .message {
-      display:
-        none;
+      display: none;
 
-      margin-top:
-        14px;
+      margin-top: 14px;
 
       padding:
         14px 16px;
 
-      border-radius:
-        14px;
+      border-radius: 14px;
 
-      background:
-        #fff7e9;
+      background: #fff7e9;
 
       border:
         1px solid #f2d8a6;
 
-      color:
-        #805c1f;
+      color: #805c1f;
 
-      font-size:
-        13px;
+      font-size: 13px;
     }
 
-
-    /* =========================================================
-       RESPONSIVE
-       ========================================================= */
-
     @media (max-width: 860px) {
-
       .kpis {
         grid-template-columns:
           repeat(2, minmax(0, 1fr));
       }
 
       .hero-content {
-        align-items:
-          flex-start;
-
-        flex-direction:
-          column;
+        align-items: flex-start;
+        flex-direction: column;
       }
 
+      .profile-box {
+        width: 100%;
+      }
     }
 
-
     @media (max-width: 520px) {
-
       body {
-        padding:
-          10px;
+        padding: 10px;
       }
 
       .hero {
-        border-radius:
-          18px;
-
-        padding:
-          20px;
+        border-radius: 18px;
+        padding: 20px;
       }
 
       .kpis {
-        grid-template-columns:
-          1fr;
+        grid-template-columns: 1fr;
       }
 
       .foot {
-        flex-direction:
-          column;
+        flex-direction: column;
       }
-
     }
-
   </style>
 </head>
-
 
 <body>
 
   <main class="app">
-
-
-    <!-- ======================================================
-         BANDEAU
-         ====================================================== -->
 
     <section class="hero">
 
@@ -626,12 +525,14 @@
 
       </div>
 
-
       <div class="hero-content">
 
         <div>
 
-          <h1>
+          <h1
+            id="welcome"
+            class="welcome"
+          >
             Bienvenue dans votre espace de suivi
           </h1>
 
@@ -642,20 +543,30 @@
 
         </div>
 
+        <div class="profile-box">
 
-        <div class="role-chip">
-          Vue adaptée à vos droits Grist
+          <div class="profile-label">
+            Votre profil
+          </div>
+
+          <div
+            id="profile-role"
+            class="profile-role"
+          >
+            Identification...
+          </div>
+
+          <div
+            id="profile-scope"
+            class="profile-scope"
+          >
+          </div>
+
         </div>
 
       </div>
 
     </section>
-
-
-
-    <!-- ======================================================
-         VUE D'ENSEMBLE
-         ====================================================== -->
 
     <div class="section-head">
 
@@ -669,28 +580,12 @@
 
     </div>
 
-
-
-    <!-- ======================================================
-         CARTES KPI
-         ====================================================== -->
-
-    <section
-      id="kpis"
-      class="kpis"
-    >
-
-
-      <!-- À TRAITER -->
+    <section class="kpis">
 
       <article class="kpi todo">
 
-        <div class="kpi-top">
-
-          <div class="kpi-icon">
-            📋
-          </div>
-
+        <div class="kpi-icon">
+          📋
         </div>
 
         <div
@@ -710,18 +605,10 @@
 
       </article>
 
-
-
-      <!-- EN RETARD -->
-
       <article class="kpi late">
 
-        <div class="kpi-top">
-
-          <div class="kpi-icon">
-            ⏰
-          </div>
-
+        <div class="kpi-icon">
+          ⏰
         </div>
 
         <div
@@ -741,18 +628,10 @@
 
       </article>
 
-
-
-      <!-- À RELANCER -->
-
       <article class="kpi remind">
 
-        <div class="kpi-top">
-
-          <div class="kpi-icon">
-            🔔
-          </div>
-
+        <div class="kpi-icon">
+          🔔
         </div>
 
         <div
@@ -772,18 +651,10 @@
 
       </article>
 
-
-
-      <!-- URGENTES -->
-
       <article class="kpi urgent">
 
-        <div class="kpi-top">
-
-          <div class="kpi-icon">
-            ⚡
-          </div>
-
+        <div class="kpi-icon">
+          ⚡
         </div>
 
         <div
@@ -805,59 +676,35 @@
 
     </section>
 
-
-
-    <!-- ======================================================
-         MESSAGE
-         ====================================================== -->
-
     <div
       id="message"
       class="message"
     >
     </div>
 
-
-
-    <!-- ======================================================
-         PIED
-         ====================================================== -->
-
     <div class="foot">
 
       <span class="status">
 
-        <span class="dot">
-        </span>
+        <span class="dot"></span>
 
         Données synchronisées avec Grist
 
       </span>
 
       <span>
-        Les indicateurs se recalculent automatiquement
-        lorsque les contributions changent.
+        Les indicateurs sont calculés selon les données accessibles à l’utilisateur.
       </span>
 
     </div>
 
   </main>
 
-
-
-  <!-- ========================================================
-       JAVASCRIPT
-       ======================================================== -->
-
   <script>
 
     const $ = id =>
       document.getElementById(id);
 
-
-    /*
-      Normalise les valeurs provenant de Grist.
-    */
 
     const clean = value =>
       String(
@@ -869,12 +716,35 @@
       .toLowerCase();
 
 
+    function showError(text) {
+
+      const box =
+        $("message");
+
+      box.textContent =
+        text;
+
+      box.style.display =
+        "block";
+
+    }
+
+
+    function hideError() {
+
+      $("message").style.display =
+        "none";
+
+    }
+
 
     /*
-      Calcul des indicateurs.
+      ==========================================================
+      KPI CONTRIBUTIONS
+      ==========================================================
     */
 
-    function render(records) {
+    function renderContributions(records) {
 
       const rows =
         Array.isArray(records)
@@ -883,203 +753,321 @@
 
 
       let todo = 0;
-
       let late = 0;
-
       let remind = 0;
-
       let urgent = 0;
-
 
 
       for (const r of rows) {
 
-
         const statut =
           clean(r.Statut);
-
 
         const alerte =
           clean(r.Alerte);
 
-
         const rappel =
           clean(r.Rappel_a_faire);
-
 
         const priorite =
           clean(r.Priorite);
 
-
-
-        /*
-          À TRAITER
-
-          Désormais :
-          uniquement Statut = À faire
-        */
 
         if (
           statut === "à faire"
           ||
           statut === "a faire"
         ) {
-
           todo += 1;
-
         }
 
-
-
-        /*
-          EN RETARD
-        */
 
         if (
           alerte.includes("retard")
         ) {
-
           late += 1;
-
         }
 
-
-
-        /*
-          À RELANCER
-        */
 
         if (
           rappel.includes("relancer")
         ) {
-
           remind += 1;
-
         }
 
-
-
-        /*
-          URGENTES
-        */
 
         if (
           priorite === "urgente"
         ) {
-
           urgent += 1;
-
         }
 
       }
 
 
-
-      /*
-        Mise à jour de l'affichage.
-      */
-
       $("kpi-todo").textContent =
         todo;
-
 
       $("kpi-late").textContent =
         late;
 
-
       $("kpi-remind").textContent =
         remind;
-
 
       $("kpi-urgent").textContent =
         urgent;
 
-
-      $("message").style.display =
-        "none";
-
     }
-
 
 
     /*
-      Affichage d'une erreur.
+      ==========================================================
+      AFFICHAGE DU PROFIL
+      ==========================================================
     */
 
-    function showError(text) {
+    function renderProfile(profile) {
 
-      const box =
-        $("message");
+      if (!profile) {
+
+        $("profile-role").textContent =
+          "Profil non identifié";
+
+        $("profile-scope").textContent =
+          "";
+
+        return;
+
+      }
 
 
-      box.textContent =
-        text;
+      const nom =
+        profile.Nom || "";
+
+      const role =
+        profile.Role || "";
+
+      const service =
+        profile.Service || "";
+
+      const sousDirection =
+        profile.Sous_direction || "";
+
+      const departement =
+        profile.Departement || "";
 
 
-      box.style.display =
-        "block";
+      if (nom) {
+
+        $("welcome").textContent =
+          "Bienvenue " + nom;
+
+      }
+
+
+      $("profile-role").textContent =
+        role || "Profil Tâchtik";
+
+
+      let scope = "";
+
+
+      if (departement) {
+
+        scope =
+          "Département " + departement;
+
+      }
+
+      else if (sousDirection) {
+
+        scope =
+          "Sous-direction " + sousDirection;
+
+      }
+
+      else if (service) {
+
+        scope =
+          "Service " + service;
+
+      }
+
+      else if (
+        role === "Administrateur"
+        ||
+        role === "Gestionnaire E1"
+      ) {
+
+        scope =
+          "Accès global";
+
+      }
+
+
+      $("profile-scope").textContent =
+        scope;
 
     }
-
 
 
     /*
-      Connexion à Grist.
+      ==========================================================
+      IDENTIFICATION UTILISATEUR
+
+      1. Création d'une ligne dans SESSION_WIDGET
+      2. Les formules de déclenchement Grist remplissent Email
+         et Horodatage.
+      3. Les formules classiques remplissent Nom / Role /
+         Service / Sous_direction / Departement.
+      4. On relit SESSION_WIDGET.
+      ==========================================================
     */
 
-    try {
+    async function identifyUser() {
 
-      grist.ready({
+      /*
+        On crée une ligne vide.
+        Les formules de déclenchement Grist font le reste.
+      */
 
-        requiredAccess:
-          "read table"
-
-      });
-
-
-
-      grist.onRecords(
-
-        records => {
-
-          try {
-
-            render(records);
-
-          }
-
-          catch (err) {
-
-            console.error(err);
+      const result =
+        await grist.docApi.applyUserActions([
+          [
+            "AddRecord",
+            "SESSION_WIDGET",
+            null,
+            {}
+          ]
+        ]);
 
 
-            showError(
+      /*
+        Petit délai pour laisser Grist recalculer
+        les colonnes dépendantes.
+      */
 
-              "Impossible de calculer les indicateurs. " +
-              "Vérifiez que le widget utilise la table CONTRIBUTIONS."
-
-            );
-
-          }
-
-        }
-
+      await new Promise(
+        resolve =>
+          setTimeout(resolve, 250)
       );
+
+
+      const sessionRows =
+        await grist.docApi.fetchTable(
+          "SESSION_WIDGET"
+        );
+
+
+      if (
+        !Array.isArray(sessionRows)
+        ||
+        sessionRows.length === 0
+      ) {
+
+        throw new Error(
+          "Aucune session trouvée"
+        );
+
+      }
+
+
+      /*
+        La ligne que nous venons de créer
+        est normalement la dernière.
+      */
+
+      const profile =
+        sessionRows[
+          sessionRows.length - 1
+        ];
+
+
+      renderProfile(profile);
 
     }
 
-    catch (err) {
 
-      console.error(err);
+    /*
+      ==========================================================
+      INITIALISATION
+      ==========================================================
+    */
+
+    async function init() {
+
+      try {
+
+        /*
+          Accès complet nécessaire :
+          lecture de plusieurs tables
+          + écriture dans SESSION_WIDGET.
+        */
+
+        grist.ready({
+          requiredAccess: "full"
+        });
 
 
-      showError(
+        /*
+          KPI calculés à partir de la table
+          CONTRIBUTIONS sélectionnée dans le widget.
+        */
 
-        "Ce widget doit être ouvert depuis Grist."
+        grist.onRecords(
+          records => {
 
-      );
+            try {
+
+              renderContributions(records);
+
+            }
+
+            catch (err) {
+
+              console.error(err);
+
+              showError(
+                "Impossible de calculer les indicateurs."
+              );
+
+            }
+
+          }
+        );
+
+
+        /*
+          Identification de l'utilisateur.
+        */
+
+        await identifyUser();
+
+
+        hideError();
+
+      }
+
+      catch (err) {
+
+        console.error(err);
+
+
+        $("profile-role").textContent =
+          "Identification impossible";
+
+
+        showError(
+          "Tâchtik n'a pas pu identifier le profil utilisateur. " +
+          "Vérifiez l'accès complet du widget et la table SESSION_WIDGET."
+        );
+
+      }
 
     }
+
+
+    init();
 
   </script>
 
