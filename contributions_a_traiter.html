@@ -2141,6 +2141,14 @@
       return String(value == null ? "" : value);
     }
 
+    function normalizeText(value) {
+      return text(value)
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    }
+
     function escapeHtml(value) {
       return text(value)
         .replaceAll("&", "&amp;")
