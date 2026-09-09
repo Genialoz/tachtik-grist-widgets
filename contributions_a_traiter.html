@@ -459,7 +459,7 @@
     }
 
     .contribution-side {
-      min-width: 190px;
+      min-width: 210px;
       display: flex;
       flex-direction: column;
       align-items: flex-end;
@@ -747,6 +747,11 @@
       background: #f7fafc;
       border:
         1px solid #edf2f6;
+    }
+
+    .technical-item.reminder-history {
+      background: var(--blue-soft);
+      border-color: #d4e2fb;
     }
 
     .technical-item strong {
@@ -1212,7 +1217,6 @@
             id="detail-reminder-btn"
             class="detail-reminder-btn"
             type="button"
-            title="Enregistre aujourd'hui comme date du dernier rappel"
           >
             🔔 Enregistrer le rappel
           </button>
@@ -1395,17 +1399,17 @@
               <div class="technical-item">
 
                 <strong>
-                  Rappel
+                  Rappel à effectuer
                 </strong>
 
                 <span id="detail-rappel"></span>
 
               </div>
 
-              <div class="technical-item">
+              <div class="technical-item reminder-history">
 
                 <strong>
-                  Dernier rappel
+                  Dernière relance
                 </strong>
 
                 <span id="detail-dernier-rappel"></span>
@@ -2082,6 +2086,13 @@
       );
     }
 
+    function hasReminderHistory(record) {
+
+      return Boolean(
+        record.Dernier_rappel
+      );
+    }
+
     function isUrgent(record) {
 
       return clean(
@@ -2664,6 +2675,29 @@
         : "";
     }
 
+    function reminderHistoryBadge(record) {
+
+      if (
+        !hasReminderHistory(
+          record
+        )
+      ) {
+
+        return "";
+      }
+
+      return `
+        <span class="badge blue">
+          📨 Dernière relance :
+          ${escapeHtml(
+            formatDate(
+              record.Dernier_rappel
+            )
+          )}
+        </span>
+      `;
+    }
+
     function priorityBadge(record) {
 
       const priority =
@@ -2718,7 +2752,7 @@
       if (
         !canRecordReminder
         ||
-        !needsReminder(
+        !isTodo(
           record
         )
       ) {
@@ -2726,13 +2760,20 @@
         return "";
       }
 
+      const label =
+        hasReminderHistory(
+          record
+        )
+          ? "🔔 Enregistrer une nouvelle relance"
+          : "🔔 Enregistrer le rappel";
+
       return `
         <button
           class="reminder-btn"
           data-reminder-id="${Number(record.id)}"
           type="button"
         >
-          🔔 Enregistrer le rappel
+          ${label}
         </button>
       `;
     }
@@ -2756,7 +2797,7 @@
         ]);
 
         showToast(
-          "✓ Rappel enregistré"
+          "✓ Date de relance enregistrée"
         );
 
         await new Promise(
@@ -2777,7 +2818,7 @@
         );
 
         showToast(
-          "Impossible d'enregistrer le rappel."
+          "Impossible d'enregistrer la relance."
         );
       }
     }
@@ -2859,6 +2900,8 @@
                     ${alertBadge(record)}
 
                     ${reminderBadge(record)}
+
+                    ${reminderHistoryBadge(record)}
 
                     ${priorityBadge(record)}
 
@@ -3135,19 +3178,23 @@
 
       $("detail-rappel")
         .textContent =
-        text(
-          record.Rappel_a_faire
+        needsReminder(
+          record
         )
-        ||
-        "Aucun rappel nécessaire";
+          ? "🔔 À relancer"
+          : "Pas de relance nécessaire actuellement";
 
       $("detail-dernier-rappel")
         .textContent =
-        formatDate(
-          record.Dernier_rappel
+        hasReminderHistory(
+          record
         )
-        ||
-        "—";
+          ? "📨 "
+            +
+            formatDate(
+              record.Dernier_rappel
+            )
+          : "Aucune relance enregistrée";
 
       $("detail-finalisation")
         .textContent =
@@ -3218,14 +3265,30 @@
             : "none";
       }
 
-      reminderButtonDetail.style.display =
+      if (
         canRecordReminder
         &&
-        needsReminder(
+        isTodo(
           record
         )
-          ? "inline-flex"
-          : "none";
+      ) {
+
+        reminderButtonDetail.style.display =
+          "inline-flex";
+
+        reminderButtonDetail.textContent =
+          hasReminderHistory(
+            record
+          )
+            ? "🔔 Enregistrer une nouvelle relance"
+            : "🔔 Enregistrer le rappel";
+
+      }
+      else {
+
+        reminderButtonDetail.style.display =
+          "none";
+      }
 
       $("edit-btn")
         .style.display =
