@@ -56,6 +56,7 @@
         Roboto,
         Arial,
         sans-serif;
+
       color: var(--ink);
       background: var(--page);
     }
@@ -150,13 +151,18 @@
     .home-link {
       position: relative;
       z-index: 2;
+
       display: inline-flex;
       align-items: center;
       gap: 7px;
+
       padding: 9px 13px;
+
       color: white;
       text-decoration: none;
+
       border-radius: 11px;
+
       background: rgba(255, 255, 255, 0.13);
       border: 1px solid rgba(255, 255, 255, 0.17);
     }
@@ -264,7 +270,7 @@
     }
 
     /* =========================
-       TOOLBAR
+       BARRE DE FILTRES
        ========================= */
 
     .panel {
@@ -354,7 +360,7 @@
     }
 
     /* =========================
-       RÉSULTATS
+       RESULTATS
        ========================= */
 
     .results-head {
@@ -376,7 +382,7 @@
     }
 
     /* =========================
-       CARTES CONTRIBUTIONS
+       CARTES
        ========================= */
 
     .contribution-list {
@@ -388,16 +394,23 @@
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 16px;
+
       padding: 17px 18px;
+
       border-radius: 17px;
+
       background: var(--surface);
       border: 1px solid var(--line);
-      box-shadow: 0 5px 16px rgba(21, 50, 75, 0.055);
+
+      box-shadow:
+        0 5px 16px rgba(21, 50, 75, 0.055);
     }
 
     .contribution:hover {
       border-color: #cbdbe7;
-      box-shadow: 0 9px 22px rgba(21, 50, 75, 0.08);
+
+      box-shadow:
+        0 9px 22px rgba(21, 50, 75, 0.08);
     }
 
     .contribution-main {
@@ -435,7 +448,9 @@
       display: flex;
       flex-wrap: wrap;
       gap: 7px 15px;
+
       margin-top: 12px;
+
       color: #617688;
       font-size: 11px;
     }
@@ -456,11 +471,15 @@
     .badge {
       display: inline-flex;
       align-items: center;
+
       min-height: 25px;
       padding: 4px 8px;
+
       border-radius: 999px;
+
       font-size: 10px;
       font-weight: 800;
+
       background: #f1f5f8;
       color: #536b7e;
     }
@@ -496,12 +515,14 @@
     }
 
     .contribution-side {
-      min-width: 165px;
+      min-width: 180px;
+
       display: flex;
       flex-direction: column;
       align-items: flex-end;
       justify-content: space-between;
-      gap: 12px;
+
+      gap: 14px;
     }
 
     .deadline {
@@ -527,12 +548,107 @@
       color: var(--muted);
     }
 
+    /* =========================
+       BOUTON RAPPEL
+       ========================= */
+
+    .reminder-action {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .reminder-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+
+      padding: 9px 12px;
+
+      border: 1px solid #e1a13b;
+      border-radius: 11px;
+
+      background: var(--orange-soft);
+      color: #9a620d;
+
+      cursor: pointer;
+
+      font-size: 11px;
+      font-weight: 800;
+
+      transition:
+        background 0.15s ease,
+        transform 0.15s ease,
+        opacity 0.15s ease;
+    }
+
+    .reminder-btn:hover:not(:disabled) {
+      background: #ffedce;
+      transform: translateY(-1px);
+    }
+
+    .reminder-btn:disabled {
+      cursor: wait;
+      opacity: 0.55;
+    }
+
+    /* =========================
+       MESSAGE
+       ========================= */
+
+    .toast {
+      position: fixed;
+      z-index: 9999;
+
+      right: 22px;
+      bottom: 22px;
+
+      max-width: 390px;
+
+      padding: 13px 16px;
+
+      border-radius: 13px;
+
+      color: white;
+
+      font-size: 12px;
+      font-weight: 700;
+
+      box-shadow:
+        0 12px 30px rgba(21, 50, 75, 0.22);
+
+      opacity: 0;
+      pointer-events: none;
+
+      transform: translateY(10px);
+
+      transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+    }
+
+    .toast.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.success {
+      background: #267b55;
+    }
+
+    .toast.error {
+      background: #b23a49;
+    }
+
     .empty {
       padding: 40px 20px;
       text-align: center;
+
       border: 1px dashed #cad8e3;
       border-radius: 18px;
+
       background: rgba(255, 255, 255, 0.55);
+
       color: var(--muted);
     }
 
@@ -556,11 +672,15 @@
       display: flex;
       justify-content: space-between;
       gap: 14px;
+
       margin-top: 16px;
       padding: 13px 15px;
+
       border-radius: 15px;
+
       background: rgba(255, 255, 255, 0.72);
       border: 1px solid var(--line);
+
       color: var(--muted);
       font-size: 10px;
     }
@@ -583,8 +703,10 @@
        ========================= */
 
     @media (max-width: 850px) {
+
       .kpis {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
       }
 
       .contribution {
@@ -603,6 +725,7 @@
     }
 
     @media (max-width: 520px) {
+
       body {
         padding: 10px;
       }
@@ -633,12 +756,24 @@
         align-items: flex-start;
       }
 
+      .reminder-action {
+        justify-content: flex-start;
+      }
+
       .foot {
         flex-direction: column;
+      }
+
+      .toast {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        max-width: none;
       }
     }
   </style>
 </head>
+
 
 <body>
 
@@ -655,6 +790,7 @@
           </div>
 
           <div>
+
             <div class="brand-name">
               TÂCHTIK
             </div>
@@ -662,9 +798,11 @@
             <div class="brand-sub">
               Suivi des contributions de la DGRH
             </div>
+
           </div>
 
         </div>
+
 
         <a
           class="home-link"
@@ -675,6 +813,7 @@
         </a>
 
       </div>
+
 
       <div class="hero-content">
 
@@ -696,50 +835,82 @@
     <section class="kpis">
 
       <article class="kpi todo">
+
         <div class="kpi-top">
-          <span class="kpi-icon">📋</span>
+          <span class="kpi-icon">
+            📋
+          </span>
+
           À traiter
         </div>
 
-        <div id="kpi-todo" class="kpi-value">
+        <div
+          id="kpi-todo"
+          class="kpi-value"
+        >
           0
         </div>
+
       </article>
 
 
       <article class="kpi late">
+
         <div class="kpi-top">
-          <span class="kpi-icon">⏰</span>
+          <span class="kpi-icon">
+            ⏰
+          </span>
+
           En retard
         </div>
 
-        <div id="kpi-late" class="kpi-value">
+        <div
+          id="kpi-late"
+          class="kpi-value"
+        >
           0
         </div>
+
       </article>
 
 
       <article class="kpi remind">
+
         <div class="kpi-top">
-          <span class="kpi-icon">🔔</span>
+          <span class="kpi-icon">
+            🔔
+          </span>
+
           À relancer
         </div>
 
-        <div id="kpi-remind" class="kpi-value">
+        <div
+          id="kpi-remind"
+          class="kpi-value"
+        >
           0
         </div>
+
       </article>
 
 
       <article class="kpi urgent">
+
         <div class="kpi-top">
-          <span class="kpi-icon">⚡</span>
+          <span class="kpi-icon">
+            ⚡
+          </span>
+
           Urgentes
         </div>
 
-        <div id="kpi-urgent" class="kpi-value">
+        <div
+          id="kpi-urgent"
+          class="kpi-value"
+        >
           0
         </div>
+
       </article>
 
     </section>
@@ -765,7 +936,10 @@
         </div>
 
 
-        <select id="priority-filter" class="select">
+        <select
+          id="priority-filter"
+          class="select"
+        >
 
           <option value="">
             Toutes les priorités
@@ -786,7 +960,10 @@
         </select>
 
 
-        <select id="department-filter" class="select">
+        <select
+          id="department-filter"
+          class="select"
+        >
 
           <option value="">
             Tous les départements
@@ -795,7 +972,10 @@
         </select>
 
 
-        <select id="origin-filter" class="select">
+        <select
+          id="origin-filter"
+          class="select"
+        >
 
           <option value="">
             Tous les bureaux d'origine
@@ -868,7 +1048,10 @@
         Contributions à traiter
       </div>
 
-      <div id="results-count" class="results-count">
+      <div
+        id="results-count"
+        class="results-count"
+      >
         0 contribution
       </div>
 
@@ -884,8 +1067,11 @@
     <div class="foot">
 
       <span class="status">
+
         <span class="dot"></span>
+
         Données synchronisées avec Grist
+
       </span>
 
       <span>
@@ -897,6 +1083,12 @@
   </main>
 
 
+  <div
+    id="toast"
+    class="toast"
+  ></div>
+
+
   <script>
 
     const $ = id =>
@@ -904,10 +1096,26 @@
 
 
     let allRecords = [];
-    let quickFilter = "all";
 
+    let quickFilter =
+      "all";
+
+    let currentRole =
+      "";
+
+    let canRecordReminder =
+      false;
+
+    let toastTimer =
+      null;
+
+
+    /* =========================
+       OUTILS
+       ========================= */
 
     function clean(value) {
+
       return String(
         value == null
           ? ""
@@ -919,6 +1127,7 @@
 
 
     function text(value) {
+
       return String(
         value == null
           ? ""
@@ -928,6 +1137,7 @@
 
 
     function escapeHtml(value) {
+
       return text(value)
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
@@ -937,45 +1147,283 @@
     }
 
 
-    function isTodo(record) {
-      const statut =
-        clean(record.Statut);
+    function showToast(
+      message,
+      type = "success"
+    ) {
 
-      return (
-        statut === "à faire"
-        ||
-        statut === "a faire"
+      const toast =
+        $("toast");
+
+
+      clearTimeout(
+        toastTimer
+      );
+
+
+      toast.textContent =
+        message;
+
+
+      toast.className =
+        "toast " +
+        type +
+        " visible";
+
+
+      toastTimer =
+        setTimeout(
+          () => {
+
+            toast.className =
+              "toast " +
+              type;
+
+          },
+          3500
+        );
+    }
+
+
+    /* =========================
+       CONVERSION TABLE GRIST
+       ========================= */
+
+    function tableToRows(table) {
+
+      if (!table) {
+        return [];
+      }
+
+
+      if (
+        Array.isArray(table)
+      ) {
+        return table;
+      }
+
+
+      const ids =
+        Array.isArray(table.id)
+          ? table.id
+          : [];
+
+
+      return ids.map(
+        (id, index) => {
+
+          const row = {
+            id: id
+          };
+
+
+          for (
+            const column
+            of Object.keys(table)
+          ) {
+
+            if (
+              column === "id"
+            ) {
+              continue;
+            }
+
+
+            const values =
+              table[column];
+
+
+            if (
+              Array.isArray(values)
+            ) {
+
+              row[column] =
+                values[index];
+            }
+          }
+
+
+          return row;
+        }
       );
     }
 
 
-    function isLate(record) {
-      return clean(record.Alerte)
-        .includes("en retard");
+    /* =========================
+       IDENTIFICATION UTILISATEUR
+       ========================= */
+
+    async function identifyUser() {
+
+      try {
+
+        const beforeTable =
+          await grist.docApi.fetchTable(
+            "SESSION_WIDGET"
+          );
+
+
+        const beforeRows =
+          tableToRows(
+            beforeTable
+          );
+
+
+        const beforeIds =
+          new Set(
+            beforeRows.map(
+              row =>
+                Number(row.id)
+            )
+          );
+
+
+        await grist.docApi.applyUserActions([
+          [
+            "AddRecord",
+            "SESSION_WIDGET",
+            null,
+            {}
+          ]
+        ]);
+
+
+        await new Promise(
+          resolve =>
+            setTimeout(
+              resolve,
+              800
+            )
+        );
+
+
+        const afterTable =
+          await grist.docApi.fetchTable(
+            "SESSION_WIDGET"
+          );
+
+
+        const afterRows =
+          tableToRows(
+            afterTable
+          );
+
+
+        const newRows =
+          afterRows.filter(
+            row =>
+              !beforeIds.has(
+                Number(row.id)
+              )
+          );
+
+
+        if (
+          newRows.length === 0
+        ) {
+
+          throw new Error(
+            "La ligne de session créée par Tâchtik n'a pas pu être retrouvée."
+          );
+        }
+
+
+        newRows.sort(
+          (a, b) =>
+            Number(b.id) -
+            Number(a.id)
+        );
+
+
+        const profile =
+          newRows[0];
+
+
+        const sessionRowId =
+          Number(
+            profile.id
+          );
+
+
+        currentRole =
+          clean(
+            profile.Role
+          );
+
+
+        canRecordReminder =
+          (
+            currentRole
+              .startsWith(
+                "admin"
+              )
+            ||
+            currentRole
+              ===
+              "gestionnaire e1"
+          );
+
+
+        try {
+
+          await grist.docApi.applyUserActions([
+            [
+              "BulkRemoveRecord",
+              "SESSION_WIDGET",
+              [sessionRowId]
+            ]
+          ]);
+
+        }
+        catch (cleanupError) {
+
+          console.error(
+            "Suppression SESSION_WIDGET impossible :",
+            cleanupError
+          );
+        }
+
+
+        renderAll();
+
+      }
+      catch (error) {
+
+        console.error(
+          "Identification utilisateur impossible :",
+          error
+        );
+
+
+        /*
+         * En cas d'échec de l'identification,
+         * aucun bouton de modification n'est affiché.
+         */
+
+        canRecordReminder =
+          false;
+
+
+        renderAll();
+      }
     }
 
 
-    function isClose(record) {
-      return clean(record.Alerte)
-        .includes("échéance proche");
-    }
+    /* =========================
+       DATE GRIST
+       ========================= */
+
+    function todayGristDate() {
+
+      const now =
+        new Date();
 
 
-    function isWatch(record) {
-      return clean(record.Alerte)
-        .includes("à surveiller");
-    }
-
-
-    function needsReminder(record) {
-      return clean(record.Rappel_a_faire)
-        .includes("relancer");
-    }
-
-
-    function isUrgent(record) {
-      return clean(record.Priorite)
-        === "urgente";
+      return Date.UTC(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate()
+      ) / 1000;
     }
 
 
@@ -993,31 +1441,32 @@
       if (
         typeof value === "number"
       ) {
+
         return new Date(
           value * 1000
         );
       }
 
 
-      const d =
+      const date =
         new Date(value);
 
 
       return Number.isNaN(
-        d.getTime()
+        date.getTime()
       )
         ? null
-        : d;
+        : date;
     }
 
 
     function formatDate(value) {
 
-      const d =
+      const date =
         dateValue(value);
 
 
-      if (!d) {
+      if (!date) {
         return "Non renseignée";
       }
 
@@ -1030,19 +1479,111 @@
           year: "numeric"
         }
       )
-      .format(d);
+      .format(date);
+    }
+
+
+    /* =========================
+       ETATS CONTRIBUTIONS
+       ========================= */
+
+    function isTodo(record) {
+
+      const statut =
+        clean(
+          record.Statut
+        );
+
+
+      return (
+        statut === "à faire"
+        ||
+        statut === "a faire"
+      );
+    }
+
+
+    function isLate(record) {
+
+      return clean(
+        record.Alerte
+      )
+      .includes(
+        "en retard"
+      );
+    }
+
+
+    function isClose(record) {
+
+      const value =
+        clean(
+          record.Alerte
+        );
+
+
+      return (
+        value.includes(
+          "échéance proche"
+        )
+        ||
+        value.includes(
+          "echeance proche"
+        )
+      );
+    }
+
+
+    function isWatch(record) {
+
+      const value =
+        clean(
+          record.Alerte
+        );
+
+
+      return (
+        value.includes(
+          "à surveiller"
+        )
+        ||
+        value.includes(
+          "a surveiller"
+        )
+      );
+    }
+
+
+    function needsReminder(record) {
+
+      return clean(
+        record.Rappel_a_faire
+      )
+      .includes(
+        "relancer"
+      );
+    }
+
+
+    function isUrgent(record) {
+
+      return clean(
+        record.Priorite
+      )
+      ===
+      "urgente";
     }
 
 
     function isThisWeek(record) {
 
-      const d =
+      const date =
         dateValue(
           record.Echeance
         );
 
 
-      if (!d) {
+      if (!date) {
         return false;
       }
 
@@ -1068,8 +1609,10 @@
 
 
       monday.setDate(
-        today.getDate() -
-        day +
+        today.getDate()
+        -
+        day
+        +
         1
       );
 
@@ -1079,7 +1622,8 @@
 
 
       sunday.setDate(
-        monday.getDate() +
+        monday.getDate()
+        +
         6
       );
 
@@ -1093,12 +1637,16 @@
 
 
       return (
-        d >= monday
+        date >= monday
         &&
-        d <= sunday
+        date <= sunday
       );
     }
 
+
+    /* =========================
+       TRI
+       ========================= */
 
     function sortByDeadline(records) {
 
@@ -1111,19 +1659,26 @@
                 a.Echeance
               );
 
+
             const db =
               dateValue(
                 b.Echeance
               );
 
 
-            if (!da && !db) {
+            if (
+              !da
+              &&
+              !db
+            ) {
               return 0;
             }
+
 
             if (!da) {
               return 1;
             }
+
 
             if (!db) {
               return -1;
@@ -1131,13 +1686,18 @@
 
 
             return (
-              da.getTime() -
+              da.getTime()
+              -
               db.getTime()
             );
           }
         );
     }
 
+
+    /* =========================
+       LISTES DEROULANTES
+       ========================= */
 
     function populateSelect(
       id,
@@ -1148,17 +1708,23 @@
       const select =
         $(id);
 
+
       const current =
         select.value;
 
 
       const unique =
-        [...new Set(
-          values
-            .map(text)
-            .map(v => v.trim())
-            .filter(Boolean)
-        )]
+        [
+          ...new Set(
+            values
+              .map(text)
+              .map(
+                value =>
+                  value.trim()
+              )
+              .filter(Boolean)
+          )
+        ]
         .sort(
           (a, b) =>
             a.localeCompare(
@@ -1172,18 +1738,24 @@
         `<option value="">${escapeHtml(firstLabel)}</option>`;
 
 
-      for (const value of unique) {
+      for (
+        const value
+        of unique
+      ) {
 
         const option =
           document.createElement(
             "option"
           );
 
+
         option.value =
           clean(value);
 
+
         option.textContent =
           value;
+
 
         select.appendChild(
           option
@@ -1196,6 +1768,10 @@
     }
 
 
+    /* =========================
+       KPI
+       ========================= */
+
     function renderKpis() {
 
       const active =
@@ -1204,28 +1780,36 @@
         );
 
 
-      $("kpi-todo").textContent =
+      $("kpi-todo")
+        .textContent =
         active.length;
 
 
-      $("kpi-late").textContent =
+      $("kpi-late")
+        .textContent =
         active.filter(
           isLate
         ).length;
 
 
-      $("kpi-remind").textContent =
+      $("kpi-remind")
+        .textContent =
         active.filter(
           needsReminder
         ).length;
 
 
-      $("kpi-urgent").textContent =
+      $("kpi-urgent")
+        .textContent =
         active.filter(
           isUrgent
         ).length;
     }
 
+
+    /* =========================
+       FILTRAGE
+       ========================= */
 
     function getFilteredRecords() {
 
@@ -1254,9 +1838,12 @@
 
 
       return sortByDeadline(
+
         allRecords
 
-          .filter(isTodo)
+          .filter(
+            isTodo
+          )
 
           .filter(
             record => {
@@ -1279,9 +1866,10 @@
                 .join(" ");
 
 
-              return haystack.includes(
-                search
-              );
+              return haystack
+                .includes(
+                  search
+                );
             }
           )
 
@@ -1297,7 +1885,8 @@
                 clean(
                   record.Priorite
                 )
-                === priority
+                ===
+                priority
               );
             }
           )
@@ -1314,7 +1903,8 @@
                 clean(
                   record.Contributeur
                 )
-                === department
+                ===
+                department
               );
             }
           )
@@ -1331,7 +1921,8 @@
                 clean(
                   record.Bureau_origine
                 )
-                === origin
+                ===
+                origin
               );
             }
           )
@@ -1340,8 +1931,11 @@
             record => {
 
               if (
-                quickFilter === "late"
+                quickFilter
+                ===
+                "late"
               ) {
+
                 return isLate(
                   record
                 );
@@ -1349,8 +1943,11 @@
 
 
               if (
-                quickFilter === "close"
+                quickFilter
+                ===
+                "close"
               ) {
+
                 return isClose(
                   record
                 );
@@ -1358,8 +1955,11 @@
 
 
               if (
-                quickFilter === "watch"
+                quickFilter
+                ===
+                "watch"
               ) {
+
                 return isWatch(
                   record
                 );
@@ -1367,8 +1967,11 @@
 
 
               if (
-                quickFilter === "remind"
+                quickFilter
+                ===
+                "remind"
               ) {
+
                 return needsReminder(
                   record
                 );
@@ -1376,8 +1979,11 @@
 
 
               if (
-                quickFilter === "urgent"
+                quickFilter
+                ===
+                "urgent"
               ) {
+
                 return isUrgent(
                   record
                 );
@@ -1385,8 +1991,11 @@
 
 
               if (
-                quickFilter === "week"
+                quickFilter
+                ===
+                "week"
               ) {
+
                 return isThisWeek(
                   record
                 );
@@ -1399,6 +2008,10 @@
       );
     }
 
+
+    /* =========================
+       BADGES
+       ========================= */
 
     function alertBadge(record) {
 
@@ -1426,23 +2039,37 @@
           "en retard"
         )
       ) {
-        cls = "red";
+
+        cls =
+          "red";
       }
 
       else if (
         normalized.includes(
           "échéance proche"
         )
+        ||
+        normalized.includes(
+          "echeance proche"
+        )
       ) {
-        cls = "orange";
+
+        cls =
+          "orange";
       }
 
       else if (
         normalized.includes(
           "à surveiller"
         )
+        ||
+        normalized.includes(
+          "a surveiller"
+        )
       ) {
-        cls = "yellow";
+
+        cls =
+          "yellow";
       }
 
       else if (
@@ -1450,7 +2077,9 @@
           "fait"
         )
       ) {
-        cls = "green";
+
+        cls =
+          "green";
       }
 
 
@@ -1484,21 +2113,33 @@
 
 
       if (
-        normalized === "urgente"
+        normalized
+        ===
+        "urgente"
       ) {
-        cls = "violet";
+
+        cls =
+          "violet";
       }
 
       else if (
-        normalized === "haute"
+        normalized
+        ===
+        "haute"
       ) {
-        cls = "orange";
+
+        cls =
+          "orange";
       }
 
       else if (
-        normalized === "normale"
+        normalized
+        ===
+        "normale"
       ) {
-        cls = "green";
+
+        cls =
+          "green";
       }
 
 
@@ -1529,6 +2170,10 @@
     }
 
 
+    /* =========================
+       ECHEANCE
+       ========================= */
+
     function deadlineText(record) {
 
       const days =
@@ -1544,25 +2189,32 @@
       }
 
 
-      const n =
+      const number =
         Number(days);
 
 
       if (
-        Number.isNaN(n)
+        Number.isNaN(
+          number
+        )
       ) {
         return "";
       }
 
 
-      if (n < 0) {
+      if (
+        number < 0
+      ) {
 
         const abs =
-          Math.abs(n);
+          Math.abs(
+            number
+          );
 
 
         return (
-          abs +
+          abs
+          +
           (
             abs > 1
               ? " jours de retard"
@@ -1572,22 +2224,197 @@
       }
 
 
-      if (n === 0) {
+      if (
+        number === 0
+      ) {
+
         return "Échéance aujourd’hui";
       }
 
 
       return (
-        "Dans " +
-        n +
+        "Dans "
+        +
+        number
+        +
         (
-          n > 1
+          number > 1
             ? " jours"
             : " jour"
         )
       );
     }
 
+
+    /* =========================
+       BOUTON RAPPEL
+       ========================= */
+
+    function reminderButton(record) {
+
+      if (
+        !canRecordReminder
+        ||
+        !needsReminder(
+          record
+        )
+      ) {
+
+        return "";
+      }
+
+
+      return `
+        <div class="reminder-action">
+
+          <button
+            class="reminder-btn"
+            data-reminder-id="${Number(record.id)}"
+            type="button"
+          >
+            🔔 Rappel effectué
+          </button>
+
+        </div>
+      `;
+    }
+
+
+    async function recordReminder(
+      recordId,
+      button
+    ) {
+
+      if (
+        !canRecordReminder
+      ) {
+
+        showToast(
+          "Vous n'avez pas l'autorisation d'enregistrer un rappel.",
+          "error"
+        );
+
+        return;
+      }
+
+
+      const record =
+        allRecords.find(
+          item =>
+            Number(item.id)
+            ===
+            Number(recordId)
+        );
+
+
+      if (
+        !record
+      ) {
+
+        showToast(
+          "Contribution introuvable.",
+          "error"
+        );
+
+        return;
+      }
+
+
+      if (
+        !needsReminder(
+          record
+        )
+      ) {
+
+        showToast(
+          "Cette contribution ne nécessite plus de rappel.",
+          "error"
+        );
+
+        return;
+      }
+
+
+      const previousText =
+        button.textContent;
+
+
+      button.disabled =
+        true;
+
+
+      button.textContent =
+        "Enregistrement…";
+
+
+      try {
+
+        const today =
+          todayGristDate();
+
+
+        await grist.docApi.applyUserActions([
+          [
+            "UpdateRecord",
+            "CONTRIBUTIONS",
+            Number(recordId),
+            {
+              Dernier_rappel: today
+            }
+          ]
+        ]);
+
+
+        /*
+         * Mise à jour locale immédiate.
+         * Grist renverra ensuite les données recalculées
+         * via onRecords.
+         */
+
+        record.Dernier_rappel =
+          today;
+
+
+        record.Rappel_a_faire =
+          "";
+
+
+        renderAll();
+
+
+        showToast(
+          "Rappel enregistré pour aujourd'hui.",
+          "success"
+        );
+
+      }
+      catch (error) {
+
+        console.error(
+          "Erreur lors de l'enregistrement du rappel :",
+          error
+        );
+
+
+        button.disabled =
+          false;
+
+
+        button.textContent =
+          previousText;
+
+
+        showToast(
+          "Le rappel n'a pas pu être enregistré. Vérifiez les droits Grist.",
+          "error"
+        );
+      }
+    }
+
+
+    /* =========================
+       AFFICHAGE LISTE
+       ========================= */
 
     function renderList() {
 
@@ -1599,8 +2426,10 @@
         $("contribution-list");
 
 
-      $("results-count").textContent =
-        records.length +
+      $("results-count")
+        .textContent =
+        records.length
+        +
         (
           records.length > 1
             ? " contributions"
@@ -1630,6 +2459,7 @@
           </div>
         `;
 
+
         return;
       }
 
@@ -1647,32 +2477,41 @@
 
               const titre =
                 escapeHtml(
-                  record.Titre ||
+                  record.Titre
+                  ||
                   "Sans titre"
                 );
 
 
               const description =
                 escapeHtml(
-                  record.Description || ""
+                  record.Description
+                  ||
+                  ""
                 );
 
 
               const contributeur =
                 escapeHtml(
-                  record.Contributeur || ""
+                  record.Contributeur
+                  ||
+                  ""
                 );
 
 
               const origin =
                 escapeHtml(
-                  record.Bureau_origine || ""
+                  record.Bureau_origine
+                  ||
+                  ""
                 );
 
 
               const demandeur =
                 escapeHtml(
-                  record.Demandeur || ""
+                  record.Demandeur
+                  ||
+                  ""
                 );
 
 
@@ -1712,7 +2551,9 @@
                           ? `
                             <span class="meta-item">
                               👤
-                              <strong>Contributeur :</strong>
+                              <strong>
+                                Contributeur :
+                              </strong>
                               ${contributeur}
                             </span>
                           `
@@ -1725,7 +2566,9 @@
                           ? `
                             <span class="meta-item">
                               🏢
-                              <strong>Origine :</strong>
+                              <strong>
+                                Origine :
+                              </strong>
                               ${origin}
                             </span>
                           `
@@ -1738,7 +2581,9 @@
                           ? `
                             <span class="meta-item">
                               ✉️
-                              <strong>Demandeur :</strong>
+                              <strong>
+                                Demandeur :
+                              </strong>
                               ${demandeur}
                             </span>
                           `
@@ -1770,22 +2615,29 @@
                       </div>
 
                       <div class="deadline-date">
+
                         ${escapeHtml(
                           formatDate(
                             record.Echeance
                           )
                         )}
+
                       </div>
 
                       <div class="deadline-days">
+
                         ${escapeHtml(
                           deadlineText(
                             record
                           )
                         )}
+
                       </div>
 
                     </div>
+
+
+                    ${reminderButton(record)}
 
                   </div>
 
@@ -1794,8 +2646,45 @@
             }
           )
           .join("");
+
+
+      bindReminderButtons();
     }
 
+
+    function bindReminderButtons() {
+
+      document
+        .querySelectorAll(
+          ".reminder-btn"
+        )
+        .forEach(
+          button => {
+
+            button.addEventListener(
+              "click",
+              () => {
+
+                const id =
+                  Number(
+                    button.dataset.reminderId
+                  );
+
+
+                recordReminder(
+                  id,
+                  button
+                );
+              }
+            );
+          }
+        );
+    }
+
+
+    /* =========================
+       AFFICHAGE GENERAL
+       ========================= */
 
     function renderAll() {
 
@@ -1804,24 +2693,32 @@
 
       populateSelect(
         "department-filter",
+
         allRecords
-          .filter(isTodo)
+          .filter(
+            isTodo
+          )
           .map(
-            r =>
-              r.Contributeur
+            record =>
+              record.Contributeur
           ),
+
         "Tous les départements"
       );
 
 
       populateSelect(
         "origin-filter",
+
         allRecords
-          .filter(isTodo)
+          .filter(
+            isTodo
+          )
           .map(
-            r =>
-              r.Bureau_origine
+            record =>
+              record.Bureau_origine
           ),
+
         "Tous les bureaux d'origine"
       );
 
@@ -1829,6 +2726,10 @@
       renderList();
     }
 
+
+    /* =========================
+       EVENEMENTS FILTRES
+       ========================= */
 
     function bindEvents() {
 
@@ -1880,15 +2781,17 @@
                     ".filter-btn"
                   )
                   .forEach(
-                    item =>
-                      item.classList.remove(
-                        "active"
-                      )
+                    item => {
+
+                      item.classList
+                        .remove(
+                          "active"
+                        );
+                    }
                   );
 
 
-                button
-                  .classList
+                button.classList
                   .add(
                     "active"
                   );
@@ -1902,7 +2805,11 @@
     }
 
 
-    function init() {
+    /* =========================
+       INITIALISATION GRIST
+       ========================= */
+
+    async function init() {
 
       grist.ready({
         requiredAccess: "full"
@@ -1924,6 +2831,9 @@
           renderAll();
         }
       );
+
+
+      await identifyUser();
     }
 
 
