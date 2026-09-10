@@ -1,0 +1,2147 @@
+from pathlib import Path
+
+html = r'''<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Tâchtik - Gestion des utilisateurs</title>
+
+<script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<style>
+:root{
+  --bg:#f5f7fb;
+  --card:#ffffff;
+  --text:#172033;
+  --muted:#667085;
+  --line:#dfe5ec;
+  --blue:#2563eb;
+  --blue-dark:#1d4ed8;
+  --blue-soft:#eff6ff;
+  --green:#047857;
+  --green-soft:#ecfdf5;
+  --red:#b42318;
+  --red-soft:#fef3f2;
+  --orange:#b54708;
+  --orange-soft:#fffaeb;
+  --grey-soft:#f2f4f7;
+  --shadow:0 10px 30px rgba(31,41,55,.08);
+  --radius:18px;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+button,input,select{font:inherit}
+button{cursor:pointer}
+button:disabled{cursor:not-allowed;opacity:.55}
+
+.app{
+  max-width:1320px;
+  margin:0 auto;
+  padding:24px;
+}
+
+.hero{
+  padding:25px 28px;
+  margin-bottom:20px;
+  border-radius:22px;
+  background:linear-gradient(135deg,#1d4ed8,#3b82f6);
+  color:white;
+  box-shadow:var(--shadow);
+}
+
+.hero-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:20px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:13px;
+}
+
+.brand-mark{
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:13px;
+  background:rgba(255,255,255,.18);
+  font-size:21px;
+  font-weight:900;
+}
+
+.brand-name{
+  font-size:13px;
+  font-weight:900;
+  letter-spacing:.12em;
+}
+
+.brand-sub{
+  margin-top:2px;
+  font-size:12px;
+  opacity:.82;
+}
+
+.hero-content{margin-top:24px}
+
+.hero h1{
+  margin:0 0 7px;
+  font-size:29px;
+}
+
+.hero p{
+  margin:0;
+  max-width:760px;
+  line-height:1.5;
+  opacity:.92;
+}
+
+.profile{
+  margin-top:13px;
+  font-size:13px;
+  opacity:.9;
+}
+
+.btn{
+  border:1px solid transparent;
+  border-radius:11px;
+  padding:10px 14px;
+  font-size:13px;
+  font-weight:800;
+  transition:.15s ease;
+}
+
+.btn:hover:not(:disabled){transform:translateY(-1px)}
+
+.btn-primary{background:var(--blue);color:white}
+.btn-primary:hover:not(:disabled){background:var(--blue-dark)}
+
+.btn-secondary{
+  border-color:#d8e0ea;
+  background:white;
+  color:var(--text);
+}
+
+.btn-danger{
+  border-color:#fecaca;
+  background:var(--red-soft);
+  color:var(--red);
+}
+
+.btn-warning{
+  border-color:#fedf89;
+  background:var(--orange-soft);
+  color:#7a2e0e;
+}
+
+.btn-small{
+  padding:8px 11px;
+  font-size:12px;
+}
+
+.kpis{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:14px;
+  margin-bottom:20px;
+}
+
+.kpi{
+  padding:18px;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:white;
+  box-shadow:var(--shadow);
+}
+
+.kpi-label{
+  margin-bottom:7px;
+  font-size:13px;
+  color:var(--muted);
+}
+
+.kpi-value{
+  font-size:29px;
+  font-weight:900;
+}
+
+.panel{
+  margin-bottom:18px;
+  padding:20px;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:white;
+  box-shadow:var(--shadow);
+}
+
+.panel-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  margin-bottom:17px;
+}
+
+.panel-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.panel-title{
+  margin:0;
+  font-size:20px;
+}
+
+.panel-subtitle{
+  margin:5px 0 0;
+  color:var(--muted);
+  font-size:13px;
+}
+
+.toolbar{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+  margin-bottom:16px;
+}
+
+.search{
+  flex:1;
+  min-width:230px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  padding:10px 12px;
+  background:white;
+}
+
+.filter-select{
+  min-width:170px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  padding:10px 11px;
+  background:white;
+}
+
+.table-wrap{
+  width:100%;
+  overflow-x:auto;
+  border:1px solid var(--line);
+  border-radius:14px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:white;
+}
+
+th{
+  padding:12px 13px;
+  border-bottom:1px solid var(--line);
+  background:#f8fafc;
+  text-align:left;
+  white-space:nowrap;
+  font-size:12px;
+  color:#475467;
+}
+
+td{
+  padding:13px;
+  border-bottom:1px solid #edf1f5;
+  vertical-align:middle;
+  font-size:13px;
+}
+
+tr:last-child td{border-bottom:0}
+
+.user-name{font-weight:800}
+.user-email{color:#475467}
+.muted{color:var(--muted)}
+
+.actions{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  white-space:nowrap;
+}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:800;
+}
+
+.badge-admin{background:#eef2ff;color:#4338ca}
+.badge-manager{background:var(--blue-soft);color:#1d4ed8}
+.badge-reader{background:var(--green-soft);color:var(--green)}
+.badge-other{background:var(--grey-soft);color:#475467}
+.badge-active{background:var(--green-soft);color:var(--green)}
+.badge-inactive{background:var(--grey-soft);color:#667085}
+.badge-error{background:var(--red-soft);color:var(--red)}
+.badge-warning{background:var(--orange-soft);color:var(--orange)}
+.badge-new{background:var(--green-soft);color:var(--green)}
+.badge-update{background:var(--blue-soft);color:var(--blue-dark)}
+.badge-same{background:var(--grey-soft);color:#475467}
+
+.modal-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:1000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(15,23,42,.48);
+}
+
+.modal-backdrop.open{display:flex}
+
+.modal{
+  width:min(820px,100%);
+  max-height:calc(100vh - 40px);
+  overflow:auto;
+  border-radius:20px;
+  background:white;
+  box-shadow:0 25px 70px rgba(15,23,42,.24);
+}
+
+.modal.large{width:min(1180px,100%)}
+
+.modal-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:20px 22px;
+  border-bottom:1px solid var(--line);
+}
+
+.modal-title{
+  margin:0;
+  font-size:20px;
+}
+
+.modal-close{
+  width:35px;
+  height:35px;
+  border:0;
+  border-radius:10px;
+  background:#f2f4f7;
+  font-size:18px;
+}
+
+.modal-body{padding:22px}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+
+.form-group{min-width:0}
+.form-group.full{grid-column:1 / -1}
+
+.form-label{
+  display:block;
+  margin-bottom:6px;
+  font-size:12px;
+  font-weight:800;
+  color:#475467;
+}
+
+.form-control{
+  width:100%;
+  padding:11px 12px;
+  border:1px solid #d5dde7;
+  border-radius:11px;
+  background:white;
+  color:var(--text);
+}
+
+.form-control:focus{
+  outline:none;
+  border-color:#80a6ed;
+  box-shadow:0 0 0 3px rgba(37,99,235,.08);
+}
+
+.form-help{
+  margin-top:6px;
+  font-size:11px;
+  line-height:1.4;
+  color:var(--muted);
+}
+
+.form-error{
+  display:none;
+  margin-top:8px;
+  padding:10px 12px;
+  border-radius:10px;
+  background:var(--red-soft);
+  color:var(--red);
+  font-size:12px;
+  font-weight:700;
+}
+
+.form-error.show{display:block}
+
+.modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:9px;
+  margin-top:22px;
+}
+
+.access-denied{
+  display:none;
+  padding:35px;
+  border:1px solid #fedf89;
+  border-radius:18px;
+  background:var(--orange-soft);
+  text-align:center;
+  color:#7a2e0e;
+}
+
+.access-denied h2{margin-top:0}
+
+.empty{
+  padding:38px;
+  text-align:center;
+  color:var(--muted);
+}
+
+.toast{
+  position:fixed;
+  right:22px;
+  bottom:22px;
+  z-index:3000;
+  display:none;
+  max-width:440px;
+  padding:13px 16px;
+  border-radius:12px;
+  background:#15324b;
+  color:white;
+  font-size:13px;
+  font-weight:750;
+  box-shadow:0 15px 40px rgba(21,50,75,.28);
+}
+
+.import-drop{
+  border:2px dashed #cbd5e1;
+  border-radius:16px;
+  padding:24px;
+  text-align:center;
+  background:#f8fafc;
+}
+
+.import-drop input{display:none}
+
+.import-file{
+  margin-top:10px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.import-summary{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:10px;
+  margin:18px 0;
+}
+
+.import-stat{
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fff;
+}
+
+.import-stat strong{
+  display:block;
+  font-size:22px;
+}
+
+.import-stat span{
+  font-size:11px;
+  color:var(--muted);
+}
+
+.import-table td,.import-table th{
+  font-size:12px;
+  padding:9px 10px;
+}
+
+.notice{
+  margin-top:14px;
+  padding:12px 14px;
+  border-radius:11px;
+  background:var(--blue-soft);
+  color:#1e40af;
+  font-size:12px;
+  line-height:1.45;
+}
+
+.notice.warning{
+  background:var(--orange-soft);
+  color:#7a2e0e;
+}
+
+@media(max-width:900px){
+  .kpis{grid-template-columns:1fr 1fr}
+  .form-grid{grid-template-columns:1fr}
+  .form-group.full{grid-column:auto}
+  .hero-top{flex-direction:column}
+  .import-summary{grid-template-columns:1fr 1fr}
+}
+
+@media(max-width:560px){
+  .kpis{grid-template-columns:1fr}
+  .app{padding:12px}
+  .panel-header{align-items:flex-start;flex-direction:column}
+}
+</style>
+</head>
+
+<body>
+<main class="app">
+
+  <!-- =========================================
+       ENTÊTE TÂCHTIK
+       ========================================= -->
+  <section class="hero">
+    <div class="hero-top">
+      <div class="brand">
+        <div class="brand-mark">👤</div>
+        <div>
+          <div class="brand-name">TÂCHTIK</div>
+          <div class="brand-sub">Suivi des contributions de la DGRH</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-content">
+      <h1>Gestion des utilisateurs</h1>
+      <p>
+        Gérez les profils Tâchtik, leurs rôles, leurs périmètres de lecture
+        et les imports en nombre depuis Excel.
+      </p>
+      <div id="profileInfo" class="profile">Identification…</div>
+    </div>
+  </section>
+
+  <!-- =========================================
+       ACCÈS REFUSÉ
+       ========================================= -->
+  <section id="accessDenied" class="access-denied">
+    <h2>🔒 Accès réservé</h2>
+    <p>Cette fonction est réservée aux administrateurs de Tâchtik.</p>
+  </section>
+
+  <!-- =========================================
+       CONTENU ADMINISTRATEUR
+       ========================================= -->
+  <div id="adminContent" style="display:none">
+
+    <section class="kpis">
+      <div class="kpi">
+        <div class="kpi-label">Utilisateurs</div>
+        <div id="kpiUsers" class="kpi-value">0</div>
+      </div>
+
+      <div class="kpi">
+        <div class="kpi-label">Actifs</div>
+        <div id="kpiActive" class="kpi-value">0</div>
+      </div>
+
+      <div class="kpi">
+        <div class="kpi-label">Lecteurs</div>
+        <div id="kpiReaders" class="kpi-value">0</div>
+      </div>
+
+      <div class="kpi">
+        <div class="kpi-label">Administrateurs</div>
+        <div id="kpiAdmins" class="kpi-value">0</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Utilisateurs Tâchtik</h2>
+          <p class="panel-subtitle">
+            Les droits métier sont pilotés par la table UTILISATEURS et les règles ACL de Grist.
+          </p>
+        </div>
+
+        <div class="panel-actions">
+          <button id="importUsersBtn" class="btn btn-secondary" type="button">
+            📥 Importer des utilisateurs
+          </button>
+          <button id="newUserBtn" class="btn btn-primary" type="button">
+            ＋ Ajouter un utilisateur
+          </button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <input
+          id="searchInput"
+          class="search"
+          type="search"
+          placeholder="Rechercher par nom, e-mail, rôle, périmètre ou bureau…"
+        >
+
+        <select id="roleFilter" class="filter-select">
+          <option value="">Tous les rôles</option>
+        </select>
+
+        <select id="activeFilter" class="filter-select">
+          <option value="">Tous les états</option>
+          <option value="active">Actifs</option>
+          <option value="inactive">Inactifs</option>
+        </select>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Utilisateur</th>
+              <th>Rôle</th>
+              <th>Périmètre</th>
+              <th>Bureau</th>
+              <th>État</th>
+              <th>Contrôle</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="usersBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- =========================================
+     MODALE AJOUT / MODIFICATION
+     ========================================= -->
+<div id="userModal" class="modal-backdrop">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle" class="modal-title">Ajouter un utilisateur</h2>
+      <button id="closeModalBtn" class="modal-close" type="button">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label for="userName" class="form-label">Nom et prénom *</label>
+          <input id="userName" class="form-control" type="text">
+        </div>
+
+        <div class="form-group">
+          <label for="userEmail" class="form-label">Adresse e-mail *</label>
+          <input id="userEmail" class="form-control" type="email" autocomplete="off">
+          <div class="form-help">
+            L'adresse doit correspondre au compte utilisé pour accéder à Grist.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="userRole" class="form-label">Rôle *</label>
+          <select id="userRole" class="form-control">
+            <option value="">Sélectionner…</option>
+            <option value="Administrateur">Administrateur</option>
+            <option value="Gestionnaire E1">Gestionnaire E1</option>
+            <option value="Lecteur">Lecteur</option>
+            <option value="Bureau saisie">Bureau saisie</option>
+            <option value="Bureau import">Bureau import</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="userActive" class="form-label">État du compte</label>
+          <select id="userActive" class="form-control">
+            <option value="true">Actif</option>
+            <option value="false">Désactivé</option>
+          </select>
+        </div>
+
+        <div id="perimeterTypeGroup" class="form-group">
+          <label for="perimeterType" class="form-label">Niveau de périmètre</label>
+          <select id="perimeterType" class="form-control">
+            <option value="">Aucun</option>
+            <option value="Service">Service</option>
+            <option value="Sous_direction">Sous-direction</option>
+            <option value="Departement">Département</option>
+          </select>
+          <div id="perimeterHelp" class="form-help">
+            Un lecteur doit avoir un seul niveau de périmètre.
+          </div>
+        </div>
+
+        <div id="perimeterValueGroup" class="form-group" style="display:none">
+          <label id="perimeterValueLabel" for="perimeterValue" class="form-label">
+            Périmètre
+          </label>
+          <select id="perimeterValue" class="form-control"></select>
+        </div>
+
+        <div id="bureauGroup" class="form-group full" style="display:none">
+          <label for="userBureau" class="form-label">Bureau *</label>
+          <select id="userBureau" class="form-control">
+            <option value="">Sélectionner…</option>
+          </select>
+          <div class="form-help">
+            Obligatoire pour les rôles Bureau saisie et Bureau import.
+          </div>
+        </div>
+
+      </div>
+
+      <div id="formError" class="form-error"></div>
+
+      <div class="modal-actions">
+        <button id="cancelBtn" class="btn btn-secondary" type="button">Annuler</button>
+        <button id="saveBtn" class="btn btn-primary" type="button">💾 Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================
+     MODALE IMPORT EXCEL
+     ========================================= -->
+<div id="importModal" class="modal-backdrop">
+  <div class="modal large">
+    <div class="modal-header">
+      <h2 class="modal-title">Importer des utilisateurs depuis Excel</h2>
+      <button id="closeImportBtn" class="modal-close" type="button">×</button>
+    </div>
+
+    <div class="modal-body">
+
+      <div class="import-drop">
+        <div style="font-size:34px;margin-bottom:8px">📄</div>
+        <strong>Sélectionnez un fichier Excel .xlsx ou .xls</strong>
+        <div class="form-help" style="margin:7px auto 14px;max-width:760px">
+          Colonnes attendues :
+          Email, Nom, Role, Service, Sous_direction, Departement, Bureau, Actif.
+        </div>
+
+        <button id="chooseImportBtn" class="btn btn-primary" type="button">
+          Choisir le fichier Excel
+        </button>
+        <input id="importFile" type="file" accept=".xlsx,.xls">
+        <div id="importFileName" class="import-file">Aucun fichier sélectionné</div>
+      </div>
+
+      <div class="notice">
+        L'adresse e-mail sert de clé : une adresse absente de Grist sera créée ;
+        une adresse déjà présente sera mise à jour. Les utilisateurs absents du fichier
+        ne seront jamais supprimés ni désactivés automatiquement.
+      </div>
+
+      <div id="importAnalysis" style="display:none">
+        <div class="import-summary">
+          <div class="import-stat">
+            <strong id="importTotal">0</strong>
+            <span>Lignes analysées</span>
+          </div>
+          <div class="import-stat">
+            <strong id="importNew">0</strong>
+            <span>Nouveaux</span>
+          </div>
+          <div class="import-stat">
+            <strong id="importUpdate">0</strong>
+            <span>À mettre à jour</span>
+          </div>
+          <div class="import-stat">
+            <strong id="importSame">0</strong>
+            <span>Sans changement</span>
+          </div>
+          <div class="import-stat">
+            <strong id="importErrors">0</strong>
+            <span>Erreurs bloquantes</span>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="import-table">
+            <thead>
+              <tr>
+                <th>Ligne</th>
+                <th>Email</th>
+                <th>Nom</th>
+                <th>Rôle</th>
+                <th>Périmètre</th>
+                <th>Bureau</th>
+                <th>Résultat</th>
+              </tr>
+            </thead>
+            <tbody id="importBody"></tbody>
+          </table>
+        </div>
+
+        <div id="importErrorMessage" class="notice warning" style="display:none"></div>
+      </div>
+
+      <div class="modal-actions">
+        <button id="cancelImportBtn" class="btn btn-secondary" type="button">Annuler</button>
+        <button id="confirmImportBtn" class="btn btn-primary" type="button" disabled>
+          Confirmer l'import
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+"use strict";
+
+/* =========================================
+   ÉTAT GLOBAL
+   ========================================= */
+
+const $ = id => document.getElementById(id);
+
+let users = [];
+let services = [];
+let subDirections = [];
+let departments = [];
+let bureaux = [];
+
+let currentProfile = null;
+let selectedUserId = null;
+let importPlan = [];
+let toastTimer = null;
+
+/* =========================================
+   CONSTANTES MÉTIER
+   ========================================= */
+
+const ALLOWED_ROLES = [
+  "Administrateur",
+  "Gestionnaire E1",
+  "Lecteur",
+  "Bureau saisie",
+  "Bureau import"
+];
+
+const REQUIRED_IMPORT_COLUMNS = [
+  "Email",
+  "Nom",
+  "Role",
+  "Service",
+  "Sous_direction",
+  "Departement",
+  "Bureau",
+  "Actif"
+];
+
+/* =========================================
+   OUTILS GÉNÉRAUX
+   ========================================= */
+
+function text(value){
+  return String(value == null ? "" : value);
+}
+
+function clean(value){
+  return text(value)
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"");
+}
+
+function escapeHtml(value){
+  return text(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;");
+}
+
+function tableToRows(table){
+  if(!table){ return []; }
+
+  const ids = table.id || [];
+
+  return ids.map((id,index) => {
+    const row = {id};
+
+    for(const column of Object.keys(table)){
+      if(column === "id"){ continue; }
+
+      row[column] = Array.isArray(table[column])
+        ? table[column][index]
+        : table[column];
+    }
+
+    return row;
+  });
+}
+
+function showToast(message){
+  const toast = $("toast");
+  toast.textContent = message;
+  toast.style.display = "block";
+
+  clearTimeout(toastTimer);
+
+  toastTimer = setTimeout(() => {
+    toast.style.display = "none";
+  },3000);
+}
+
+function setFormError(message){
+  const box = $("formError");
+
+  if(message){
+    box.textContent = message;
+    box.classList.add("show");
+  }else{
+    box.textContent = "";
+    box.classList.remove("show");
+  }
+}
+
+function isFalseValue(value){
+  return value === false
+    || value === 0
+    || clean(value) === "non"
+    || clean(value) === "false"
+    || clean(value) === "inactif"
+    || clean(value) === "desactive";
+}
+
+function parseActive(value){
+  if(value === "" || value == null){
+    return true;
+  }
+
+  if(isFalseValue(value)){
+    return false;
+  }
+
+  const normalized = clean(value);
+
+  if(
+    value === true
+    || value === 1
+    || normalized === "oui"
+    || normalized === "true"
+    || normalized === "actif"
+    || normalized === "1"
+  ){
+    return true;
+  }
+
+  return null;
+}
+
+function sameRef(a,b){
+  return Number(a || 0) === Number(b || 0);
+}
+
+function refLabel(rows,id){
+  const row = rows.find(item => Number(item.id) === Number(id));
+
+  if(!row){ return ""; }
+
+  if(row.Code && row.Nom){
+    return `${row.Code} — ${row.Nom}`;
+  }
+
+  return row.Code || row.Nom || "";
+}
+
+function findReferenceByCode(rows,code){
+  const normalized = clean(code);
+
+  if(!normalized){ return null; }
+
+  return rows.find(row =>
+    clean(row.Code) === normalized
+    || clean(row.Nom) === normalized
+  ) || null;
+}
+
+/* =========================================
+   IDENTIFICATION UTILISATEUR
+   IMPORTANT :
+   mécanisme SESSION_WIDGET conservé.
+   ========================================= */
+
+async function identifyUser(){
+  const before = tableToRows(
+    await grist.docApi.fetchTable("SESSION_WIDGET")
+  );
+
+  const previousIds = new Set(
+    before.map(row => Number(row.id))
+  );
+
+  await grist.docApi.applyUserActions([
+    ["AddRecord","SESSION_WIDGET",null,{}]
+  ]);
+
+  await new Promise(resolve => setTimeout(resolve,800));
+
+  const after = tableToRows(
+    await grist.docApi.fetchTable("SESSION_WIDGET")
+  );
+
+  const created = after
+    .filter(row => !previousIds.has(Number(row.id)))
+    .sort((a,b) => Number(b.id) - Number(a.id));
+
+  /*
+    Ne pas supprimer la ligne SESSION_WIDGET ici.
+    Cette version suit le mécanisme stable utilisé
+    dans les autres widgets Tâchtik.
+  */
+  return created[0] || null;
+}
+
+function isAdministrator(){
+  return clean(currentProfile?.Role) === "administrateur";
+}
+
+function renderAccess(){
+  const allowed = isAdministrator();
+
+  $("adminContent").style.display = allowed ? "block" : "none";
+  $("accessDenied").style.display = allowed ? "none" : "block";
+
+  if(currentProfile){
+    $("profileInfo").textContent =
+      "Profil connecté : "
+      + (currentProfile.Email || "")
+      + " — "
+      + (currentProfile.Role || "rôle non défini");
+  }else{
+    $("profileInfo").textContent = "Profil non identifié";
+  }
+}
+
+/* =========================================
+   RÉFÉRENTIELS
+   ========================================= */
+
+function fillReferenceSelect(select,rows,emptyLabel){
+  select.innerHTML = "";
+
+  const empty = document.createElement("option");
+  empty.value = "";
+  empty.textContent = emptyLabel;
+  select.appendChild(empty);
+
+  rows
+    .slice()
+    .sort((a,b) =>
+      text(a.Code || a.Nom).localeCompare(
+        text(b.Code || b.Nom),
+        "fr",
+        {sensitivity:"base"}
+      )
+    )
+    .forEach(row => {
+      const option = document.createElement("option");
+      option.value = row.id;
+      option.textContent = row.Code && row.Nom
+        ? `${row.Code} — ${row.Nom}`
+        : row.Code || row.Nom || row.id;
+      select.appendChild(option);
+    });
+}
+
+function populateBureaux(){
+  fillReferenceSelect(
+    $("userBureau"),
+    bureaux,
+    "Sélectionner…"
+  );
+}
+
+function perimeterRows(type){
+  if(type === "Service"){ return services; }
+  if(type === "Sous_direction"){ return subDirections; }
+  if(type === "Departement"){ return departments; }
+  return [];
+}
+
+function updatePerimeterSelector(){
+  const type = $("perimeterType").value;
+  const group = $("perimeterValueGroup");
+
+  if(!type){
+    group.style.display = "none";
+    $("perimeterValue").innerHTML = "";
+    return;
+  }
+
+  group.style.display = "";
+
+  $("perimeterValueLabel").textContent =
+    type === "Service"
+      ? "Service"
+      : type === "Sous_direction"
+        ? "Sous-direction"
+        : "Département";
+
+  fillReferenceSelect(
+    $("perimeterValue"),
+    perimeterRows(type),
+    "Sélectionner…"
+  );
+}
+
+function updateFieldsForRole(){
+  const role = $("userRole").value;
+  const isPartner = role === "Bureau saisie" || role === "Bureau import";
+  const isReader = role === "Lecteur";
+  const isAdminLike = role === "Administrateur" || role === "Gestionnaire E1";
+
+  $("bureauGroup").style.display = isPartner ? "" : "none";
+  $("perimeterTypeGroup").style.display = isAdminLike ? "none" : "";
+  $("perimeterValueGroup").style.display =
+    isAdminLike || !$("perimeterType").value ? "none" : "";
+
+  if(isAdminLike){
+    $("perimeterType").value = "";
+    $("perimeterValue").innerHTML = "";
+    $("userBureau").value = "";
+  }
+
+  $("perimeterHelp").textContent =
+    isReader
+      ? "Obligatoire : choisissez un Service, une Sous-direction ou un Département."
+      : "Facultatif : permet d'ajouter un périmètre de lecture au profil partenaire.";
+}
+
+/* =========================================
+   LIBELLÉS / BADGES
+   ========================================= */
+
+function roleBadge(role){
+  const normalized = clean(role);
+  let css = "badge-other";
+
+  if(normalized === "administrateur"){
+    css = "badge-admin";
+  }else if(normalized === "gestionnaire e1"){
+    css = "badge-manager";
+  }else if(normalized === "lecteur"){
+    css = "badge-reader";
+  }
+
+  return `<span class="badge ${css}">${escapeHtml(role || "Non défini")}</span>`;
+}
+
+function controlBadge(user){
+  const value = user.Controle_utilisateur || "";
+
+  if(clean(value).includes("incorrecte") || value.startsWith("🔴")){
+    return `<span class="badge badge-error">${escapeHtml(value || "Erreur")}</span>`;
+  }
+
+  if(clean(value).includes("verifier") || value.startsWith("🟠")){
+    return `<span class="badge badge-warning">${escapeHtml(value || "À vérifier")}</span>`;
+  }
+
+  return `<span class="badge badge-active">${escapeHtml(value || "OK")}</span>`;
+}
+
+function perimeterLabel(user){
+  if(user.Departement){
+    return `Département : ${refLabel(departments,user.Departement)}`;
+  }
+
+  if(user.Sous_direction){
+    return `Sous-direction : ${refLabel(subDirections,user.Sous_direction)}`;
+  }
+
+  if(user.Service){
+    return `Service : ${refLabel(services,user.Service)}`;
+  }
+
+  return "—";
+}
+
+/* =========================================
+   KPI / FILTRES / TABLEAU
+   ========================================= */
+
+function populateRoleFilter(){
+  const current = $("roleFilter").value;
+
+  $("roleFilter").innerHTML =
+    `<option value="">Tous les rôles</option>`;
+
+  ALLOWED_ROLES.forEach(role => {
+    const option = document.createElement("option");
+    option.value = role;
+    option.textContent = role;
+    $("roleFilter").appendChild(option);
+  });
+
+  $("roleFilter").value = current;
+}
+
+function renderKpis(){
+  $("kpiUsers").textContent = users.length;
+
+  $("kpiActive").textContent = users.filter(
+    user => !isFalseValue(user.Actif)
+  ).length;
+
+  $("kpiReaders").textContent = users.filter(
+    user => user.Role === "Lecteur"
+  ).length;
+
+  $("kpiAdmins").textContent = users.filter(
+    user => user.Role === "Administrateur"
+  ).length;
+}
+
+function filteredUsers(){
+  const search = clean($("searchInput").value);
+  const role = $("roleFilter").value;
+  const activeFilter = $("activeFilter").value;
+
+  return users
+    .filter(user => {
+      if(role && user.Role !== role){
+        return false;
+      }
+
+      if(activeFilter === "active" && isFalseValue(user.Actif)){
+        return false;
+      }
+
+      if(activeFilter === "inactive" && !isFalseValue(user.Actif)){
+        return false;
+      }
+
+      if(search){
+        const haystack = clean([
+          user.Nom,
+          user.Email,
+          user.Role,
+          perimeterLabel(user),
+          refLabel(bureaux,user.Bureau),
+          user.Controle_utilisateur
+        ].join(" "));
+
+        if(!haystack.includes(search)){
+          return false;
+        }
+      }
+
+      return true;
+    })
+    .sort((a,b) =>
+      text(a.Nom || a.Email).localeCompare(
+        text(b.Nom || b.Email),
+        "fr",
+        {sensitivity:"base"}
+      )
+    );
+}
+
+function renderUsers(){
+  const rows = filteredUsers();
+
+  if(rows.length === 0){
+    $("usersBody").innerHTML = `
+      <tr>
+        <td colspan="7" class="empty">Aucun utilisateur trouvé.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  $("usersBody").innerHTML = rows.map(user => {
+    const active = !isFalseValue(user.Actif);
+    const isSelf = clean(user.Email) === clean(currentProfile?.Email);
+
+    return `
+      <tr>
+        <td>
+          <div class="user-name">${escapeHtml(user.Nom || "—")}</div>
+          <div class="user-email">${escapeHtml(user.Email || "")}</div>
+        </td>
+
+        <td>${roleBadge(user.Role)}</td>
+
+        <td>${escapeHtml(perimeterLabel(user))}</td>
+
+        <td>${escapeHtml(refLabel(bureaux,user.Bureau) || "—")}</td>
+
+        <td>
+          <span class="badge ${active ? "badge-active" : "badge-inactive"}">
+            ${active ? "Actif" : "Inactif"}
+          </span>
+        </td>
+
+        <td>${controlBadge(user)}</td>
+
+        <td>
+          <div class="actions">
+            <button
+              class="btn btn-secondary btn-small edit-user"
+              data-id="${Number(user.id)}"
+              type="button"
+            >
+              ✏️ Modifier
+            </button>
+
+            <button
+              class="btn ${active ? "btn-warning" : "btn-secondary"} btn-small toggle-user"
+              data-id="${Number(user.id)}"
+              type="button"
+              ${isSelf ? "disabled" : ""}
+            >
+              ${active ? "⏸ Désactiver" : "▶ Réactiver"}
+            </button>
+
+            <button
+              class="btn btn-danger btn-small delete-user"
+              data-id="${Number(user.id)}"
+              type="button"
+              ${isSelf ? "disabled" : ""}
+            >
+              🗑 Supprimer
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  document.querySelectorAll(".edit-user").forEach(button => {
+    button.addEventListener("click",() => {
+      openEditUser(Number(button.dataset.id));
+    });
+  });
+
+  document.querySelectorAll(".toggle-user").forEach(button => {
+    button.addEventListener("click",() => {
+      toggleUserActive(Number(button.dataset.id));
+    });
+  });
+
+  document.querySelectorAll(".delete-user").forEach(button => {
+    button.addEventListener("click",() => {
+      deleteUser(Number(button.dataset.id));
+    });
+  });
+}
+
+function renderAll(){
+  populateRoleFilter();
+  renderKpis();
+  renderUsers();
+}
+
+/* =========================================
+   MODALE UTILISATEUR
+   ========================================= */
+
+function resetUserForm(){
+  selectedUserId = null;
+
+  $("modalTitle").textContent = "Ajouter un utilisateur";
+  $("userName").value = "";
+  $("userEmail").value = "";
+  $("userRole").value = "";
+  $("userActive").value = "true";
+  $("perimeterType").value = "";
+  $("perimeterValue").innerHTML = "";
+  $("perimeterValueGroup").style.display = "none";
+  $("userBureau").value = "";
+  $("bureauGroup").style.display = "none";
+  $("perimeterTypeGroup").style.display = "";
+  setFormError("");
+}
+
+function openNewUser(){
+  resetUserForm();
+  $("userModal").classList.add("open");
+}
+
+function openEditUser(id){
+  const user = users.find(item => Number(item.id) === Number(id));
+
+  if(!user){ return; }
+
+  selectedUserId = Number(id);
+
+  $("modalTitle").textContent = "Modifier un utilisateur";
+  $("userName").value = user.Nom || "";
+  $("userEmail").value = user.Email || "";
+  $("userRole").value = user.Role || "";
+  $("userActive").value = isFalseValue(user.Actif) ? "false" : "true";
+  $("userBureau").value = user.Bureau || "";
+
+  let type = "";
+  let value = "";
+
+  if(user.Departement){
+    type = "Departement";
+    value = user.Departement;
+  }else if(user.Sous_direction){
+    type = "Sous_direction";
+    value = user.Sous_direction;
+  }else if(user.Service){
+    type = "Service";
+    value = user.Service;
+  }
+
+  $("perimeterType").value = type;
+  updatePerimeterSelector();
+
+  if(type){
+    $("perimeterValue").value = value;
+  }
+
+  updateFieldsForRole();
+  setFormError("");
+
+  $("userModal").classList.add("open");
+}
+
+function closeUserModal(){
+  $("userModal").classList.remove("open");
+  selectedUserId = null;
+  setFormError("");
+}
+
+function validateUserForm(){
+  const name = $("userName").value.trim();
+  const email = $("userEmail").value.trim();
+  const role = $("userRole").value;
+  const type = $("perimeterType").value;
+  const perimeterValue = $("perimeterValue").value;
+  const bureau = $("userBureau").value;
+
+  if(!name){
+    return "Le nom et prénom sont obligatoires.";
+  }
+
+  if(!email || !email.includes("@")){
+    return "L'adresse e-mail n'est pas valide.";
+  }
+
+  if(!ALLOWED_ROLES.includes(role)){
+    return "Le rôle est obligatoire.";
+  }
+
+  const duplicate = users.find(user =>
+    clean(user.Email) === clean(email)
+    && Number(user.id) !== Number(selectedUserId)
+  );
+
+  if(duplicate){
+    return "Cette adresse e-mail existe déjà dans UTILISATEURS.";
+  }
+
+  if(role === "Lecteur"){
+    if(!type || !perimeterValue){
+      return "Un Lecteur doit avoir un Service, une Sous-direction ou un Département.";
+    }
+  }
+
+  if(
+    (role === "Bureau saisie" || role === "Bureau import")
+    && !bureau
+  ){
+    return "Le Bureau est obligatoire pour ce rôle.";
+  }
+
+  return "";
+}
+
+function formValues(){
+  const role = $("userRole").value;
+  const type = $("perimeterType").value;
+  const value = Number($("perimeterValue").value) || null;
+  const partner = role === "Bureau saisie" || role === "Bureau import";
+
+  return {
+    Email:$("userEmail").value.trim(),
+    Nom:$("userName").value.trim(),
+    Role:role,
+    Service:type === "Service" ? value : null,
+    Sous_direction:type === "Sous_direction" ? value : null,
+    Departement:type === "Departement" ? value : null,
+    Bureau:partner ? (Number($("userBureau").value) || null) : null,
+    Actif:$("userActive").value === "true"
+  };
+}
+
+async function saveUser(){
+  if(!isAdministrator()){ return; }
+
+  const error = validateUserForm();
+
+  if(error){
+    setFormError(error);
+    return;
+  }
+
+  setFormError("");
+  $("saveBtn").disabled = true;
+
+  try{
+    const values = formValues();
+
+    if(selectedUserId === null){
+      await grist.docApi.applyUserActions([
+        ["AddRecord","UTILISATEURS",null,values]
+      ]);
+      showToast("✓ Utilisateur ajouté");
+    }else{
+      await grist.docApi.applyUserActions([
+        ["UpdateRecord","UTILISATEURS",Number(selectedUserId),values]
+      ]);
+      showToast("✓ Utilisateur mis à jour");
+    }
+
+    closeUserModal();
+    await loadUsers();
+  }catch(error){
+    console.error(error);
+    setFormError("Impossible d'enregistrer l'utilisateur. Vérifiez les ACL et les données saisies.");
+  }finally{
+    $("saveBtn").disabled = false;
+  }
+}
+
+/* =========================================
+   ACTIVER / DÉSACTIVER
+   ========================================= */
+
+async function toggleUserActive(id){
+  if(!isAdministrator()){ return; }
+
+  const user = users.find(item => Number(item.id) === Number(id));
+  if(!user){ return; }
+
+  if(clean(user.Email) === clean(currentProfile?.Email)){
+    showToast("Vous ne pouvez pas désactiver votre propre compte.");
+    return;
+  }
+
+  const currentlyActive = !isFalseValue(user.Actif);
+  const actionLabel = currentlyActive ? "désactiver" : "réactiver";
+  const label = user.Nom || user.Email;
+
+  if(!window.confirm(`${actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1)} ${label} ?`)){
+    return;
+  }
+
+  try{
+    await grist.docApi.applyUserActions([
+      ["UpdateRecord","UTILISATEURS",Number(id),{
+        Actif:!currentlyActive
+      }]
+    ]);
+
+    showToast(currentlyActive ? "✓ Utilisateur désactivé" : "✓ Utilisateur réactivé");
+    await loadUsers();
+  }catch(error){
+    console.error(error);
+    showToast("Impossible de modifier l'état de cet utilisateur.");
+  }
+}
+
+/* =========================================
+   SUPPRESSION
+   ========================================= */
+
+async function deleteUser(id){
+  if(!isAdministrator()){ return; }
+
+  const user = users.find(item => Number(item.id) === Number(id));
+  if(!user){ return; }
+
+  if(clean(user.Email) === clean(currentProfile?.Email)){
+    showToast("Vous ne pouvez pas supprimer votre propre compte administrateur.");
+    return;
+  }
+
+  const label = user.Nom || user.Email || "cet utilisateur";
+
+  const confirmed = window.confirm(
+    `Supprimer définitivement ${label} de Tâchtik ?\n\n`
+    + `Cette action supprime son profil UTILISATEURS. `
+    + `Pour une suspension temporaire, utilisez plutôt Désactiver.`
+  );
+
+  if(!confirmed){ return; }
+
+  try{
+    await grist.docApi.applyUserActions([
+      ["BulkRemoveRecord","UTILISATEURS",[Number(id)]]
+    ]);
+
+    showToast("✓ Utilisateur supprimé");
+    await loadUsers();
+  }catch(error){
+    console.error(error);
+    showToast("Impossible de supprimer cet utilisateur.");
+  }
+}
+
+/* =========================================
+   IMPORT EXCEL - OUVERTURE / FERMETURE
+   ========================================= */
+
+function resetImport(){
+  importPlan = [];
+  $("importFile").value = "";
+  $("importFileName").textContent = "Aucun fichier sélectionné";
+  $("importAnalysis").style.display = "none";
+  $("importBody").innerHTML = "";
+  $("importErrorMessage").style.display = "none";
+  $("confirmImportBtn").disabled = true;
+}
+
+function openImportModal(){
+  resetImport();
+  $("importModal").classList.add("open");
+}
+
+function closeImportModal(){
+  $("importModal").classList.remove("open");
+  resetImport();
+}
+
+/* =========================================
+   IMPORT EXCEL - ANALYSE
+   ========================================= */
+
+function normalizedExcelRow(row){
+  const result = {};
+
+  REQUIRED_IMPORT_COLUMNS.forEach(column => {
+    result[column] = row[column] == null ? "" : row[column];
+  });
+
+  return result;
+}
+
+function rowPerimeterText(row){
+  if(row.Departement){ return `Département : ${row.Departement}`; }
+  if(row.Sous_direction){ return `Sous-direction : ${row.Sous_direction}`; }
+  if(row.Service){ return `Service : ${row.Service}`; }
+  return "—";
+}
+
+function userComparable(user){
+  return {
+    Email:text(user.Email).trim(),
+    Nom:text(user.Nom).trim(),
+    Role:text(user.Role).trim(),
+    Service:Number(user.Service || 0),
+    Sous_direction:Number(user.Sous_direction || 0),
+    Departement:Number(user.Departement || 0),
+    Bureau:Number(user.Bureau || 0),
+    Actif:!isFalseValue(user.Actif)
+  };
+}
+
+function valuesEqual(a,b){
+  return clean(a.Email) === clean(b.Email)
+    && text(a.Nom).trim() === text(b.Nom).trim()
+    && a.Role === b.Role
+    && sameRef(a.Service,b.Service)
+    && sameRef(a.Sous_direction,b.Sous_direction)
+    && sameRef(a.Departement,b.Departement)
+    && sameRef(a.Bureau,b.Bureau)
+    && Boolean(a.Actif) === Boolean(b.Actif);
+}
+
+function validateImportRow(row,lineNumber){
+  const errors = [];
+
+  const email = text(row.Email).trim();
+  const name = text(row.Nom).trim();
+  const role = text(row.Role).trim();
+
+  if(!email || !email.includes("@")){
+    errors.push("Email manquant ou invalide");
+  }
+
+  if(!name){
+    errors.push("Nom manquant");
+  }
+
+  if(!ALLOWED_ROLES.includes(role)){
+    errors.push("Rôle non autorisé");
+  }
+
+  const perimeterCount = [
+    row.Service,
+    row.Sous_direction,
+    row.Departement
+  ].filter(value => text(value).trim() !== "").length;
+
+  if(perimeterCount > 1){
+    errors.push("Plusieurs périmètres renseignés");
+  }
+
+  if(role === "Lecteur" && perimeterCount !== 1){
+    errors.push("Un Lecteur doit avoir exactement un périmètre");
+  }
+
+  if(
+    (role === "Administrateur" || role === "Gestionnaire E1")
+    && perimeterCount > 0
+  ){
+    errors.push("Administrateur/Gestionnaire E1 : périmètre inutile");
+  }
+
+  const service = text(row.Service).trim()
+    ? findReferenceByCode(services,row.Service)
+    : null;
+
+  const subDirection = text(row.Sous_direction).trim()
+    ? findReferenceByCode(subDirections,row.Sous_direction)
+    : null;
+
+  const department = text(row.Departement).trim()
+    ? findReferenceByCode(departments,row.Departement)
+    : null;
+
+  const bureau = text(row.Bureau).trim()
+    ? findReferenceByCode(bureaux,row.Bureau)
+    : null;
+
+  if(text(row.Service).trim() && !service){
+    errors.push(`Service introuvable : ${row.Service}`);
+  }
+
+  if(text(row.Sous_direction).trim() && !subDirection){
+    errors.push(`Sous-direction introuvable : ${row.Sous_direction}`);
+  }
+
+  if(text(row.Departement).trim() && !department){
+    errors.push(`Département introuvable : ${row.Departement}`);
+  }
+
+  const partner = role === "Bureau saisie" || role === "Bureau import";
+
+  if(partner && !text(row.Bureau).trim()){
+    errors.push("Bureau obligatoire pour ce rôle");
+  }
+
+  if(text(row.Bureau).trim() && !bureau){
+    errors.push(`Bureau introuvable : ${row.Bureau}`);
+  }
+
+  if(!partner && text(row.Bureau).trim()){
+    errors.push("Bureau renseigné pour un rôle non partenaire");
+  }
+
+  const active = parseActive(row.Actif);
+
+  if(active === null){
+    errors.push("Actif doit valoir Oui/Non, Actif/Inactif, TRUE/FALSE ou 1/0");
+  }
+
+  const values = {
+    Email:email,
+    Nom:name,
+    Role:role,
+    Service:service ? Number(service.id) : null,
+    Sous_direction:subDirection ? Number(subDirection.id) : null,
+    Departement:department ? Number(department.id) : null,
+    Bureau:partner && bureau ? Number(bureau.id) : null,
+    Actif:active === null ? true : active
+  };
+
+  return {
+    lineNumber,
+    source:row,
+    values,
+    errors
+  };
+}
+
+function buildImportPlan(rawRows){
+  const seenEmails = new Set();
+
+  importPlan = rawRows.map((raw,index) => {
+    const row = normalizedExcelRow(raw);
+    const checked = validateImportRow(row,index + 2);
+
+    const emailKey = clean(checked.values.Email);
+
+    if(emailKey){
+      if(seenEmails.has(emailKey)){
+        checked.errors.push("Adresse e-mail en doublon dans le fichier");
+      }
+      seenEmails.add(emailKey);
+    }
+
+    const existing = users.find(
+      user => clean(user.Email) === emailKey
+    );
+
+    let mode = "new";
+
+    if(existing){
+      mode = valuesEqual(
+        userComparable(existing),
+        checked.values
+      )
+        ? "same"
+        : "update";
+    }
+
+    if(checked.errors.length){
+      mode = "error";
+    }
+
+    return {
+      ...checked,
+      existing,
+      mode
+    };
+  });
+}
+
+function renderImportPlan(){
+  const count = mode =>
+    importPlan.filter(item => item.mode === mode).length;
+
+  const errors = count("error");
+  const changes = count("new") + count("update");
+
+  $("importTotal").textContent = importPlan.length;
+  $("importNew").textContent = count("new");
+  $("importUpdate").textContent = count("update");
+  $("importSame").textContent = count("same");
+  $("importErrors").textContent = errors;
+
+  $("importBody").innerHTML = importPlan.map(item => {
+    let resultHtml = "";
+
+    if(item.mode === "error"){
+      resultHtml = `
+        <span class="badge badge-error">Erreur</span>
+        <div class="muted" style="margin-top:5px">
+          ${escapeHtml(item.errors.join(" • "))}
+        </div>
+      `;
+    }else if(item.mode === "new"){
+      resultHtml = `<span class="badge badge-new">Nouveau</span>`;
+    }else if(item.mode === "update"){
+      resultHtml = `<span class="badge badge-update">Mise à jour</span>`;
+    }else{
+      resultHtml = `<span class="badge badge-same">Sans changement</span>`;
+    }
+
+    return `
+      <tr>
+        <td>${item.lineNumber}</td>
+        <td>${escapeHtml(item.values.Email)}</td>
+        <td>${escapeHtml(item.values.Nom)}</td>
+        <td>${escapeHtml(item.values.Role)}</td>
+        <td>${escapeHtml(rowPerimeterText(item.source))}</td>
+        <td>${escapeHtml(item.source.Bureau || "—")}</td>
+        <td>${resultHtml}</td>
+      </tr>
+    `;
+  }).join("");
+
+  $("importAnalysis").style.display = "";
+
+  if(errors){
+    $("importErrorMessage").style.display = "";
+    $("importErrorMessage").textContent =
+      `${errors} erreur(s) bloquante(s) détectée(s). `
+      + `Corrigez le fichier Excel puis rechargez-le. Aucun utilisateur n'a été modifié.`;
+  }else{
+    $("importErrorMessage").style.display = "none";
+  }
+
+  $("confirmImportBtn").disabled =
+    errors > 0 || changes === 0;
+}
+
+async function analyseExcelFile(file){
+  if(typeof XLSX === "undefined"){
+    throw new Error("La bibliothèque de lecture Excel n'a pas pu être chargée.");
+  }
+
+  const buffer = await file.arrayBuffer();
+  const workbook = XLSX.read(buffer,{type:"array"});
+
+  if(!workbook.SheetNames.length){
+    throw new Error("Le classeur ne contient aucune feuille.");
+  }
+
+  const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(worksheet,{
+    defval:"",
+    raw:false
+  });
+
+  if(!rows.length){
+    throw new Error("La première feuille du fichier est vide.");
+  }
+
+  const headers = Object.keys(rows[0]);
+  const missing = REQUIRED_IMPORT_COLUMNS.filter(
+    column => !headers.includes(column)
+  );
+
+  if(missing.length){
+    throw new Error(
+      "Colonnes manquantes : " + missing.join(", ")
+    );
+  }
+
+  buildImportPlan(rows);
+  renderImportPlan();
+}
+
+/* =========================================
+   IMPORT EXCEL - ÉCRITURE DANS GRIST
+   ========================================= */
+
+async function confirmImport(){
+  if(!isAdministrator()){ return; }
+
+  const errors = importPlan.filter(item => item.mode === "error");
+
+  if(errors.length){
+    showToast("L'import est bloqué tant qu'il reste des erreurs.");
+    return;
+  }
+
+  const changes = importPlan.filter(
+    item => item.mode === "new" || item.mode === "update"
+  );
+
+  if(!changes.length){
+    showToast("Aucune modification à importer.");
+    return;
+  }
+
+  const confirmed = window.confirm(
+    `Confirmer l'import ?\n\n`
+    + `${changes.filter(item => item.mode === "new").length} création(s)\n`
+    + `${changes.filter(item => item.mode === "update").length} mise(s) à jour\n\n`
+    + `Les utilisateurs absents du fichier ne seront pas modifiés.`
+  );
+
+  if(!confirmed){ return; }
+
+  $("confirmImportBtn").disabled = true;
+
+  try{
+    const actions = changes.map(item => {
+      if(item.mode === "new"){
+        return [
+          "AddRecord",
+          "UTILISATEURS",
+          null,
+          item.values
+        ];
+      }
+
+      return [
+        "UpdateRecord",
+        "UTILISATEURS",
+        Number(item.existing.id),
+        item.values
+      ];
+    });
+
+    await grist.docApi.applyUserActions(actions);
+
+    showToast(`✓ Import terminé : ${changes.length} utilisateur(s) traité(s)`);
+    closeImportModal();
+    await loadUsers();
+  }catch(error){
+    console.error(error);
+    showToast("Échec de l'import. Aucune nouvelle tentative automatique n'a été lancée.");
+    $("confirmImportBtn").disabled = false;
+  }
+}
+
+/* =========================================
+   CHARGEMENT DES DONNÉES
+   ========================================= */
+
+async function loadUsers(){
+  users = tableToRows(
+    await grist.docApi.fetchTable("UTILISATEURS")
+  );
+
+  renderAll();
+}
+
+async function load(){
+  try{
+    currentProfile = await identifyUser();
+    renderAccess();
+
+    if(!isAdministrator()){
+      return;
+    }
+
+    const [
+      userTable,
+      servicesTable,
+      subDirectionsTable,
+      departmentsTable,
+      bureauxTable
+    ] = await Promise.all([
+      grist.docApi.fetchTable("UTILISATEURS"),
+      grist.docApi.fetchTable("SERVICES"),
+      grist.docApi.fetchTable("SOUS_DIRECTIONS"),
+      grist.docApi.fetchTable("DEPARTEMENTS"),
+      grist.docApi.fetchTable("BUREAUX_ORIGINE")
+    ]);
+
+    users = tableToRows(userTable);
+    services = tableToRows(servicesTable);
+    subDirections = tableToRows(subDirectionsTable);
+    departments = tableToRows(departmentsTable);
+    bureaux = tableToRows(bureauxTable);
+
+    populateBureaux();
+    renderAll();
+  }catch(error){
+    console.error(error);
+
+    $("profileInfo").textContent =
+      "⚠ Impossible de charger la gestion des utilisateurs";
+
+    showToast("Erreur lors du chargement.");
+  }
+}
+
+/* =========================================
+   ÉVÉNEMENTS
+   ========================================= */
+
+$("newUserBtn").addEventListener("click",openNewUser);
+$("importUsersBtn").addEventListener("click",openImportModal);
+
+$("closeModalBtn").addEventListener("click",closeUserModal);
+$("cancelBtn").addEventListener("click",closeUserModal);
+$("saveBtn").addEventListener("click",saveUser);
+
+$("userRole").addEventListener("change",updateFieldsForRole);
+
+$("perimeterType").addEventListener("change",() => {
+  updatePerimeterSelector();
+  updateFieldsForRole();
+});
+
+$("searchInput").addEventListener("input",renderUsers);
+$("roleFilter").addEventListener("change",renderUsers);
+$("activeFilter").addEventListener("change",renderUsers);
+
+$("userModal").addEventListener("click",event => {
+  if(event.target === $("userModal")){
+    closeUserModal();
+  }
+});
+
+$("closeImportBtn").addEventListener("click",closeImportModal);
+$("cancelImportBtn").addEventListener("click",closeImportModal);
+
+$("chooseImportBtn").addEventListener("click",() => {
+  $("importFile").click();
+});
+
+$("importFile").addEventListener("change",async event => {
+  const file = event.target.files?.[0];
+
+  resetImport();
+
+  if(!file){
+    return;
+  }
+
+  $("importFileName").textContent = file.name;
+
+  try{
+    await analyseExcelFile(file);
+  }catch(error){
+    console.error(error);
+
+    $("importAnalysis").style.display = "";
+    $("importBody").innerHTML = "";
+    $("importErrorMessage").style.display = "";
+    $("importErrorMessage").textContent = error.message || "Impossible de lire ce fichier.";
+    $("confirmImportBtn").disabled = true;
+  }
+});
+
+$("confirmImportBtn").addEventListener("click",confirmImport);
+
+$("importModal").addEventListener("click",event => {
+  if(event.target === $("importModal")){
+    closeImportModal();
+  }
+});
+
+document.addEventListener("keydown",event => {
+  if(event.key === "Escape"){
+    closeUserModal();
+    closeImportModal();
+  }
+});
+
+/* =========================================
+   GRIST
+   ========================================= */
+
+grist.ready({
+  requiredAccess:"full"
+});
+
+load();
+</script>
+
+</body>
+</html>
+'''
+
+path = Path("/mnt/data/gestion_utilisateurs_tachtik_v2.html")
+path.write_text(html, encoding="utf-8")
+
+print(f"Fichier créé : {path}")
+print(f"Taille : {path.stat().st_size} octets")
