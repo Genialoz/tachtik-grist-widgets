@@ -1,6 +1,4 @@
-from pathlib import Path
-
-html = r'''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
@@ -2138,10 +2136,3 @@ load();
 
 </body>
 </html>
-'''
-
-path = Path("/mnt/data/gestion_utilisateurs_tachtik_v2.html")
-path.write_text(html, encoding="utf-8")
-
-print(f"Fichier créé : {path}")
-print(f"Taille : {path.stat().st_size} octets")
