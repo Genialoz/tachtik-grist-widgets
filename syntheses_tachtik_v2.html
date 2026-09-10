@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tâchtik - Synthèses</title>
 <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+
 <style>
   :root{
     --bg:#f6f8fb;
@@ -23,14 +24,24 @@
     --shadow:0 10px 30px rgba(31,41,55,.08);
     --radius:18px;
   }
-  *{box-sizing:border-box}
+
+  *{
+    box-sizing:border-box;
+  }
+
   body{
     margin:0;
     font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     background:var(--bg);
     color:var(--text);
   }
-  .wrap{max-width:1180px;margin:0 auto;padding:24px}
+
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding:24px;
+  }
+
   .hero{
     background:linear-gradient(135deg,#1d4ed8,#3b82f6);
     color:#fff;
@@ -39,15 +50,30 @@
     box-shadow:var(--shadow);
     margin-bottom:20px;
   }
-  .hero h1{margin:0 0 6px;font-size:28px}
-  .hero p{margin:0;opacity:.92}
-  .meta{margin-top:12px;font-size:13px;opacity:.9}
+
+  .hero h1{
+    margin:0 0 6px;
+    font-size:28px;
+  }
+
+  .hero p{
+    margin:0;
+    opacity:.92;
+  }
+
+  .meta{
+    margin-top:12px;
+    font-size:13px;
+    opacity:.9;
+  }
+
   .grid-kpi{
     display:grid;
     grid-template-columns:repeat(4,minmax(0,1fr));
     gap:14px;
     margin-bottom:20px;
   }
+
   .kpi{
     background:var(--card);
     border:1px solid var(--line);
@@ -55,11 +81,30 @@
     padding:18px;
     box-shadow:var(--shadow);
   }
-  .kpi .label{font-size:13px;color:var(--muted);margin-bottom:8px}
-  .kpi .value{font-size:30px;font-weight:800}
-  .kpi.danger{background:var(--danger-soft)}
-  .kpi.warning{background:var(--warning-soft)}
-  .kpi.success{background:var(--success-soft)}
+
+  .kpi .label{
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:8px;
+  }
+
+  .kpi .value{
+    font-size:30px;
+    font-weight:800;
+  }
+
+  .kpi.danger{
+    background:var(--danger-soft);
+  }
+
+  .kpi.warning{
+    background:var(--warning-soft);
+  }
+
+  .kpi.success{
+    background:var(--success-soft);
+  }
+
   .panel{
     background:var(--card);
     border:1px solid var(--line);
@@ -68,7 +113,12 @@
     box-shadow:var(--shadow);
     margin-bottom:18px;
   }
-  .panel h2{margin:0 0 14px;font-size:20px}
+
+  .panel h2{
+    margin:0 0 14px;
+    font-size:20px;
+  }
+
   .controls{
     display:flex;
     gap:10px;
@@ -76,6 +126,7 @@
     align-items:center;
     margin-bottom:16px;
   }
+
   .options-box{
     border:1px solid var(--line);
     border-radius:14px;
@@ -83,11 +134,38 @@
     padding:14px 16px;
     margin-bottom:16px;
   }
-  .options-title{font-weight:800;margin-bottom:10px}
-  .options-row{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
-  .check{display:flex;gap:7px;align-items:center;font-size:14px}
-  .check input{width:17px;height:17px}
-  .select-wrap{display:flex;gap:8px;align-items:center;font-size:14px}
+
+  .options-title{
+    font-weight:800;
+    margin-bottom:10px;
+  }
+
+  .options-row{
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+
+  .check{
+    display:flex;
+    gap:7px;
+    align-items:center;
+    font-size:14px;
+  }
+
+  .check input{
+    width:17px;
+    height:17px;
+  }
+
+  .select-wrap{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    font-size:14px;
+  }
+
   .select-wrap select{
     border:1px solid var(--line);
     border-radius:10px;
@@ -95,6 +173,7 @@
     background:#fff;
     font:inherit;
   }
+
   button{
     border:0;
     border-radius:12px;
@@ -104,9 +183,21 @@
     background:#eef2f7;
     color:#111827;
   }
-  button.primary{background:var(--primary);color:#fff}
-  button:hover{filter:brightness(.98)}
-  button:disabled{opacity:.5;cursor:not-allowed}
+
+  button.primary{
+    background:var(--primary);
+    color:#fff;
+  }
+
+  button:hover{
+    filter:brightness(.98);
+  }
+
+  button:disabled{
+    opacity:.5;
+    cursor:not-allowed;
+  }
+
   .status{
     min-height:22px;
     margin:4px 0 12px;
@@ -114,13 +205,23 @@
     color:var(--success);
     font-weight:700;
   }
+
   .mail-grid{
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:16px;
   }
-  .field label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px}
-  .field input,.field textarea{
+
+  .field label{
+    display:block;
+    font-size:12px;
+    font-weight:700;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+
+  .field input,
+  .field textarea{
     width:100%;
     border:1px solid var(--line);
     border-radius:12px;
@@ -129,7 +230,13 @@
     background:#fff;
     color:var(--text);
   }
-  .field textarea{min-height:420px;resize:vertical;white-space:pre-wrap}
+
+  .field textarea{
+    min-height:420px;
+    resize:vertical;
+    white-space:pre-wrap;
+  }
+
   .preview{
     border:1px solid var(--line);
     border-radius:14px;
@@ -139,6 +246,7 @@
     min-height:420px;
     line-height:1.5;
   }
+
   .section-title{
     display:flex;
     align-items:center;
@@ -146,8 +254,17 @@
     gap:12px;
     margin:14px 0 8px;
   }
-  .section-title h3{margin:0;font-size:16px}
-  .mini{font-size:12px;color:var(--muted)}
+
+  .section-title h3{
+    margin:0;
+    font-size:16px;
+  }
+
+  .mini{
+    font-size:12px;
+    color:var(--muted);
+  }
+
   .error{
     background:#fef2f2;
     color:#991b1b;
@@ -156,452 +273,2617 @@
     padding:12px;
     margin-bottom:14px;
   }
-  .hidden{display:none}
+
+  .hidden{
+    display:none;
+  }
+
   @media(max-width:800px){
-    .grid-kpi{grid-template-columns:repeat(2,1fr)}
-    .mail-grid{grid-template-columns:1fr}
+
+    .grid-kpi{
+      grid-template-columns:repeat(2,1fr);
+    }
+
+    .mail-grid{
+      grid-template-columns:1fr;
+    }
+
+    .select-wrap{
+      width:100%;
+      justify-content:space-between;
+    }
+
+    .select-wrap select{
+      max-width:60%;
+    }
   }
 </style>
 </head>
+
+
 <body>
+
 <div class="wrap">
+
   <section class="hero">
+
     <h1>📊 Synthèses</h1>
-    <p>Générez une synthèse des contributions à traiter, prête à être copiée ou ouverte dans votre messagerie.</p>
-    <div id="scopeMeta" class="meta">Chargement du périmètre…</div>
+
+    <p>
+      Générez une synthèse des contributions à traiter,
+      prête à être copiée ou ouverte dans votre messagerie.
+    </p>
+
+    <div id="scopeMeta" class="meta">
+      Chargement du périmètre…
+    </div>
+
   </section>
+
 
   <div id="errorBox" class="error hidden"></div>
 
+
+  <!-- ================================
+       KPI
+       ================================ -->
+
   <section class="grid-kpi">
+
     <div class="kpi">
       <div class="label">À traiter</div>
       <div id="kpiTodo" class="value">0</div>
     </div>
+
     <div class="kpi danger">
       <div class="label">En retard</div>
       <div id="kpiLate" class="value">0</div>
     </div>
+
     <div class="kpi warning">
       <div class="label">À relancer</div>
       <div id="kpiReminder" class="value">0</div>
     </div>
+
     <div class="kpi success">
       <div class="label">Urgentes</div>
       <div id="kpiUrgent" class="value">0</div>
     </div>
+
   </section>
+
+
+  <!-- ================================
+       PRÉPARATION SYNTHÈSE
+       ================================ -->
 
   <section class="panel">
-    <h2>✉️ Préparer la synthèse</h2>
-    <div class="options-box">
-      <div class="options-title">Contenu de la synthèse</div>
-      <div class="options-row">
-        <label class="check"><input type="checkbox" id="includeLate" checked> Contributions en retard</label>
-        <label class="check"><input type="checkbox" id="includeReminders" checked> Contributions à relancer</label>
-        <label class="check"><input type="checkbox" id="includeUpcoming" checked> Prochaines échéances</label>
-        <label class="select-wrap">Période des prochaines échéances
-          <select id="upcomingDays">
-            <option value="7">7 jours</option>
-            <option value="15" selected>15 jours</option>
-            <option value="30">30 jours</option>
-            <option value="all">Toutes</option>
-          </select>
-        </label>
-      </div>
-    </div>
-    <div class="controls">
-      <button class="primary" id="refreshBtn">🔄 Actualiser</button>
-      <button id="copyBtn">📋 Copier la synthèse</button>
-      <button id="mailtoBtn">📨 Ouvrir dans la messagerie</button>
-    </div>
-    <div id="status" class="status"></div>
 
-    <div class="field" style="margin-bottom:14px">
-      <label>Destinataires</label>
-      <input id="recipients" type="text" placeholder="ex. bureau-e1@...">
+    <h2>✉️ Préparer la synthèse</h2>
+
+
+    <!-- ================================
+         CONTENU DE LA SYNTHÈSE
+         ================================ -->
+
+    <div class="options-box">
+
+      <div class="options-title">
+        Contenu de la synthèse
+      </div>
+
+      <div class="options-row">
+
+        <label class="check">
+          <input
+            type="checkbox"
+            id="includeLate"
+            checked
+          >
+          Contributions en retard
+        </label>
+
+
+        <label class="check">
+          <input
+            type="checkbox"
+            id="includeReminders"
+            checked
+          >
+          Contributions à relancer
+        </label>
+
+
+        <label class="check">
+          <input
+            type="checkbox"
+            id="includeUpcoming"
+            checked
+          >
+          Prochaines échéances
+        </label>
+
+
+        <label class="select-wrap">
+
+          Période des prochaines échéances
+
+          <select id="upcomingDays">
+
+            <option value="7">
+              7 jours
+            </option>
+
+            <option value="15" selected>
+              15 jours
+            </option>
+
+            <option value="30">
+              30 jours
+            </option>
+
+            <option value="all">
+              Toutes
+            </option>
+
+          </select>
+
+        </label>
+
+      </div>
+
     </div>
-    <div class="field" style="margin-bottom:14px">
-      <label>Objet</label>
-      <input id="subject" type="text">
+
+
+    <!-- ================================
+         FILTRES SYNTHÈSE V2
+         ================================ -->
+
+    <div class="options-box">
+
+      <div class="options-title">
+        🔎 Filtrer la synthèse
+      </div>
+
+      <div class="options-row">
+
+
+        <label class="select-wrap">
+
+          Département
+
+          <select id="filterDepartment">
+
+            <option value="">
+              Tous les départements
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <label class="select-wrap">
+
+          Priorité
+
+          <select id="filterPriority">
+
+            <option value="">
+              Toutes les priorités
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <label class="select-wrap">
+
+          Demandeur
+
+          <select id="filterRequester">
+
+            <option value="">
+              Tous les demandeurs
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <label class="select-wrap">
+
+          Type
+
+          <select id="filterType">
+
+            <option value="">
+              Toutes les contributions à traiter
+            </option>
+
+            <option value="late">
+              En retard uniquement
+            </option>
+
+            <option value="reminder">
+              À relancer uniquement
+            </option>
+
+            <option value="urgent">
+              Urgentes uniquement
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <button
+          id="resetFiltersBtn"
+          type="button"
+        >
+          ↺ Réinitialiser les filtres
+        </button>
+
+      </div>
+
     </div>
+
+
+    <!-- ================================
+         ACTIONS
+         ================================ -->
+
+    <div class="controls">
+
+      <button
+        class="primary"
+        id="refreshBtn"
+      >
+        🔄 Actualiser
+      </button>
+
+      <button id="copyBtn">
+        📋 Copier la synthèse
+      </button>
+
+      <button id="mailtoBtn">
+        📨 Ouvrir dans la messagerie
+      </button>
+
+    </div>
+
+
+    <div
+      id="status"
+      class="status"
+    ></div>
+
+
+    <!-- ================================
+         DESTINATAIRES
+         ================================ -->
+
+    <div
+      class="field"
+      style="margin-bottom:14px"
+    >
+
+      <label>
+        Destinataires
+      </label>
+
+      <input
+        id="recipients"
+        type="text"
+        placeholder="ex. bureau-e1@..."
+      >
+
+    </div>
+
+
+    <!-- ================================
+         OBJET
+         ================================ -->
+
+    <div
+      class="field"
+      style="margin-bottom:14px"
+    >
+
+      <label>
+        Objet
+      </label>
+
+      <input
+        id="subject"
+        type="text"
+      >
+
+    </div>
+
+
+    <!-- ================================
+         MESSAGE + APERÇU
+         ================================ -->
 
     <div class="mail-grid">
+
+
       <div class="field">
-        <label>Message généré</label>
+
+        <label>
+          Message généré
+        </label>
+
         <textarea id="body"></textarea>
+
       </div>
+
+
       <div class="field">
-        <label>Aperçu</label>
-        <div id="preview" class="preview"></div>
+
+        <label>
+          Aperçu
+        </label>
+
+        <div
+          id="preview"
+          class="preview"
+        ></div>
+
       </div>
+
+
     </div>
+
   </section>
+
 </div>
 
+
 <script>
+
 "use strict";
 
-const $ = (id) => document.getElementById(id);
+
+/* ========================================
+   OUTILS
+   ======================================== */
+
+const $ =
+  (id) =>
+    document.getElementById(id);
+
+
 
 let state = {
+
   user: null,
+
   profile: null,
+
   bureauId: null,
+
   bureauCode: "",
+
   params: null,
+
   contributions: [],
+
   filtered: []
+
 };
 
+
+
+/* ========================================
+   ERREURS
+   ======================================== */
+
 function showError(err){
-  const box = $("errorBox");
-  box.textContent = "Erreur : " + (err?.message || String(err));
-  box.classList.remove("hidden");
+
+  const box =
+    $("errorBox");
+
+  box.textContent =
+    "Erreur : "
+    +
+    (
+      err?.message
+      ||
+      String(err)
+    );
+
+  box.classList.remove(
+    "hidden"
+  );
+
 }
-function clearError(){ $("errorBox").classList.add("hidden"); }
+
+
+
+function clearError(){
+
+  $("errorBox")
+    .classList
+    .add("hidden");
+
+}
+
+
+
+/* ========================================
+   NORMALISATION
+   ======================================== */
 
 function normalizeText(v){
-  return String(v ?? "").trim().toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+
+  return String(v ?? "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(
+      /[\u0300-\u036f]/g,
+      ""
+    );
+
 }
+
+
+
+/* ========================================
+   STATUTS
+   ======================================== */
 
 function isDone(rec){
-  return normalizeText(rec.Statut) === normalizeText("Fait");
+
+  return normalizeText(
+    rec.Statut
+  )
+  ===
+  normalizeText(
+    "Fait"
+  );
+
 }
+
+
+
 function isUrgent(rec){
-  return normalizeText(rec.Priorite) === normalizeText("Urgente");
+
+  return normalizeText(
+    rec.Priorite
+  )
+  ===
+  normalizeText(
+    "Urgente"
+  );
+
 }
+
+
+
 function isReminder(rec){
-  return normalizeText(rec.Rappel_a_faire).includes("relancer");
+
+  return normalizeText(
+    rec.Rappel_a_faire
+  )
+  .includes(
+    "relancer"
+  );
+
 }
+
+
+
+/* ========================================
+   DATES
+   ======================================== */
 
 function gristDateToDate(v){
-  if(v === null || v === undefined || v === "") return null;
-  if(v instanceof Date) return v;
-  const n = Number(v);
-  if(Number.isFinite(n)) return new Date(n * 1000);
-  const d = new Date(v);
-  return Number.isNaN(d.getTime()) ? null : d;
+
+  if(
+    v === null
+    ||
+    v === undefined
+    ||
+    v === ""
+  ){
+    return null;
+  }
+
+
+  if(
+    v instanceof Date
+  ){
+    return v;
+  }
+
+
+  const n =
+    Number(v);
+
+
+  if(
+    Number.isFinite(n)
+  ){
+    return new Date(
+      n * 1000
+    );
+  }
+
+
+  const d =
+    new Date(v);
+
+
+  return Number.isNaN(
+    d.getTime()
+  )
+    ? null
+    : d;
+
 }
+
+
+
 function formatDate(v){
-  const d = gristDateToDate(v);
-  if(!d) return "";
-  return new Intl.DateTimeFormat("fr-FR",{day:"2-digit",month:"2-digit",year:"numeric"}).format(d);
+
+  const d =
+    gristDateToDate(v);
+
+
+  if(!d){
+    return "";
+  }
+
+
+  return new Intl.DateTimeFormat(
+    "fr-FR",
+    {
+      day:"2-digit",
+      month:"2-digit",
+      year:"numeric"
+    }
+  )
+  .format(d);
+
 }
+
+
+
 function todayFr(){
-  return new Intl.DateTimeFormat("fr-FR",{day:"numeric",month:"long",year:"numeric"}).format(new Date());
+
+  return new Intl.DateTimeFormat(
+    "fr-FR",
+    {
+      day:"numeric",
+      month:"long",
+      year:"numeric"
+    }
+  )
+  .format(
+    new Date()
+  );
+
 }
+
+
+
+/* ========================================
+   TABLES GRIST
+   ======================================== */
 
 function rowsFromTable(t){
-  if(!t || !t.id) return [];
-  const n = t.id.length;
-  const rows = [];
-  for(let i=0;i<n;i++){
-    const r = {};
-    for(const [k,v] of Object.entries(t)) r[k] = Array.isArray(v) ? v[i] : v;
-    rows.push(r);
+
+  if(
+    !t
+    ||
+    !t.id
+  ){
+    return [];
   }
+
+
+  const n =
+    t.id.length;
+
+
+  const rows =
+    [];
+
+
+  for(
+    let i = 0;
+    i < n;
+    i++
+  ){
+
+    const r =
+      {};
+
+
+    for(
+      const [k,v]
+      of Object.entries(t)
+    ){
+
+      r[k] =
+        Array.isArray(v)
+          ? v[i]
+          : v;
+
+    }
+
+
+    rows.push(r);
+
+  }
+
+
   return rows;
+
 }
+
+
+
 async function safeFetch(name){
-  try{ return rowsFromTable(await grist.docApi.fetchTable(name)); }
-  catch(e){ console.warn("Table inaccessible:", name, e); return []; }
+
+  try{
+
+    return rowsFromTable(
+      await grist.docApi.fetchTable(
+        name
+      )
+    );
+
+  }
+  catch(e){
+
+    console.warn(
+      "Table inaccessible:",
+      name,
+      e
+    );
+
+    return [];
+
+  }
+
 }
+
+
+
+/* ========================================
+   UTILISATEUR COURANT
+   ======================================== */
 
 async function resolveCurrentUser(){
-  // Méthode Tâchtik : crée brièvement une ligne afin que les trigger formulas
-  // de SESSION_WIDGET renseignent user.Email / rôle / périmètre.
-  const actions = [["AddRecord","SESSION_WIDGET",null,{}]];
-  const result = await grist.docApi.applyUserActions(actions);
-  let newId = null;
 
-  if(Array.isArray(result)){
-    for(const item of result){
-      if(Array.isArray(item) && item[0] === "AddRecord"){
-        newId = item[2];
+  /*
+    Méthode Tâchtik :
+    création temporaire d'une ligne
+    SESSION_WIDGET afin que les
+    trigger formulas renseignent
+    l'utilisateur et son périmètre.
+  */
+
+  const actions = [
+    [
+      "AddRecord",
+      "SESSION_WIDGET",
+      null,
+      {}
+    ]
+  ];
+
+
+  const result =
+    await grist.docApi
+      .applyUserActions(
+        actions
+      );
+
+
+  let newId =
+    null;
+
+
+  if(
+    Array.isArray(result)
+  ){
+
+    for(
+      const item
+      of result
+    ){
+
+      if(
+        Array.isArray(item)
+        &&
+        item[0] === "AddRecord"
+      ){
+
+        newId =
+          item[2];
+
       }
+
     }
+
   }
-  const sessions = await safeFetch("SESSION_WIDGET");
-  let row = null;
-  if(newId) row = sessions.find(r => Number(r.id) === Number(newId));
-  if(!row && sessions.length) row = sessions[sessions.length - 1];
+
+
+  const sessions =
+    await safeFetch(
+      "SESSION_WIDGET"
+    );
+
+
+  let row =
+    null;
+
+
+  if(newId){
+
+    row =
+      sessions.find(
+        r =>
+          Number(r.id)
+          ===
+          Number(newId)
+      );
+
+  }
+
+
+  if(
+    !row
+    &&
+    sessions.length
+  ){
+
+    row =
+      sessions[
+        sessions.length - 1
+      ];
+
+  }
+
 
   if(row?.id){
+
     try{
-      await grist.docApi.applyUserActions([["BulkRemoveRecord","SESSION_WIDGET",[row.id]]]);
-    }catch(e){ console.warn("Nettoyage SESSION_WIDGET impossible",e); }
-  }
-  return row || null;
-}
 
-function contributionLine(r){
-  const num = r.Numero || "";
-  const title = r.Titre || "(Sans titre)";
-  const contributor = r.Contributeur_code || r.Contributeur_label || r.Contributeur || "";
-  const due = formatDate(r.Echeance);
-  const parts = [num, title];
-  if(contributor) parts.push(String(contributor));
-  if(due) parts.push("échéance " + due);
-  return parts.filter(Boolean).join(" – ");
-}
+      await grist.docApi
+        .applyUserActions([
+          [
+            "BulkRemoveRecord",
+            "SESSION_WIDGET",
+            [row.id]
+          ]
+        ]);
 
-function sortByDue(a,b){
-  const da = gristDateToDate(a.Echeance);
-  const db = gristDateToDate(b.Echeance);
-  if(!da && !db) return 0;
-  if(!da) return 1;
-  if(!db) return -1;
-  return da - db;
-}
+    }
+    catch(e){
 
-function getUpcoming(data){
-  const choice = $("upcomingDays").value;
-  const now = new Date();
-  now.setHours(0,0,0,0);
+      console.warn(
+        "Nettoyage SESSION_WIDGET impossible",
+        e
+      );
 
-  return data.todo
-    .filter(r => !data.late.includes(r))
-    .filter(r => r.Echeance)
-    .filter(r => {
-      if(choice === "all") return true;
-      const d = gristDateToDate(r.Echeance);
-      if(!d) return false;
-      d.setHours(0,0,0,0);
-      const diff = Math.ceil((d - now) / 86400000);
-      return diff >= 0 && diff <= Number(choice);
-    })
-    .sort(sortByDue);
-}
-
-function buildDefaultBody(data){
-  const lines = [];
-  lines.push(`Bonjour,`);
-  lines.push("");
-  lines.push(`Voici la synthèse des contributions au ${todayFr()}.`);
-  lines.push("");
-  lines.push(`${data.todo.length} contribution(s) à traiter`);
-  lines.push(`- ${data.late.length} en retard`);
-  lines.push(`- ${data.reminders.length} à relancer`);
-  lines.push(`- ${data.urgent.length} urgente(s)`);
-  lines.push("");
-
-  if($("includeLate").checked && data.late.length){
-    lines.push("🔴 Contributions en retard");
-    data.late.forEach(r => lines.push("• " + contributionLine(r)));
-    lines.push("");
-  }
-  if($("includeReminders").checked && data.reminders.length){
-    lines.push("🔔 Contributions à relancer");
-    data.reminders.forEach(r => lines.push("• " + contributionLine(r)));
-    lines.push("");
-  }
-
-  const upcoming = getUpcoming(data);
-  if($("includeUpcoming").checked && upcoming.length){
-    lines.push("📅 Prochaines échéances");
-    upcoming.forEach(r => lines.push("• " + contributionLine(r)));
-    lines.push("");
-  }
-
-  lines.push("Bien cordialement,");
-  lines.push("");
-  lines.push(state.params?.Nom_signature || state.bureauCode || "");
-  return lines.join("\n");
-}
-
-function detailBlock(list){
-  return list.length ? list.map(r => "• " + contributionLine(r)).join("\n") : "Aucune";
-}
-
-function cleanEmptyLines(text){
-  return String(text ?? "")
-    .split("\n")
-    .filter(line => {
-      const trimmed = line.trim();
-      if(!trimmed) return true;
-      // supprime les lignes finissant par ":" sans contenu
-      if(/^[^:\n]+:\s*$/.test(trimmed)) return false;
-      return true;
-    })
-    .join("\n")
-    .replace(/\n{3,}/g,"\n\n")
-    .trim();
-}
-
-function renderTemplate(template, data){
-  if(!template) return buildDefaultBody(data);
-
-  const upcoming = getUpcoming(data);
-
-  const vars = {
-    "[DATE]": todayFr(),
-    "[NB_A_TRAITER]": String(data.todo.length),
-    "[NB_EN_RETARD]": String(data.late.length),
-    "[NB_A_RELANCER]": String(data.reminders.length),
-    "[NB_URGENTES]": String(data.urgent.length),
-    "[DETAIL_EN_RETARD]": $("includeLate").checked ? detailBlock(data.late) : "",
-    "[DETAIL_A_RELANCER]": $("includeReminders").checked ? detailBlock(data.reminders) : "",
-    "[DETAIL_PROCHAINES]": $("includeUpcoming").checked ? detailBlock(upcoming) : "",
-    "[NOM_SIGNATURE]": state.params?.Nom_signature || state.bureauCode || "",
-    "[EMAIL_CONTACT]": state.params?.Email_contact || ""
-  };
-
-  let out = String(template);
-  for(const [key,val] of Object.entries(vars)) out = out.split(key).join(val);
-
-  // Si une section est décochée, on retire aussi son titre standard du modèle.
-  if(!$("includeLate").checked){
-    out = out.replace(/^.*Contributions en retard.*\n?/gmi, "");
-  }
-  if(!$("includeReminders").checked){
-    out = out.replace(/^.*Contributions à relancer.*\n?/gmi, "");
-  }
-  if(!$("includeUpcoming").checked){
-    out = out.replace(/^.*Prochaines échéances.*\n?/gmi, "");
-  }
-
-  return cleanEmptyLines(out);
-}
-
-function renderSubject(template){
-  const base = template || "Synthèse des contributions – [DATE]";
-  return base.split("[DATE]").join(todayFr());
-}
-
-function currentData(){
-  const todo = state.filtered.filter(r => !isDone(r));
-  const late = todo.filter(r => {
-    const jr = Number(r.Jours_restants);
-    return Number.isFinite(jr) && jr < 0;
-  }).sort(sortByDue);
-  const reminders = todo.filter(isReminder).sort(sortByDue);
-  const urgent = todo.filter(isUrgent).sort(sortByDue);
-  return {todo,late,reminders,urgent};
-}
-
-function render(){
-  const data = currentData();
-  $("kpiTodo").textContent = data.todo.length;
-  $("kpiLate").textContent = data.late.length;
-  $("kpiReminder").textContent = data.reminders.length;
-  $("kpiUrgent").textContent = data.urgent.length;
-
-  $("recipients").value = state.params?.Destinataires_synthese || "";
-  $("subject").value = renderSubject(state.params?.Objet_mail_synthese);
-  $("body").value = renderTemplate(state.params?.Corps_mail_synthese, data);
-  $("preview").textContent = $("body").value;
-
-  let scope = "Périmètre : ";
-  if(state.profile?.Role === "Administrateur" || state.profile?.Role === "Gestionnaire E1"){
-    scope += "ensemble des contributions";
-  } else if(state.bureauCode){
-    scope += "contributions du bureau " + state.bureauCode;
-  } else {
-    scope += "contributions accessibles";
-  }
-  $("scopeMeta").textContent = scope;
-}
-
-async function load(){
-  clearError();
-  $("status").textContent = "Chargement…";
-  try{
-    state.user = await resolveCurrentUser();
-
-    const [users,bureaux,params,contribs,depts] = await Promise.all([
-      safeFetch("UTILISATEURS"),
-      safeFetch("BUREAUX_ORIGINE"),
-      safeFetch("PARAMETRES_BUREAUX"),
-      safeFetch("CONTRIBUTIONS"),
-      safeFetch("DEPARTEMENTS")
-    ]);
-
-    const email = state.user?.Email || "";
-    state.profile = users.find(u => normalizeText(u.Email) === normalizeText(email)) || null;
-
-    state.bureauId = state.profile?.Bureau || state.user?.Bureau || null;
-    const bureau = bureaux.find(b => Number(b.id) === Number(state.bureauId));
-    state.bureauCode = bureau?.Code || "";
-
-    // Enrichit le code département pour l'affichage.
-    const deptMap = new Map(depts.map(d => [Number(d.id), d.Code || d.Nom || ""]));
-    state.contributions = contribs.map(r => ({
-      ...r,
-      Contributeur_code: deptMap.get(Number(r.Contributeur)) || ""
-    }));
-
-    const role = state.profile?.Role || state.user?.Role || "";
-    if(role === "Administrateur" || role === "Gestionnaire E1"){
-      state.filtered = state.contributions;
-      const e1 = bureaux.find(b => normalizeText(b.Code) === "e1");
-      const paramBureauId = e1?.id || state.bureauId;
-      state.params = params.find(p => Number(p.Bureau) === Number(paramBureauId)) || params[0] || null;
-    } else if(state.bureauId){
-      state.filtered = state.contributions.filter(r => Number(r.Bureau_origine) === Number(state.bureauId));
-      state.params = params.find(p => Number(p.Bureau) === Number(state.bureauId)) || null;
-    } else {
-      state.filtered = state.contributions;
-      state.params = params[0] || null;
     }
 
-    render();
-    $("status").textContent = "✓ Synthèse actualisée";
-    setTimeout(()=>{ $("status").textContent=""; },2200);
-  }catch(e){
-    showError(e);
-    $("status").textContent = "";
   }
+
+
+  return row || null;
+
 }
 
+
+
+/* ========================================
+   AFFICHAGE D'UNE CONTRIBUTION
+   ======================================== */
+
+function contributionLine(r){
+
+  const num =
+    r.Numero
+    ||
+    "";
+
+
+  const title =
+    r.Titre
+    ||
+    "(Sans titre)";
+
+
+  const contributor =
+    r.Contributeur_code
+    ||
+    r.Contributeur_label
+    ||
+    r.Contributeur
+    ||
+    "";
+
+
+  const due =
+    formatDate(
+      r.Echeance
+    );
+
+
+  const parts =
+    [
+      num,
+      title
+    ];
+
+
+  if(contributor){
+
+    parts.push(
+      String(
+        contributor
+      )
+    );
+
+  }
+
+
+  if(due){
+
+    parts.push(
+      "échéance "
+      +
+      due
+    );
+
+  }
+
+
+  return parts
+    .filter(Boolean)
+    .join(" – ");
+
+}
+
+
+
+/* ========================================
+   TRI PAR ÉCHÉANCE
+   ======================================== */
+
+function sortByDue(a,b){
+
+  const da =
+    gristDateToDate(
+      a.Echeance
+    );
+
+
+  const db =
+    gristDateToDate(
+      b.Echeance
+    );
+
+
+  if(
+    !da
+    &&
+    !db
+  ){
+    return 0;
+  }
+
+
+  if(!da){
+    return 1;
+  }
+
+
+  if(!db){
+    return -1;
+  }
+
+
+  return da - db;
+
+}
+
+
+
+/* ========================================
+   FILTRES DE LA SYNTHÈSE
+   ======================================== */
+
+function uniqueSortedValues(values){
+
+  return [
+    ...new Set(
+
+      values
+
+        .map(
+          v =>
+            String(v ?? "")
+              .trim()
+        )
+
+        .filter(Boolean)
+
+    )
+  ]
+  .sort(
+    (a,b) =>
+      a.localeCompare(
+        b,
+        "fr",
+        {
+          sensitivity:"base"
+        }
+      )
+  );
+
+}
+
+
+
+function fillFilterSelect(
+  selectId,
+  values,
+  emptyLabel
+){
+
+  const select =
+    $(selectId);
+
+
+  /*
+    Conserve le filtre sélectionné
+    lorsqu'on clique sur Actualiser.
+  */
+
+  const previousValue =
+    select.value;
+
+
+  select.innerHTML =
+    "";
+
+
+  const emptyOption =
+    document.createElement(
+      "option"
+    );
+
+
+  emptyOption.value =
+    "";
+
+
+  emptyOption.textContent =
+    emptyLabel;
+
+
+  select.appendChild(
+    emptyOption
+  );
+
+
+  values.forEach(
+    value => {
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+
+      option.value =
+        value;
+
+
+      option.textContent =
+        value;
+
+
+      select.appendChild(
+        option
+      );
+
+    }
+  );
+
+
+  const stillExists =
+    [
+      ...select.options
+    ]
+    .some(
+      option =>
+        option.value
+        ===
+        previousValue
+    );
+
+
+  if(
+    previousValue
+    &&
+    stillExists
+  ){
+
+    select.value =
+      previousValue;
+
+  }
+
+}
+
+
+
+function populateSynthFilters(){
+
+  /*
+    Important :
+    state.filtered contient déjà
+    uniquement les contributions
+    autorisées pour l'utilisateur.
+  */
+
+  const todo =
+    state.filtered.filter(
+      r =>
+        !isDone(r)
+    );
+
+
+  const departments =
+    uniqueSortedValues(
+      todo.map(
+        r =>
+          r.Contributeur_code
+      )
+    );
+
+
+  const priorities =
+    uniqueSortedValues(
+      todo.map(
+        r =>
+          r.Priorite
+      )
+    );
+
+
+  const requesters =
+    uniqueSortedValues(
+      todo.map(
+        r =>
+          r.Demandeur
+      )
+    );
+
+
+  fillFilterSelect(
+    "filterDepartment",
+    departments,
+    "Tous les départements"
+  );
+
+
+  fillFilterSelect(
+    "filterPriority",
+    priorities,
+    "Toutes les priorités"
+  );
+
+
+  fillFilterSelect(
+    "filterRequester",
+    requesters,
+    "Tous les demandeurs"
+  );
+
+}
+
+
+
+/* ========================================
+   APPLICATION DES FILTRES
+   ======================================== */
+
+function getFilteredContributions(){
+
+  const department =
+    $("filterDepartment")
+      .value;
+
+
+  const priority =
+    $("filterPriority")
+      .value;
+
+
+  const requester =
+    $("filterRequester")
+      .value;
+
+
+  const type =
+    $("filterType")
+      .value;
+
+
+  /*
+    On repart TOUJOURS de state.filtered.
+
+    Cela garantit que les filtres
+    n'élargissent jamais le périmètre
+    de droits de l'utilisateur.
+  */
+
+  let rows =
+    state.filtered
+      .filter(
+        r =>
+          !isDone(r)
+      );
+
+
+  /* Département */
+
+  if(department){
+
+    rows =
+      rows.filter(
+        r =>
+          normalizeText(
+            r.Contributeur_code
+          )
+          ===
+          normalizeText(
+            department
+          )
+      );
+
+  }
+
+
+  /* Priorité */
+
+  if(priority){
+
+    rows =
+      rows.filter(
+        r =>
+          normalizeText(
+            r.Priorite
+          )
+          ===
+          normalizeText(
+            priority
+          )
+      );
+
+  }
+
+
+  /* Demandeur */
+
+  if(requester){
+
+    rows =
+      rows.filter(
+        r =>
+          normalizeText(
+            r.Demandeur
+          )
+          ===
+          normalizeText(
+            requester
+          )
+      );
+
+  }
+
+
+  /* En retard */
+
+  if(
+    type === "late"
+  ){
+
+    rows =
+      rows.filter(
+        r => {
+
+          const jr =
+            Number(
+              r.Jours_restants
+            );
+
+
+          return (
+            Number.isFinite(jr)
+            &&
+            jr < 0
+          );
+
+        }
+      );
+
+  }
+
+
+  /* À relancer */
+
+  if(
+    type === "reminder"
+  ){
+
+    rows =
+      rows.filter(
+        isReminder
+      );
+
+  }
+
+
+  /* Urgentes */
+
+  if(
+    type === "urgent"
+  ){
+
+    rows =
+      rows.filter(
+        isUrgent
+      );
+
+  }
+
+
+  return rows;
+
+}
+
+
+
+/* ========================================
+   PROCHAINES ÉCHÉANCES
+   ======================================== */
+
+function getUpcoming(data){
+
+  const choice =
+    $("upcomingDays")
+      .value;
+
+
+  const now =
+    new Date();
+
+
+  now.setHours(
+    0,
+    0,
+    0,
+    0
+  );
+
+
+  return data.todo
+
+    .filter(
+      r =>
+        !data.late.includes(r)
+    )
+
+    .filter(
+      r =>
+        r.Echeance
+    )
+
+    .filter(
+      r => {
+
+        if(
+          choice === "all"
+        ){
+          return true;
+        }
+
+
+        const d =
+          gristDateToDate(
+            r.Echeance
+          );
+
+
+        if(!d){
+          return false;
+        }
+
+
+        d.setHours(
+          0,
+          0,
+          0,
+          0
+        );
+
+
+        const diff =
+          Math.ceil(
+            (
+              d - now
+            )
+            /
+            86400000
+          );
+
+
+        return (
+          diff >= 0
+          &&
+          diff <= Number(choice)
+        );
+
+      }
+    )
+
+    .sort(
+      sortByDue
+    );
+
+}
+
+
+
+/* ========================================
+   CORPS PAR DÉFAUT
+   ======================================== */
+
+function buildDefaultBody(data){
+
+  const lines =
+    [];
+
+
+  lines.push(
+    "Bonjour,"
+  );
+
+
+  lines.push(
+    ""
+  );
+
+
+  lines.push(
+    `Voici la synthèse des contributions au ${todayFr()}.`
+  );
+
+
+  lines.push(
+    ""
+  );
+
+
+  lines.push(
+    `${data.todo.length} contribution(s) à traiter`
+  );
+
+
+  lines.push(
+    `- ${data.late.length} en retard`
+  );
+
+
+  lines.push(
+    `- ${data.reminders.length} à relancer`
+  );
+
+
+  lines.push(
+    `- ${data.urgent.length} urgente(s)`
+  );
+
+
+  lines.push(
+    ""
+  );
+
+
+  if(
+    $("includeLate").checked
+    &&
+    data.late.length
+  ){
+
+    lines.push(
+      "🔴 Contributions en retard"
+    );
+
+
+    data.late.forEach(
+      r =>
+        lines.push(
+          "• "
+          +
+          contributionLine(r)
+        )
+    );
+
+
+    lines.push(
+      ""
+    );
+
+  }
+
+
+  if(
+    $("includeReminders").checked
+    &&
+    data.reminders.length
+  ){
+
+    lines.push(
+      "🔔 Contributions à relancer"
+    );
+
+
+    data.reminders.forEach(
+      r =>
+        lines.push(
+          "• "
+          +
+          contributionLine(r)
+        )
+    );
+
+
+    lines.push(
+      ""
+    );
+
+  }
+
+
+  const upcoming =
+    getUpcoming(data);
+
+
+  if(
+    $("includeUpcoming").checked
+    &&
+    upcoming.length
+  ){
+
+    lines.push(
+      "📅 Prochaines échéances"
+    );
+
+
+    upcoming.forEach(
+      r =>
+        lines.push(
+          "• "
+          +
+          contributionLine(r)
+        )
+    );
+
+
+    lines.push(
+      ""
+    );
+
+  }
+
+
+  lines.push(
+    "Bien cordialement,"
+  );
+
+
+  lines.push(
+    ""
+  );
+
+
+  lines.push(
+    state.params?.Nom_signature
+    ||
+    state.bureauCode
+    ||
+    ""
+  );
+
+
+  return lines.join(
+    "\n"
+  );
+
+}
+
+
+
+/* ========================================
+   BLOC DE DÉTAIL
+   ======================================== */
+
+function detailBlock(list){
+
+  return list.length
+
+    ? list
+        .map(
+          r =>
+            "• "
+            +
+            contributionLine(r)
+        )
+        .join("\n")
+
+    : "Aucune";
+
+}
+
+
+
+/* ========================================
+   NETTOYAGE DU MODÈLE
+   ======================================== */
+
+function cleanEmptyLines(text){
+
+  return String(
+    text ?? ""
+  )
+
+    .split("\n")
+
+    .filter(
+      line => {
+
+        const trimmed =
+          line.trim();
+
+
+        if(!trimmed){
+          return true;
+        }
+
+
+        /*
+          Supprime les lignes
+          finissant par ":" sans contenu.
+        */
+
+        if(
+          /^[^:\n]+:\s*$/
+            .test(trimmed)
+        ){
+          return false;
+        }
+
+
+        return true;
+
+      }
+    )
+
+    .join("\n")
+
+    .replace(
+      /\n{3,}/g,
+      "\n\n"
+    )
+
+    .trim();
+
+}
+
+
+
+/* ========================================
+   MODÈLE DE MESSAGE
+   ======================================== */
+
+function renderTemplate(
+  template,
+  data
+){
+
+  if(!template){
+
+    return buildDefaultBody(
+      data
+    );
+
+  }
+
+
+  const upcoming =
+    getUpcoming(
+      data
+    );
+
+
+  const vars = {
+
+    "[DATE]":
+      todayFr(),
+
+    "[NB_A_TRAITER]":
+      String(
+        data.todo.length
+      ),
+
+    "[NB_EN_RETARD]":
+      String(
+        data.late.length
+      ),
+
+    "[NB_A_RELANCER]":
+      String(
+        data.reminders.length
+      ),
+
+    "[NB_URGENTES]":
+      String(
+        data.urgent.length
+      ),
+
+    "[DETAIL_EN_RETARD]":
+      $("includeLate").checked
+        ? detailBlock(
+            data.late
+          )
+        : "",
+
+    "[DETAIL_A_RELANCER]":
+      $("includeReminders").checked
+        ? detailBlock(
+            data.reminders
+          )
+        : "",
+
+    "[DETAIL_PROCHAINES]":
+      $("includeUpcoming").checked
+        ? detailBlock(
+            upcoming
+          )
+        : "",
+
+    "[NOM_SIGNATURE]":
+      state.params?.Nom_signature
+      ||
+      state.bureauCode
+      ||
+      "",
+
+    "[EMAIL_CONTACT]":
+      state.params?.Email_contact
+      ||
+      ""
+
+  };
+
+
+  let out =
+    String(
+      template
+    );
+
+
+  for(
+    const [key,val]
+    of Object.entries(vars)
+  ){
+
+    out =
+      out
+        .split(key)
+        .join(val);
+
+  }
+
+
+  /*
+    Si une section est décochée,
+    suppression de son titre standard.
+  */
+
+  if(
+    !$("includeLate").checked
+  ){
+
+    out =
+      out.replace(
+        /^.*Contributions en retard.*\n?/gmi,
+        ""
+      );
+
+  }
+
+
+  if(
+    !$("includeReminders").checked
+  ){
+
+    out =
+      out.replace(
+        /^.*Contributions à relancer.*\n?/gmi,
+        ""
+      );
+
+  }
+
+
+  if(
+    !$("includeUpcoming").checked
+  ){
+
+    out =
+      out.replace(
+        /^.*Prochaines échéances.*\n?/gmi,
+        ""
+      );
+
+  }
+
+
+  return cleanEmptyLines(
+    out
+  );
+
+}
+
+
+
+/* ========================================
+   OBJET DU MAIL
+   ======================================== */
+
+function renderSubject(template){
+
+  const base =
+    template
+    ||
+    "Synthèse des contributions – [DATE]";
+
+
+  return base
+    .split(
+      "[DATE]"
+    )
+    .join(
+      todayFr()
+    );
+
+}
+
+
+
+/* ========================================
+   DONNÉES COURANTES APRÈS FILTRES
+   ======================================== */
+
+function currentData(){
+
+  const todo =
+    getFilteredContributions();
+
+
+  const late =
+    todo
+
+      .filter(
+        r => {
+
+          const jr =
+            Number(
+              r.Jours_restants
+            );
+
+
+          return (
+            Number.isFinite(jr)
+            &&
+            jr < 0
+          );
+
+        }
+      )
+
+      .sort(
+        sortByDue
+      );
+
+
+  const reminders =
+    todo
+
+      .filter(
+        isReminder
+      )
+
+      .sort(
+        sortByDue
+      );
+
+
+  const urgent =
+    todo
+
+      .filter(
+        isUrgent
+      )
+
+      .sort(
+        sortByDue
+      );
+
+
+  return {
+
+    todo,
+
+    late,
+
+    reminders,
+
+    urgent
+
+  };
+
+}
+
+
+
+/* ========================================
+   RENDU PRINCIPAL
+   ======================================== */
+
+function render(){
+
+  const data =
+    currentData();
+
+
+  $("kpiTodo").textContent =
+    data.todo.length;
+
+
+  $("kpiLate").textContent =
+    data.late.length;
+
+
+  $("kpiReminder").textContent =
+    data.reminders.length;
+
+
+  $("kpiUrgent").textContent =
+    data.urgent.length;
+
+
+  $("recipients").value =
+    state.params
+      ?.Destinataires_synthese
+    ||
+    "";
+
+
+  $("subject").value =
+    renderSubject(
+      state.params
+        ?.Objet_mail_synthese
+    );
+
+
+  $("body").value =
+    renderTemplate(
+      state.params
+        ?.Corps_mail_synthese,
+      data
+    );
+
+
+  $("preview").textContent =
+    $("body").value;
+
+
+  let scope =
+    "Périmètre : ";
+
+
+  if(
+    state.profile?.Role
+      ===
+      "Administrateur"
+    ||
+    state.profile?.Role
+      ===
+      "Gestionnaire E1"
+  ){
+
+    scope +=
+      "ensemble des contributions";
+
+  }
+  else if(
+    state.bureauCode
+  ){
+
+    scope +=
+      "contributions du bureau "
+      +
+      state.bureauCode;
+
+  }
+  else{
+
+    scope +=
+      "contributions accessibles";
+
+  }
+
+
+  $("scopeMeta")
+    .textContent =
+      scope;
+
+}
+
+
+
+/* ========================================
+   CHARGEMENT DES DONNÉES
+   ======================================== */
+
+async function load(){
+
+  clearError();
+
+
+  $("status")
+    .textContent =
+      "Chargement…";
+
+
+  try{
+
+
+    state.user =
+      await resolveCurrentUser();
+
+
+    const [
+      users,
+      bureaux,
+      params,
+      contribs,
+      depts
+    ] =
+      await Promise.all([
+
+        safeFetch(
+          "UTILISATEURS"
+        ),
+
+        safeFetch(
+          "BUREAUX_ORIGINE"
+        ),
+
+        safeFetch(
+          "PARAMETRES_BUREAUX"
+        ),
+
+        safeFetch(
+          "CONTRIBUTIONS"
+        ),
+
+        safeFetch(
+          "DEPARTEMENTS"
+        )
+
+      ]);
+
+
+    const email =
+      state.user?.Email
+      ||
+      "";
+
+
+    state.profile =
+      users.find(
+        u =>
+          normalizeText(
+            u.Email
+          )
+          ===
+          normalizeText(
+            email
+          )
+      )
+      ||
+      null;
+
+
+    state.bureauId =
+      state.profile?.Bureau
+      ||
+      state.user?.Bureau
+      ||
+      null;
+
+
+    const bureau =
+      bureaux.find(
+        b =>
+          Number(b.id)
+          ===
+          Number(
+            state.bureauId
+          )
+      );
+
+
+    state.bureauCode =
+      bureau?.Code
+      ||
+      "";
+
+
+    /*
+      Enrichissement du code département
+      pour l'affichage et les filtres.
+    */
+
+    const deptMap =
+      new Map(
+
+        depts.map(
+          d => [
+            Number(d.id),
+            d.Code
+            ||
+            d.Nom
+            ||
+            ""
+          ]
+        )
+
+      );
+
+
+    state.contributions =
+      contribs.map(
+        r => ({
+
+          ...r,
+
+          Contributeur_code:
+            deptMap.get(
+              Number(
+                r.Contributeur
+              )
+            )
+            ||
+            ""
+
+        })
+      );
+
+
+    const role =
+      state.profile?.Role
+      ||
+      state.user?.Role
+      ||
+      "";
+
+
+    /*
+      ADMINISTRATEUR / GESTIONNAIRE E1
+      = toutes les contributions
+    */
+
+    if(
+      role === "Administrateur"
+      ||
+      role === "Gestionnaire E1"
+    ){
+
+      state.filtered =
+        state.contributions;
+
+
+      const e1 =
+        bureaux.find(
+          b =>
+            normalizeText(
+              b.Code
+            )
+            ===
+            "e1"
+        );
+
+
+      const paramBureauId =
+        e1?.id
+        ||
+        state.bureauId;
+
+
+      state.params =
+        params.find(
+          p =>
+            Number(p.Bureau)
+            ===
+            Number(
+              paramBureauId
+            )
+        )
+        ||
+        params[0]
+        ||
+        null;
+
+    }
+
+
+    /*
+      UTILISATEUR RATTACHÉ À UN BUREAU
+    */
+
+    else if(
+      state.bureauId
+    ){
+
+      state.filtered =
+        state.contributions
+          .filter(
+            r =>
+              Number(
+                r.Bureau_origine
+              )
+              ===
+              Number(
+                state.bureauId
+              )
+          );
+
+
+      state.params =
+        params.find(
+          p =>
+            Number(
+              p.Bureau
+            )
+            ===
+            Number(
+              state.bureauId
+            )
+        )
+        ||
+        null;
+
+    }
+
+
+    /*
+      CAS DE SECOURS
+    */
+
+    else{
+
+      state.filtered =
+        state.contributions;
+
+
+      state.params =
+        params[0]
+        ||
+        null;
+
+    }
+
+
+    /*
+      ANCRE :
+      FILTRES_SYNTHÈSE_POPULATION
+    */
+
+    populateSynthFilters();
+
+
+    render();
+
+
+    $("status")
+      .textContent =
+        "✓ Synthèse actualisée";
+
+
+    setTimeout(
+      () => {
+
+        $("status")
+          .textContent =
+            "";
+
+      },
+      2200
+    );
+
+
+  }
+  catch(e){
+
+    showError(
+      e
+    );
+
+
+    $("status")
+      .textContent =
+        "";
+
+  }
+
+}
+
+
+
+/* ========================================
+   COPIE DE LA SYNTHÈSE
+   ======================================== */
+
 async function copySummary(){
+
   const text =
 `À : ${$("recipients").value}
 
 Objet : ${$("subject").value}
 
 ${$("body").value}`;
+
+
   try{
-    await navigator.clipboard.writeText(text);
-    $("status").textContent = "✓ Synthèse copiée dans le presse-papiers";
-  }catch(e){
-    $("body").focus();
-    $("body").select();
-    document.execCommand("copy");
-    $("status").textContent = "✓ Message copié";
+
+    await navigator
+      .clipboard
+      .writeText(
+        text
+      );
+
+
+    $("status")
+      .textContent =
+        "✓ Synthèse copiée dans le presse-papiers";
+
   }
-  setTimeout(()=>{ $("status").textContent=""; },2500);
+  catch(e){
+
+    $("body")
+      .focus();
+
+
+    $("body")
+      .select();
+
+
+    document.execCommand(
+      "copy"
+    );
+
+
+    $("status")
+      .textContent =
+        "✓ Message copié";
+
+  }
+
+
+  setTimeout(
+    () => {
+
+      $("status")
+        .textContent =
+          "";
+
+    },
+    2500
+  );
+
 }
+
+
+
+/* ========================================
+   OUVERTURE MESSAGERIE
+   ======================================== */
 
 function openMail(){
-  const to = $("recipients").value.trim();
-  const subject = $("subject").value;
-  const body = $("body").value;
+
+  const to =
+    $("recipients")
+      .value
+      .trim();
+
+
+  const subject =
+    $("subject")
+      .value;
+
+
+  const body =
+    $("body")
+      .value;
+
+
   window.location.href =
-    "mailto:" + encodeURIComponent(to) +
-    "?subject=" + encodeURIComponent(subject) +
-    "&body=" + encodeURIComponent(body);
+
+    "mailto:"
+    +
+    encodeURIComponent(
+      to
+    )
+
+    +
+    "?subject="
+    +
+    encodeURIComponent(
+      subject
+    )
+
+    +
+    "&body="
+    +
+    encodeURIComponent(
+      body
+    );
+
 }
+
+
+
+/* ========================================
+   RAFRAÎCHISSEMENT APRÈS FILTRE
+   ======================================== */
 
 function refreshGeneratedMessage(){
-  const data = currentData();
-  $("subject").value = renderSubject(state.params?.Objet_mail_synthese);
-  $("body").value = renderTemplate(state.params?.Corps_mail_synthese, data);
-  $("preview").textContent = $("body").value;
+
+  const data =
+    currentData();
+
+
+  /*
+    Mise à jour des KPI
+  */
+
+  $("kpiTodo").textContent =
+    data.todo.length;
+
+
+  $("kpiLate").textContent =
+    data.late.length;
+
+
+  $("kpiReminder").textContent =
+    data.reminders.length;
+
+
+  $("kpiUrgent").textContent =
+    data.urgent.length;
+
+
+  /*
+    Mise à jour du message
+  */
+
+  $("subject").value =
+    renderSubject(
+      state.params
+        ?.Objet_mail_synthese
+    );
+
+
+  $("body").value =
+    renderTemplate(
+      state.params
+        ?.Corps_mail_synthese,
+      data
+    );
+
+
+  $("preview")
+    .textContent =
+      $("body").value;
+
 }
 
-$("refreshBtn").addEventListener("click",load);
-$("copyBtn").addEventListener("click",copySummary);
-$("mailtoBtn").addEventListener("click",openMail);
-$("body").addEventListener("input",()=>{$("preview").textContent=$("body").value;});
-$("includeLate").addEventListener("change",refreshGeneratedMessage);
-$("includeReminders").addEventListener("change",refreshGeneratedMessage);
-$("includeUpcoming").addEventListener("change",refreshGeneratedMessage);
-$("upcomingDays").addEventListener("change",refreshGeneratedMessage);
 
-grist.ready({requiredAccess:"full"});
+
+/* ========================================
+   ÉVÉNEMENTS PRINCIPAUX
+   ======================================== */
+
+$("refreshBtn")
+  .addEventListener(
+    "click",
+    load
+  );
+
+
+$("copyBtn")
+  .addEventListener(
+    "click",
+    copySummary
+  );
+
+
+$("mailtoBtn")
+  .addEventListener(
+    "click",
+    openMail
+  );
+
+
+$("body")
+  .addEventListener(
+    "input",
+    () => {
+
+      $("preview")
+        .textContent =
+          $("body").value;
+
+    }
+  );
+
+
+$("includeLate")
+  .addEventListener(
+    "change",
+    refreshGeneratedMessage
+  );
+
+
+$("includeReminders")
+  .addEventListener(
+    "change",
+    refreshGeneratedMessage
+  );
+
+
+$("includeUpcoming")
+  .addEventListener(
+    "change",
+    refreshGeneratedMessage
+  );
+
+
+$("upcomingDays")
+  .addEventListener(
+    "change",
+    refreshGeneratedMessage
+  );
+
+
+
+/* ========================================
+   ÉVÉNEMENTS DES FILTRES
+   ======================================== */
+
+$("filterDepartment")
+  .addEventListener(
+    "change",
+    refreshGeneratedMessage
+  );
+
+
+$("filterPriority")
+  .addEventListener(
+    "change",
+    refreshGeneratedMessage
+  );
+
+
+$("filterRequester")
+  .addEventListener(
+    "change",
+    refreshGeneratedMessage
+  );
+
+
+$("filterType")
+  .addEventListener(
+    "change",
+    refreshGeneratedMessage
+  );
+
+
+
+/* ========================================
+   RÉINITIALISATION DES FILTRES
+   ======================================== */
+
+$("resetFiltersBtn")
+  .addEventListener(
+    "click",
+    () => {
+
+      $("filterDepartment")
+        .value =
+          "";
+
+
+      $("filterPriority")
+        .value =
+          "";
+
+
+      $("filterRequester")
+        .value =
+          "";
+
+
+      $("filterType")
+        .value =
+          "";
+
+
+      refreshGeneratedMessage();
+
+
+      $("status")
+        .textContent =
+          "✓ Filtres réinitialisés";
+
+
+      setTimeout(
+        () => {
+
+          $("status")
+            .textContent =
+              "";
+
+        },
+        1800
+      );
+
+    }
+  );
+
+
+
+/* ========================================
+   DÉMARRAGE GRIST
+   ======================================== */
+
+grist.ready({
+  requiredAccess:"full"
+});
+
+
 load();
+
 </script>
+
 </body>
 </html>
