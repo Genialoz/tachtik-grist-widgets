@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tâchtik - Synthèses</title>
+
 <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
 
 <style>
@@ -31,7 +32,13 @@
 
   body{
     margin:0;
-    font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    font-family:
+      Inter,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
     background:var(--bg);
     color:var(--text);
   }
@@ -43,7 +50,12 @@
   }
 
   .hero{
-    background:linear-gradient(135deg,#1d4ed8,#3b82f6);
+    background:
+      linear-gradient(
+        135deg,
+        #1d4ed8,
+        #3b82f6
+      );
     color:#fff;
     border-radius:22px;
     padding:24px 26px;
@@ -69,7 +81,11 @@
 
   .grid-kpi{
     display:grid;
-    grid-template-columns:repeat(4,minmax(0,1fr));
+    grid-template-columns:
+      repeat(
+        4,
+        minmax(0,1fr)
+      );
     gap:14px;
     margin-bottom:20px;
   }
@@ -247,41 +263,15 @@
     line-height:1.5;
   }
 
-  .section-title{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-    margin:14px 0 8px;
-  }
-
-  .section-title h3{
-    margin:0;
-    font-size:16px;
-  }
-
-  .mini{
-    font-size:12px;
-    color:var(--muted);
-  }
-
-  .error{
-    background:#fef2f2;
-    color:#991b1b;
-    border:1px solid #fecaca;
-    border-radius:12px;
-    padding:12px;
-    margin-bottom:14px;
-  }
-
   .hidden{
-    display:none;
+    display:none !important;
   }
 
   @media(max-width:800px){
 
     .grid-kpi{
-      grid-template-columns:repeat(2,1fr);
+      grid-template-columns:
+        repeat(2,1fr);
     }
 
     .mail-grid{
@@ -305,6 +295,10 @@
 
 <div class="wrap">
 
+  <!-- =====================================
+       ENTÊTE
+       ===================================== -->
+
   <section class="hero">
 
     <h1>📊 Synthèses</h1>
@@ -314,57 +308,96 @@
       prête à être copiée ou ouverte dans votre messagerie.
     </p>
 
-    <div id="scopeMeta" class="meta">
+    <div
+      id="scopeMeta"
+      class="meta"
+    >
       Chargement du périmètre…
     </div>
 
   </section>
 
 
-  <div id="errorBox" class="error hidden"></div>
+  <div
+    id="errorBox"
+    class="error hidden"
+  ></div>
 
 
-  <!-- ================================
+  <!-- =====================================
        KPI
-       ================================ -->
+       ===================================== -->
 
   <section class="grid-kpi">
 
     <div class="kpi">
-      <div class="label">À traiter</div>
-      <div id="kpiTodo" class="value">0</div>
+      <div class="label">
+        À traiter
+      </div>
+      <div
+        id="kpiTodo"
+        class="value"
+      >
+        0
+      </div>
     </div>
+
 
     <div class="kpi danger">
-      <div class="label">En retard</div>
-      <div id="kpiLate" class="value">0</div>
+      <div class="label">
+        En retard
+      </div>
+      <div
+        id="kpiLate"
+        class="value"
+      >
+        0
+      </div>
     </div>
+
 
     <div class="kpi warning">
-      <div class="label">À relancer</div>
-      <div id="kpiReminder" class="value">0</div>
+      <div class="label">
+        À relancer
+      </div>
+      <div
+        id="kpiReminder"
+        class="value"
+      >
+        0
+      </div>
     </div>
 
+
     <div class="kpi success">
-      <div class="label">Urgentes</div>
-      <div id="kpiUrgent" class="value">0</div>
+      <div class="label">
+        Urgentes
+      </div>
+      <div
+        id="kpiUrgent"
+        class="value"
+      >
+        0
+      </div>
     </div>
 
   </section>
 
 
-  <!-- ================================
-       PRÉPARATION SYNTHÈSE
-       ================================ -->
+  <!-- =====================================
+       PRÉPARATION
+       ===================================== -->
 
   <section class="panel">
 
-    <h2>✉️ Préparer la synthèse</h2>
+    <h2>
+      ✉️ Préparer la synthèse
+    </h2>
 
 
-    <!-- ================================
-         CONTENU DE LA SYNTHÈSE
-         ================================ -->
+    <!-- =====================================
+         CONTENU
+         ===================================== -->
 
     <div class="options-box">
 
@@ -375,32 +408,41 @@
       <div class="options-row">
 
         <label class="check">
+
           <input
             type="checkbox"
             id="includeLate"
             checked
           >
+
           Contributions en retard
+
         </label>
 
 
         <label class="check">
+
           <input
             type="checkbox"
             id="includeReminders"
             checked
           >
+
           Contributions à relancer
+
         </label>
 
 
         <label class="check">
+
           <input
             type="checkbox"
             id="includeUpcoming"
             checked
           >
+
           Prochaines échéances
+
         </label>
 
 
@@ -414,7 +456,10 @@
               7 jours
             </option>
 
-            <option value="15" selected>
+            <option
+              value="15"
+              selected
+            >
               15 jours
             </option>
 
@@ -435,9 +480,9 @@
     </div>
 
 
-    <!-- ================================
-         FILTRES SYNTHÈSE V2
-         ================================ -->
+    <!-- =====================================
+         FILTRES
+         ===================================== -->
 
     <div class="options-box">
 
@@ -446,6 +491,33 @@
       </div>
 
       <div class="options-row">
+
+
+        <!--
+          NOUVEAU v62 :
+          bureau d'origine.
+
+          Ce filtre sera masqué automatiquement
+          pour les profils qui ne sont ni
+          Administrateur ni Gestionnaire E1.
+        -->
+
+        <label
+          class="select-wrap hidden"
+          id="bureauFilterWrap"
+        >
+
+          Bureau d'origine
+
+          <select id="filterBureau">
+
+            <option value="">
+              Tous les bureaux
+            </option>
+
+          </select>
+
+        </label>
 
 
         <label class="select-wrap">
@@ -532,9 +604,9 @@
     </div>
 
 
-    <!-- ================================
+    <!-- =====================================
          ACTIONS
-         ================================ -->
+         ===================================== -->
 
     <div class="controls">
 
@@ -562,9 +634,9 @@
     ></div>
 
 
-    <!-- ================================
+    <!-- =====================================
          DESTINATAIRES
-         ================================ -->
+         ===================================== -->
 
     <div
       class="field"
@@ -584,9 +656,9 @@
     </div>
 
 
-    <!-- ================================
+    <!-- =====================================
          OBJET
-         ================================ -->
+         ===================================== -->
 
     <div
       class="field"
@@ -605,12 +677,11 @@
     </div>
 
 
-    <!-- ================================
+    <!-- =====================================
          MESSAGE + APERÇU
-         ================================ -->
+         ===================================== -->
 
     <div class="mail-grid">
-
 
       <div class="field">
 
@@ -636,7 +707,6 @@
 
       </div>
 
-
     </div>
 
   </section>
@@ -649,9 +719,9 @@
 "use strict";
 
 
-/* ========================================
+/* =========================================
    OUTILS
-   ======================================== */
+   ========================================= */
 
 const $ =
   (id) =>
@@ -661,27 +731,31 @@ const $ =
 
 let state = {
 
-  user: null,
+  user:null,
 
-  profile: null,
+  profile:null,
 
-  bureauId: null,
+  bureauId:null,
 
-  bureauCode: "",
+  bureauCode:"",
 
-  params: null,
+  role:"",
 
-  contributions: [],
+  params:null,
 
-  filtered: []
+  bureaux:[],
+
+  contributions:[],
+
+  filtered:[]
 
 };
 
 
 
-/* ========================================
+/* =========================================
    ERREURS
-   ======================================== */
+   ========================================= */
 
 function showError(err){
 
@@ -709,19 +783,23 @@ function clearError(){
 
   $("errorBox")
     .classList
-    .add("hidden");
+    .add(
+      "hidden"
+    );
 
 }
 
 
 
-/* ========================================
+/* =========================================
    NORMALISATION
-   ======================================== */
+   ========================================= */
 
 function normalizeText(v){
 
-  return String(v ?? "")
+  return String(
+    v ?? ""
+  )
     .trim()
     .toLowerCase()
     .normalize("NFD")
@@ -734,18 +812,36 @@ function normalizeText(v){
 
 
 
-/* ========================================
+/* =========================================
+   PROFILS
+   ========================================= */
+
+function hasGlobalAccess(){
+
+  return (
+    state.role === "Administrateur"
+    ||
+    state.role === "Gestionnaire E1"
+  );
+
+}
+
+
+
+/* =========================================
    STATUTS
-   ======================================== */
+   ========================================= */
 
 function isDone(rec){
 
-  return normalizeText(
-    rec.Statut
-  )
-  ===
-  normalizeText(
-    "Fait"
+  return (
+    normalizeText(
+      rec.Statut
+    )
+    ===
+    normalizeText(
+      "Fait"
+    )
   );
 
 }
@@ -754,12 +850,14 @@ function isDone(rec){
 
 function isUrgent(rec){
 
-  return normalizeText(
-    rec.Priorite
-  )
-  ===
-  normalizeText(
-    "Urgente"
+  return (
+    normalizeText(
+      rec.Priorite
+    )
+    ===
+    normalizeText(
+      "Urgente"
+    )
   );
 
 }
@@ -771,17 +869,17 @@ function isReminder(rec){
   return normalizeText(
     rec.Rappel_a_faire
   )
-  .includes(
-    "relancer"
-  );
+    .includes(
+      "relancer"
+    );
 
 }
 
 
 
-/* ========================================
+/* =========================================
    DATES
-   ======================================== */
+   ========================================= */
 
 function gristDateToDate(v){
 
@@ -810,9 +908,11 @@ function gristDateToDate(v){
   if(
     Number.isFinite(n)
   ){
+
     return new Date(
       n * 1000
     );
+
   }
 
 
@@ -873,9 +973,9 @@ function todayFr(){
 
 
 
-/* ========================================
+/* =========================================
    TABLES GRIST
-   ======================================== */
+   ========================================= */
 
 function rowsFromTable(t){
 
@@ -897,29 +997,31 @@ function rowsFromTable(t){
 
 
   for(
-    let i = 0;
-    i < n;
+    let i=0;
+    i<n;
     i++
   ){
 
-    const r =
+    const row =
       {};
 
 
     for(
-      const [k,v]
+      const [key,value]
       of Object.entries(t)
     ){
 
-      r[k] =
-        Array.isArray(v)
-          ? v[i]
-          : v;
+      row[key] =
+        Array.isArray(value)
+          ? value[i]
+          : value;
 
     }
 
 
-    rows.push(r);
+    rows.push(
+      row
+    );
 
   }
 
@@ -941,12 +1043,12 @@ async function safeFetch(name){
     );
 
   }
-  catch(e){
+  catch(error){
 
     console.warn(
-      "Table inaccessible:",
+      "Table inaccessible :",
       name,
-      e
+      error
     );
 
     return [];
@@ -957,18 +1059,19 @@ async function safeFetch(name){
 
 
 
-/* ========================================
+/* =========================================
    UTILISATEUR COURANT
-   ======================================== */
+   ========================================= */
 
 async function resolveCurrentUser(){
 
   /*
-    Méthode Tâchtik :
-    création temporaire d'une ligne
-    SESSION_WIDGET afin que les
-    trigger formulas renseignent
-    l'utilisateur et son périmètre.
+    Méthode utilisée par Tâchtik :
+
+    une ligne temporaire est créée
+    dans SESSION_WIDGET afin que les
+    trigger formulas Grist déterminent
+    l'utilisateur courant.
   */
 
   const actions = [
@@ -1054,6 +1157,10 @@ async function resolveCurrentUser(){
   }
 
 
+  /*
+    Suppression de la ligne temporaire.
+  */
+
   if(row?.id){
 
     try{
@@ -1068,11 +1175,11 @@ async function resolveCurrentUser(){
         ]);
 
     }
-    catch(e){
+    catch(error){
 
       console.warn(
         "Nettoyage SESSION_WIDGET impossible",
-        e
+        error
       );
 
     }
@@ -1086,9 +1193,9 @@ async function resolveCurrentUser(){
 
 
 
-/* ========================================
+/* =========================================
    AFFICHAGE D'UNE CONTRIBUTION
-   ======================================== */
+   ========================================= */
 
 function contributionLine(r){
 
@@ -1151,15 +1258,17 @@ function contributionLine(r){
 
   return parts
     .filter(Boolean)
-    .join(" – ");
+    .join(
+      " – "
+    );
 
 }
 
 
 
-/* ========================================
-   TRI PAR ÉCHÉANCE
-   ======================================== */
+/* =========================================
+   TRI ÉCHÉANCE
+   ========================================= */
 
 function sortByDue(a,b){
 
@@ -1200,9 +1309,9 @@ function sortByDue(a,b){
 
 
 
-/* ========================================
-   FILTRES DE LA SYNTHÈSE
-   ======================================== */
+/* =========================================
+   VALEURS UNIQUES DES FILTRES
+   ========================================= */
 
 function uniqueSortedValues(values){
 
@@ -1210,13 +1319,13 @@ function uniqueSortedValues(values){
     ...new Set(
 
       values
-
         .map(
-          v =>
-            String(v ?? "")
-              .trim()
+          value =>
+            String(
+              value ?? ""
+            )
+            .trim()
         )
-
         .filter(Boolean)
 
     )
@@ -1236,6 +1345,10 @@ function uniqueSortedValues(values){
 
 
 
+/* =========================================
+   REMPLISSAGE D'UN SELECT
+   ========================================= */
+
 function fillFilterSelect(
   selectId,
   values,
@@ -1245,11 +1358,6 @@ function fillFilterSelect(
   const select =
     $(selectId);
 
-
-  /*
-    Conserve le filtre sélectionné
-    lorsqu'on clique sur Actualiser.
-  */
 
   const previousValue =
     select.value;
@@ -1330,20 +1438,228 @@ function fillFilterSelect(
 
 
 
-function populateSynthFilters(){
+/* =========================================
+   NOUVEAU v62
+   BUREAU D'ORIGINE
+   ========================================= */
+
+function bureauLabelFromId(id){
+
+  const bureau =
+    state.bureaux.find(
+      b =>
+        Number(b.id)
+        ===
+        Number(id)
+    );
+
+
+  if(!bureau){
+    return "";
+  }
+
+
+  return (
+    bureau.Code
+    ||
+    bureau.Nom
+    ||
+    String(id)
+  );
+
+}
+
+
+
+function populateBureauFilter(){
+
+  const wrap =
+    $("bureauFilterWrap");
+
 
   /*
-    Important :
-    state.filtered contient déjà
-    uniquement les contributions
-    autorisées pour l'utilisateur.
+    Ce filtre n'a d'intérêt que
+    pour les profils ayant accès
+    à plusieurs bureaux.
   */
+
+  if(
+    !hasGlobalAccess()
+  ){
+
+    wrap.classList.add(
+      "hidden"
+    );
+
+    $("filterBureau").value =
+      "";
+
+    return;
+
+  }
+
+
+  wrap.classList.remove(
+    "hidden"
+  );
+
 
   const todo =
     state.filtered.filter(
       r =>
         !isDone(r)
     );
+
+
+  /*
+    On récupère uniquement les bureaux
+    qui ont effectivement au moins
+    une contribution dans le périmètre.
+  */
+
+  const bureauIds =
+    [
+      ...new Set(
+        todo
+          .map(
+            r =>
+              Number(
+                r.Bureau_origine
+              )
+          )
+          .filter(
+            id =>
+              Number.isFinite(id)
+              &&
+              id > 0
+          )
+      )
+    ];
+
+
+  const values =
+    bureauIds
+      .map(
+        id => ({
+          id,
+          label:
+            bureauLabelFromId(id)
+            ||
+            String(id)
+        })
+      )
+      .sort(
+        (a,b) =>
+          a.label.localeCompare(
+            b.label,
+            "fr",
+            {
+              sensitivity:"base"
+            }
+          )
+      );
+
+
+  const select =
+    $("filterBureau");
+
+
+  const previousValue =
+    select.value;
+
+
+  select.innerHTML =
+    "";
+
+
+  const allOption =
+    document.createElement(
+      "option"
+    );
+
+
+  allOption.value =
+    "";
+
+
+  allOption.textContent =
+    "Tous les bureaux";
+
+
+  select.appendChild(
+    allOption
+  );
+
+
+  values.forEach(
+    bureau => {
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+
+      /*
+        On stocke l'ID Grist,
+        mais on affiche le code métier.
+      */
+
+      option.value =
+        String(
+          bureau.id
+        );
+
+
+      option.textContent =
+        bureau.label;
+
+
+      select.appendChild(
+        option
+      );
+
+    }
+  );
+
+
+  if(
+    previousValue
+    &&
+    [
+      ...select.options
+    ]
+    .some(
+      option =>
+        option.value
+        ===
+        previousValue
+    )
+  ){
+
+    select.value =
+      previousValue;
+
+  }
+
+}
+
+
+
+/* =========================================
+   AUTRES FILTRES
+   ========================================= */
+
+function populateSynthFilters(){
+
+  const todo =
+    state.filtered.filter(
+      r =>
+        !isDone(r)
+    );
+
+
+  populateBureauFilter();
 
 
   const departments =
@@ -1397,11 +1713,16 @@ function populateSynthFilters(){
 
 
 
-/* ========================================
+/* =========================================
    APPLICATION DES FILTRES
-   ======================================== */
+   ========================================= */
 
 function getFilteredContributions(){
+
+  const bureauId =
+    $("filterBureau")
+      .value;
+
 
   const department =
     $("filterDepartment")
@@ -1424,19 +1745,42 @@ function getFilteredContributions(){
 
 
   /*
-    On repart TOUJOURS de state.filtered.
+    IMPORTANT :
 
-    Cela garantit que les filtres
-    n'élargissent jamais le périmètre
-    de droits de l'utilisateur.
+    on repart toujours de state.filtered.
+
+    Les filtres ne peuvent donc jamais
+    élargir les droits de l'utilisateur.
   */
 
   let rows =
-    state.filtered
-      .filter(
+    state.filtered.filter(
+      r =>
+        !isDone(r)
+    );
+
+
+  /* Bureau d'origine */
+
+  if(
+    hasGlobalAccess()
+    &&
+    bureauId
+  ){
+
+    rows =
+      rows.filter(
         r =>
-          !isDone(r)
+          Number(
+            r.Bureau_origine
+          )
+          ===
+          Number(
+            bureauId
+          )
       );
+
+  }
 
 
   /* Département */
@@ -1506,16 +1850,16 @@ function getFilteredContributions(){
       rows.filter(
         r => {
 
-          const jr =
+          const days =
             Number(
               r.Jours_restants
             );
 
 
           return (
-            Number.isFinite(jr)
+            Number.isFinite(days)
             &&
-            jr < 0
+            days < 0
           );
 
         }
@@ -1538,7 +1882,7 @@ function getFilteredContributions(){
   }
 
 
-  /* Urgentes */
+  /* Urgente */
 
   if(
     type === "urgent"
@@ -1558,9 +1902,74 @@ function getFilteredContributions(){
 
 
 
-/* ========================================
+/* =========================================
+   DONNÉES COURANTES
+   ========================================= */
+
+function currentData(){
+
+  const todo =
+    getFilteredContributions();
+
+
+  const late =
+    todo
+      .filter(
+        r => {
+
+          const days =
+            Number(
+              r.Jours_restants
+            );
+
+
+          return (
+            Number.isFinite(days)
+            &&
+            days < 0
+          );
+
+        }
+      )
+      .sort(
+        sortByDue
+      );
+
+
+  const reminders =
+    todo
+      .filter(
+        isReminder
+      )
+      .sort(
+        sortByDue
+      );
+
+
+  const urgent =
+    todo
+      .filter(
+        isUrgent
+      )
+      .sort(
+        sortByDue
+      );
+
+
+  return {
+    todo,
+    late,
+    reminders,
+    urgent
+  };
+
+}
+
+
+
+/* =========================================
    PROCHAINES ÉCHÉANCES
-   ======================================== */
+   ========================================= */
 
 function getUpcoming(data){
 
@@ -1603,18 +2012,18 @@ function getUpcoming(data){
         }
 
 
-        const d =
+        const date =
           gristDateToDate(
             r.Echeance
           );
 
 
-        if(!d){
+        if(!date){
           return false;
         }
 
 
-        d.setHours(
+        date.setHours(
           0,
           0,
           0,
@@ -1625,7 +2034,7 @@ function getUpcoming(data){
         const diff =
           Math.ceil(
             (
-              d - now
+              date - now
             )
             /
             86400000
@@ -1649,9 +2058,9 @@ function getUpcoming(data){
 
 
 
-/* ========================================
+/* =========================================
    CORPS PAR DÉFAUT
-   ======================================== */
+   ========================================= */
 
 function buildDefaultBody(data){
 
@@ -1761,7 +2170,9 @@ function buildDefaultBody(data){
 
 
   const upcoming =
-    getUpcoming(data);
+    getUpcoming(
+      data
+    );
 
 
   if(
@@ -1819,9 +2230,9 @@ function buildDefaultBody(data){
 
 
 
-/* ========================================
-   BLOC DE DÉTAIL
-   ======================================== */
+/* =========================================
+   BLOCS DE DÉTAIL
+   ========================================= */
 
 function detailBlock(list){
 
@@ -1834,7 +2245,9 @@ function detailBlock(list){
             +
             contributionLine(r)
         )
-        .join("\n")
+        .join(
+          "\n"
+        )
 
     : "Aucune";
 
@@ -1842,9 +2255,9 @@ function detailBlock(list){
 
 
 
-/* ========================================
-   NETTOYAGE DU MODÈLE
-   ======================================== */
+/* =========================================
+   NETTOYAGE MODÈLE
+   ========================================= */
 
 function cleanEmptyLines(text){
 
@@ -1852,7 +2265,9 @@ function cleanEmptyLines(text){
     text ?? ""
   )
 
-    .split("\n")
+    .split(
+      "\n"
+    )
 
     .filter(
       line => {
@@ -1866,14 +2281,11 @@ function cleanEmptyLines(text){
         }
 
 
-        /*
-          Supprime les lignes
-          finissant par ":" sans contenu.
-        */
-
         if(
           /^[^:\n]+:\s*$/
-            .test(trimmed)
+            .test(
+              trimmed
+            )
         ){
           return false;
         }
@@ -1884,7 +2296,9 @@ function cleanEmptyLines(text){
       }
     )
 
-    .join("\n")
+    .join(
+      "\n"
+    )
 
     .replace(
       /\n{3,}/g,
@@ -1897,9 +2311,9 @@ function cleanEmptyLines(text){
 
 
 
-/* ========================================
-   MODÈLE DE MESSAGE
-   ======================================== */
+/* =========================================
+   MODÈLE DE MAIL
+   ========================================= */
 
 function renderTemplate(
   template,
@@ -1989,22 +2403,17 @@ function renderTemplate(
 
 
   for(
-    const [key,val]
+    const [key,value]
     of Object.entries(vars)
   ){
 
     out =
       out
         .split(key)
-        .join(val);
+        .join(value);
 
   }
 
-
-  /*
-    Si une section est décochée,
-    suppression de son titre standard.
-  */
 
   if(
     !$("includeLate").checked
@@ -2053,9 +2462,9 @@ function renderTemplate(
 
 
 
-/* ========================================
-   OBJET DU MAIL
-   ======================================== */
+/* =========================================
+   OBJET MAIL
+   ========================================= */
 
 function renderSubject(template){
 
@@ -2077,85 +2486,9 @@ function renderSubject(template){
 
 
 
-/* ========================================
-   DONNÉES COURANTES APRÈS FILTRES
-   ======================================== */
-
-function currentData(){
-
-  const todo =
-    getFilteredContributions();
-
-
-  const late =
-    todo
-
-      .filter(
-        r => {
-
-          const jr =
-            Number(
-              r.Jours_restants
-            );
-
-
-          return (
-            Number.isFinite(jr)
-            &&
-            jr < 0
-          );
-
-        }
-      )
-
-      .sort(
-        sortByDue
-      );
-
-
-  const reminders =
-    todo
-
-      .filter(
-        isReminder
-      )
-
-      .sort(
-        sortByDue
-      );
-
-
-  const urgent =
-    todo
-
-      .filter(
-        isUrgent
-      )
-
-      .sort(
-        sortByDue
-      );
-
-
-  return {
-
-    todo,
-
-    late,
-
-    reminders,
-
-    urgent
-
-  };
-
-}
-
-
-
-/* ========================================
-   RENDU PRINCIPAL
-   ======================================== */
+/* =========================================
+   RENDU
+   ========================================= */
 
 function render(){
 
@@ -2163,46 +2496,54 @@ function render(){
     currentData();
 
 
-  $("kpiTodo").textContent =
-    data.todo.length;
+  $("kpiTodo")
+    .textContent =
+      data.todo.length;
 
 
-  $("kpiLate").textContent =
-    data.late.length;
+  $("kpiLate")
+    .textContent =
+      data.late.length;
 
 
-  $("kpiReminder").textContent =
-    data.reminders.length;
+  $("kpiReminder")
+    .textContent =
+      data.reminders.length;
 
 
-  $("kpiUrgent").textContent =
-    data.urgent.length;
+  $("kpiUrgent")
+    .textContent =
+      data.urgent.length;
 
 
-  $("recipients").value =
-    state.params
-      ?.Destinataires_synthese
-    ||
-    "";
-
-
-  $("subject").value =
-    renderSubject(
+  $("recipients")
+    .value =
       state.params
-        ?.Objet_mail_synthese
-    );
+        ?.Destinataires_synthese
+      ||
+      "";
 
 
-  $("body").value =
-    renderTemplate(
-      state.params
-        ?.Corps_mail_synthese,
-      data
-    );
+  $("subject")
+    .value =
+      renderSubject(
+        state.params
+          ?.Objet_mail_synthese
+      );
 
 
-  $("preview").textContent =
-    $("body").value;
+  $("body")
+    .value =
+      renderTemplate(
+        state.params
+          ?.Corps_mail_synthese,
+        data
+      );
+
+
+  $("preview")
+    .textContent =
+      $("body").value;
 
 
   let scope =
@@ -2210,13 +2551,7 @@ function render(){
 
 
   if(
-    state.profile?.Role
-      ===
-      "Administrateur"
-    ||
-    state.profile?.Role
-      ===
-      "Gestionnaire E1"
+    hasGlobalAccess()
   ){
 
     scope +=
@@ -2249,9 +2584,64 @@ function render(){
 
 
 
-/* ========================================
-   CHARGEMENT DES DONNÉES
-   ======================================== */
+/* =========================================
+   RAFRAÎCHISSEMENT DU MESSAGE
+   ========================================= */
+
+function refreshGeneratedMessage(){
+
+  const data =
+    currentData();
+
+
+  $("kpiTodo")
+    .textContent =
+      data.todo.length;
+
+
+  $("kpiLate")
+    .textContent =
+      data.late.length;
+
+
+  $("kpiReminder")
+    .textContent =
+      data.reminders.length;
+
+
+  $("kpiUrgent")
+    .textContent =
+      data.urgent.length;
+
+
+  $("subject")
+    .value =
+      renderSubject(
+        state.params
+          ?.Objet_mail_synthese
+      );
+
+
+  $("body")
+    .value =
+      renderTemplate(
+        state.params
+          ?.Corps_mail_synthese,
+        data
+      );
+
+
+  $("preview")
+    .textContent =
+      $("body").value;
+
+}
+
+
+
+/* =========================================
+   CHARGEMENT
+   ========================================= */
 
 async function load(){
 
@@ -2302,6 +2692,10 @@ async function load(){
       ]);
 
 
+    state.bureaux =
+      bureaux;
+
+
     const email =
       state.user?.Email
       ||
@@ -2349,8 +2743,19 @@ async function load(){
 
 
     /*
-      Enrichissement du code département
-      pour l'affichage et les filtres.
+      Rôle courant.
+    */
+
+    state.role =
+      state.profile?.Role
+      ||
+      state.user?.Role
+      ||
+      "";
+
+
+    /*
+      Référentiel départements.
     */
 
     const deptMap =
@@ -2358,17 +2763,24 @@ async function load(){
 
         depts.map(
           d => [
+
             Number(d.id),
+
             d.Code
             ||
             d.Nom
             ||
             ""
+
           ]
         )
 
       );
 
+
+    /*
+      Enrichissement des contributions.
+    */
 
     state.contributions =
       contribs.map(
@@ -2389,23 +2801,13 @@ async function load(){
       );
 
 
-    const role =
-      state.profile?.Role
-      ||
-      state.user?.Role
-      ||
-      "";
-
-
     /*
-      ADMINISTRATEUR / GESTIONNAIRE E1
-      = toutes les contributions
+      Administrateur / Gestionnaire E1 :
+      accès global.
     */
 
     if(
-      role === "Administrateur"
-      ||
-      role === "Gestionnaire E1"
+      hasGlobalAccess()
     ){
 
       state.filtered =
@@ -2432,7 +2834,9 @@ async function load(){
       state.params =
         params.find(
           p =>
-            Number(p.Bureau)
+            Number(
+              p.Bureau
+            )
             ===
             Number(
               paramBureauId
@@ -2447,7 +2851,8 @@ async function load(){
 
 
     /*
-      UTILISATEUR RATTACHÉ À UN BUREAU
+      Profil bureau :
+      uniquement son bureau d'origine.
     */
 
     else if(
@@ -2486,7 +2891,7 @@ async function load(){
 
 
     /*
-      CAS DE SECOURS
+      Cas de secours.
     */
 
     else{
@@ -2504,8 +2909,8 @@ async function load(){
 
 
     /*
-      ANCRE :
-      FILTRES_SYNTHÈSE_POPULATION
+      ANCRE v62 :
+      remplissage de tous les filtres.
     */
 
     populateSynthFilters();
@@ -2532,10 +2937,10 @@ async function load(){
 
 
   }
-  catch(e){
+  catch(error){
 
     showError(
-      e
+      error
     );
 
 
@@ -2549,9 +2954,9 @@ async function load(){
 
 
 
-/* ========================================
-   COPIE DE LA SYNTHÈSE
-   ======================================== */
+/* =========================================
+   COPIER LA SYNTHÈSE
+   ========================================= */
 
 async function copySummary(){
 
@@ -2577,7 +2982,7 @@ ${$("body").value}`;
         "✓ Synthèse copiée dans le presse-papiers";
 
   }
-  catch(e){
+  catch(error){
 
     $("body")
       .focus();
@@ -2614,9 +3019,9 @@ ${$("body").value}`;
 
 
 
-/* ========================================
-   OUVERTURE MESSAGERIE
-   ======================================== */
+/* =========================================
+   OUVRIR DANS LA MESSAGERIE
+   ========================================= */
 
 function openMail(){
 
@@ -2662,66 +3067,63 @@ function openMail(){
 
 
 
-/* ========================================
-   RAFRAÎCHISSEMENT APRÈS FILTRE
-   ======================================== */
+/* =========================================
+   RÉINITIALISER LES FILTRES
+   ========================================= */
 
-function refreshGeneratedMessage(){
+function resetFilters(){
 
-  const data =
-    currentData();
-
-
-  /*
-    Mise à jour des KPI
-  */
-
-  $("kpiTodo").textContent =
-    data.todo.length;
+  $("filterBureau")
+    .value =
+      "";
 
 
-  $("kpiLate").textContent =
-    data.late.length;
+  $("filterDepartment")
+    .value =
+      "";
 
 
-  $("kpiReminder").textContent =
-    data.reminders.length;
+  $("filterPriority")
+    .value =
+      "";
 
 
-  $("kpiUrgent").textContent =
-    data.urgent.length;
+  $("filterRequester")
+    .value =
+      "";
 
 
-  /*
-    Mise à jour du message
-  */
-
-  $("subject").value =
-    renderSubject(
-      state.params
-        ?.Objet_mail_synthese
-    );
+  $("filterType")
+    .value =
+      "";
 
 
-  $("body").value =
-    renderTemplate(
-      state.params
-        ?.Corps_mail_synthese,
-      data
-    );
+  refreshGeneratedMessage();
 
 
-  $("preview")
+  $("status")
     .textContent =
-      $("body").value;
+      "✓ Filtres réinitialisés";
+
+
+  setTimeout(
+    () => {
+
+      $("status")
+        .textContent =
+          "";
+
+    },
+    1800
+  );
 
 }
 
 
 
-/* ========================================
-   ÉVÉNEMENTS PRINCIPAUX
-   ======================================== */
+/* =========================================
+   ÉVÉNEMENTS
+   ========================================= */
 
 $("refreshBtn")
   .addEventListener(
@@ -2785,10 +3187,16 @@ $("upcomingDays")
   );
 
 
+/*
+  NOUVEAU v62
+*/
 
-/* ========================================
-   ÉVÉNEMENTS DES FILTRES
-   ======================================== */
+$("filterBureau")
+  .addEventListener(
+    "change",
+    refreshGeneratedMessage
+  );
+
 
 $("filterDepartment")
   .addEventListener(
@@ -2818,63 +3226,17 @@ $("filterType")
   );
 
 
-
-/* ========================================
-   RÉINITIALISATION DES FILTRES
-   ======================================== */
-
 $("resetFiltersBtn")
   .addEventListener(
     "click",
-    () => {
-
-      $("filterDepartment")
-        .value =
-          "";
-
-
-      $("filterPriority")
-        .value =
-          "";
-
-
-      $("filterRequester")
-        .value =
-          "";
-
-
-      $("filterType")
-        .value =
-          "";
-
-
-      refreshGeneratedMessage();
-
-
-      $("status")
-        .textContent =
-          "✓ Filtres réinitialisés";
-
-
-      setTimeout(
-        () => {
-
-          $("status")
-            .textContent =
-              "";
-
-        },
-        1800
-      );
-
-    }
+    resetFilters
   );
 
 
 
-/* ========================================
+/* =========================================
    DÉMARRAGE GRIST
-   ======================================== */
+   ========================================= */
 
 grist.ready({
   requiredAccess:"full"
