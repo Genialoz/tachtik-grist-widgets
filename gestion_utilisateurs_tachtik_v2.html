@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+from pathlib import Path
+
+html = r'''<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
@@ -290,7 +292,7 @@ tr:last-child td{border-bottom:0}
 }
 
 .badge-admin{background:#eef2ff;color:#4338ca}
-.badge-manager{background:var(--blue-soft);color:#1d4ed8}
+.badge-contributor{background:var(--blue-soft);color:#1d4ed8}
 .badge-reader{background:var(--green-soft);color:var(--green)}
 .badge-other{background:var(--grey-soft);color:#475467}
 .badge-active{background:var(--green-soft);color:var(--green)}
@@ -641,6 +643,8 @@ tr:last-child td{border-bottom:0}
 
 <!-- =========================================
      MODALE AJOUT / MODIFICATION
+     NOUVELLE ARCHITECTURE :
+     Administrateur / Lecteur / Bureau contributeur
      ========================================= -->
 <div id="userModal" class="modal-backdrop">
   <div class="modal">
@@ -670,10 +674,8 @@ tr:last-child td{border-bottom:0}
           <select id="userRole" class="form-control">
             <option value="">Sélectionner…</option>
             <option value="Administrateur">Administrateur</option>
-            <option value="Gestionnaire E1">Gestionnaire E1</option>
             <option value="Lecteur">Lecteur</option>
-            <option value="Bureau saisie">Bureau saisie</option>
-            <option value="Bureau import">Bureau import</option>
+            <option value="Bureau contributeur">Bureau contributeur</option>
           </select>
         </div>
 
@@ -711,7 +713,7 @@ tr:last-child td{border-bottom:0}
             <option value="">Sélectionner…</option>
           </select>
           <div class="form-help">
-            Obligatoire pour les rôles Bureau saisie et Bureau import.
+            Obligatoire pour le rôle Bureau contributeur.
           </div>
         </div>
 
@@ -838,14 +840,13 @@ let toastTimer = null;
 
 /* =========================================
    CONSTANTES MÉTIER
+   MODIFICATION : nouveaux rôles Tâchtik
    ========================================= */
 
 const ALLOWED_ROLES = [
   "Administrateur",
-  "Gestionnaire E1",
   "Lecteur",
-  "Bureau saisie",
-  "Bureau import"
+  "Bureau contributeur"
 ];
 
 const REQUIRED_IMPORT_COLUMNS = [
@@ -991,7 +992,7 @@ function findReferenceByCode(rows,code){
 /* =========================================
    IDENTIFICATION UTILISATEUR
    IMPORTANT :
-   mécanisme SESSION_WIDGET conservé.
+   mécanisme SESSION_WIDGET conservé inchangé.
    ========================================= */
 
 async function identifyUser(){
@@ -1118,27 +1119,43 @@ function updatePerimeterSelector(){
   );
 }
 
+/* =========================================
+   AFFICHAGE DES CHAMPS SELON LE RÔLE
+   - Administrateur : pas de périmètre, pas de bureau
+   - Lecteur : périmètre obligatoire
+   - Bureau contributeur : bureau obligatoire,
+     périmètre lecteur facultatif
+   ========================================= */
+
 function updateFieldsForRole(){
   const role = $("userRole").value;
-  const isPartner = role === "Bureau saisie" || role === "Bureau import";
+  const isContributor = role === "Bureau contributeur";
   const isReader = role === "Lecteur";
-  const isAdminLike = role === "Administrateur" || role === "Gestionnaire E1";
+  const isAdmin = role === "Administrateur";
 
-  $("bureauGroup").style.display = isPartner ? "" : "none";
-  $("perimeterTypeGroup").style.display = isAdminLike ? "none" : "";
-  $("perimeterValueGroup").style.display =
-    isAdminLike || !$("perimeterType").value ? "none" : "";
+  $("bureauGroup").style.display = isContributor ? "" : "none";
+  $("perimeterTypeGroup").style.display = isAdmin ? "none" : "";
 
-  if(isAdminLike){
+  if(isAdmin){
     $("perimeterType").value = "";
     $("perimeterValue").innerHTML = "";
+    $("perimeterValueGroup").style.display = "none";
     $("userBureau").value = "";
+  }else{
+    $("perimeterValueGroup").style.display =
+      $("perimeterType").value ? "" : "none";
+
+    if(!isContributor){
+      $("userBureau").value = "";
+    }
   }
 
   $("perimeterHelp").textContent =
     isReader
       ? "Obligatoire : choisissez un Service, une Sous-direction ou un Département."
-      : "Facultatif : permet d'ajouter un périmètre de lecture au profil partenaire.";
+      : isContributor
+        ? "Facultatif : permet d'ajouter un périmètre de lecture au Bureau contributeur."
+        : "";
 }
 
 /* =========================================
@@ -1151,8 +1168,8 @@ function roleBadge(role){
 
   if(normalized === "administrateur"){
     css = "badge-admin";
-  }else if(normalized === "gestionnaire e1"){
-    css = "badge-manager";
+  }else if(normalized === "bureau contributeur"){
+    css = "badge-contributor";
   }else if(normalized === "lecteur"){
     css = "badge-reader";
   }
@@ -1474,11 +1491,12 @@ function validateUserForm(){
     }
   }
 
-  if(
-    (role === "Bureau saisie" || role === "Bureau import")
-    && !bureau
-  ){
-    return "Le Bureau est obligatoire pour ce rôle.";
+  if(role === "Administrateur" && type){
+    return "Un Administrateur ne doit pas avoir de périmètre de lecture.";
+  }
+
+  if(role === "Bureau contributeur" && !bureau){
+    return "Le Bureau est obligatoire pour un Bureau contributeur.";
   }
 
   return "";
@@ -1488,7 +1506,7 @@ function formValues(){
   const role = $("userRole").value;
   const type = $("perimeterType").value;
   const value = Number($("perimeterValue").value) || null;
-  const partner = role === "Bureau saisie" || role === "Bureau import";
+  const contributor = role === "Bureau contributeur";
 
   return {
     Email:$("userEmail").value.trim(),
@@ -1497,7 +1515,7 @@ function formValues(){
     Service:type === "Service" ? value : null,
     Sous_direction:type === "Sous_direction" ? value : null,
     Departement:type === "Departement" ? value : null,
-    Bureau:partner ? (Number($("userBureau").value) || null) : null,
+    Bureau:contributor ? (Number($("userBureau").value) || null) : null,
     Actif:$("userActive").value === "true"
   };
 }
@@ -1718,11 +1736,8 @@ function validateImportRow(row,lineNumber){
     errors.push("Un Lecteur doit avoir exactement un périmètre");
   }
 
-  if(
-    (role === "Administrateur" || role === "Gestionnaire E1")
-    && perimeterCount > 0
-  ){
-    errors.push("Administrateur/Gestionnaire E1 : périmètre inutile");
+  if(role === "Administrateur" && perimeterCount > 0){
+    errors.push("Administrateur : périmètre inutile");
   }
 
   const service = text(row.Service).trim()
@@ -1753,17 +1768,17 @@ function validateImportRow(row,lineNumber){
     errors.push(`Département introuvable : ${row.Departement}`);
   }
 
-  const partner = role === "Bureau saisie" || role === "Bureau import";
+  const contributor = role === "Bureau contributeur";
 
-  if(partner && !text(row.Bureau).trim()){
-    errors.push("Bureau obligatoire pour ce rôle");
+  if(contributor && !text(row.Bureau).trim()){
+    errors.push("Bureau obligatoire pour un Bureau contributeur");
   }
 
   if(text(row.Bureau).trim() && !bureau){
     errors.push(`Bureau introuvable : ${row.Bureau}`);
   }
 
-  if(!partner && text(row.Bureau).trim()){
+  if(!contributor && text(row.Bureau).trim()){
     errors.push("Bureau renseigné pour un rôle non partenaire");
   }
 
@@ -1780,7 +1795,7 @@ function validateImportRow(row,lineNumber){
     Service:service ? Number(service.id) : null,
     Sous_direction:subDirection ? Number(subDirection.id) : null,
     Departement:department ? Number(department.id) : null,
-    Bureau:partner && bureau ? Number(bureau.id) : null,
+    Bureau:contributor && bureau ? Number(bureau.id) : null,
     Actif:active === null ? true : active
   };
 
@@ -2125,6 +2140,7 @@ document.addEventListener("keydown",event => {
 
 /* =========================================
    GRIST
+   IMPORTANT : accès complet nécessaire.
    ========================================= */
 
 grist.ready({
@@ -2136,3 +2152,8 @@ load();
 
 </body>
 </html>
+'''
+
+path = Path("/mnt/data/gestion_utilisateurs_tachtik_v2.html")
+path.write_text(html, encoding="utf-8")
+print(path)
