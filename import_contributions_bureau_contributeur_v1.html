@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Tâchtik — Import de contributions</title>
+  <title>Importer des contributions</title>
 
   <!-- SDK Grist -->
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
@@ -313,7 +313,7 @@
     <h1>📥 Importer des contributions</h1>
     <p>
       Importez plusieurs contributions depuis un fichier Excel.
-      Tâchtik contrôle toutes les lignes avant de lancer l'import.
+      Toutes les lignes sont contrôlées avant de lancer l'import.
     </p>
     <div id="profileInfo" class="profile">Identification du profil…</div>
   </section>
@@ -337,7 +337,7 @@
       <h2>1. Sélectionner le fichier Excel</h2>
       <p>
         Le fichier doit contenir une feuille nommée <strong>Import</strong>
-        et les 8 colonnes prévues par le modèle Tâchtik.
+        et les 8 colonnes prévues par le modèle d'import.
       </p>
 
       <div class="technical-note">
@@ -392,7 +392,7 @@
         </div>
 
         <div class="stat">
-          <div class="label">Bureau d'origine</div>
+          <div class="label">Bureau demandeur</div>
           <div id="statBureau" class="value" style="font-size:18px">—</div>
         </div>
       </div>
@@ -439,7 +439,7 @@
 
 <script>
 /* =============================================================
-   TÂCHTIK — IMPORT CONTRIBUTIONS / BUREAU CONTRIBUTEUR
+   IMPORT CONTRIBUTIONS / BUREAU CONTRIBUTEUR
    Version 1
 
    Objectif :
@@ -587,7 +587,7 @@ async function identifyProfile(){
   const profile = created[0] || null;
 
   if(!profile){
-    throw new Error("Profil Tâchtik non identifié.");
+    throw new Error("Profil utilisateur non identifié.");
   }
 
   try{
@@ -659,7 +659,7 @@ async function loadContext(){
   }
 
   if(!isActiveUser()){
-    throw new Error("Votre compte Tâchtik est inactif.");
+    throw new Error("Votre compte utilisateur est inactif.");
   }
 
   if(!currentUserBureauId){
