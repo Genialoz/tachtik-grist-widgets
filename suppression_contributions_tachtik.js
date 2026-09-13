@@ -7,9 +7,7 @@
 
      Droits :
      - Administrateur : toutes les contributions
-     - Gestionnaire E1 : toutes les contributions
-     - Bureau saisie : uniquement son Bureau_origine
-     - Bureau import : uniquement son Bureau_origine
+     - Bureau contributeur : uniquement les contributions de son Bureau_origine
      - Lecteur : aucune suppression
 
      La sécurité définitive reste assurée par les ACL Grist.
@@ -27,26 +25,21 @@
     }
 
     /*
-     * Administrateur
-     * Gestionnaire E1
+     * Administrateur : suppression globale.
      */
     if (
-      currentRole.startsWith("admin")
-      || currentRole === "gestionnaire e1"
+      currentRole === "administrateur"
     ) {
       return true;
     }
 
 
     /*
-     * Bureaux partenaires
-     *
-     * Ils ne peuvent supprimer que les contributions
-     * dont le Bureau_origine correspond à leur propre bureau.
+     * Bureau contributeur : suppression limitée aux contributions
+     * dont le Bureau_origine correspond à UTILISATEURS.Bureau.
      */
     if (
-      currentRole === "bureau saisie"
-      || currentRole === "bureau import"
+      currentRole === "bureau contributeur"
     ) {
 
       return Boolean(
