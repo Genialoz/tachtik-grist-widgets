@@ -1539,6 +1539,17 @@
 
           </select>
 
+          <select
+            id="creator-filter"
+            class="select"
+          >
+
+            <option value="">
+              Tous les créateurs
+            </option>
+
+          </select>
+
         </div>
 
         <div class="quick-filters">
@@ -1590,6 +1601,14 @@
             data-filter="week"
           >
             📅 Cette semaine
+          </button>
+
+          <button
+            id="my-contributions-filter"
+            class="filter-btn"
+            data-filter="mine"
+          >
+            👤 Mes contributions
           </button>
 
         </div>
@@ -1805,6 +1824,19 @@
 
               <div
                 id="detail-bureau"
+                class="field-value"
+              ></div>
+
+            </div>
+
+            <div class="detail-field">
+
+              <div class="field-label">
+                Créée par
+              </div>
+
+              <div
+                id="detail-createur"
                 class="field-value"
               ></div>
 
@@ -2183,6 +2215,17 @@
 
   <script>
 
+    /* =========================================================
+       CONTRIBUTIONS À TRAITER — V3
+
+       Ajouts :
+       - affichage du créateur à partir de CONTRIBUTIONS.Cree_par ;
+       - affichage du nom UTILISATEURS.Nom lorsque l'email correspond ;
+       - filtre "Créateur" ;
+       - raccourci "Mes contributions" ;
+       - Cree_par reste strictement informatif et ne modifie aucun droit.
+       ========================================================= */
+
     const $ = id => document.getElementById(id);
 
     let allRecords = [];
@@ -2305,6 +2348,30 @@
       }
 
       return map;
+    }
+
+    /* =========================
+       V3 — CRÉATEUR DE LA CONTRIBUTION
+
+       Cree_par reste un champ d'information et d'audit.
+       Il ne sert jamais à déterminer les droits d'écriture.
+       Les droits continuent de dépendre du rôle et de Bureau_origine.
+       ========================= */
+
+    function creatorLabel(record) {
+      const email = clean(record && record.Cree_par);
+
+      if (!email) {
+        return "Non renseigné";
+      }
+
+      const user = utilisateurRows.find(
+        row => clean(row.Email) === email
+      );
+
+      const name = user ? text(user.Nom).trim() : "";
+
+      return name || text(record.Cree_par).trim();
     }
 
     function showToast(message) {
@@ -2747,6 +2814,7 @@
       $("priority-filter").value = "";
       $("department-filter").value = "";
       $("origin-filter").value = "";
+      $("creator-filter").value = "";
     }
 
     function priorityRank(value) {
@@ -2818,11 +2886,19 @@
       else if (quickFilter === "week") {
         records = records.filter(isThisWeek);
       }
+      else if (quickFilter === "mine") {
+        records = currentUserEmail
+          ? records.filter(
+              record => clean(record.Cree_par) === currentUserEmail
+            )
+          : [];
+      }
 
       const search = clean($("search").value);
       const priority = clean($("priority-filter").value);
       const department = clean($("department-filter").value);
       const origin = clean($("origin-filter").value);
+      const creator = clean($("creator-filter").value);
 
       if (search) {
         records = records.filter(record =>
@@ -2832,7 +2908,9 @@
             record.Description,
             record.Demandeur,
             record.Contributeur,
-            record.Bureau_origine
+            record.Bureau_origine,
+            record.Cree_par,
+            creatorLabel(record)
           ]
             .map(clean)
             .join(" ")
@@ -2855,6 +2933,12 @@
       if (origin) {
         records = records.filter(
           record => clean(record.Bureau_origine) === origin
+        );
+      }
+
+      if (creator) {
+        records = records.filter(
+          record => clean(creatorLabel(record)) === creator
         );
       }
 
@@ -3567,6 +3651,8 @@
                 👤 ${escapeHtml(record.Contributeur)}
                 &nbsp;&nbsp;
                 🏢 ${escapeHtml(record.Bureau_origine)}
+                &nbsp;&nbsp;
+                ✍️ Créée par : ${escapeHtml(creatorLabel(record))}
               </div>
 
               <div class="badges">
@@ -3683,6 +3769,7 @@
       $("detail-demandeur").textContent = text(record.Demandeur) || "—";
       $("detail-contributeur").textContent = text(record.Contributeur) || "—";
       $("detail-bureau").textContent = text(record.Bureau_origine) || "—";
+      $("detail-createur").textContent = creatorLabel(record);
       $("detail-priorite").textContent = text(record.Priorite) || "—";
       $("detail-attribution").textContent = formatDate(record.Date_attribution) || "—";
       $("detail-echeance").textContent = formatDate(record.Echeance) || "—";
@@ -3920,6 +4007,17 @@
         "Tous les bureaux demandeurs"
       );
 
+      populateSelect(
+        "creator-filter",
+        pilotRecords.map(record => creatorLabel(record)),
+        "Tous les créateurs"
+      );
+
+      const myButton = $("my-contributions-filter");
+      if (myButton) {
+        myButton.style.display = currentUserEmail ? "inline-flex" : "none";
+      }
+
       renderList();
     }
 
@@ -3932,6 +4030,7 @@
       $("priority-filter").addEventListener("change", renderList);
       $("department-filter").addEventListener("change", renderList);
       $("origin-filter").addEventListener("change", renderList);
+      $("creator-filter").addEventListener("change", renderList);
 
       document
         .querySelectorAll(".filter-btn")
