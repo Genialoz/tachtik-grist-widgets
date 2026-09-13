@@ -374,7 +374,13 @@
     </div>
   </main>
 
-  <script>
+  <!-- =========================================================
+       MISE À JOUR NAVIGATION SINGLE PAGE
+       Tous les liens internes vers les pages Grist sont ouverts
+       avec ?style=singlePage afin de conserver l'interface épurée.
+       ========================================================= -->
+
+<script>
     "use strict";
 
     const $ = id => document.getElementById(id);
@@ -474,13 +480,13 @@
        ========================================================= */
 
     const PAGE_URLS = {
-      "Contributions": "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/31",
-      "Contributions à traiter": "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/21",
-      "Contributions terminées": "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/10",
-      "Nouvelle contribution - Bureau contributeur": "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/17",
-      "Importer des contributions - Bureau contributeur": "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/29",
-      "Synthèses": "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/26",
-      "Modèles de messages": "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/25"
+      "Contributions": "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/31?style=singlePage",
+      "Contributions à traiter": "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/21?style=singlePage",
+      "Contributions terminées": "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/10?style=singlePage",
+      "Nouvelle contribution - Bureau contributeur": "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/17?style=singlePage",
+      "Importer des contributions - Bureau contributeur": "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/29?style=singlePage",
+      "Synthèses": "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/26?style=singlePage",
+      "Modèles de messages": "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/25?style=singlePage"
     };
 
     function bindNavigation(){
