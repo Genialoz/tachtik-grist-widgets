@@ -549,23 +549,7 @@
 
         </label>
 
-
-        <label class="select-wrap">
-
-          Demandeur
-
-          <select id="filterRequester">
-
-            <option value="">
-              Tous les demandeurs
-            </option>
-
-          </select>
-
-        </label>
-
-
-        <label class="select-wrap">
+<label class="select-wrap">
 
           Type
 
@@ -823,6 +807,11 @@ function hasGlobalAccess(){
     - Administrateur : accès global ;
     - Bureau contributeur : périmètre de son bureau ;
     - Lecteur : périmètre déterminé par les ACL Grist.
+
+    IMPORTANT :
+    le Lecteur n'est pas bloqué techniquement dans ce widget.
+    Dans sa future page d'accueil, aucun lien vers "Synthèses"
+    ne lui sera proposé.
   */
   return (
     state.role === "Administrateur"
@@ -1692,17 +1681,7 @@ function populateSynthFilters(){
       )
     );
 
-
-  const requesters =
-    uniqueSortedValues(
-      todo.map(
-        r =>
-          r.Demandeur
-      )
-    );
-
-
-  fillFilterSelect(
+fillFilterSelect(
     "filterDepartment",
     departments,
     "Tous les départements"
@@ -1713,13 +1692,6 @@ function populateSynthFilters(){
     "filterPriority",
     priorities,
     "Toutes les priorités"
-  );
-
-
-  fillFilterSelect(
-    "filterRequester",
-    requesters,
-    "Tous les demandeurs"
   );
 
 }
@@ -1746,13 +1718,7 @@ function getFilteredContributions(){
     $("filterPriority")
       .value;
 
-
-  const requester =
-    $("filterRequester")
-      .value;
-
-
-  const type =
+const type =
     $("filterType")
       .value;
 
@@ -1833,27 +1799,7 @@ function getFilteredContributions(){
 
   }
 
-
-  /* Demandeur */
-
-  if(requester){
-
-    rows =
-      rows.filter(
-        r =>
-          normalizeText(
-            r.Demandeur
-          )
-          ===
-          normalizeText(
-            requester
-          )
-      );
-
-  }
-
-
-  /* En retard */
+/* En retard */
 
   if(
     type === "late"
@@ -3115,13 +3061,7 @@ function resetFilters(){
     .value =
       "";
 
-
-  $("filterRequester")
-    .value =
-      "";
-
-
-  $("filterType")
+$("filterType")
     .value =
       "";
 
@@ -3238,14 +3178,6 @@ $("filterPriority")
     "change",
     refreshGeneratedMessage
   );
-
-
-$("filterRequester")
-  .addEventListener(
-    "change",
-    refreshGeneratedMessage
-  );
-
 
 $("filterType")
   .addEventListener(
