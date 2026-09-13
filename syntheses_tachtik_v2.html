@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tâchtik - Synthèses</title>
+<title>Synthèses</title>
 
 <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
 
@@ -497,9 +497,9 @@
           NOUVEAU v62 :
           bureau d'origine.
 
-          Ce filtre sera masqué automatiquement
-          pour les profils qui ne sont ni
-          Administrateur ni Gestionnaire E1.
+          Ce filtre est réservé à l'Administrateur,
+          seul profil ayant un accès global à plusieurs
+          bureaux dans cette interface.
         -->
 
         <label
@@ -507,12 +507,12 @@
           id="bureauFilterWrap"
         >
 
-          Bureau d'origine
+          Bureau demandeur
 
           <select id="filterBureau">
 
             <option value="">
-              Tous les bureaux
+              Tous les bureaux demandeurs
             </option>
 
           </select>
@@ -818,10 +818,23 @@ function normalizeText(v){
 
 function hasGlobalAccess(){
 
+  /*
+    Rôles actuels :
+    - Administrateur : accès global ;
+    - Bureau contributeur : périmètre de son bureau ;
+    - Lecteur : périmètre déterminé par les ACL Grist.
+  */
   return (
     state.role === "Administrateur"
-    ||
-    state.role === "Gestionnaire E1"
+  );
+
+}
+
+
+function isBureauContributor(){
+
+  return (
+    state.role === "Bureau contributeur"
   );
 
 }
@@ -1066,7 +1079,7 @@ async function safeFetch(name){
 async function resolveCurrentUser(){
 
   /*
-    Méthode utilisée par Tâchtik :
+    Méthode utilisée par  :
 
     une ligne temporaire est créée
     dans SESSION_WIDGET afin que les
@@ -1583,7 +1596,7 @@ function populateBureauFilter(){
 
 
   allOption.textContent =
-    "Tous les bureaux";
+    "Tous les bureaux demandeurs";
 
 
   select.appendChild(
@@ -1760,7 +1773,7 @@ function getFilteredContributions(){
     );
 
 
-  /* Bureau d'origine */
+  /* Bureau demandeur */
 
   if(
     hasGlobalAccess()
@@ -2559,11 +2572,13 @@ function render(){
 
   }
   else if(
+    isBureauContributor()
+    &&
     state.bureauCode
   ){
 
     scope +=
-      "contributions du bureau "
+      "contributions du bureau demandeur "
       +
       state.bureauCode;
 
@@ -2802,7 +2817,7 @@ async function load(){
 
 
     /*
-      Administrateur / Gestionnaire E1 :
+      Administrateur :
       accès global.
     */
 
@@ -2851,11 +2866,18 @@ async function load(){
 
 
     /*
-      Profil bureau :
-      uniquement son bureau d'origine.
+      Bureau contributeur :
+      uniquement les contributions dont Bureau_origine
+      correspond à son bureau.
+
+      IMPORTANT :
+      l'autorisation repose sur Bureau_origine,
+      jamais sur Cree_par.
     */
 
     else if(
+      isBureauContributor()
+      &&
       state.bureauId
     ){
 
@@ -2891,7 +2913,13 @@ async function load(){
 
 
     /*
-      Cas de secours.
+      Lecteur et cas de secours :
+      on ne rajoute aucun filtrage métier ici.
+
+      Les lignes déjà retournées par fetchTable("CONTRIBUTIONS")
+      sont celles autorisées par les ACL Grist du profil courant.
+      Cela permet notamment de respecter correctement les périmètres
+      Département / Sous-direction / Service des Lecteurs.
     */
 
     else{
