@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tâchtik — Contributions terminées</title>
+  <title>Contributions terminées</title>
 
   <!-- SDK Grist -->
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
@@ -326,7 +326,7 @@
   <section class="hero">
     <h1>✅ Contributions terminées</h1>
     <p>
-      Consultez l’historique des contributions finalisées accessibles selon vos droits Tâchtik.
+      Consultez l’historique des contributions finalisées accessibles selon vos droits.
     </p>
     <div id="profileInfo" class="profile">Profil en cours d’identification…</div>
   </section>
@@ -361,7 +361,7 @@
         </select>
 
         <select id="originFilter">
-          <option value="">Tous les bureaux</option>
+          <option value="">Tous les bureaux demandeurs</option>
         </select>
 
       </div>
@@ -412,7 +412,7 @@
         </div>
 
         <div class="detail-item">
-          <div class="detail-label">Bureau d'origine</div>
+          <div class="detail-label">Bureau demandeur</div>
           <div id="detailBureau" class="detail-value"></div>
         </div>
 
@@ -469,7 +469,7 @@
 
 <script>
 /* =============================================================
-   TÂCHTIK — CONTRIBUTIONS TERMINÉES
+   CONTRIBUTIONS TERMINÉES
    Version 3
 
    Règles :
@@ -770,7 +770,7 @@ function canRestoreRecord(record){
 
   if(isBureauContributor()){
     /*
-      RÈGLE MÉTIER TÂCHTIK :
+      RÈGLE MÉTIER :
       le Bureau contributeur peut agir sur toute contribution
       dont Bureau_origine correspond à son bureau, qu'elle ait
       été créée manuellement ou importée pour ce bureau.
@@ -934,7 +934,7 @@ function renderList(){
         </span>
 
         <span>
-          <strong>Bureau :</strong>
+          <strong>Bureau demandeur :</strong>
           ${escapeHtml(record._BureauLabel || "—")}
         </span>
 
@@ -1108,7 +1108,7 @@ function populateFiltersAfterReload(){
     '<option value="">Tous les départements</option>';
 
   $("originFilter").innerHTML =
-    '<option value="">Tous les bureaux</option>';
+    '<option value="">Tous les bureaux demandeurs</option>';
 
   populateFilters();
 
