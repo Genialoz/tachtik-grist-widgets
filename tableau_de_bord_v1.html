@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Tableau de bord</title>
+
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+
+  <style>
+    :root{
+      --page:#f5f8fb;
+      --surface:#ffffff;
+      --ink:#17324a;
+      --muted:#6f8190;
+      --line:#dfe8ef;
+
+      --blue:#2f6fdd;
+      --blue-soft:#eef4ff;
+
+      --green:#2e9465;
+      --green-soft:#edf9f2;
+
+      --red:#d94a59;
+      --red-soft:#fff1f3;
+
+      --orange:#df8f18;
+      --orange-soft:#fff6e8;
+
+      --yellow:#c99b24;
+      --yellow-soft:#fff9e7;
+
+      --violet:#7857d6;
+      --violet-soft:#f3efff;
+
+      --shadow:0 10px 28px rgba(21,50,75,.08);
+    }
+
+    *{box-sizing:border-box}
+
+    html,body{
+      margin:0;
+      min-height:100%;
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+      background:var(--page);
+      color:var(--ink);
+    }
+
+    body{
+      padding:20px;
+    }
+
+    .app{
+      width:min(1320px,100%);
+      margin:0 auto;
+    }
+
+    /* =========================================================
+       EN-TÊTE
+       ========================================================= */
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      padding:26px 28px;
+      color:white;
+      border-radius:24px;
+      background:
+        linear-gradient(
+          135deg,
+          #173d66 0%,
+          #245f9a 62%,
+          #2f6fdd 100%
+        );
+      box-shadow:0 16px 40px rgba(23,61,102,.18);
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      width:270px;
+      height:270px;
+      right:-85px;
+      top:-125px;
+      border-radius:50%;
+      background:rgba(255,255,255,.08);
+    }
+
+    .hero-content{
+      position:relative;
+      z-index:1;
+    }
+
+    .hero h1{
+      margin:0;
+      font-size:clamp(28px,4vw,40px);
+      line-height:1.12;
+    }
+
+    .hero p{
+      margin:9px 0 0;
+      max-width:780px;
+      color:rgba(255,255,255,.80);
+      font-size:13px;
+      line-height:1.55;
+    }
+
+    .profile{
+      display:inline-flex;
+      margin-top:15px;
+      padding:7px 11px;
+      border-radius:999px;
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.18);
+      font-size:11px;
+      font-weight:800;
+    }
+
+    .scope-note{
+      margin-top:14px;
+      padding:12px 14px;
+      border-radius:14px;
+      background:#eef4ff;
+      border:1px solid #d1def3;
+      color:#315985;
+      font-size:12px;
+      line-height:1.5;
+    }
+
+    /* =========================================================
+       KPI
+       ========================================================= */
+
+    .section{
+      margin-top:20px;
+    }
+
+    .section-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:12px;
+      margin-bottom:10px;
+    }
+
+    .section-title{
+      margin:0;
+      font-size:18px;
+      font-weight:900;
+    }
+
+    .section-subtitle{
+      margin:4px 0 0;
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.45;
+    }
+
+    .kpi-grid{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:12px;
+    }
+
+    .kpi{
+      position:relative;
+      min-height:116px;
+      overflow:hidden;
+      padding:16px 17px;
+      border-radius:18px;
+      background:var(--surface);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+    }
+
+    .kpi::before{
+      content:"";
+      position:absolute;
+      left:0;
+      top:0;
+      bottom:0;
+      width:5px;
+      background:var(--accent);
+    }
+
+    .kpi-top{
+      display:flex;
+      align-items:center;
+      gap:9px;
+      color:#476074;
+      font-size:12px;
+      font-weight:850;
+    }
+
+    .kpi-icon{
+      width:34px;
+      height:34px;
+      display:grid;
+      place-items:center;
+      border-radius:10px;
+      background:var(--soft);
+      font-size:17px;
+    }
+
+    .kpi-value{
+      margin-top:11px;
+      color:var(--accent);
+      font-size:30px;
+      font-weight:950;
+    }
+
+    .kpi.blue{--accent:var(--blue);--soft:var(--blue-soft)}
+    .kpi.green{--accent:var(--green);--soft:var(--green-soft)}
+    .kpi.red{--accent:var(--red);--soft:var(--red-soft)}
+    .kpi.orange{--accent:var(--orange);--soft:var(--orange-soft)}
+    .kpi.yellow{--accent:var(--yellow);--soft:var(--yellow-soft)}
+    .kpi.violet{--accent:var(--violet);--soft:var(--violet-soft)}
+
+    /* =========================================================
+       PANELS / BARRES DE RÉPARTITION
+       ========================================================= */
+
+    .two-columns{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:16px;
+    }
+
+    .panel{
+      padding:18px;
+      border-radius:19px;
+      background:var(--surface);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+    }
+
+    .panel-title{
+      margin:0;
+      font-size:15px;
+      font-weight:900;
+    }
+
+    .panel-subtitle{
+      margin:4px 0 0;
+      color:var(--muted);
+      font-size:10px;
+      line-height:1.45;
+    }
+
+    .bars{
+      display:grid;
+      gap:12px;
+      margin-top:16px;
+    }
+
+    .bar-row{
+      display:grid;
+      grid-template-columns:minmax(120px,1.2fr) minmax(140px,2fr) auto;
+      gap:10px;
+      align-items:center;
+    }
+
+    .bar-label{
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      color:#425b70;
+      font-size:11px;
+      font-weight:800;
+    }
+
+    .bar-track{
+      height:10px;
+      overflow:hidden;
+      border-radius:999px;
+      background:#edf2f6;
+    }
+
+    .bar-fill{
+      height:100%;
+      border-radius:999px;
+      background:linear-gradient(90deg,#2f6fdd,#6d8fe8);
+    }
+
+    .bar-value{
+      min-width:28px;
+      text-align:right;
+      color:#425b70;
+      font-size:11px;
+      font-weight:900;
+    }
+
+    .empty{
+      padding:22px;
+      text-align:center;
+      color:var(--muted);
+      border:1px dashed #cedbe5;
+      border-radius:14px;
+      background:#fbfdff;
+      font-size:11px;
+    }
+
+    /* =========================================================
+       À SURVEILLER
+       ========================================================= */
+
+    .watch-list{
+      display:grid;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .watch-item{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:14px;
+      padding:14px 15px;
+      border-radius:15px;
+      border:1px solid var(--line);
+      background:#fff;
+    }
+
+    .watch-item.red{border-left:5px solid var(--red)}
+    .watch-item.orange{border-left:5px solid var(--orange)}
+    .watch-item.yellow{border-left:5px solid var(--yellow)}
+    .watch-item.violet{border-left:5px solid var(--violet)}
+
+    .watch-number{
+      color:var(--blue);
+      font-size:10px;
+      font-weight:850;
+    }
+
+    .watch-title{
+      margin-top:3px;
+      font-size:13px;
+      font-weight:900;
+      line-height:1.35;
+    }
+
+    .watch-meta{
+      margin-top:7px;
+      color:var(--muted);
+      font-size:10px;
+      line-height:1.45;
+    }
+
+    .watch-side{
+      min-width:150px;
+      text-align:right;
+    }
+
+    .watch-badge{
+      display:inline-flex;
+      padding:5px 8px;
+      border-radius:999px;
+      font-size:9px;
+      font-weight:900;
+    }
+
+    .watch-badge.red{
+      color:#b13a47;
+      background:var(--red-soft);
+    }
+
+    .watch-badge.orange{
+      color:#9a620d;
+      background:var(--orange-soft);
+    }
+
+    .watch-badge.yellow{
+      color:#816717;
+      background:var(--yellow-soft);
+    }
+
+    .watch-badge.violet{
+      color:#6444bc;
+      background:var(--violet-soft);
+    }
+
+    .watch-date{
+      margin-top:7px;
+      color:#536b7e;
+      font-size:10px;
+      font-weight:800;
+    }
+
+    /* =========================================================
+       ÉTATS
+       ========================================================= */
+
+    .loading,
+    .error{
+      margin-top:18px;
+      padding:24px;
+      text-align:center;
+      border-radius:16px;
+    }
+
+    .loading{
+      color:var(--muted);
+    }
+
+    .error{
+      display:none;
+      color:#9c2f3c;
+      background:var(--red-soft);
+      border:1px solid #f0c2c8;
+    }
+
+    .hidden{
+      display:none!important;
+    }
+
+    @media(max-width:1000px){
+      .kpi-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+
+      .two-columns{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media(max-width:650px){
+      body{padding:12px}
+      .hero{padding:22px}
+      .kpi-grid{grid-template-columns:1fr}
+      .bar-row{
+        grid-template-columns:1fr auto;
+      }
+      .bar-track{
+        grid-column:1 / -1;
+      }
+      .watch-item{
+        grid-template-columns:1fr;
+      }
+      .watch-side{
+        min-width:0;
+        text-align:left;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+
+    <!-- =========================================================
+         EN-TÊTE
+         ========================================================= -->
+    <section class="hero">
+      <div class="hero-content">
+        <h1>📊 Tableau de bord</h1>
+        <p id="heroDescription">
+          Vue synthétique des contributions, des échéances et des points d’attention.
+        </p>
+        <div id="profileInfo" class="profile">👤 Identification du profil…</div>
+      </div>
+    </section>
+
+    <section id="scopeNote" class="scope-note hidden"></section>
+
+    <div id="loadingBox" class="loading">
+      Chargement du tableau de bord…
+    </div>
+
+    <div id="errorBox" class="error"></div>
+
+    <div id="dashboard" class="hidden">
+
+      <!-- =======================================================
+           1. VUE D'ENSEMBLE
+           ======================================================= -->
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Vue d’ensemble</h2>
+            <p class="section-subtitle">
+              Situation générale des contributions dans votre périmètre.
+            </p>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <article class="kpi blue">
+            <div class="kpi-top">
+              <span class="kpi-icon">📚</span>
+              <span id="kpiTotalLabel">Total</span>
+            </div>
+            <div id="kpiTotal" class="kpi-value">0</div>
+          </article>
+
+          <article class="kpi blue">
+            <div class="kpi-top">
+              <span class="kpi-icon">📋</span>
+              À faire
+            </div>
+            <div id="kpiTodo" class="kpi-value">0</div>
+          </article>
+
+          <article class="kpi green">
+            <div class="kpi-top">
+              <span class="kpi-icon">✓</span>
+              Terminées
+            </div>
+            <div id="kpiDone" class="kpi-value">0</div>
+          </article>
+
+          <article class="kpi violet">
+            <div class="kpi-top">
+              <span class="kpi-icon">⚡</span>
+              Urgentes
+            </div>
+            <div id="kpiUrgent" class="kpi-value">0</div>
+          </article>
+        </div>
+      </section>
+
+      <!-- =======================================================
+           2. ÉCHÉANCES
+           ======================================================= -->
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Échéances</h2>
+            <p class="section-subtitle">
+              Repérez immédiatement les contributions nécessitant une attention particulière.
+            </p>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <article class="kpi red">
+            <div class="kpi-top">
+              <span class="kpi-icon">⏰</span>
+              En retard
+            </div>
+            <div id="kpiLate" class="kpi-value">0</div>
+          </article>
+
+          <article class="kpi orange">
+            <div class="kpi-top">
+              <span class="kpi-icon">🟠</span>
+              Échéance proche
+            </div>
+            <div id="kpiClose" class="kpi-value">0</div>
+          </article>
+
+          <article class="kpi yellow">
+            <div class="kpi-top">
+              <span class="kpi-icon">🟡</span>
+              À surveiller
+            </div>
+            <div id="kpiWatch" class="kpi-value">0</div>
+          </article>
+
+          <article class="kpi blue" id="kpiNoDeadlineCard">
+            <div class="kpi-top">
+              <span class="kpi-icon">📅</span>
+              Sans échéance
+            </div>
+            <div id="kpiNoDeadline" class="kpi-value">0</div>
+          </article>
+        </div>
+      </section>
+
+      <!-- =======================================================
+           3. RELANCES
+           Masqué pour Lecteur
+           ======================================================= -->
+      <section id="reminderSection" class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Relances</h2>
+            <p class="section-subtitle">
+              Suivi des contributions qui nécessitent une relance.
+            </p>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <article class="kpi orange">
+            <div class="kpi-top">
+              <span class="kpi-icon">🔔</span>
+              À relancer
+            </div>
+            <div id="kpiReminder" class="kpi-value">0</div>
+          </article>
+
+          <article class="kpi green">
+            <div class="kpi-top">
+              <span class="kpi-icon">📨</span>
+              Déjà relancées
+            </div>
+            <div id="kpiAlreadyReminded" class="kpi-value">0</div>
+          </article>
+        </div>
+      </section>
+
+      <!-- =======================================================
+           4. RÉPARTITIONS
+           ======================================================= -->
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Répartition</h2>
+            <p class="section-subtitle">
+              Analyse des contributions selon les principales dimensions de suivi.
+            </p>
+          </div>
+        </div>
+
+        <div class="two-columns">
+
+          <article id="bureauPanel" class="panel">
+            <h3 class="panel-title">Par bureau demandeur</h3>
+            <p class="panel-subtitle">
+              Nombre de contributions pilotées par chaque bureau.
+            </p>
+            <div id="bureauBars" class="bars"></div>
+          </article>
+
+          <article id="departmentPanel" class="panel">
+            <h3 class="panel-title">Par département contributeur</h3>
+            <p class="panel-subtitle">
+              Répartition des contributions par département destinataire.
+            </p>
+            <div id="departmentBars" class="bars"></div>
+          </article>
+
+          <article class="panel">
+            <h3 class="panel-title">Par priorité</h3>
+            <p class="panel-subtitle">
+              Importance déclarée des contributions.
+            </p>
+            <div id="priorityBars" class="bars"></div>
+          </article>
+
+          <article class="panel">
+            <h3 class="panel-title">Par statut</h3>
+            <p class="panel-subtitle">
+              Répartition entre contributions à faire et terminées.
+            </p>
+            <div id="statusBars" class="bars"></div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- =======================================================
+           5. À SURVEILLER
+           ======================================================= -->
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">À surveiller</h2>
+            <p class="section-subtitle">
+              Contributions prioritaires : retards, urgences et échéances proches.
+            </p>
+          </div>
+        </div>
+
+        <article class="panel">
+          <div id="watchList" class="watch-list"></div>
+        </article>
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    "use strict";
+
+    const $ = id => document.getElementById(id);
+
+    let currentProfile = null;
+    let currentUser = null;
+    let currentRole = "";
+    let currentUserBureauId = null;
+
+    let allRecords = [];
+    let dashboardRecords = [];
+
+    let departments = [];
+    let bureaux = [];
+
+    let departmentById = new Map();
+    let bureauById = new Map();
+
+    /* =========================================================
+       OUTILS GÉNÉRAUX
+       ========================================================= */
+
+    function text(value){
+      return String(value == null ? "" : value);
+    }
+
+    function clean(value){
+      return text(value)
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g,"");
+    }
+
+    function escapeHtml(value){
+      return text(value)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;");
+    }
+
+    function tableToRows(table){
+      if(!table){
+        return [];
+      }
+
+      const ids = table.id || [];
+
+      return ids.map((id,index)=>{
+        const row = {id};
+
+        for(const column of Object.keys(table)){
+          if(column === "id"){
+            continue;
+          }
+
+          row[column] = Array.isArray(table[column])
+            ? table[column][index]
+            : table[column];
+        }
+
+        return row;
+      });
+    }
+
+    function isCensoredValue(value){
+      if(Array.isArray(value)){
+        return value.length > 0
+          && String(value[0]).trim().toUpperCase() === "C";
+      }
+
+      if(value && typeof value === "object"){
+        const marker =
+          value.type
+          || value.kind
+          || value._type
+          || value.code
+          || "";
+
+        if(String(marker).trim().toUpperCase() === "CENSORED"){
+          return true;
+        }
+      }
+
+      const normalized = clean(value);
+
+      return normalized === "censored"
+        || normalized === "[censored]";
+    }
+
+    function isCensoredRecord(record){
+      return Object.entries(record).some(([key,value])=>{
+        if(key === "id"){
+          return false;
+        }
+
+        return isCensoredValue(value);
+      });
+    }
+
+    function dateValue(value){
+      if(!value){
+        return null;
+      }
+
+      if(typeof value === "number"){
+        return new Date(value * 1000);
+      }
+
+      const date = new Date(value);
+
+      return Number.isNaN(date.getTime())
+        ? null
+        : date;
+    }
+
+    function formatDate(value){
+      const date = dateValue(value);
+
+      if(!date){
+        return "—";
+      }
+
+      return new Intl.DateTimeFormat("fr-FR").format(date);
+    }
+
+    function isAdministrator(){
+      return currentRole === "administrateur";
+    }
+
+    function isBureauContributor(){
+      return currentRole === "bureau contributeur";
+    }
+
+    function isReader(){
+      return currentRole === "lecteur";
+    }
+
+    function isDone(record){
+      return clean(record.Statut) === "fait";
+    }
+
+    function isTodo(record){
+      return !isDone(record);
+    }
+
+    function isUrgent(record){
+      return clean(record.Priorite) === "urgente";
+    }
+
+    function isLate(record){
+      return clean(record.Alerte).includes("retard");
+    }
+
+    function isClose(record){
+      const value = clean(record.Alerte);
+
+      return value.includes("echeance proche")
+        || value.includes("proche");
+    }
+
+    function isWatch(record){
+      return clean(record.Alerte).includes("surveiller");
+    }
+
+    function needsReminder(record){
+      return clean(record.Rappel_a_faire).includes("relancer");
+    }
+
+    function hasReminderHistory(record){
+      return Boolean(record.Dernier_rappel);
+    }
+
+    /* =========================================================
+       IDENTIFICATION DU PROFIL
+
+       Administrateur / Bureau contributeur :
+       identification via SESSION_WIDGET.
+
+       Lecteur :
+       SESSION_WIDGET peut être inaccessible.
+       Dans ce cas, le widget reste en lecture et s'appuie
+       uniquement sur les lignes rendues visibles par les ACL Grist.
+       ========================================================= */
+
+    async function identifyProfile(){
+      try{
+        const before = tableToRows(
+          await grist.docApi.fetchTable("SESSION_WIDGET")
+        );
+
+        const previousIds = new Set(
+          before.map(row => Number(row.id))
+        );
+
+        await grist.docApi.applyUserActions([
+          ["AddRecord","SESSION_WIDGET",null,{}]
+        ]);
+
+        await new Promise(resolve => setTimeout(resolve,700));
+
+        const after = tableToRows(
+          await grist.docApi.fetchTable("SESSION_WIDGET")
+        );
+
+        const created = after
+          .filter(row => !previousIds.has(Number(row.id)))
+          .sort((a,b)=>Number(b.id)-Number(a.id));
+
+        const profile = created[0] || null;
+
+        if(profile){
+          try{
+            await grist.docApi.applyUserActions([
+              ["BulkRemoveRecord","SESSION_WIDGET",[Number(profile.id)]]
+            ]);
+          }catch(cleanupError){
+            console.warn("Nettoyage SESSION_WIDGET impossible :",cleanupError);
+          }
+        }
+
+        return profile;
+
+      }catch(error){
+        console.warn(
+          "SESSION_WIDGET indisponible : mode consultation ACL.",
+          error
+        );
+
+        return null;
+      }
+    }
+
+    async function loadUserContext(){
+      currentProfile = await identifyProfile();
+
+      if(!currentProfile){
+        currentRole = "lecteur";
+        currentUser = null;
+        currentUserBureauId = null;
+
+        $("profileInfo").textContent = "👤 Lecteur";
+        return;
+      }
+
+      currentRole = clean(currentProfile.Role);
+
+      try{
+        const users = tableToRows(
+          await grist.docApi.fetchTable("UTILISATEURS")
+        ).filter(row => !isCensoredRecord(row));
+
+        const email = clean(currentProfile.Email);
+
+        currentUser = users.find(
+          row => clean(row.Email) === email
+        ) || null;
+
+        currentUserBureauId = currentUser
+          ? Number(currentUser.Bureau) || null
+          : null;
+
+      }catch(error){
+        console.warn("UTILISATEURS indisponible :",error);
+
+        currentUser = null;
+        currentUserBureauId = null;
+      }
+
+      $("profileInfo").textContent =
+        "👤 " + (
+          text(currentProfile.Role).trim()
+          || "Consultation"
+        );
+    }
+
+    /* =========================================================
+       CHARGEMENT DES DONNÉES
+       ========================================================= */
+
+    async function safeFetch(tableId){
+      try{
+        return await grist.docApi.fetchTable(tableId);
+      }catch(error){
+        console.warn(`Table ${tableId} indisponible :`,error);
+        return null;
+      }
+    }
+
+    async function loadData(){
+      const [
+        contributionTable,
+        departmentTable,
+        bureauTable
+      ] = await Promise.all([
+        grist.docApi.fetchTable("CONTRIBUTIONS"),
+        safeFetch("DEPARTEMENTS"),
+        safeFetch("BUREAUX_ORIGINE")
+      ]);
+
+      departments = tableToRows(departmentTable)
+        .filter(row => !isCensoredRecord(row));
+
+      bureaux = tableToRows(bureauTable)
+        .filter(row => !isCensoredRecord(row));
+
+      departmentById = new Map(
+        departments.map(row => [Number(row.id),row])
+      );
+
+      bureauById = new Map(
+        bureaux.map(row => [Number(row.id),row])
+      );
+
+      allRecords = tableToRows(contributionTable)
+        .filter(row => !isCensoredRecord(row))
+        .map(row=>{
+          const departmentId = Number(row.Contributeur) || null;
+          const bureauId = Number(row.Bureau_origine) || null;
+
+          const dep = departmentById.get(departmentId);
+          const bureau = bureauById.get(bureauId);
+
+          return {
+            ...row,
+
+            _ContributeurId:departmentId,
+            _BureauId:bureauId,
+
+            _ContributeurLabel:dep
+              ? (
+                  text(dep.Code).trim()
+                  + (
+                      text(dep.Nom).trim()
+                      ? " — " + text(dep.Nom).trim()
+                      : ""
+                    )
+                )
+              : text(row.Contributeur).trim(),
+
+            _BureauLabel:bureau
+              ? (
+                  text(bureau.Code).trim()
+                  + (
+                      text(bureau.Nom).trim()
+                      ? " — " + text(bureau.Nom).trim()
+                      : ""
+                    )
+                )
+              : text(row.Bureau_origine).trim()
+          };
+        });
+    }
+
+    /* =========================================================
+       PÉRIMÈTRE SELON LE RÔLE
+
+       Administrateur :
+       toutes les contributions accessibles.
+
+       Bureau contributeur :
+       uniquement les contributions pilotées par son bureau
+       (CONTRIBUTIONS.Bureau_origine = UTILISATEURS.Bureau).
+
+       Lecteur :
+       uniquement les lignes déjà autorisées par les ACL Grist.
+       ========================================================= */
+
+    function buildDashboardScope(){
+      if(isAdministrator()){
+        dashboardRecords = [...allRecords];
+        return;
+      }
+
+      if(isBureauContributor()){
+        if(!currentUserBureauId){
+          dashboardRecords = [];
+          return;
+        }
+
+        dashboardRecords = allRecords.filter(record =>
+          record._BureauId
+          && Number(record._BureauId) === Number(currentUserBureauId)
+        );
+
+        return;
+      }
+
+      dashboardRecords = [...allRecords];
+    }
+
+    /* =========================================================
+       PERSONNALISATION VISUELLE SELON LE RÔLE
+       ========================================================= */
+
+    function applyRoleLayout(){
+      const note = $("scopeNote");
+
+      if(isAdministrator()){
+        $("heroDescription").textContent =
+          "Pilotez l’ensemble des contributions, leurs échéances, priorités et points d’attention.";
+
+        note.textContent =
+          "Vue Administrateur : l’ensemble des contributions accessibles dans le document est pris en compte.";
+
+        note.classList.remove("hidden");
+
+        $("bureauPanel").classList.remove("hidden");
+        $("departmentPanel").classList.remove("hidden");
+        $("reminderSection").classList.remove("hidden");
+        $("kpiNoDeadlineCard").classList.remove("hidden");
+
+        return;
+      }
+
+      if(isBureauContributor()){
+        $("heroDescription").textContent =
+          "Suivez les contributions pilotées par votre bureau, leurs échéances et les relances à effectuer.";
+
+        note.textContent =
+          "Vue Bureau contributeur : seuls les indicateurs des contributions pilotées par votre bureau sont affichés.";
+
+        note.classList.remove("hidden");
+
+        $("bureauPanel").classList.add("hidden");
+        $("departmentPanel").classList.remove("hidden");
+        $("reminderSection").classList.remove("hidden");
+        $("kpiNoDeadlineCard").classList.add("hidden");
+
+        return;
+      }
+
+      $("heroDescription").textContent =
+        "Consultez une synthèse des contributions accessibles dans votre périmètre de lecture.";
+
+      note.textContent =
+        "Vue Lecteur : les indicateurs portent uniquement sur les contributions que les ACL Grist vous autorisent à consulter.";
+
+      note.classList.remove("hidden");
+
+      $("bureauPanel").classList.add("hidden");
+      $("departmentPanel").classList.add("hidden");
+      $("reminderSection").classList.add("hidden");
+      $("kpiNoDeadlineCard").classList.add("hidden");
+    }
+
+    /* =========================================================
+       KPI
+       ========================================================= */
+
+    function renderKpis(){
+      const records = dashboardRecords;
+
+      $("kpiTotal").textContent = records.length;
+      $("kpiTodo").textContent = records.filter(isTodo).length;
+      $("kpiDone").textContent = records.filter(isDone).length;
+      $("kpiUrgent").textContent = records.filter(isUrgent).length;
+
+      $("kpiLate").textContent =
+        records.filter(record => isTodo(record) && isLate(record)).length;
+
+      $("kpiClose").textContent =
+        records.filter(record => isTodo(record) && isClose(record)).length;
+
+      $("kpiWatch").textContent =
+        records.filter(record => isTodo(record) && isWatch(record)).length;
+
+      $("kpiNoDeadline").textContent =
+        records.filter(record => isTodo(record) && !record.Echeance).length;
+
+      $("kpiReminder").textContent =
+        records.filter(record => isTodo(record) && needsReminder(record)).length;
+
+      $("kpiAlreadyReminded").textContent =
+        records.filter(hasReminderHistory).length;
+    }
+
+    /* =========================================================
+       RÉPARTITIONS
+       ========================================================= */
+
+    function countBy(records,getLabel){
+      const counts = new Map();
+
+      for(const record of records){
+        const label = text(getLabel(record)).trim() || "Non renseigné";
+
+        counts.set(
+          label,
+          (counts.get(label) || 0) + 1
+        );
+      }
+
+      return [...counts.entries()]
+        .map(([label,count])=>({label,count}))
+        .sort((a,b)=>{
+          if(b.count !== a.count){
+            return b.count - a.count;
+          }
+
+          return a.label.localeCompare(
+            b.label,
+            "fr",
+            {numeric:true}
+          );
+        });
+    }
+
+    function renderBars(containerId,items,maxItems=10){
+      const container = $(containerId);
+      container.innerHTML = "";
+
+      if(!items.length){
+        container.innerHTML =
+          '<div class="empty">Aucune donnée disponible.</div>';
+
+        return;
+      }
+
+      const visibleItems = items.slice(0,maxItems);
+      const max = Math.max(...visibleItems.map(item => item.count),1);
+
+      container.innerHTML = visibleItems
+        .map(item=>{
+          const width = Math.max(
+            5,
+            Math.round((item.count / max) * 100)
+          );
+
+          return `
+            <div class="bar-row">
+              <div class="bar-label" title="${escapeHtml(item.label)}">
+                ${escapeHtml(item.label)}
+              </div>
+
+              <div class="bar-track">
+                <div
+                  class="bar-fill"
+                  style="width:${width}%"
+                ></div>
+              </div>
+
+              <div class="bar-value">
+                ${item.count}
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    function renderDistributions(){
+      renderBars(
+        "bureauBars",
+        countBy(
+          dashboardRecords,
+          record => record._BureauLabel
+        ),
+        12
+      );
+
+      renderBars(
+        "departmentBars",
+        countBy(
+          dashboardRecords,
+          record => record._ContributeurLabel
+        ),
+        12
+      );
+
+      renderBars(
+        "priorityBars",
+        countBy(
+          dashboardRecords,
+          record => record.Priorite
+        ),
+        10
+      );
+
+      renderBars(
+        "statusBars",
+        countBy(
+          dashboardRecords,
+          record => isDone(record) ? "Fait" : "À faire"
+        ),
+        10
+      );
+    }
+
+    /* =========================================================
+       À SURVEILLER
+       Ordre :
+       1. En retard
+       2. Urgente
+       3. Échéance proche
+       4. À surveiller
+       ========================================================= */
+
+    function riskInfo(record){
+      if(isLate(record)){
+        return {
+          rank:0,
+          css:"red",
+          label:text(record.Alerte).trim() || "En retard"
+        };
+      }
+
+      if(isUrgent(record)){
+        return {
+          rank:1,
+          css:"violet",
+          label:"Priorité urgente"
+        };
+      }
+
+      if(isClose(record)){
+        return {
+          rank:2,
+          css:"orange",
+          label:text(record.Alerte).trim() || "Échéance proche"
+        };
+      }
+
+      if(isWatch(record)){
+        return {
+          rank:3,
+          css:"yellow",
+          label:text(record.Alerte).trim() || "À surveiller"
+        };
+      }
+
+      return null;
+    }
+
+    function renderWatchList(){
+      const records = dashboardRecords
+        .filter(isTodo)
+        .map(record=>({
+          record,
+          risk:riskInfo(record)
+        }))
+        .filter(item => Boolean(item.risk))
+        .sort((a,b)=>{
+          if(a.risk.rank !== b.risk.rank){
+            return a.risk.rank - b.risk.rank;
+          }
+
+          const da =
+            dateValue(a.record.Echeance)?.getTime()
+            || Number.POSITIVE_INFINITY;
+
+          const db =
+            dateValue(b.record.Echeance)?.getTime()
+            || Number.POSITIVE_INFINITY;
+
+          return da - db;
+        })
+        .slice(0,10);
+
+      const container = $("watchList");
+
+      if(!records.length){
+        container.innerHTML =
+          '<div class="empty">Aucune contribution prioritaire à signaler actuellement.</div>';
+
+        return;
+      }
+
+      container.innerHTML = records
+        .map(({record,risk})=>`
+          <article class="watch-item ${risk.css}">
+
+            <div>
+              <div class="watch-number">
+                ${escapeHtml(
+                  record.Numero
+                    ? `N° ${record.Numero}`
+                    : `Contribution ${record.id}`
+                )}
+              </div>
+
+              <div class="watch-title">
+                ${escapeHtml(record.Titre || "Sans titre")}
+              </div>
+
+              <div class="watch-meta">
+                ${
+                  isAdministrator()
+                    ? `Bureau demandeur : ${escapeHtml(record._BureauLabel || "—")} · `
+                    : ""
+                }
+                Département contributeur :
+                ${escapeHtml(record._ContributeurLabel || "—")}
+              </div>
+            </div>
+
+            <div class="watch-side">
+              <span class="watch-badge ${risk.css}">
+                ${escapeHtml(risk.label)}
+              </span>
+
+              <div class="watch-date">
+                Échéance : ${escapeHtml(formatDate(record.Echeance))}
+              </div>
+            </div>
+
+          </article>
+        `)
+        .join("");
+    }
+
+    /* =========================================================
+       RENDU GLOBAL
+       ========================================================= */
+
+    function renderDashboard(){
+      applyRoleLayout();
+      renderKpis();
+      renderDistributions();
+      renderWatchList();
+    }
+
+    /* =========================================================
+       INITIALISATION
+       ========================================================= */
+
+    async function init(){
+      try{
+        /*
+          Accès complet demandé pour permettre l'identification
+          via SESSION_WIDGET des profils Administrateur et
+          Bureau contributeur.
+
+          Le widget lui-même ne modifie aucune contribution.
+          Pour le Lecteur, si SESSION_WIDGET est inaccessible,
+          le widget bascule automatiquement en consultation ACL.
+        */
+        grist.ready({
+          requiredAccess:"full"
+        });
+
+        await loadUserContext();
+        await loadData();
+
+        buildDashboardScope();
+        renderDashboard();
+
+        $("loadingBox").classList.add("hidden");
+        $("dashboard").classList.remove("hidden");
+
+        grist.onRecords(async ()=>{
+          await loadData();
+          buildDashboardScope();
+          renderDashboard();
+        });
+
+      }catch(error){
+        console.error(error);
+
+        $("loadingBox").classList.add("hidden");
+
+        $("errorBox").textContent =
+          "Impossible de charger le tableau de bord. Vérifiez les droits du widget et l’accès aux tables nécessaires.";
+
+        $("errorBox").style.display = "block";
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
