@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tâchtik — Nouvelle contribution</title>
+  <title>Nouvelle contribution</title>
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
   <style>
     :root{--bg:#f6f7fb;--card:#fff;--text:#1d2939;--muted:#667085;--line:#e4e7ec;--primary:#4f46e5;--primary-hover:#4338ca;--success:#067647;--success-bg:#ecfdf3;--danger:#b42318;--danger-bg:#fef3f2;--shadow:0 10px 30px rgba(16,24,40,.08)}
@@ -20,7 +20,7 @@
 <div class="app">
   <section class="hero">
     <h1>➕ Nouvelle contribution</h1>
-    <p>Créez une contribution pour votre bureau. Le bureau d'origine et l'utilisateur créateur sont renseignés automatiquement par Tâchtik.</p>
+    <p>Créez une contribution pour votre bureau. Le bureau demandeur et l'utilisateur créateur sont renseignés automatiquement.</p>
     <div id="profileInfo" class="profile">Identification du profil…</div>
   </section>
 
@@ -60,11 +60,11 @@
 
 <script>
 /* =============================================================
-   TÂCHTIK — NOUVELLE CONTRIBUTION / BUREAU CONTRIBUTEUR
+   NOUVELLE CONTRIBUTION / BUREAU CONTRIBUTEUR
    Version 1
 
    Objectif :
-   - créer une contribution depuis une interface Tâchtik ;
+   - créer une contribution depuis cette interface ;
    - identifier le Bureau contributeur connecté ;
    - envoyer Bureau_origine et Cree_par dès le premier AddRecord ;
    - éviter le CENSORED temporaire observé avec la Fiche Grist native ;
@@ -139,7 +139,7 @@ async function identifyProfile(){
     .sort((a,b) => Number(b.id) - Number(a.id));
 
   const profile = created[0] || null;
-  if(!profile){ throw new Error("Profil Tâchtik non identifié."); }
+  if(!profile){ throw new Error("Profil utilisateur non identifié."); }
 
   try{
     await grist.docApi.applyUserActions([
@@ -177,7 +177,7 @@ async function loadContext(){
     $("accessDenied").classList.add("show");
     return false;
   }
-  if(!isActiveUser()){ throw new Error("Votre compte Tâchtik est inactif."); }
+  if(!isActiveUser()){ throw new Error("Votre compte utilisateur est inactif."); }
   if(!currentUserBureauId){ throw new Error("Aucun bureau n'est associé à votre profil Bureau contributeur."); }
 
   return true;
@@ -216,7 +216,7 @@ async function createContribution(event){
 
   if(!title){ setError("Le titre est obligatoire."); $("titre").focus(); return; }
   if(!contributorId){ setError("Le contributeur est obligatoire."); $("contributeur").focus(); return; }
-  if(!currentUser || !currentUserBureauId){ setError("Le profil Tâchtik n'est pas suffisamment renseigné pour créer une contribution."); return; }
+  if(!currentUser || !currentUserBureauId){ setError("Le profil utilisateur n'est pas suffisamment renseigné pour créer une contribution."); return; }
 
   /*
     MODIFICATION PRINCIPALE v1 :
