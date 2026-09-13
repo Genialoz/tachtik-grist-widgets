@@ -655,7 +655,7 @@
 <script>
 /* =============================================================
    TÂCHTIK — CONTRIBUTIONS
-   Version 4
+   Version 5
 
    Objectif :
    - vue métier commune Administrateur / Bureau contributeur / Lecteur ;
@@ -664,7 +664,10 @@
    - les actions opérationnelles restent dans "Contributions à traiter" ;
    - mise en avant forte de l'échéance et de l'alerte ;
    - pour les contributions "À faire" : seule la pastille d'alerte est affichée ;
-   - pour les contributions "Fait" : seule la pastille "✓ Fait" est affichée.
+   - pour les contributions "Fait" : seule la pastille "✓ Fait" est affichée ;
+   - V5 : suppression du doublon de rond/couleur dans l'alerte.
+          CONTRIBUTIONS.Alerte est affichée telle quelle, sans ajouter
+          un second pictogramme coloré devant.
    - affichage des lignes déjà filtrées par les ACL Grist ;
    - Lecteur = consultation uniquement ;
    - Administrateur = gestion complète ;
@@ -1261,7 +1264,7 @@ function renderList(){
           done
             ? ""
             : `<span class="deadline-badge deadline-${alert.css}">
-                 ${alert.icon} ${escapeHtml(alert.label)}
+                 ${escapeHtml(alert.label)}
                </span>`
         }
       </div>
@@ -1337,7 +1340,7 @@ function openDetail(recordId){
     "detailAlerte",
     isDone(record)
       ? "—"
-      : `${alert.icon} ${alert.label}`
+      : alert.label
   );
 
   setDetail(
