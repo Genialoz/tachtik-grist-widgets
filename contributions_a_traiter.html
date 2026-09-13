@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Tâchtik — À traiter & relances</title>
+  <title>Contributions pilotées & relances</title>
 
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
 
@@ -200,6 +200,43 @@
         1px solid rgba(255, 255, 255, 0.18);
       font-size: 11px;
       font-weight: 750;
+    }
+
+    /* =========================
+       V2 — RAPPEL DE PÉRIMÈTRE
+       ========================= */
+
+    .scope-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: 14px;
+      padding: 13px 15px;
+      border-radius: 14px;
+      background: #eef4ff;
+      border: 1px solid #cfe0fb;
+      color: #244d82;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .scope-note[hidden] {
+      display: none !important;
+    }
+
+    .scope-note strong {
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 850px) {
+      .scope-note {
+        flex-direction: column;
+      }
+
+      .scope-note strong {
+        white-space: normal;
+      }
     }
 
     /* =========================
@@ -1324,11 +1361,11 @@
             <div>
 
               <div class="brand-name">
-                TÂCHTIK
+                Suivi des contributions
               </div>
 
               <div class="brand-sub">
-                Suivi des contributions de la DGRH
+                Pilotage & relances
               </div>
 
             </div>
@@ -1348,12 +1385,12 @@
         <div class="hero-content">
 
           <h1>
-            À traiter & relances
+            Contributions pilotées & relances
           </h1>
 
-          <p>
-            Suivez les contributions en cours,
-            les échéances et les relances à effectuer.
+          <p id="hero-description">
+            Suivez les contributions que vous pilotez,
+            leurs échéances et les relances à effectuer.
           </p>
 
           <div
@@ -1367,13 +1404,24 @@
 
       </section>
 
+      <!-- =====================================================
+           V2 — RAPPEL DU PÉRIMÈTRE POUR LE BUREAU CONTRIBUTEUR
+           ===================================================== -->
+      <section id="scope-note" class="scope-note" hidden>
+        <strong>📌 Contributions pilotées par votre bureau</strong>
+        <span>
+          Cette page contient les contributions émises par votre bureau et dont vous assurez le suivi.
+          Les contributions qui vous sont attribuées sont disponibles dans la page « Contributions ».
+        </span>
+      </section>
+
       <section class="kpis">
 
         <article class="kpi todo">
 
           <div class="kpi-top">
             <span class="kpi-icon">📋</span>
-            À traiter
+            En cours de pilotage
           </div>
 
           <div
@@ -1499,7 +1547,7 @@
             class="filter-btn active"
             data-filter="all"
           >
-            Toutes
+            Toutes en cours
           </button>
 
           <button
@@ -1551,7 +1599,7 @@
       <div class="results-head">
 
         <div class="results-title">
-          Contributions
+          Contributions pilotées
         </div>
 
         <div
@@ -1624,7 +1672,7 @@
 
         <div class="mail-actions-title">✉️ Actions de messagerie</div>
         <div class="mail-actions-subtitle">
-          Choisissez librement le type de message. Une relance peut être préparée même si le premier envoi a été effectué hors de Tâchtik.
+          Choisissez librement le type de message. Une relance peut être préparée même si le premier envoi a été effectué en dehors de cette interface.
         </div>
 
         <div class="mail-actions-grid">
@@ -1632,7 +1680,7 @@
           <div class="mail-action-card initial">
             <div class="mail-action-label">✉️ Envoi</div>
             <div class="mail-action-help">
-              Prépare le courriel d'envoi à partir du modèle du bureau d'origine.
+              Prépare le courriel d'envoi à partir du modèle du bureau demandeur.
             </div>
             <div class="mail-action-buttons">
               <button
@@ -1655,7 +1703,7 @@
           <div class="mail-action-card reminder">
             <div class="mail-action-label">🔔 Relance</div>
             <div class="mail-action-help">
-              Prépare le courriel de relance, y compris lorsque le premier envoi n'a pas été enregistré dans Tâchtik.
+              Prépare le courriel de relance, y compris lorsque le premier envoi n'a pas été enregistré dans cette interface.
             </div>
             <div class="mail-action-buttons">
               <button
@@ -1752,7 +1800,7 @@
             <div class="detail-field">
 
               <div class="field-label">
-                Bureau d'origine
+                Bureau demandeur
               </div>
 
               <div
@@ -2208,6 +2256,47 @@
       });
     }
 
+    /* =========================
+       V2 — LIGNES CENSURÉES PAR LES ACL GRIST
+       Une ligne contenant une valeur ["C"] / CENSORED ne doit jamais
+       apparaître dans l'interface métier.
+       ========================= */
+
+    function isCensoredValue(value) {
+      if (Array.isArray(value)) {
+        return value.length > 0
+          && String(value[0]).trim().toUpperCase() === "C";
+      }
+
+      if (value && typeof value === "object") {
+        const marker =
+          value.type
+          || value.kind
+          || value._type
+          || value.code
+          || "";
+
+        if (String(marker).trim().toUpperCase() === "CENSORED") {
+          return true;
+        }
+      }
+
+      const normalized = clean(value);
+
+      return normalized === "censored"
+        || normalized === "[censored]";
+    }
+
+    function isCensoredRecord(record) {
+      return Object.entries(record).some(([key, value]) => {
+        if (key === "id") {
+          return false;
+        }
+
+        return isCensoredValue(value);
+      });
+    }
+
     function makeCodeMap(rows) {
       const map = new Map();
 
@@ -2241,7 +2330,7 @@
     }
 
     /* =========================
-       DROITS SELON LA NOUVELLE ARCHITECTURE TÂCHTIK
+       DROITS SELON L'ARCHITECTURE ACTUELLE
        - Administrateur : actions sur toutes les contributions
        - Bureau contributeur : actions uniquement sur les contributions
          rattachées à son propre UTILISATEURS.Bureau
@@ -2254,6 +2343,36 @@
 
     function isBureauContributor() {
       return currentRole === "bureau contributeur";
+    }
+
+    /* =========================
+       V2 — PÉRIMÈTRE DE PILOTAGE DE CETTE PAGE
+
+       - Administrateur : toutes les contributions.
+       - Bureau contributeur : uniquement les contributions dont
+         Bureau_origine correspond à UTILISATEURS.Bureau.
+       - Les contributions attribuées au périmètre du Bureau contributeur
+         sont consultées dans la page "Contributions", pas ici.
+       ========================= */
+
+    function getPilotRecords() {
+      if (isAdministrator()) {
+        return allRecords.filter(record => !isCensoredRecord(record));
+      }
+
+      if (isBureauContributor()) {
+        if (!currentUserBureauId) {
+          return [];
+        }
+
+        return allRecords.filter(record =>
+          !isCensoredRecord(record)
+          && record._BureauId
+          && Number(record._BureauId) === Number(currentUserBureauId)
+        );
+      }
+
+      return [];
     }
 
     function canEditRecord(record) {
@@ -2340,6 +2459,25 @@
 
         $("profile-debug").textContent = "👤 " + role;
 
+        const scopeNote = $("scope-note");
+        const heroDescription = $("hero-description");
+
+        if (isBureauContributor()) {
+          scopeNote.hidden = false;
+          heroDescription.textContent =
+            "Suivez ici les contributions émises par votre bureau, leurs échéances et les relances à effectuer.";
+        }
+        else if (isAdministrator()) {
+          scopeNote.hidden = true;
+          heroDescription.textContent =
+            "Suivez ici l'ensemble des contributions pilotées par les bureaux, leurs échéances et les relances à effectuer.";
+        }
+        else {
+          scopeNote.hidden = true;
+          heroDescription.textContent =
+            "Suivi des contributions pilotées, des échéances et des relances.";
+        }
+
         try {
           await grist.docApi.applyUserActions([
             [
@@ -2362,6 +2500,9 @@
         canEdit = false;
 
         $("profile-debug").textContent = "⚠ Profil non identifié";
+        $("scope-note").hidden = true;
+        $("hero-description").textContent =
+          "Suivi des contributions pilotées, des échéances et des relances.";
       }
 
       renderAll();
@@ -2405,6 +2546,7 @@
       const bureaux = makeCodeMap(tableToRows(bureauTable));
 
       allRecords = tableToRows(contributionTable)
+        .filter(row => !isCensoredRecord(row))
         .map(row => {
           const result = {
             ...row,
@@ -2486,10 +2628,12 @@
        ========================= */
 
     function renderKpis() {
-      $("kpi-todo").textContent = allRecords.filter(isTodo).length;
-      $("kpi-late").textContent = allRecords.filter(isLate).length;
-      $("kpi-remind").textContent = allRecords.filter(needsReminder).length;
-      $("kpi-urgent").textContent = allRecords.filter(isUrgent).length;
+      const records = getPilotRecords();
+
+      $("kpi-todo").textContent = records.filter(isTodo).length;
+      $("kpi-late").textContent = records.filter(isLate).length;
+      $("kpi-remind").textContent = records.filter(needsReminder).length;
+      $("kpi-urgent").textContent = records.filter(isUrgent).length;
     }
 
     /* =========================
@@ -2651,7 +2795,7 @@
     }
 
     function getFilteredRecords() {
-      let records = [...allRecords];
+      let records = [...getPilotRecords()];
 
       if (quickFilter === "all") {
         records = records.filter(isTodo);
@@ -3488,7 +3632,7 @@
        ========================= */
 
     function getSelectedRecord() {
-      return allRecords.find(
+      return getPilotRecords().find(
         record => Number(record.id) === Number(selectedRecordId)
       );
     }
@@ -3760,18 +3904,20 @@
        ========================= */
 
     function renderAll() {
+      const pilotRecords = getPilotRecords();
+
       renderKpis();
 
       populateSelect(
         "department-filter",
-        allRecords.map(record => record.Contributeur),
+        pilotRecords.map(record => record.Contributeur),
         "Tous les départements"
       );
 
       populateSelect(
         "origin-filter",
-        allRecords.map(record => record.Bureau_origine),
-        "Tous les bureaux"
+        pilotRecords.map(record => record.Bureau_origine),
+        "Tous les bureaux demandeurs"
       );
 
       renderList();
