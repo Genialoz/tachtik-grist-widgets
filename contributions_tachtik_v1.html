@@ -147,19 +147,10 @@
       outline:none;
     }
 
-    textarea{
-      min-height:110px;
-      resize:vertical;
-    }
-
     input:focus,select:focus,textarea:focus{
       border-color:#818cf8;
       box-shadow:0 0 0 3px rgba(99,102,241,.12);
     }
-
-    /* =====================================================
-       V7 — MENU DES BUREAUX DEMANDEURS
-       ===================================================== */
 
     .bureau-nav-wrap{
       margin-top:16px;
@@ -282,19 +273,10 @@
       white-space:nowrap;
     }
 
-    .badge.todo{
-      color:#3730a3;
-      background:#eef2ff;
-    }
-
     .badge.done{
       color:var(--success);
       background:var(--success-bg);
     }
-
-    /* =====================================================
-       V2 — ÉCHÉANCE / ALERTE MISE EN AVANT
-       ===================================================== */
 
     .deadline-box{
       margin-top:14px;
@@ -316,14 +298,8 @@
       flex-wrap:wrap;
     }
 
-    .deadline-date{
-      font-weight:900;
-    }
-
-    .deadline-days{
-      font-weight:800;
-      opacity:.9;
-    }
+    .deadline-date{font-weight:900}
+    .deadline-days{font-weight:800;opacity:.9}
 
     .deadline-badge{
       display:inline-flex;
@@ -336,65 +312,17 @@
       white-space:nowrap;
     }
 
-    .deadline-green{
-      background:#ecfdf3;
-      color:#067647;
-      border-color:#abefc6;
-    }
+    .deadline-green{background:#ecfdf3;color:#067647;border-color:#abefc6}
+    .deadline-yellow{background:#fffaeb;color:#b54708;border-color:#fedf89}
+    .deadline-orange{background:#fff4ed;color:#b93815;border-color:#f9dbaf}
+    .deadline-red{background:#fef3f2;color:#b42318;border-color:#fecdca}
+    .deadline-neutral{background:#f2f4f7;color:#475467;border-color:#e4e7ec}
 
-    .deadline-yellow{
-      background:#fffaeb;
-      color:#b54708;
-      border-color:#fedf89;
-    }
-
-    .deadline-orange{
-      background:#fff4ed;
-      color:#b93815;
-      border-color:#f9dbaf;
-    }
-
-    .deadline-red{
-      background:#fef3f2;
-      color:#b42318;
-      border-color:#fecdca;
-    }
-
-    .deadline-neutral{
-      background:#f2f4f7;
-      color:#475467;
-      border-color:#e4e7ec;
-    }
-
-    .deadline-done{
-      background:#ecfdf3;
-      color:#067647;
-      border-color:#abefc6;
-    }
-
-    .card.alert-red{
-      border-left:6px solid #d92d20;
-    }
-
-    .card.alert-orange{
-      border-left:6px solid #f79009;
-    }
-
-    .card.alert-yellow{
-      border-left:6px solid #fdb022;
-    }
-
-    .card.alert-green{
-      border-left:6px solid #12b76a;
-    }
-
-    .card.alert-neutral{
-      border-left:6px solid #98a2b3;
-    }
-
-    .card.alert-done{
-      border-left:6px solid #12b76a;
-    }
+    .card.alert-red{border-left:6px solid #d92d20}
+    .card.alert-orange{border-left:6px solid #f79009}
+    .card.alert-yellow{border-left:6px solid #fdb022}
+    .card.alert-green{border-left:6px solid #12b76a}
+    .card.alert-neutral{border-left:6px solid #98a2b3}
 
     .meta{
       display:flex;
@@ -405,9 +333,7 @@
       font-size:13px;
     }
 
-    .meta strong{
-      color:#344054;
-    }
+    .meta strong{color:#344054}
 
     .empty{
       background:#fff;
@@ -437,28 +363,9 @@
       cursor:pointer;
     }
 
-    button:disabled{
-      opacity:.55;
-      cursor:not-allowed;
-    }
-
-    .btn-primary{
-      background:var(--primary);
-      color:#fff;
-    }
-
-    .btn-primary:hover:not(:disabled){
-      background:var(--primary-hover);
-    }
-
     .btn-secondary{
       background:#f2f4f7;
       color:#344054;
-    }
-
-    .btn-danger{
-      background:var(--danger-bg);
-      color:var(--danger);
     }
 
     .detail-grid{
@@ -474,9 +381,7 @@
       background:#fff;
     }
 
-    .detail-item.full{
-      grid-column:1 / -1;
-    }
+    .detail-item.full{grid-column:1 / -1}
 
     .detail-label{
       color:var(--muted);
@@ -492,35 +397,6 @@
       line-height:1.5;
     }
 
-    .actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:18px;
-    }
-
-    .edit-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:14px;
-    }
-
-    .field{
-      display:flex;
-      flex-direction:column;
-      gap:7px;
-    }
-
-    .field.full{
-      grid-column:1 / -1;
-    }
-
-    label{
-      font-size:13px;
-      font-weight:800;
-      color:#344054;
-    }
-
     .notice{
       display:none;
       margin-top:14px;
@@ -530,18 +406,8 @@
     }
 
     .notice.show{display:block}
-
-    .notice.success{
-      background:var(--success-bg);
-      color:var(--success);
-      border:1px solid #abefc6;
-    }
-
-    .notice.danger{
-      background:var(--danger-bg);
-      color:var(--danger);
-      border:1px solid #fecdca;
-    }
+    .notice.success{background:var(--success-bg);color:var(--success);border:1px solid #abefc6}
+    .notice.danger{background:var(--danger-bg);color:var(--danger);border:1px solid #fecdca}
 
     .loading{
       padding:34px;
@@ -552,8 +418,8 @@
     @media(max-width:850px){
       .app{padding:14px}
       .toolbar{grid-template-columns:1fr}
-      .detail-grid,.edit-grid{grid-template-columns:1fr}
-      .detail-item.full,.field.full{grid-column:auto}
+      .detail-grid{grid-template-columns:1fr}
+      .detail-item.full{grid-column:auto}
     }
   </style>
 </head>
@@ -585,17 +451,9 @@
     <section class="panel">
 
       <div class="tabs">
-        <button class="tab active" data-tab="todo" type="button">
-          À traiter
-        </button>
-
-        <button class="tab" data-tab="done" type="button">
-          Terminées
-        </button>
-
-        <button class="tab" data-tab="all" type="button">
-          Toutes
-        </button>
+        <button class="tab active" data-tab="todo" type="button">À traiter</button>
+        <button class="tab" data-tab="done" type="button">Terminées</button>
+        <button class="tab" data-tab="all" type="button">Toutes</button>
       </div>
 
       <div class="filters-title">Filtres</div>
@@ -604,11 +462,7 @@
 
         <div class="filter-field">
           <label class="filter-label" for="search">Recherche</label>
-          <input
-            id="search"
-            type="search"
-            placeholder="Titre, numéro, demandeur..."
-          >
+          <input id="search" type="search" placeholder="Titre, numéro, demandeur...">
         </div>
 
         <div class="filter-field">
@@ -651,16 +505,11 @@
     </section>
 
     <div class="results-head">
-      <div id="resultsTitle" class="results-title">
-        Contributions à traiter
-      </div>
-      <div id="resultsCount" class="results-count">
-        0 contribution
-      </div>
+      <div id="resultsTitle" class="results-title">Contributions à traiter</div>
+      <div id="resultsCount" class="results-count">0 contribution</div>
     </div>
 
     <section id="contributionList" class="list"></section>
-
   </main>
 
   <!-- =========================================================
@@ -669,15 +518,11 @@
   <main id="detailView" class="hidden">
 
     <div class="detail-toolbar">
-      <button id="backBtn" class="btn-secondary" type="button">
-        ← Retour à la liste
-      </button>
-
+      <button id="backBtn" class="btn-secondary" type="button">← Retour à la liste</button>
       <span id="detailNumber" class="number"></span>
     </div>
 
     <section class="panel">
-
       <div id="detailContent">
         <div class="detail-grid">
 
@@ -737,15 +582,11 @@
           </div>
 
         </div>
-
-
       </div>
 
       <div id="successBox" class="notice success"></div>
       <div id="errorBox" class="notice danger"></div>
-
     </section>
-
   </main>
 
 </div>
@@ -753,27 +594,21 @@
 <script>
 /* =============================================================
    CONTRIBUTIONS
-   Version 8
+   Version 9
 
    Objectif :
-   - vue métier commune Administrateur / Bureau contributeur / Lecteur ;
-   - page volontairement en CONSULTATION UNIQUEMENT ;
-   - aucune modification, suppression ou changement de statut ici ;
-   - les actions opérationnelles restent dans "Contributions à traiter" ;
-   - mise en avant forte de l'échéance et de l'alerte ;
-   - pour les contributions "À faire" : seule la pastille d'alerte est affichée ;
-   - pour les contributions "Fait" : seule la pastille "✓ Fait" est affichée ;
-   - navigation claire par Bureau_origine via un menu d'onglets ;
-   - le libellé métier utilisé est "Bureau demandeur" ;
-   - le bureau n'est pas répété dans chaque carte ;
-   - un onglet "Tous" permet de revenir à l'ensemble ;
-   - V8 : filtres rendus plus lisibles avec des libellés fixes ;
-   - suppression des références au nom provisoire de l'application.
-   - affichage des lignes déjà filtrées par les ACL Grist ;
-   - Lecteur = consultation uniquement ;
-   - Administrateur = gestion complète ;
-   - Bureau contributeur = actions sur les contributions
-     dont Bureau_origine correspond à son bureau.
+   - page de CONSULTATION uniquement ;
+   - Administrateur : voit les lignes autorisées globalement ;
+   - Lecteur : voit uniquement les lignes autorisées par les ACL Grist ;
+   - Bureau contributeur : cette page joue le rôle de "boîte de réception" :
+     elle montre uniquement les contributions destinées à son périmètre
+     (Département, Sous-direction ou Service), quelle que soit leur origine ;
+   - "Contributions à traiter" reste la page de pilotage des demandes émises
+     par le bureau via Bureau_origine ;
+   - V9 : suppression complète des lignes CENSORED renvoyées par Grist ;
+   - V9 : filtrage métier supplémentaire du Bureau contributeur sur son
+     périmètre de réponse ;
+   - aucune modification, suppression ou changement de statut ici.
    ============================================================= */
 
 const $ = id => document.getElementById(id);
@@ -781,7 +616,6 @@ const $ = id => document.getElementById(id);
 let currentProfile = null;
 let currentUser = null;
 let currentRole = "";
-let currentUserBureauId = null;
 
 let allRecords = [];
 let departments = [];
@@ -795,7 +629,7 @@ let currentTab = "todo";
 let currentBureauFilter = "";
 
 /* =============================================================
-   OUTILS
+   OUTILS GÉNÉRAUX
    ============================================================= */
 
 function text(value){
@@ -849,6 +683,53 @@ function showNotice(id,message){
   box.classList.add("show");
 }
 
+/* =============================================================
+   V9 — DÉTECTION DES VALEURS CENSURÉES GRIST
+
+   Grist peut renvoyer une ligne dont certaines cellules sont encodées
+   comme ["C"] lorsque l'utilisateur n'a pas le droit de les lire.
+   Ces lignes ne doivent jamais apparaître dans l'interface métier.
+   ============================================================= */
+
+function isCensoredValue(value){
+  if(Array.isArray(value)){
+    return value.length > 0
+      && String(value[0]).trim().toUpperCase() === "C";
+  }
+
+  if(value && typeof value === "object"){
+    const marker =
+      value.type
+      || value.kind
+      || value._type
+      || value.code
+      || "";
+
+    if(String(marker).trim().toUpperCase() === "CENSORED"){
+      return true;
+    }
+  }
+
+  const normalized = clean(value);
+
+  return normalized === "censored"
+    || normalized === "[censored]";
+}
+
+function isCensoredRecord(record){
+  return Object.entries(record).some(([key,value])=>{
+    if(key === "id"){
+      return false;
+    }
+
+    return isCensoredValue(value);
+  });
+}
+
+/* =============================================================
+   DATES / STATUT / ALERTES
+   ============================================================= */
+
 function dateValue(value){
   if(!value){
     return null;
@@ -872,30 +753,6 @@ function formatDate(value){
   return new Intl.DateTimeFormat("fr-FR").format(d);
 }
 
-function dateToInput(value){
-  const d = dateValue(value);
-
-  if(!d){
-    return "";
-  }
-
-  return [
-    d.getUTCFullYear(),
-    String(d.getUTCMonth()+1).padStart(2,"0"),
-    String(d.getUTCDate()).padStart(2,"0")
-  ].join("-");
-}
-
-function inputToGristDate(value){
-  if(!value){
-    return null;
-  }
-
-  const [y,m,d] = value.split("-").map(Number);
-
-  return Date.UTC(y,m-1,d) / 1000;
-}
-
 function isAdministrator(){
   return currentRole === "administrateur";
 }
@@ -908,23 +765,11 @@ function isDone(record){
   return clean(record.Statut) === "fait";
 }
 
-/* =============================================================
-   V2 — ÉCHÉANCE / ALERTE
-   On s'appuie sur CONTRIBUTIONS.Alerte déjà calculé dans Grist.
-   Aucun seuil métier n'est recalculé dans ce widget.
-   ============================================================= */
-
 function alertInfo(record){
   if(isDone(record)){
-    /*
-      V3 :
-      Une contribution terminée n'a plus d'alerte d'échéance.
-      On conserve uniquement le statut "Fait" affiché en haut de la carte.
-    */
     return {
       category:"done",
       css:"done",
-      icon:"",
       label:""
     };
   }
@@ -933,7 +778,6 @@ function alertInfo(record){
     return {
       category:"none",
       css:"neutral",
-      icon:"⚪",
       label:"Sans échéance"
     };
   }
@@ -945,7 +789,6 @@ function alertInfo(record){
     return {
       category:"late",
       css:"red",
-      icon:"🔴",
       label:raw || "En retard"
     };
   }
@@ -954,7 +797,6 @@ function alertInfo(record){
     return {
       category:"urgent",
       css:"red",
-      icon:"🔴",
       label:raw || "Urgent"
     };
   }
@@ -967,7 +809,6 @@ function alertInfo(record){
     return {
       category:"close",
       css:"orange",
-      icon:"🟠",
       label:raw || "Échéance proche"
     };
   }
@@ -976,7 +817,6 @@ function alertInfo(record){
     return {
       category:"watch",
       css:"yellow",
-      icon:"🟡",
       label:raw || "À surveiller"
     };
   }
@@ -984,7 +824,6 @@ function alertInfo(record){
   return {
     category:"ok",
     css:"green",
-    icon:"🟢",
     label:raw || "OK"
   };
 }
@@ -1057,7 +896,7 @@ async function identifyProfile(){
   }catch(error){
     /*
       Un Lecteur peut ne pas disposer des droits SESSION_WIDGET.
-      Dans ce cas, le widget reste en consultation seule.
+      Dans ce cas, les ACL Grist restent l'autorité sur les lignes visibles.
     */
     console.warn("SESSION_WIDGET indisponible :",error);
     return null;
@@ -1070,8 +909,6 @@ async function loadUserContext(){
   if(!currentProfile){
     currentRole = "lecteur";
     currentUser = null;
-    currentUserBureauId = null;
-
     $("profileInfo").textContent = "👤 Consultation";
     return;
   }
@@ -1089,16 +926,9 @@ async function loadUserContext(){
       row => clean(row.Email) === email
     ) || null;
 
-    currentUserBureauId =
-      currentUser && Number(currentUser.Bureau)
-        ? Number(currentUser.Bureau)
-        : null;
-
   }catch(error){
     console.warn("UTILISATEURS indisponible :",error);
-
     currentUser = null;
-    currentUserBureauId = null;
   }
 
   $("profileInfo").textContent =
@@ -1109,6 +939,51 @@ async function loadUserContext(){
 }
 
 /* =============================================================
+   V9 — PÉRIMÈTRE DE RÉPONSE DU BUREAU CONTRIBUTEUR
+
+   IMPORTANT :
+   - Bureau_origine sert au pilotage des demandes émises.
+   - Cette page "Contributions" sert à afficher les demandes auxquelles
+     le Bureau contributeur doit répondre.
+   - Le périmètre de réponse est porté par UTILISATEURS :
+     Departement OU Sous_direction OU Service.
+   ============================================================= */
+
+function contributorProfileSource(){
+  return currentUser || currentProfile || {};
+}
+
+function isInBureauContributorResponseScope(record){
+  if(!isBureauContributor()){
+    return true;
+  }
+
+  const profile = contributorProfileSource();
+
+  const departmentId = Number(profile.Departement) || null;
+  const subDirectionId = Number(profile.Sous_direction) || null;
+  const serviceId = Number(profile.Service) || null;
+
+  const matchesDepartment =
+    departmentId
+    && Number(record.Contributeur) === departmentId;
+
+  const matchesSubDirection =
+    subDirectionId
+    && Number(record.Sous_direction) === subDirectionId;
+
+  const matchesService =
+    serviceId
+    && Number(record.Service) === serviceId;
+
+  return Boolean(
+    matchesDepartment
+    || matchesSubDirection
+    || matchesService
+  );
+}
+
+/* =============================================================
    CHARGEMENT DES DONNÉES
    ============================================================= */
 
@@ -1116,12 +991,21 @@ async function loadData(){
   const contributionsTable =
     await grist.docApi.fetchTable("CONTRIBUTIONS");
 
-  allRecords = tableToRows(contributionsTable);
+  /*
+    V9 :
+    1. conversion en lignes ;
+    2. suppression des lignes censurées par Grist ;
+    3. pour Bureau contributeur, conservation uniquement des demandes
+       correspondant à son périmètre de réponse.
+  */
+  allRecords = tableToRows(contributionsTable)
+    .filter(record => !isCensoredRecord(record))
+    .filter(record => isInBureauContributorResponseScope(record));
 
   try{
     departments = tableToRows(
       await grist.docApi.fetchTable("DEPARTEMENTS")
-    );
+    ).filter(record => !isCensoredRecord(record));
   }catch(error){
     console.warn("DEPARTEMENTS indisponible :",error);
     departments = [];
@@ -1130,7 +1014,7 @@ async function loadData(){
   try{
     bureaux = tableToRows(
       await grist.docApi.fetchTable("BUREAUX_ORIGINE")
-    );
+    ).filter(record => !isCensoredRecord(record));
   }catch(error){
     console.warn("BUREAUX_ORIGINE indisponible :",error);
     bureaux = [];
@@ -1196,7 +1080,7 @@ function populateFilters(){
 }
 
 /* =============================================================
-   V7 — MENU DE NAVIGATION PAR BUREAU DEMANDEUR
+   MENU DE NAVIGATION PAR BUREAU DEMANDEUR
    ============================================================= */
 
 function renderBureauNav(){
@@ -1445,7 +1329,6 @@ function renderList(){
       </div>
 
       <div class="meta">
-
         <span>
           <strong>Contributeur :</strong>
           ${escapeHtml(record._ContributeurLabel || "—")}
@@ -1455,7 +1338,6 @@ function renderList(){
           <strong>Priorité :</strong>
           ${escapeHtml(record.Priorite || "—")}
         </span>
-
       </div>
     `;
 
@@ -1546,13 +1428,7 @@ function closeDetail(){
 
 async function init(){
   try{
-    grist.ready({
-      /*
-        V4 :
-        Cette page est volontairement en consultation uniquement.
-        Les ACL Grist restent l'autorité sur les lignes visibles.
-      */
-    });
+    grist.ready({});
 
     await loadUserContext();
     await loadData();
@@ -1593,7 +1469,6 @@ $("search").addEventListener("input",renderList);
 $("priorityFilter").addEventListener("change",renderList);
 $("alertFilter").addEventListener("change",renderList);
 $("departmentFilter").addEventListener("change",renderList);
-
 $("backBtn").addEventListener("click",closeDetail);
 
 init();
