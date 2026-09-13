@@ -152,6 +152,44 @@
 
     .list{
       display:grid;
+      gap:18px;
+    }
+
+    /* =====================================================
+       V6 — REGROUPEMENT PAR BUREAU DEMANDEUR
+       ===================================================== */
+
+    .bureau-group{
+      display:grid;
+      gap:10px;
+    }
+
+    .bureau-group-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      padding:12px 14px;
+      border-radius:14px;
+      background:#eef2ff;
+      border:1px solid #c7d2fe;
+    }
+
+    .bureau-group-title{
+      font-weight:900;
+      color:#3730a3;
+      line-height:1.35;
+    }
+
+    .bureau-group-count{
+      color:#667085;
+      font-size:12px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .bureau-group-list{
+      display:grid;
       gap:12px;
     }
 
@@ -545,7 +583,7 @@
         </select>
 
         <select id="originFilter">
-          <option value="">Tous les bureaux</option>
+          <option value="">Tous les bureaux demandeurs</option>
         </select>
 
       </div>
@@ -604,7 +642,7 @@
           </div>
 
           <div class="detail-item">
-            <div class="detail-label">Bureau d'origine</div>
+            <div class="detail-label">Bureau demandeur</div>
             <div id="detailBureau" class="detail-value"></div>
           </div>
 
@@ -655,7 +693,7 @@
 <script>
 /* =============================================================
    TÂCHTIK — CONTRIBUTIONS
-   Version 5
+   Version 6
 
    Objectif :
    - vue métier commune Administrateur / Bureau contributeur / Lecteur ;
@@ -665,9 +703,10 @@
    - mise en avant forte de l'échéance et de l'alerte ;
    - pour les contributions "À faire" : seule la pastille d'alerte est affichée ;
    - pour les contributions "Fait" : seule la pastille "✓ Fait" est affichée ;
-   - V5 : suppression du doublon de rond/couleur dans l'alerte.
-          CONTRIBUTIONS.Alerte est affichée telle quelle, sans ajouter
-          un second pictogramme coloré devant.
+   - regroupement visuel des contributions par Bureau_origine ;
+   - le libellé métier devient "Bureau demandeur" ;
+   - le bureau n'est plus répété dans chaque carte puisqu'il figure
+     dans l'en-tête du groupe.
    - affichage des lignes déjà filtrées par les ACL Grist ;
    - Lecteur = consultation uniquement ;
    - Administrateur = gestion complète ;
@@ -1081,7 +1120,7 @@ function populateFilters(){
     '<option value="">Tous les départements</option>';
 
   originSelect.innerHTML =
-    '<option value="">Tous les bureaux</option>';
+    '<option value="">Tous les bureaux demandeurs</option>';
 
   const deps = [...new Set(
     allRecords
@@ -1212,88 +1251,136 @@ function renderList(){
     return;
   }
 
+  /*
+    V6 :
+    Regroupement des contributions par Bureau_origine.
+    Le bureau devient un contexte de groupe ("Bureau demandeur")
+    et n'est plus répété dans chaque carte.
+  */
+  const groups = new Map();
+
   for(const record of records){
-    const done = isDone(record);
-    const alert = alertInfo(record);
-    const remaining = remainingDaysLabel(record);
+    const bureauKey = record._BureauId
+      ? String(record._BureauId)
+      : "__sans_bureau__";
 
-    const card = document.createElement("article");
-    card.className = done
-      ? "card"
-      : `card alert-${alert.css}`;
+    if(!groups.has(bureauKey)){
+      groups.set(bureauKey,{
+        label:record._BureauLabel || "Bureau demandeur non renseigné",
+        records:[]
+      });
+    }
 
-    card.innerHTML = `
-      <div class="card-top">
+    groups.get(bureauKey).records.push(record);
+  }
 
-        <div>
-          <div class="number">
-            ${escapeHtml(
-              record.Numero
-                ? `N° ${record.Numero}`
-                : `Contribution ${record.id}`
-            )}
-          </div>
+  const sortedGroups = [...groups.values()].sort((a,b)=>
+    a.label.localeCompare(b.label,"fr",{numeric:true})
+  );
 
-          <div class="title">
-            ${escapeHtml(record.Titre || "Sans titre")}
-          </div>
-        </div>
+  for(const group of sortedGroups){
 
-        ${
-          done
-            ? `<span class="badge done">✓ Fait</span>`
-            : ""
-        }
+    const section = document.createElement("section");
+    section.className = "bureau-group";
 
+    const header = document.createElement("div");
+    header.className = "bureau-group-header";
+
+    header.innerHTML = `
+      <div class="bureau-group-title">
+        Bureau demandeur : ${escapeHtml(group.label)}
       </div>
 
-      <div class="deadline-box ${done ? "deadline-neutral" : `deadline-${alert.css}`}">
-        <div class="deadline-main">
-          <span class="deadline-date">
-            📅 Échéance : ${escapeHtml(formatDate(record.Echeance))}
-          </span>
-
-          ${
-            !done && remaining
-              ? `<span class="deadline-days">• ${escapeHtml(remaining)}</span>`
-              : ""
-          }
-        </div>
-
-        ${
-          done
-            ? ""
-            : `<span class="deadline-badge deadline-${alert.css}">
-                 ${escapeHtml(alert.label)}
-               </span>`
-        }
-      </div>
-
-      <div class="meta">
-
-        <span>
-          <strong>Contributeur :</strong>
-          ${escapeHtml(record._ContributeurLabel || "—")}
-        </span>
-
-        <span>
-          <strong>Bureau :</strong>
-          ${escapeHtml(record._BureauLabel || "—")}
-        </span>
-
-        <span>
-          <strong>Priorité :</strong>
-          ${escapeHtml(record.Priorite || "—")}
-        </span>
-
+      <div class="bureau-group-count">
+        ${group.records.length} contribution${group.records.length > 1 ? "s" : ""}
       </div>
     `;
 
-    card.addEventListener("click",()=>{
-      openDetail(record.id);
-    });
+    const groupList = document.createElement("div");
+    groupList.className = "bureau-group-list";
 
-    list.appendChild(card);
+    for(const record of group.records){
+      const done = isDone(record);
+      const alert = alertInfo(record);
+      const remaining = remainingDaysLabel(record);
+
+      const card = document.createElement("article");
+      card.className = done
+        ? "card"
+        : `card alert-${alert.css}`;
+
+      card.innerHTML = `
+        <div class="card-top">
+
+          <div>
+            <div class="number">
+              ${escapeHtml(
+                record.Numero
+                  ? `N° ${record.Numero}`
+                  : `Contribution ${record.id}`
+              )}
+            </div>
+
+            <div class="title">
+              ${escapeHtml(record.Titre || "Sans titre")}
+            </div>
+          </div>
+
+          ${
+            done
+              ? `<span class="badge done">✓ Fait</span>`
+              : ""
+          }
+
+        </div>
+
+        <div class="deadline-box ${done ? "deadline-neutral" : `deadline-${alert.css}`}">
+          <div class="deadline-main">
+            <span class="deadline-date">
+              📅 Échéance : ${escapeHtml(formatDate(record.Echeance))}
+            </span>
+
+            ${
+              !done && remaining
+                ? `<span class="deadline-days">• ${escapeHtml(remaining)}</span>`
+                : ""
+            }
+          </div>
+
+          ${
+            done
+              ? ""
+              : `<span class="deadline-badge deadline-${alert.css}">
+                   ${escapeHtml(alert.label)}
+                 </span>`
+          }
+        </div>
+
+        <div class="meta">
+
+          <span>
+            <strong>Contributeur :</strong>
+            ${escapeHtml(record._ContributeurLabel || "—")}
+          </span>
+
+          <span>
+            <strong>Priorité :</strong>
+            ${escapeHtml(record.Priorite || "—")}
+          </span>
+
+        </div>
+      `;
+
+      card.addEventListener("click",()=>{
+        openDetail(record.id);
+      });
+
+      groupList.appendChild(card);
+    }
+
+    section.appendChild(header);
+    section.appendChild(groupList);
+    list.appendChild(section);
   }
 }
 
