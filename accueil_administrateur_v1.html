@@ -391,12 +391,12 @@
             </div>
           </a>
 
-          <a class="card violet" data-page="Indicateurs" href="#">
+          <a class="card violet" data-page="Tableau de bord" href="#">
             <div class="icon">📈</div>
             <div class="card-content">
-              <h3 class="card-title">Indicateurs</h3>
+              <h3 class="card-title">Tableau de bord</h3>
               <p class="card-text">
-                Consulter les indicateurs de suivi et les principaux éléments de pilotage.
+                Consulter le tableau de bord et les principaux indicateurs de pilotage.
               </p>
               <span class="card-link">Ouvrir la page →</span>
             </div>
@@ -499,91 +499,30 @@
     /* =========================================================
        NAVIGATION VERS LES PAGES GRIST
 
-       V3 :
-       - lecture des pages du document via _grist_Pages ;
-       - lecture de leur nom via _grist_Views ;
-       - construction automatique du lien /p/<id_page> ;
-       - aucun identifiant de page Grist n'est codé en dur.
+       V4 :
+       - les URLS réelles des pages ont été relevées directement
+         dans le document Grist ;
+       - aucun identifiant n'est calculé automatiquement ;
+       - les liens s'ouvrent dans la fenêtre principale Grist.
        ========================================================= */
 
-    let pageUrlByName = new Map();
-
-    function normalizePageName(value){
-      return text(value)
-        .trim()
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g,"");
-    }
-
-    function getDocumentBaseUrl(){
-      const referrer = document.referrer || "";
-
-      if(!referrer){
-        return "";
-      }
-
-      try{
-        const url = new URL(referrer);
-
-        url.search = "";
-        url.hash = "";
-
-        // Une page Grist se termine normalement par /p/<id>.
-        url.pathname = url.pathname.replace(/\/p\/\d+\/?$/,"");
-
-        return url.toString().replace(/\/$/,"");
-      }catch(error){
-        console.warn("Impossible de déterminer l'URL de base du document Grist :",error);
-        return "";
-      }
-    }
-
-    async function loadPageNavigation(){
-      const [pagesTable,viewsTable] = await Promise.all([
-        grist.docApi.fetchTable("_grist_Pages"),
-        grist.docApi.fetchTable("_grist_Views")
-      ]);
-
-      const pages = tableToRows(pagesTable);
-      const views = tableToRows(viewsTable);
-
-      const viewNameById = new Map(
-        views.map(view => [Number(view.id),text(view.name).trim()])
-      );
-
-      const baseUrl = getDocumentBaseUrl();
-
-      if(!baseUrl){
-        throw new Error("URL de base du document Grist introuvable.");
-      }
-
-      pageUrlByName = new Map();
-
-      for(const page of pages){
-        const pageName = viewNameById.get(Number(page.viewRef)) || "";
-
-        if(!pageName){
-          continue;
-        }
-
-        /*
-          IMPORTANT V3 :
-          dans l'URL Grist /p/<numéro>, le numéro correspond
-          à l'identifiant de la vue (viewRef), pas à l'id de la ligne
-          de _grist_Pages.
-        */
-        pageUrlByName.set(
-          normalizePageName(pageName),
-          `${baseUrl}/p/${Number(page.viewRef)}`
-        );
-      }
-    }
+    const PAGE_URLS = {
+      'Contributions': 'https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/31',
+      'Contributions à traiter': 'https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/21',
+      'Contributions terminées': 'https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/10',
+      'Synthèses': 'https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/26',
+      'Nouvelle contribution - Administrateur': 'https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/14',
+      'Importer des contributions - Administrateur': 'https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/30',
+      'Gestion des utilisateurs': 'https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/27',
+      'Gestion des bureaux': 'https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/28',
+      'Modèles de messages': 'https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/25',
+      'Tableau de bord': 'https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/11'
+    };
 
     function bindNavigation(){
       document.querySelectorAll("[data-page]").forEach(card=>{
         const pageName = card.dataset.page || "";
-        const pageUrl = pageUrlByName.get(normalizePageName(pageName));
+        const pageUrl = PAGE_URLS[pageName];
 
         if(pageUrl){
           card.href = pageUrl;
@@ -597,10 +536,7 @@
 
         card.addEventListener("click",event=>{
           event.preventDefault();
-
-          window.alert(
-            `La page Grist « ${pageName} » n'a pas été trouvée. Vérifiez son nom exact dans le menu des pages.`
-          );
+          window.alert(`Aucun lien n'est défini pour la page « ${pageName} ».`);
         });
       });
     }
@@ -632,8 +568,6 @@
           $("accessDenied").style.display = "block";
           return;
         }
-
-        await loadPageNavigation();
 
         $("adminContent").classList.remove("hidden");
         bindNavigation();
