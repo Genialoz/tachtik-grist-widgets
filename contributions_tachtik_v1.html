@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tâchtik — Contributions</title>
+  <title>Contributions</title>
 
   <!-- SDK Grist -->
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
@@ -104,10 +104,36 @@
       border-color:var(--primary);
     }
 
+    .filters-title{
+      font-size:15px;
+      font-weight:900;
+      color:#344054;
+      margin-bottom:12px;
+    }
+
     .toolbar{
       display:grid;
-      grid-template-columns:2fr 1fr 1fr 1fr 1fr;
+      grid-template-columns:2fr 1fr 1fr 1fr;
       gap:12px;
+      align-items:end;
+    }
+
+    .filter-field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:0;
+    }
+
+    .filter-label{
+      font-size:12px;
+      font-weight:900;
+      color:#475467;
+      text-transform:uppercase;
+      letter-spacing:.03em;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
 
     input,select,textarea{
@@ -129,6 +155,63 @@
     input:focus,select:focus,textarea:focus{
       border-color:#818cf8;
       box-shadow:0 0 0 3px rgba(99,102,241,.12);
+    }
+
+    /* =====================================================
+       V7 — MENU DES BUREAUX DEMANDEURS
+       ===================================================== */
+
+    .bureau-nav-wrap{
+      margin-top:16px;
+      padding-top:14px;
+      border-top:1px solid var(--line);
+    }
+
+    .bureau-nav-label{
+      font-size:12px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      color:var(--muted);
+      margin-bottom:9px;
+    }
+
+    .bureau-nav{
+      display:flex;
+      gap:8px;
+      overflow-x:auto;
+      padding-bottom:4px;
+      scrollbar-width:thin;
+    }
+
+    .bureau-tab{
+      flex:0 0 auto;
+      border:1px solid #d0d5dd;
+      background:#fff;
+      color:#344054;
+      border-radius:999px;
+      padding:9px 13px;
+      font-size:13px;
+      font-weight:900;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .bureau-tab:hover{
+      border-color:#a5b4fc;
+      background:#f8f9ff;
+    }
+
+    .bureau-tab.active{
+      background:var(--primary);
+      border-color:var(--primary);
+      color:#fff;
+    }
+
+    .bureau-tab-count{
+      opacity:.75;
+      margin-left:4px;
+      font-size:11px;
     }
 
     .results-head{
@@ -153,44 +236,6 @@
     .list{
       display:grid;
       gap:18px;
-    }
-
-    /* =====================================================
-       V6 — REGROUPEMENT PAR BUREAU DEMANDEUR
-       ===================================================== */
-
-    .bureau-group{
-      display:grid;
-      gap:10px;
-    }
-
-    .bureau-group-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      padding:12px 14px;
-      border-radius:14px;
-      background:#eef2ff;
-      border:1px solid #c7d2fe;
-    }
-
-    .bureau-group-title{
-      font-weight:900;
-      color:#3730a3;
-      line-height:1.35;
-    }
-
-    .bureau-group-count{
-      color:#667085;
-      font-size:12px;
-      font-weight:800;
-      white-space:nowrap;
-    }
-
-    .bureau-group-list{
-      display:grid;
-      gap:12px;
     }
 
     .card{
@@ -522,7 +567,7 @@
   <section class="hero">
     <h1>📋 Contributions</h1>
     <p>
-      Consultez les contributions accessibles selon votre profil et votre périmètre Tâchtik.
+      Consultez les contributions accessibles selon votre profil.
       Cette page est dédiée à la consultation.
     </p>
     <div id="profileInfo" class="profile">Profil en cours d’identification…</div>
@@ -553,39 +598,54 @@
         </button>
       </div>
 
+      <div class="filters-title">Filtres</div>
+
       <div class="toolbar">
 
-        <input
-          id="search"
-          type="search"
-          placeholder="🔎 Rechercher un titre, numéro, demandeur..."
-        >
+        <div class="filter-field">
+          <label class="filter-label" for="search">Recherche</label>
+          <input
+            id="search"
+            type="search"
+            placeholder="Titre, numéro, demandeur..."
+          >
+        </div>
 
-        <select id="priorityFilter">
-          <option value="">Toutes les priorités</option>
-          <option value="Normale">Normale</option>
-          <option value="Haute">Haute</option>
-          <option value="Urgente">Urgente</option>
-        </select>
+        <div class="filter-field">
+          <label class="filter-label" for="priorityFilter">Priorité</label>
+          <select id="priorityFilter">
+            <option value="">Toutes</option>
+            <option value="Normale">Normale</option>
+            <option value="Haute">Haute</option>
+            <option value="Urgente">Urgente</option>
+          </select>
+        </div>
 
-        <select id="alertFilter">
-          <option value="">Toutes les alertes</option>
-          <option value="late">🔴 En retard</option>
-          <option value="urgent">🔴 Urgent</option>
-          <option value="close">🟠 Échéance proche</option>
-          <option value="watch">🟡 À surveiller</option>
-          <option value="ok">🟢 OK</option>
-          <option value="none">⚪ Sans échéance</option>
-        </select>
+        <div class="filter-field">
+          <label class="filter-label" for="alertFilter">Alerte échéance</label>
+          <select id="alertFilter">
+            <option value="">Toutes</option>
+            <option value="late">🔴 En retard</option>
+            <option value="urgent">🔴 Urgent</option>
+            <option value="close">🟠 Échéance proche</option>
+            <option value="watch">🟡 À surveiller</option>
+            <option value="ok">🟢 OK</option>
+            <option value="none">⚪ Sans échéance</option>
+          </select>
+        </div>
 
-        <select id="departmentFilter">
-          <option value="">Tous les départements</option>
-        </select>
+        <div class="filter-field">
+          <label class="filter-label" for="departmentFilter">Département contributeur</label>
+          <select id="departmentFilter">
+            <option value="">Tous</option>
+          </select>
+        </div>
 
-        <select id="originFilter">
-          <option value="">Tous les bureaux demandeurs</option>
-        </select>
+      </div>
 
+      <div class="bureau-nav-wrap">
+        <div class="bureau-nav-label">Bureau demandeur</div>
+        <div id="bureauNav" class="bureau-nav"></div>
       </div>
 
     </section>
@@ -692,8 +752,8 @@
 
 <script>
 /* =============================================================
-   TÂCHTIK — CONTRIBUTIONS
-   Version 6
+   CONTRIBUTIONS
+   Version 8
 
    Objectif :
    - vue métier commune Administrateur / Bureau contributeur / Lecteur ;
@@ -703,10 +763,12 @@
    - mise en avant forte de l'échéance et de l'alerte ;
    - pour les contributions "À faire" : seule la pastille d'alerte est affichée ;
    - pour les contributions "Fait" : seule la pastille "✓ Fait" est affichée ;
-   - regroupement visuel des contributions par Bureau_origine ;
-   - le libellé métier devient "Bureau demandeur" ;
-   - le bureau n'est plus répété dans chaque carte puisqu'il figure
-     dans l'en-tête du groupe.
+   - navigation claire par Bureau_origine via un menu d'onglets ;
+   - le libellé métier utilisé est "Bureau demandeur" ;
+   - le bureau n'est pas répété dans chaque carte ;
+   - un onglet "Tous" permet de revenir à l'ensemble ;
+   - V8 : filtres rendus plus lisibles avec des libellés fixes ;
+   - suppression des références au nom provisoire de l'application.
    - affichage des lignes déjà filtrées par les ACL Grist ;
    - Lecteur = consultation uniquement ;
    - Administrateur = gestion complète ;
@@ -730,6 +792,7 @@ let bureauById = new Map();
 
 let selectedRecordId = null;
 let currentTab = "todo";
+let currentBureauFilter = "";
 
 /* =============================================================
    OUTILS
@@ -1114,13 +1177,9 @@ async function loadData(){
 
 function populateFilters(){
   const depSelect = $("departmentFilter");
-  const originSelect = $("originFilter");
 
   depSelect.innerHTML =
-    '<option value="">Tous les départements</option>';
-
-  originSelect.innerHTML =
-    '<option value="">Tous les bureaux demandeurs</option>';
+    '<option value="">Tous</option>';
 
   const deps = [...new Set(
     allRecords
@@ -1134,18 +1193,75 @@ function populateFilters(){
     option.textContent = label;
     depSelect.appendChild(option);
   }
+}
 
-  const origins = [...new Set(
-    allRecords
-      .map(row => row._BureauLabel)
-      .filter(Boolean)
-  )].sort((a,b)=>a.localeCompare(b,"fr",{numeric:true}));
+/* =============================================================
+   V7 — MENU DE NAVIGATION PAR BUREAU DEMANDEUR
+   ============================================================= */
 
-  for(const label of origins){
-    const option = document.createElement("option");
-    option.value = label;
-    option.textContent = label;
-    originSelect.appendChild(option);
+function renderBureauNav(){
+  const nav = $("bureauNav");
+  nav.innerHTML = "";
+
+  const counts = new Map();
+
+  for(const record of allRecords){
+    const key = record._BureauId
+      ? String(record._BureauId)
+      : "__sans_bureau__";
+
+    const label =
+      record._BureauLabel
+      || "Bureau demandeur non renseigné";
+
+    if(!counts.has(key)){
+      counts.set(key,{
+        label,
+        count:0
+      });
+    }
+
+    counts.get(key).count += 1;
+  }
+
+  const buttons = [
+    {
+      key:"",
+      label:"Tous",
+      count:allRecords.length
+    },
+    ...[...counts.entries()]
+      .map(([key,value])=>({
+        key,
+        label:value.label,
+        count:value.count
+      }))
+      .sort((a,b)=>a.label.localeCompare(
+        b.label,
+        "fr",
+        {numeric:true}
+      ))
+  ];
+
+  for(const item of buttons){
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className =
+      "bureau-tab"
+      + (currentBureauFilter === item.key ? " active" : "");
+
+    button.innerHTML = `
+      ${escapeHtml(item.label)}
+      <span class="bureau-tab-count">${item.count}</span>
+    `;
+
+    button.addEventListener("click",()=>{
+      currentBureauFilter = item.key;
+      renderBureauNav();
+      renderList();
+    });
+
+    nav.appendChild(button);
   }
 }
 
@@ -1154,7 +1270,6 @@ function filteredRecords(){
   const priority = $("priorityFilter").value;
   const alertCategory = $("alertFilter").value;
   const department = $("departmentFilter").value;
-  const origin = $("originFilter").value;
 
   return allRecords
     .filter(record => {
@@ -1184,11 +1299,14 @@ function filteredRecords(){
         return false;
       }
 
-      if(
-        origin
-        && record._BureauLabel !== origin
-      ){
-        return false;
+      if(currentBureauFilter){
+        const recordBureauKey = record._BureauId
+          ? String(record._BureauId)
+          : "__sans_bureau__";
+
+        if(recordBureauKey !== currentBureauFilter){
+          return false;
+        }
       }
 
       if(query){
@@ -1235,12 +1353,30 @@ function renderList(){
   $("resultsCount").textContent =
     `${records.length} contribution${records.length > 1 ? "s" : ""}`;
 
-  $("resultsTitle").textContent =
+  const activeBureauLabel = currentBureauFilter
+    ? (
+        allRecords.find(record=>{
+          const key = record._BureauId
+            ? String(record._BureauId)
+            : "__sans_bureau__";
+
+          return key === currentBureauFilter;
+        })?._BureauLabel
+        || "Bureau demandeur non renseigné"
+      )
+    : "";
+
+  const baseTitle =
     currentTab === "todo"
       ? "Contributions à traiter"
       : currentTab === "done"
         ? "Contributions terminées"
         : "Toutes les contributions";
+
+  $("resultsTitle").textContent =
+    activeBureauLabel
+      ? `${baseTitle} — ${activeBureauLabel}`
+      : baseTitle;
 
   if(!records.length){
     list.innerHTML = `
@@ -1251,136 +1387,83 @@ function renderList(){
     return;
   }
 
-  /*
-    V6 :
-    Regroupement des contributions par Bureau_origine.
-    Le bureau devient un contexte de groupe ("Bureau demandeur")
-    et n'est plus répété dans chaque carte.
-  */
-  const groups = new Map();
-
   for(const record of records){
-    const bureauKey = record._BureauId
-      ? String(record._BureauId)
-      : "__sans_bureau__";
+    const done = isDone(record);
+    const alert = alertInfo(record);
+    const remaining = remainingDaysLabel(record);
 
-    if(!groups.has(bureauKey)){
-      groups.set(bureauKey,{
-        label:record._BureauLabel || "Bureau demandeur non renseigné",
-        records:[]
-      });
-    }
+    const card = document.createElement("article");
+    card.className = done
+      ? "card"
+      : `card alert-${alert.css}`;
 
-    groups.get(bureauKey).records.push(record);
-  }
+    card.innerHTML = `
+      <div class="card-top">
 
-  const sortedGroups = [...groups.values()].sort((a,b)=>
-    a.label.localeCompare(b.label,"fr",{numeric:true})
-  );
+        <div>
+          <div class="number">
+            ${escapeHtml(
+              record.Numero
+                ? `N° ${record.Numero}`
+                : `Contribution ${record.id}`
+            )}
+          </div>
 
-  for(const group of sortedGroups){
+          <div class="title">
+            ${escapeHtml(record.Titre || "Sans titre")}
+          </div>
+        </div>
 
-    const section = document.createElement("section");
-    section.className = "bureau-group";
+        ${
+          done
+            ? `<span class="badge done">✓ Fait</span>`
+            : ""
+        }
 
-    const header = document.createElement("div");
-    header.className = "bureau-group-header";
-
-    header.innerHTML = `
-      <div class="bureau-group-title">
-        Bureau demandeur : ${escapeHtml(group.label)}
       </div>
 
-      <div class="bureau-group-count">
-        ${group.records.length} contribution${group.records.length > 1 ? "s" : ""}
+      <div class="deadline-box ${done ? "deadline-neutral" : `deadline-${alert.css}`}">
+        <div class="deadline-main">
+          <span class="deadline-date">
+            📅 Échéance : ${escapeHtml(formatDate(record.Echeance))}
+          </span>
+
+          ${
+            !done && remaining
+              ? `<span class="deadline-days">• ${escapeHtml(remaining)}</span>`
+              : ""
+          }
+        </div>
+
+        ${
+          done
+            ? ""
+            : `<span class="deadline-badge deadline-${alert.css}">
+                 ${escapeHtml(alert.label)}
+               </span>`
+        }
+      </div>
+
+      <div class="meta">
+
+        <span>
+          <strong>Contributeur :</strong>
+          ${escapeHtml(record._ContributeurLabel || "—")}
+        </span>
+
+        <span>
+          <strong>Priorité :</strong>
+          ${escapeHtml(record.Priorite || "—")}
+        </span>
+
       </div>
     `;
 
-    const groupList = document.createElement("div");
-    groupList.className = "bureau-group-list";
+    card.addEventListener("click",()=>{
+      openDetail(record.id);
+    });
 
-    for(const record of group.records){
-      const done = isDone(record);
-      const alert = alertInfo(record);
-      const remaining = remainingDaysLabel(record);
-
-      const card = document.createElement("article");
-      card.className = done
-        ? "card"
-        : `card alert-${alert.css}`;
-
-      card.innerHTML = `
-        <div class="card-top">
-
-          <div>
-            <div class="number">
-              ${escapeHtml(
-                record.Numero
-                  ? `N° ${record.Numero}`
-                  : `Contribution ${record.id}`
-              )}
-            </div>
-
-            <div class="title">
-              ${escapeHtml(record.Titre || "Sans titre")}
-            </div>
-          </div>
-
-          ${
-            done
-              ? `<span class="badge done">✓ Fait</span>`
-              : ""
-          }
-
-        </div>
-
-        <div class="deadline-box ${done ? "deadline-neutral" : `deadline-${alert.css}`}">
-          <div class="deadline-main">
-            <span class="deadline-date">
-              📅 Échéance : ${escapeHtml(formatDate(record.Echeance))}
-            </span>
-
-            ${
-              !done && remaining
-                ? `<span class="deadline-days">• ${escapeHtml(remaining)}</span>`
-                : ""
-            }
-          </div>
-
-          ${
-            done
-              ? ""
-              : `<span class="deadline-badge deadline-${alert.css}">
-                   ${escapeHtml(alert.label)}
-                 </span>`
-          }
-        </div>
-
-        <div class="meta">
-
-          <span>
-            <strong>Contributeur :</strong>
-            ${escapeHtml(record._ContributeurLabel || "—")}
-          </span>
-
-          <span>
-            <strong>Priorité :</strong>
-            ${escapeHtml(record.Priorite || "—")}
-          </span>
-
-        </div>
-      `;
-
-      card.addEventListener("click",()=>{
-        openDetail(record.id);
-      });
-
-      groupList.appendChild(card);
-    }
-
-    section.appendChild(header);
-    section.appendChild(groupList);
-    list.appendChild(section);
+    list.appendChild(card);
   }
 }
 
@@ -1475,6 +1558,7 @@ async function init(){
     await loadData();
 
     populateFilters();
+    renderBureauNav();
     renderList();
 
     $("loadingBox").classList.add("hidden");
@@ -1509,7 +1593,6 @@ $("search").addEventListener("input",renderList);
 $("priorityFilter").addEventListener("change",renderList);
 $("alertFilter").addEventListener("change",renderList);
 $("departmentFilter").addEventListener("change",renderList);
-$("originFilter").addEventListener("change",renderList);
 
 $("backBtn").addEventListener("click",closeDetail);
 
