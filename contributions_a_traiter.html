@@ -2242,9 +2242,9 @@
 
     /* =========================
        DROITS SELON LA NOUVELLE ARCHITECTURE TÂCHTIK
-       - Administrateur : accès global aux actions d'écriture
-       - Bureau contributeur : actions autorisées uniquement
-         sur les contributions de son propre bureau
+       - Administrateur : actions sur toutes les contributions
+       - Bureau contributeur : actions uniquement sur les contributions
+         rattachées à son propre UTILISATEURS.Bureau
        - Lecteur : aucune action d'écriture
        ========================= */
 
@@ -2256,8 +2256,8 @@
       return currentRole === "bureau contributeur";
     }
 
-    function canManageReminder(record) {
-      if (!record || !isTodo(record)) {
+    function canEditRecord(record) {
+      if (!record) {
         return false;
       }
 
@@ -2274,6 +2274,14 @@
       }
 
       return false;
+    }
+
+    function canManageReminder(record) {
+      return Boolean(
+        record
+        && isTodo(record)
+        && canEditRecord(record)
+      );
     }
 
     /* =========================
@@ -3564,6 +3572,7 @@
       const reminderEmailButton = $("detail-reminder-email-btn");
       const confirmInitialButton = $("detail-confirm-initial-btn");
       const confirmReminderButton = $("detail-confirm-reminder-btn");
+      const canWriteRecord = canEditRecord(record);
 
       if (isTodo(record)) {
         status.textContent = "🔵 À faire";
@@ -3571,7 +3580,7 @@
 
         statusButton.textContent = "✓ Marquer comme fait";
         statusButton.className = "status-action mark-done";
-        statusButton.style.display = canEdit ? "inline-flex" : "none";
+        statusButton.style.display = canWriteRecord ? "inline-flex" : "none";
       }
       else {
         status.textContent = "🟢 Fait";
@@ -3579,7 +3588,7 @@
 
         statusButton.textContent = "↩ Remettre à faire";
         statusButton.className = "status-action mark-todo";
-        statusButton.style.display = canEdit ? "inline-flex" : "none";
+        statusButton.style.display = canWriteRecord ? "inline-flex" : "none";
       }
 
       const canMail = canManageReminder(record);
@@ -3604,7 +3613,7 @@
           ? "inline-flex"
           : "none";
 
-      $("edit-btn").style.display = canEdit ? "inline-flex" : "none";
+      $("edit-btn").style.display = canWriteRecord ? "inline-flex" : "none";
 
       renderMailHistory(record);
     }
@@ -3616,7 +3625,7 @@
     async function toggleStatus() {
       const record = getSelectedRecord();
 
-      if (!record || !canEdit) {
+      if (!record || !canEditRecord(record)) {
         return;
       }
 
@@ -3659,7 +3668,7 @@
     function enterEditMode() {
       const record = getSelectedRecord();
 
-      if (!record || !canEdit) {
+      if (!record || !canEditRecord(record)) {
         return;
       }
 
@@ -3682,7 +3691,8 @@
       $("detail-content").style.display = "block";
       $("edit-form").style.display = "none";
 
-      if (canEdit) {
+      const selected = getSelectedRecord();
+      if (selected && canEditRecord(selected)) {
         $("edit-btn").style.display = "inline-flex";
       }
     }
@@ -3690,7 +3700,7 @@
     async function saveEdit() {
       const record = getSelectedRecord();
 
-      if (!record || !canEdit) {
+      if (!record || !canEditRecord(record)) {
         return;
       }
 
@@ -3875,7 +3885,7 @@
 
   </script>
 
-  <script src="https://genialoz.github.io/tachtik-grist-widgets/suppression_contributions_tachtik.js?v=1"></script>
+  <script src="https://genialoz.github.io/tachtik-grist-widgets/suppression_contributions_tachtik.js?v=2"></script>
 
 </body>
 
