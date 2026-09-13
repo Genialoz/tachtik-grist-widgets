@@ -106,7 +106,7 @@
 
     .toolbar{
       display:grid;
-      grid-template-columns:2fr 1fr 1fr 1fr;
+      grid-template-columns:2fr 1fr 1fr 1fr 1fr;
       gap:12px;
     }
 
@@ -207,6 +207,110 @@
     .badge.done{
       color:var(--success);
       background:var(--success-bg);
+    }
+
+    /* =====================================================
+       V2 — ÉCHÉANCE / ALERTE MISE EN AVANT
+       ===================================================== */
+
+    .deadline-box{
+      margin-top:14px;
+      border-radius:14px;
+      padding:12px 14px;
+      border:1px solid var(--line);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .deadline-main{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .deadline-date{
+      font-weight:900;
+    }
+
+    .deadline-days{
+      font-weight:800;
+      opacity:.9;
+    }
+
+    .deadline-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .deadline-green{
+      background:#ecfdf3;
+      color:#067647;
+      border-color:#abefc6;
+    }
+
+    .deadline-yellow{
+      background:#fffaeb;
+      color:#b54708;
+      border-color:#fedf89;
+    }
+
+    .deadline-orange{
+      background:#fff4ed;
+      color:#b93815;
+      border-color:#f9dbaf;
+    }
+
+    .deadline-red{
+      background:#fef3f2;
+      color:#b42318;
+      border-color:#fecdca;
+    }
+
+    .deadline-neutral{
+      background:#f2f4f7;
+      color:#475467;
+      border-color:#e4e7ec;
+    }
+
+    .deadline-done{
+      background:#ecfdf3;
+      color:#067647;
+      border-color:#abefc6;
+    }
+
+    .card.alert-red{
+      border-left:6px solid #d92d20;
+    }
+
+    .card.alert-orange{
+      border-left:6px solid #f79009;
+    }
+
+    .card.alert-yellow{
+      border-left:6px solid #fdb022;
+    }
+
+    .card.alert-green{
+      border-left:6px solid #12b76a;
+    }
+
+    .card.alert-neutral{
+      border-left:6px solid #98a2b3;
+    }
+
+    .card.alert-done{
+      border-left:6px solid #12b76a;
     }
 
     .meta{
@@ -425,6 +529,16 @@
           <option value="Urgente">Urgente</option>
         </select>
 
+        <select id="alertFilter">
+          <option value="">Toutes les alertes</option>
+          <option value="late">🔴 En retard</option>
+          <option value="urgent">🔴 Urgent</option>
+          <option value="close">🟠 Échéance proche</option>
+          <option value="watch">🟡 À surveiller</option>
+          <option value="ok">🟢 OK</option>
+          <option value="none">⚪ Sans échéance</option>
+        </select>
+
         <select id="departmentFilter">
           <option value="">Tous les départements</option>
         </select>
@@ -506,6 +620,16 @@
           <div class="detail-item">
             <div class="detail-label">Échéance</div>
             <div id="detailEcheance" class="detail-value"></div>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-label">Alerte échéance</div>
+            <div id="detailAlerte" class="detail-value"></div>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-label">Jours restants</div>
+            <div id="detailJours" class="detail-value"></div>
           </div>
 
           <div class="detail-item full">
@@ -600,10 +724,14 @@
 <script>
 /* =============================================================
    TÂCHTIK — CONTRIBUTIONS
-   Version 1
+   Version 2
 
    Objectif :
    - vue métier commune Administrateur / Bureau contributeur / Lecteur ;
+   - V2 : mise en avant forte de l'échéance et de l'alerte ;
+          couleurs basées sur CONTRIBUTIONS.Alerte ;
+          affichage de Jours_restants ;
+          ajout d'un filtre Alerte ;
    - affichage des lignes déjà filtrées par les ACL Grist ;
    - Lecteur = consultation uniquement ;
    - Administrateur = gestion complète ;
@@ -740,6 +868,105 @@ function isBureauContributor(){
 
 function isDone(record){
   return clean(record.Statut) === "fait";
+}
+
+/* =============================================================
+   V2 — ÉCHÉANCE / ALERTE
+   On s'appuie sur CONTRIBUTIONS.Alerte déjà calculé dans Grist.
+   Aucun seuil métier n'est recalculé dans ce widget.
+   ============================================================= */
+
+function alertInfo(record){
+  if(isDone(record)){
+    return {
+      category:"done",
+      css:"done",
+      icon:"✅",
+      label:"Terminée"
+    };
+  }
+
+  if(!record.Echeance){
+    return {
+      category:"none",
+      css:"neutral",
+      icon:"⚪",
+      label:"Sans échéance"
+    };
+  }
+
+  const raw = text(record.Alerte).trim();
+  const normal = clean(raw);
+
+  if(normal.includes("retard")){
+    return {
+      category:"late",
+      css:"red",
+      icon:"🔴",
+      label:raw || "En retard"
+    };
+  }
+
+  if(normal.includes("urgent")){
+    return {
+      category:"urgent",
+      css:"red",
+      icon:"🔴",
+      label:raw || "Urgent"
+    };
+  }
+
+  if(
+    normal.includes("échéance proche")
+    || normal.includes("echeance proche")
+    || normal.includes("proche")
+  ){
+    return {
+      category:"close",
+      css:"orange",
+      icon:"🟠",
+      label:raw || "Échéance proche"
+    };
+  }
+
+  if(normal.includes("surveiller")){
+    return {
+      category:"watch",
+      css:"yellow",
+      icon:"🟡",
+      label:raw || "À surveiller"
+    };
+  }
+
+  return {
+    category:"ok",
+    css:"green",
+    icon:"🟢",
+    label:raw || "OK"
+  };
+}
+
+function remainingDaysLabel(record){
+  if(record.Jours_restants == null || record.Jours_restants === ""){
+    return "";
+  }
+
+  const n = Number(record.Jours_restants);
+
+  if(!Number.isFinite(n)){
+    return text(record.Jours_restants);
+  }
+
+  if(n < 0){
+    const days = Math.abs(n);
+    return `${days} jour${days > 1 ? "s" : ""} de retard`;
+  }
+
+  if(n === 0){
+    return "Échéance aujourd’hui";
+  }
+
+  return `dans ${n} jour${n > 1 ? "s" : ""}`;
 }
 
 /* =============================================================
@@ -969,6 +1196,7 @@ function populateFilters(){
 function filteredRecords(){
   const query = clean($("search").value);
   const priority = $("priorityFilter").value;
+  const alertCategory = $("alertFilter").value;
   const department = $("departmentFilter").value;
   const origin = $("originFilter").value;
 
@@ -983,6 +1211,13 @@ function filteredRecords(){
       }
 
       if(priority && text(record.Priorite) !== priority){
+        return false;
+      }
+
+      if(
+        alertCategory
+        && alertInfo(record).category !== alertCategory
+      ){
         return false;
       }
 
@@ -1062,9 +1297,11 @@ function renderList(){
 
   for(const record of records){
     const done = isDone(record);
+    const alert = alertInfo(record);
+    const remaining = remainingDaysLabel(record);
 
     const card = document.createElement("article");
-    card.className = "card";
+    card.className = `card alert-${alert.css}`;
 
     card.innerHTML = `
       <div class="card-top">
@@ -1089,6 +1326,24 @@ function renderList(){
 
       </div>
 
+      <div class="deadline-box deadline-${alert.css}">
+        <div class="deadline-main">
+          <span class="deadline-date">
+            📅 Échéance : ${escapeHtml(formatDate(record.Echeance))}
+          </span>
+
+          ${
+            remaining
+              ? `<span class="deadline-days">• ${escapeHtml(remaining)}</span>`
+              : ""
+          }
+        </div>
+
+        <span class="deadline-badge deadline-${alert.css}">
+          ${alert.icon} ${escapeHtml(alert.label)}
+        </span>
+      </div>
+
       <div class="meta">
 
         <span>
@@ -1104,11 +1359,6 @@ function renderList(){
         <span>
           <strong>Priorité :</strong>
           ${escapeHtml(record.Priorite || "—")}
-        </span>
-
-        <span>
-          <strong>Échéance :</strong>
-          ${escapeHtml(formatDate(record.Echeance))}
         </span>
 
       </div>
@@ -1158,6 +1408,18 @@ function openDetail(recordId){
   setDetail("detailPriorite",record.Priorite);
   setDetail("detailStatut",record.Statut);
   setDetail("detailEcheance",formatDate(record.Echeance));
+
+  const alert = alertInfo(record);
+  setDetail(
+    "detailAlerte",
+    `${alert.icon} ${alert.label}`
+  );
+
+  setDetail(
+    "detailJours",
+    remainingDaysLabel(record) || "—"
+  );
+
   setDetail("detailCommentaire",record.Commentaire);
 
   const canManage = canManageRecord(record);
@@ -1431,6 +1693,7 @@ async function deleteContribution(){
 
 async function refreshAfterAction(){
   const priority = $("priorityFilter").value;
+  const alertCategory = $("alertFilter").value;
   const department = $("departmentFilter").value;
   const origin = $("originFilter").value;
 
@@ -1439,6 +1702,7 @@ async function refreshAfterAction(){
   populateFilters();
 
   $("priorityFilter").value = priority;
+  $("alertFilter").value = alertCategory;
 
   if(
     [...$("departmentFilter").options]
@@ -1505,6 +1769,7 @@ document.querySelectorAll(".tab").forEach(button=>{
 
 $("search").addEventListener("input",renderList);
 $("priorityFilter").addEventListener("change",renderList);
+$("alertFilter").addEventListener("change",renderList);
 $("departmentFilter").addEventListener("change",renderList);
 $("originFilter").addEventListener("change",renderList);
 
