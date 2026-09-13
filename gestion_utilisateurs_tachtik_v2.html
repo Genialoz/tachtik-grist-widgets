@@ -1,12 +1,10 @@
-from pathlib import Path
-
-html = r'''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Tâchtik - Gestion des utilisateurs</title>
+<title>Gestion des utilisateurs</title>
 
 <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -525,15 +523,15 @@ tr:last-child td{border-bottom:0}
 <main class="app">
 
   <!-- =========================================
-       ENTÊTE TÂCHTIK
+       ENTÊTE
        ========================================= -->
   <section class="hero">
     <div class="hero-top">
       <div class="brand">
         <div class="brand-mark">👤</div>
         <div>
-          <div class="brand-name">TÂCHTIK</div>
-          <div class="brand-sub">Suivi des contributions de la DGRH</div>
+          <div class="brand-name">GESTION DES UTILISATEURS</div>
+          <div class="brand-sub">Administration des accès et des profils</div>
         </div>
       </div>
     </div>
@@ -541,7 +539,7 @@ tr:last-child td{border-bottom:0}
     <div class="hero-content">
       <h1>Gestion des utilisateurs</h1>
       <p>
-        Gérez les profils Tâchtik, leurs rôles, leurs périmètres de lecture
+        Gérez les profils utilisateurs, leurs rôles, leurs périmètres
         et les imports en nombre depuis Excel.
       </p>
       <div id="profileInfo" class="profile">Identification…</div>
@@ -553,7 +551,7 @@ tr:last-child td{border-bottom:0}
        ========================================= -->
   <section id="accessDenied" class="access-denied">
     <h2>🔒 Accès réservé</h2>
-    <p>Cette fonction est réservée aux administrateurs de Tâchtik.</p>
+    <p>Cette fonction est réservée aux administrateurs.</p>
   </section>
 
   <!-- =========================================
@@ -586,7 +584,7 @@ tr:last-child td{border-bottom:0}
     <section class="panel">
       <div class="panel-header">
         <div>
-          <h2 class="panel-title">Utilisateurs Tâchtik</h2>
+          <h2 class="panel-title">Utilisateurs</h2>
           <p class="panel-subtitle">
             Les droits métier sont pilotés par la table UTILISATEURS et les règles ACL de Grist.
           </p>
@@ -840,7 +838,7 @@ let toastTimer = null;
 
 /* =========================================
    CONSTANTES MÉTIER
-   MODIFICATION : nouveaux rôles Tâchtik
+   RÔLES ACTUELS
    ========================================= */
 
 const ALLOWED_ROLES = [
@@ -1021,7 +1019,7 @@ async function identifyUser(){
   /*
     Ne pas supprimer la ligne SESSION_WIDGET ici.
     Cette version suit le mécanisme stable utilisé
-    dans les autres widgets Tâchtik.
+    dans les autres widgets.
   */
   return created[0] || null;
 }
@@ -1124,7 +1122,7 @@ function updatePerimeterSelector(){
    - Administrateur : pas de périmètre, pas de bureau
    - Lecteur : périmètre obligatoire
    - Bureau contributeur : bureau obligatoire,
-     périmètre lecteur facultatif
+     périmètre de réception facultatif
    ========================================= */
 
 function updateFieldsForRole(){
@@ -1154,7 +1152,7 @@ function updateFieldsForRole(){
     isReader
       ? "Obligatoire : choisissez un Service, une Sous-direction ou un Département."
       : isContributor
-        ? "Facultatif : permet d'ajouter un périmètre de lecture au Bureau contributeur."
+        ? "Facultatif : définit le périmètre des contributions attribuées au Bureau contributeur."
         : "";
 }
 
@@ -1614,7 +1612,7 @@ async function deleteUser(id){
   const label = user.Nom || user.Email || "cet utilisateur";
 
   const confirmed = window.confirm(
-    `Supprimer définitivement ${label} de Tâchtik ?\n\n`
+    `Supprimer définitivement ${label} ?\n\n`
     + `Cette action supprime son profil UTILISATEURS. `
     + `Pour une suspension temporaire, utilisez plutôt Désactiver.`
   );
@@ -1779,7 +1777,7 @@ function validateImportRow(row,lineNumber){
   }
 
   if(!contributor && text(row.Bureau).trim()){
-    errors.push("Bureau renseigné pour un rôle non partenaire");
+    errors.push("Bureau renseigné pour un rôle autre que Bureau contributeur");
   }
 
   const active = parseActive(row.Actif);
@@ -2152,8 +2150,3 @@ load();
 
 </body>
 </html>
-'''
-
-path = Path("/mnt/data/gestion_utilisateurs_tachtik_v2.html")
-path.write_text(html, encoding="utf-8")
-print(path)
