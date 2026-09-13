@@ -6,21 +6,46 @@
   <title>Nouvelle contribution</title>
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
   <style>
-    :root{--bg:#f6f7fb;--card:#fff;--text:#1d2939;--muted:#667085;--line:#e4e7ec;--primary:#4f46e5;--primary-hover:#4338ca;--success:#067647;--success-bg:#ecfdf3;--danger:#b42318;--danger-bg:#fef3f2;--shadow:0 10px 30px rgba(16,24,40,.08)}
-    *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
-    .app{max-width:980px;margin:0 auto;padding:24px}.hero{background:linear-gradient(135deg,#312e81,#6366f1);color:#fff;border-radius:20px;padding:24px 26px;box-shadow:var(--shadow);margin-bottom:20px}.hero h1{margin:0 0 8px;font-size:28px}.hero p{margin:0;opacity:.92;line-height:1.5}.profile{display:inline-flex;margin-top:14px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.16);font-size:13px;font-weight:700}
-    .panel{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:24px}.panel-title{margin:0 0 4px;font-size:21px}.panel-sub{margin:0 0 22px;color:var(--muted);line-height:1.5}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.field{min-width:0}.field.full{grid-column:1/-1}
-    label{display:block;margin-bottom:7px;font-size:13px;font-weight:800;color:#344054}.required::after{content:" *";color:#d92d20}input,select,textarea{width:100%;border:1px solid #d0d5dd;border-radius:12px;padding:11px 12px;font:inherit;color:var(--text);background:#fff;outline:none}input:focus,select:focus,textarea:focus{border-color:#818cf8;box-shadow:0 0 0 3px rgba(99,102,241,.12)}textarea{resize:vertical;min-height:120px}.help{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.4}
-    .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}button{border:0;border-radius:12px;padding:11px 16px;font:inherit;font-weight:800;cursor:pointer}button:disabled{cursor:not-allowed;opacity:.6}.btn-secondary{background:#f2f4f7;color:#344054}.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover:not(:disabled){background:var(--primary-hover)}
-    .notice{display:none;margin-bottom:18px;border-radius:14px;padding:14px 16px;line-height:1.5}.notice.show{display:block}.notice.success{color:var(--success);background:var(--success-bg);border:1px solid #abefc6}.notice.danger{color:var(--danger);background:var(--danger-bg);border:1px solid #fecdca}.hidden{display:none!important}.loading{padding:26px;text-align:center;color:var(--muted)}
-    @media(max-width:760px){.app{padding:14px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.actions{flex-direction:column-reverse}.actions button{width:100%}}
+    :root{--bg:#f6f7fb;--card:#fff;--text:#1d2939;--muted:#667085;--line:#e4e7ec;--primary:#4f46e5;--primary-hover:#4338ca;--success:#067647;--success-bg:#ecfdf3;--danger:#b42318;--danger-bg:#fef3f2;--warning:#b54708;--warning-bg:#fffaeb;--shadow:0 10px 30px rgba(16,24,40,.08)}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+    .app{max-width:980px;margin:0 auto;padding:24px}
+    .hero{background:linear-gradient(135deg,#312e81,#6366f1);color:#fff;border-radius:20px;padding:24px 26px;box-shadow:var(--shadow);margin-bottom:20px}
+    .hero h1{margin:0 0 8px;font-size:28px}.hero p{margin:0;opacity:.92;line-height:1.5}
+    .profile{display:inline-flex;margin-top:14px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.16);font-size:13px;font-weight:700}
+    .panel{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:24px}
+    .panel-title{margin:0 0 4px;font-size:21px}.panel-sub{margin:0 0 22px;color:var(--muted);line-height:1.5}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.field{min-width:0}.field.full{grid-column:1/-1}
+    label{display:block;margin-bottom:7px;font-size:13px;font-weight:800;color:#344054}.required::after{content:" *";color:#d92d20}
+    input,select,textarea{width:100%;border:1px solid #d0d5dd;border-radius:12px;padding:11px 12px;font:inherit;color:var(--text);background:#fff;outline:none}
+    input:focus,select:focus,textarea:focus{border-color:#818cf8;box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+    textarea{resize:vertical;min-height:120px}.help{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.4}
+    .target-builder{border:1px solid var(--line);background:#fafbff;border-radius:16px;padding:16px}
+    .target-builder-grid{display:grid;grid-template-columns:170px 1fr auto;gap:12px;align-items:end}
+    .deploy-box{margin-top:12px;padding:12px 14px;border:1px solid #fedf89;background:var(--warning-bg);border-radius:12px;color:#7a2e0e}
+    .deploy-box label{display:flex;align-items:flex-start;gap:9px;margin:0;font-weight:700;color:#7a2e0e;cursor:pointer}
+    .deploy-box input{width:auto;margin-top:3px}
+    .selected-targets{margin-top:14px;display:grid;gap:9px}
+    .target-empty{padding:14px;border:1px dashed #d0d5dd;border-radius:12px;color:var(--muted);background:#fff;font-size:13px}
+    .target-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border:1px solid #d0d5dd;border-radius:12px;background:#fff}
+    .target-main{min-width:0}.target-title{font-weight:800;font-size:14px}.target-meta{margin-top:3px;color:var(--muted);font-size:12px}
+    .target-remove{flex:0 0 auto;background:#fef3f2;color:#b42318;padding:8px 10px;border-radius:10px}
+    .target-summary{display:none;margin-top:14px;padding:13px 14px;border:1px solid #c7d7fe;background:#eef4ff;border-radius:12px;color:#3538cd;font-size:13px;line-height:1.5}
+    .target-summary.show{display:block}
+    .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}
+    button{border:0;border-radius:12px;padding:11px 16px;font:inherit;font-weight:800;cursor:pointer}
+    button:disabled{cursor:not-allowed;opacity:.6}.btn-secondary{background:#f2f4f7;color:#344054}.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover:not(:disabled){background:var(--primary-hover)}
+    .btn-add{background:#eef2ff;color:#3730a3;white-space:nowrap}.btn-add:hover{background:#e0e7ff}
+    .notice{display:none;margin-bottom:18px;border-radius:14px;padding:14px 16px;line-height:1.5}.notice.show{display:block}.notice.success{color:var(--success);background:var(--success-bg);border:1px solid #abefc6}.notice.danger{color:var(--danger);background:var(--danger-bg);border:1px solid #fecdca}
+    .hidden{display:none!important}.loading{padding:26px;text-align:center;color:var(--muted)}
+    @media(max-width:760px){.app{padding:14px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.target-builder-grid{grid-template-columns:1fr}.actions{flex-direction:column-reverse}.actions button,.btn-add{width:100%}.target-item{align-items:flex-start}}
   </style>
 </head>
 <body>
 <div class="app">
   <section class="hero">
     <h1>➕ Nouvelle contribution</h1>
-    <p>Créez une contribution pour votre bureau. Le bureau demandeur et l'utilisateur créateur sont renseignés automatiquement.</p>
+    <p>Créez une demande et adressez-la à un ou plusieurs contributeurs. Le bureau demandeur et l'utilisateur créateur sont renseignés automatiquement.</p>
     <div id="profileInfo" class="profile">Identification du profil…</div>
   </section>
 
@@ -33,7 +58,7 @@
 
   <section id="formPanel" class="panel hidden">
     <h2 class="panel-title">Informations de la contribution</h2>
-    <p class="panel-sub">Les champs marqués d’un astérisque sont obligatoires.</p>
+    <p class="panel-sub">Les champs marqués d’un astérisque sont obligatoires. Une même demande peut être adressée à plusieurs départements, sous-directions ou services.</p>
 
     <div id="successBox" class="notice success"></div>
     <div id="errorBox" class="notice danger"></div>
@@ -43,8 +68,43 @@
         <div class="field full"><label for="titre" class="required">Titre</label><input id="titre" type="text" autocomplete="off" required></div>
         <div class="field full"><label for="description">Description</label><textarea id="description"></textarea></div>
         <div class="field"><label for="demandeur">Demandeur</label><input id="demandeur" type="text" autocomplete="off"></div>
-        <div class="field"><label for="contributeur" class="required">Contributeur</label><select id="contributeur" required><option value="">Chargement…</option></select><div class="help">Département auquel la contribution est adressée.</div></div>
         <div class="field"><label for="echeance">Échéance</label><input id="echeance" type="date"></div>
+
+        <div class="field full">
+          <label class="required">Contributeurs</label>
+          <div class="target-builder">
+            <div class="target-builder-grid">
+              <div class="field">
+                <label for="targetType">Niveau</label>
+                <select id="targetType">
+                  <option value="Département" selected>Département</option>
+                  <option value="Sous-direction">Sous-direction</option>
+                  <option value="Service">Service</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="targetValue">Contributeur</label>
+                <select id="targetValue"><option value="">Chargement…</option></select>
+              </div>
+              <button id="addTargetBtn" type="button" class="btn-add">＋ Ajouter</button>
+            </div>
+
+            <div id="deployBox" class="deploy-box hidden">
+              <label>
+                <input id="deployToDepartments" type="checkbox">
+                <span>
+                  Déployer vers les départements rattachés
+                  <div class="help" style="color:#9a3412;margin-top:3px">Option facultative. Si elle est cochée, la sous-direction ou le service sera remplacé par ses départements rattachés lors de la création.</div>
+                </span>
+              </label>
+            </div>
+
+            <div id="selectedTargets" class="selected-targets"></div>
+            <div id="targetSummary" class="target-summary"></div>
+          </div>
+          <div class="help">Vous pouvez mélanger les niveaux, par exemple une sous-direction et un département. Les doublons créés par un déploiement sont supprimés automatiquement.</div>
+        </div>
+
         <div class="field"><label for="priorite">Priorité</label><select id="priorite"><option value="Normale" selected>Normale</option><option value="Haute">Haute</option><option value="Urgente">Urgente</option></select></div>
         <div class="field"><label for="statut">Statut</label><select id="statut"><option value="À faire" selected>À faire</option><option value="Fait">Fait</option></select></div>
         <div class="field full"><label for="commentaire">Commentaire</label><textarea id="commentaire"></textarea></div>
@@ -59,29 +119,41 @@
 </div>
 
 <!-- =========================================================
-     NOUVELLE CONTRIBUTION — BUREAU CONTRIBUTEUR — V3
-     Ajout : CONTRIBUTIONS.Source = "Manuelle".
+     NOUVELLE CONTRIBUTION — BUREAU CONTRIBUTEUR — V4
+
+     Nouveautés :
+     - sélection de plusieurs contributeurs ;
+     - niveaux Département / Sous-direction / Service ;
+     - sélection mixte entre plusieurs niveaux ;
+     - déploiement facultatif d'une Sous-direction ou d'un Service
+       vers ses départements rattachés ;
+     - dédoublonnage automatique des affectations finales ;
+     - création d'un Groupe_contribution commun à toutes les
+       affectations issues de la même saisie ;
+     - Type_contributeur et champs de cible dédiés ;
+     - conservation de Source = "Manuelle".
+
      Aucun envoi automatique n'est déclenché dans cette version.
      ========================================================= -->
 
 <script>
-/* =============================================================
-   NOUVELLE CONTRIBUTION / BUREAU CONTRIBUTEUR
-   Version 1
-
-   Objectif :
-   - créer une contribution depuis cette interface ;
-   - identifier le Bureau contributeur connecté ;
-   - envoyer Bureau_origine et Cree_par dès le premier AddRecord ;
-   - éviter le CENSORED temporaire observé avec la Fiche Grist native ;
-   - ne jamais permettre à l'utilisateur de choisir son Bureau_origine.
-   ============================================================= */
-
 const $ = id => document.getElementById(id);
+
 let currentProfile = null;
 let currentUser = null;
 let currentUserBureauId = null;
+
 let departments = [];
+let subDirections = [];
+let services = [];
+
+/*
+  selectedTargets contient les choix explicites de l'utilisateur.
+  Exemple :
+  { type:"Sous-direction", id:12, deploy:true }
+  { type:"Département", id:34, deploy:false }
+*/
+let selectedTargets = [];
 
 function text(value){ return String(value == null ? "" : value); }
 function clean(value){ return text(value).trim().toLowerCase(); }
@@ -119,7 +191,18 @@ function setSuccess(message){
   box.classList.add("show");
 }
 
-function isBureauContributor(){ return clean(currentProfile?.Role) === "bureau contributeur"; }
+function escapeHtml(value){
+  return text(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function isBureauContributor(){
+  return clean(currentProfile?.Role) === "bureau contributeur";
+}
 
 function isActiveUser(){
   const value = currentUser?.Actif;
@@ -159,16 +242,20 @@ async function identifyProfile(){
 }
 
 /* =============================================================
-   CHARGEMENT DU PROFIL ET DES DÉPARTEMENTS
+   CHARGEMENT DU PROFIL ET DES RÉFÉRENTIELS
    ============================================================= */
 async function loadContext(){
-  const [userTable,departmentTable] = await Promise.all([
+  const [userTable,departmentTable,subDirectionTable,serviceTable] = await Promise.all([
     grist.docApi.fetchTable("UTILISATEURS"),
-    grist.docApi.fetchTable("DEPARTEMENTS")
+    grist.docApi.fetchTable("DEPARTEMENTS"),
+    grist.docApi.fetchTable("SOUS_DIRECTIONS"),
+    grist.docApi.fetchTable("SERVICES")
   ]);
 
   const users = tableToRows(userTable);
   departments = tableToRows(departmentTable);
+  subDirections = tableToRows(subDirectionTable);
+  services = tableToRows(serviceTable);
 
   currentProfile = await identifyProfile();
   const profileEmail = text(currentProfile.Email).trim();
@@ -189,78 +276,366 @@ async function loadContext(){
   return true;
 }
 
-function populateDepartments(){
-  const select = $("contributeur");
-  select.innerHTML = '<option value="">Sélectionner un département…</option>';
+/* =============================================================
+   SÉLECTEUR DE CONTRIBUTEURS
+   ============================================================= */
+function rowsForType(type){
+  if(type === "Département"){ return departments; }
+  if(type === "Sous-direction"){ return subDirections; }
+  if(type === "Service"){ return services; }
+  return [];
+}
 
-  const sorted = departments.slice().sort((a,b)=>text(a.Code).localeCompare(text(b.Code),"fr",{sensitivity:"base"}));
+function rowLabel(row){
+  if(!row){ return ""; }
+  const code = text(row.Code).trim();
+  const name = text(row.Nom).trim();
+  if(code && name){ return `${code} — ${name}`; }
+  return code || name || text(row.id);
+}
 
-  for(const row of sorted){
+function findRow(type,id){
+  return rowsForType(type).find(row => Number(row.id) === Number(id)) || null;
+}
+
+function populateTargetValues(){
+  const type = $("targetType").value;
+  const select = $("targetValue");
+  const rows = rowsForType(type)
+    .slice()
+    .sort((a,b)=>rowLabel(a).localeCompare(rowLabel(b),"fr",{sensitivity:"base",numeric:true}));
+
+  select.innerHTML = `<option value="">Sélectionner ${type === "Département" ? "un département" : type === "Sous-direction" ? "une sous-direction" : "un service"}…</option>`;
+
+  for(const row of rows){
     const option = document.createElement("option");
     option.value = Number(row.id);
-    option.textContent = row.Code && row.Nom ? `${text(row.Code)} — ${text(row.Nom)}` : text(row.Code || row.Nom || row.id);
+    option.textContent = rowLabel(row);
     select.appendChild(option);
   }
+
+  const showDeploy = type === "Sous-direction" || type === "Service";
+  $("deployBox").classList.toggle("hidden",!showDeploy);
+  $("deployToDepartments").checked = false;
+}
+
+function explicitTargetKey(target){
+  return `${target.type}:${Number(target.id)}:${target.deploy ? "deploy" : "direct"}`;
+}
+
+function addTarget(){
+  setError("");
+
+  const type = $("targetType").value;
+  const id = Number($("targetValue").value);
+  const deploy = (type === "Sous-direction" || type === "Service")
+    ? $("deployToDepartments").checked
+    : false;
+
+  if(!id){
+    setError("Sélectionnez un contributeur avant de l'ajouter.");
+    $("targetValue").focus();
+    return;
+  }
+
+  const row = findRow(type,id);
+  if(!row){
+    setError("Le contributeur sélectionné n'a pas été retrouvé dans le référentiel.");
+    return;
+  }
+
+  const target = {type,id,deploy};
+  const key = explicitTargetKey(target);
+
+  if(selectedTargets.some(item => explicitTargetKey(item) === key)){
+    setError("Ce contributeur est déjà présent avec la même option de déploiement.");
+    return;
+  }
+
+  /*
+    Pour un même Service ou une même Sous-direction, on ne garde qu'un seul
+    choix explicite : si l'utilisateur l'ajoute de nouveau avec une autre
+    option, la nouvelle option remplace l'ancienne.
+  */
+  selectedTargets = selectedTargets.filter(item => !(item.type === type && Number(item.id) === id));
+  selectedTargets.push(target);
+
+  $("targetValue").value = "";
+  $("deployToDepartments").checked = false;
+
+  renderSelectedTargets();
+}
+
+function removeTarget(index){
+  selectedTargets.splice(index,1);
+  renderSelectedTargets();
+}
+
+function departmentsForSubDirection(subDirectionId){
+  return departments.filter(row => Number(row.Sous_direction) === Number(subDirectionId));
+}
+
+function subDirectionsForService(serviceId){
+  return subDirections.filter(row => Number(row.Service) === Number(serviceId));
+}
+
+function departmentsForService(serviceId){
+  const subIds = new Set(
+    subDirectionsForService(serviceId).map(row => Number(row.id))
+  );
+  return departments.filter(row => subIds.has(Number(row.Sous_direction)));
+}
+
+/*
+  Transforme les choix explicites en affectations finales.
+  Le dédoublonnage s'effectue sur le type final + l'identifiant final.
+*/
+function buildFinalAssignments(){
+  const assignments = [];
+
+  for(const target of selectedTargets){
+    if(target.type === "Département"){
+      assignments.push({
+        type:"Département",
+        id:Number(target.id),
+        sourceLabel:rowLabel(findRow("Département",target.id))
+      });
+      continue;
+    }
+
+    if(target.type === "Sous-direction"){
+      if(target.deploy){
+        const children = departmentsForSubDirection(target.id);
+        for(const department of children){
+          assignments.push({
+            type:"Département",
+            id:Number(department.id),
+            sourceLabel:rowLabel(department)
+          });
+        }
+      }else{
+        assignments.push({
+          type:"Sous-direction",
+          id:Number(target.id),
+          sourceLabel:rowLabel(findRow("Sous-direction",target.id))
+        });
+      }
+      continue;
+    }
+
+    if(target.type === "Service"){
+      if(target.deploy){
+        const children = departmentsForService(target.id);
+        for(const department of children){
+          assignments.push({
+            type:"Département",
+            id:Number(department.id),
+            sourceLabel:rowLabel(department)
+          });
+        }
+      }else{
+        assignments.push({
+          type:"Service",
+          id:Number(target.id),
+          sourceLabel:rowLabel(findRow("Service",target.id))
+        });
+      }
+    }
+  }
+
+  const unique = new Map();
+  for(const assignment of assignments){
+    const key = `${assignment.type}:${Number(assignment.id)}`;
+    if(!unique.has(key)){
+      unique.set(key,assignment);
+    }
+  }
+
+  return [...unique.values()];
+}
+
+function renderSelectedTargets(){
+  const container = $("selectedTargets");
+
+  if(!selectedTargets.length){
+    container.innerHTML = '<div class="target-empty">Aucun contributeur ajouté pour le moment.</div>';
+    $("targetSummary").classList.remove("show");
+    $("targetSummary").textContent = "";
+    return;
+  }
+
+  container.innerHTML = selectedTargets.map((target,index)=>{
+    const row = findRow(target.type,target.id);
+    const deployText = target.deploy
+      ? "Déploiement vers les départements rattachés"
+      : `Affectation directe au niveau ${target.type.toLowerCase()}`;
+
+    return `
+      <div class="target-item">
+        <div class="target-main">
+          <div class="target-title">${escapeHtml(target.type)} — ${escapeHtml(rowLabel(row))}</div>
+          <div class="target-meta">${escapeHtml(deployText)}</div>
+        </div>
+        <button type="button" class="target-remove" data-remove-index="${index}">Retirer</button>
+      </div>
+    `;
+  }).join("");
+
+  container.querySelectorAll("[data-remove-index]").forEach(button=>{
+    button.addEventListener("click",()=>removeTarget(Number(button.dataset.removeIndex)));
+  });
+
+  const assignments = buildFinalAssignments();
+  const summary = $("targetSummary");
+
+  summary.innerHTML = `<strong>Cette saisie créera ${assignments.length} affectation${assignments.length > 1 ? "s" : ""} :</strong><br>`
+    + assignments.map(item => `• ${escapeHtml(item.type)} — ${escapeHtml(item.sourceLabel)}`).join("<br>");
+  summary.classList.add("show");
+}
+
+/* =============================================================
+   GROUPE DE CONTRIBUTION
+   ============================================================= */
+function generateGroupId(){
+  const now = new Date();
+  const pad = value => String(value).padStart(2,"0");
+  const stamp = [
+    now.getFullYear(),
+    pad(now.getMonth()+1),
+    pad(now.getDate())
+  ].join("") + "-" + [
+    pad(now.getHours()),
+    pad(now.getMinutes()),
+    pad(now.getSeconds())
+  ].join("");
+
+  const random = Math.random().toString(36).slice(2,8).toUpperCase();
+  return `GRP-${stamp}-${random}`;
+}
+
+function assignmentValues(assignment,commonValues,groupId){
+  const values = {
+    ...commonValues,
+    Type_contributeur:assignment.type,
+    Groupe_contribution:groupId,
+    Contributeur:null,
+    Contributeur_sous_direction:null,
+    Contributeur_service:null
+  };
+
+  if(assignment.type === "Département"){
+    values.Contributeur = Number(assignment.id);
+  }else if(assignment.type === "Sous-direction"){
+    values.Contributeur_sous_direction = Number(assignment.id);
+  }else if(assignment.type === "Service"){
+    values.Contributeur_service = Number(assignment.id);
+  }
+
+  return values;
 }
 
 function resetForm(){
   $("contributionForm").reset();
   $("priorite").value = "Normale";
   $("statut").value = "À faire";
+  $("targetType").value = "Département";
+  selectedTargets = [];
+  populateTargetValues();
+  renderSelectedTargets();
   setError("");
   setSuccess("");
   $("titre").focus();
 }
 
+/* =============================================================
+   CRÉATION D'UNE OU PLUSIEURS AFFECTATIONS
+   ============================================================= */
 async function createContribution(event){
   event.preventDefault();
   setError("");
   setSuccess("");
 
   const title = $("titre").value.trim();
-  const contributorId = Number($("contributeur").value);
+  const assignments = buildFinalAssignments();
 
-  if(!title){ setError("Le titre est obligatoire."); $("titre").focus(); return; }
-  if(!contributorId){ setError("Le contributeur est obligatoire."); $("contributeur").focus(); return; }
-  if(!currentUser || !currentUserBureauId){ setError("Le profil utilisateur n'est pas suffisamment renseigné pour créer une contribution."); return; }
+  if(!title){
+    setError("Le titre est obligatoire.");
+    $("titre").focus();
+    return;
+  }
+
+  if(!selectedTargets.length || !assignments.length){
+    setError("Ajoutez au moins un contributeur avant de créer la contribution.");
+    $("targetType").focus();
+    return;
+  }
 
   /*
-    MODIFICATION PRINCIPALE v1 :
-    Bureau_origine et Cree_par sont inclus DIRECTEMENT dans AddRecord.
+    Un déploiement vers une structure sans département rattaché ne doit pas
+    produire silencieusement zéro affectation.
   */
-  const values = {
-    Titre: title,
-    Description: $("description").value.trim(),
-    Demandeur: $("demandeur").value.trim(),
-    Contributeur: contributorId,
-    Echeance: inputToGristDate($("echeance").value),
-    Priorite: $("priorite").value,
-    Statut: $("statut").value,
-    Commentaire: $("commentaire").value.trim(),
-    Bureau_origine: Number(currentUserBureauId),
-    Cree_par: text(currentUser.Email).trim(),
+  for(const target of selectedTargets){
+    if(target.type === "Sous-direction" && target.deploy && departmentsForSubDirection(target.id).length === 0){
+      setError(`La sous-direction « ${rowLabel(findRow("Sous-direction",target.id))} » ne contient aucun département rattaché.`);
+      return;
+    }
+    if(target.type === "Service" && target.deploy && departmentsForService(target.id).length === 0){
+      setError(`Le service « ${rowLabel(findRow("Service",target.id))} » ne contient aucun département rattaché.`);
+      return;
+    }
+  }
 
-    /*
-      V3 — TRAÇABILITÉ DE LA CRÉATION MANUELLE
-      Permet de distinguer une contribution saisie dans le formulaire
-      d'une contribution issue d'un import.
-    */
-    Source: "Manuelle"
+  if(!currentUser || !currentUserBureauId){
+    setError("Le profil utilisateur n'est pas suffisamment renseigné pour créer une contribution.");
+    return;
+  }
+
+  const groupId = generateGroupId();
+
+  const commonValues = {
+    Titre:title,
+    Description:$("description").value.trim(),
+    Demandeur:$("demandeur").value.trim(),
+    Echeance:inputToGristDate($("echeance").value),
+    Priorite:$("priorite").value,
+    Statut:$("statut").value,
+    Commentaire:$("commentaire").value.trim(),
+    Bureau_origine:Number(currentUserBureauId),
+    Cree_par:text(currentUser.Email).trim(),
+    Source:"Manuelle"
   };
+
+  const actions = assignments.map(assignment => [
+    "AddRecord",
+    "CONTRIBUTIONS",
+    null,
+    assignmentValues(assignment,commonValues,groupId)
+  ]);
 
   const button = $("saveBtn");
   button.disabled = true;
-  button.textContent = "Création…";
+  button.textContent = assignments.length > 1 ? "Création des affectations…" : "Création…";
 
   try{
-    await grist.docApi.applyUserActions([
-      ["AddRecord","CONTRIBUTIONS",null,values]
-    ]);
+    /*
+      Une seule opération Grist pour que toutes les affectations d'une même
+      demande soient créées ensemble.
+    */
+    await grist.docApi.applyUserActions(actions);
 
-    setSuccess("✓ Contribution créée avec succès.");
+    setSuccess(
+      assignments.length === 1
+        ? "✓ Contribution créée avec succès."
+        : `✓ Contribution créée avec succès : ${assignments.length} affectations rattachées au même groupe.`
+    );
+
     $("contributionForm").reset();
     $("priorite").value = "Normale";
     $("statut").value = "À faire";
+    $("targetType").value = "Département";
+    selectedTargets = [];
+    populateTargetValues();
+    renderSelectedTargets();
     $("titre").focus();
   }catch(error){
     console.error(error);
@@ -280,7 +655,9 @@ async function init(){
 
     if(!allowed){ return; }
 
-    populateDepartments();
+    populateTargetValues();
+    renderSelectedTargets();
+
     $("formPanel").classList.remove("hidden");
     $("titre").focus();
   }catch(error){
@@ -291,8 +668,11 @@ async function init(){
   }
 }
 
+$("targetType").addEventListener("change",populateTargetValues);
+$("addTargetBtn").addEventListener("click",addTarget);
 $("contributionForm").addEventListener("submit",createContribution);
 $("resetBtn").addEventListener("click",resetForm);
+
 init();
 </script>
 </body>
