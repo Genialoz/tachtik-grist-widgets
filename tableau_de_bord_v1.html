@@ -226,6 +226,68 @@
     .kpi.yellow{--accent:var(--yellow);--soft:var(--yellow-soft)}
     .kpi.violet{--accent:var(--violet);--soft:var(--violet-soft)}
 
+
+    /* =========================================================
+       ONGLETS DU TABLEAU DE BORD — V2
+       ========================================================= */
+
+    .dashboard-tabs-wrap{
+      margin-top:20px;
+      padding:10px;
+      border-radius:18px;
+      background:var(--surface);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+    }
+
+    .dashboard-tabs{
+      display:flex;
+      gap:8px;
+      overflow-x:auto;
+      scrollbar-width:thin;
+      padding-bottom:2px;
+    }
+
+    .dashboard-tab{
+      flex:0 0 auto;
+      border:1px solid #d8e3ec;
+      background:#fff;
+      color:#476074;
+      border-radius:999px;
+      padding:10px 14px;
+      font:inherit;
+      font-size:11px;
+      font-weight:900;
+      cursor:pointer;
+      white-space:nowrap;
+      transition:
+        background .15s ease,
+        border-color .15s ease,
+        color .15s ease,
+        transform .15s ease;
+    }
+
+    .dashboard-tab:hover{
+      transform:translateY(-1px);
+      border-color:#b7cbe0;
+      background:#f8fbfe;
+    }
+
+    .dashboard-tab.active{
+      color:#fff;
+      background:var(--blue);
+      border-color:var(--blue);
+      box-shadow:0 6px 16px rgba(47,111,221,.18);
+    }
+
+    .tab-panel{
+      display:none;
+    }
+
+    .tab-panel.active{
+      display:block;
+    }
+
     /* =========================================================
        PANELS / BARRES DE RÉPARTITION
        ========================================================= */
@@ -481,9 +543,22 @@
     <div id="dashboard" class="hidden">
 
       <!-- =======================================================
+           V2 — NAVIGATION PAR ONGLETS
+           ======================================================= -->
+      <nav class="dashboard-tabs-wrap" aria-label="Navigation du tableau de bord">
+        <div id="dashboardTabs" class="dashboard-tabs">
+          <button class="dashboard-tab active" type="button" data-tab="overview">Vue d’ensemble</button>
+          <button class="dashboard-tab" type="button" data-tab="deadlines">Échéances</button>
+          <button id="reminderTab" class="dashboard-tab" type="button" data-tab="reminders">Relances</button>
+          <button class="dashboard-tab" type="button" data-tab="distribution">Répartition</button>
+          <button class="dashboard-tab" type="button" data-tab="watch">À surveiller</button>
+        </div>
+      </nav>
+
+      <!-- =======================================================
            1. VUE D'ENSEMBLE
            ======================================================= -->
-      <section class="section">
+      <section class="section tab-panel active" data-panel="overview">
         <div class="section-head">
           <div>
             <h2 class="section-title">Vue d’ensemble</h2>
@@ -531,7 +606,7 @@
       <!-- =======================================================
            2. ÉCHÉANCES
            ======================================================= -->
-      <section class="section">
+      <section class="section tab-panel" data-panel="deadlines">
         <div class="section-head">
           <div>
             <h2 class="section-title">Échéances</h2>
@@ -580,7 +655,7 @@
            3. RELANCES
            Masqué pour Lecteur
            ======================================================= -->
-      <section id="reminderSection" class="section">
+      <section id="reminderSection" class="section tab-panel" data-panel="reminders">
         <div class="section-head">
           <div>
             <h2 class="section-title">Relances</h2>
@@ -612,7 +687,7 @@
       <!-- =======================================================
            4. RÉPARTITIONS
            ======================================================= -->
-      <section class="section">
+      <section class="section tab-panel" data-panel="distribution">
         <div class="section-head">
           <div>
             <h2 class="section-title">Répartition</h2>
@@ -662,7 +737,7 @@
       <!-- =======================================================
            5. À SURVEILLER
            ======================================================= -->
-      <section class="section">
+      <section class="section tab-panel" data-panel="watch">
         <div class="section-head">
           <div>
             <h2 class="section-title">À surveiller</h2>
@@ -682,6 +757,17 @@
 
   <script>
     "use strict";
+
+    /* =========================================================
+       TABLEAU DE BORD — VERSION 2
+
+       Nouvelle présentation :
+       - chaque grand bloc est désormais affiché dans un onglet ;
+       - les onglets sont adaptés au rôle ;
+       - l'onglet Relances est masqué pour le Lecteur ;
+       - les règles de périmètre et les indicateurs de la V1
+         sont conservés à l'identique.
+       ========================================================= */
 
     const $ = id => document.getElementById(id);
 
@@ -1073,6 +1159,57 @@
       dashboardRecords = [...allRecords];
     }
 
+
+    /* =========================================================
+       V2 — NAVIGATION PAR ONGLETS
+       ========================================================= */
+
+    let activeDashboardTab = "overview";
+
+    function showDashboardTab(tabName){
+      const allowedButtons = [
+        ...document.querySelectorAll(".dashboard-tab:not(.hidden)")
+      ];
+
+      const requestedButton = allowedButtons.find(
+        button => button.dataset.tab === tabName
+      );
+
+      const finalTab = requestedButton
+        ? tabName
+        : (allowedButtons[0]?.dataset.tab || "overview");
+
+      activeDashboardTab = finalTab;
+
+      document
+        .querySelectorAll(".dashboard-tab")
+        .forEach(button=>{
+          button.classList.toggle(
+            "active",
+            button.dataset.tab === finalTab
+          );
+        });
+
+      document
+        .querySelectorAll(".tab-panel")
+        .forEach(panel=>{
+          panel.classList.toggle(
+            "active",
+            panel.dataset.panel === finalTab
+          );
+        });
+    }
+
+    function bindDashboardTabs(){
+      document
+        .querySelectorAll(".dashboard-tab")
+        .forEach(button=>{
+          button.addEventListener("click",()=>{
+            showDashboardTab(button.dataset.tab);
+          });
+        });
+    }
+
     /* =========================================================
        PERSONNALISATION VISUELLE SELON LE RÔLE
        ========================================================= */
@@ -1092,8 +1229,10 @@
         $("bureauPanel").classList.remove("hidden");
         $("departmentPanel").classList.remove("hidden");
         $("reminderSection").classList.remove("hidden");
+        $("reminderTab").classList.remove("hidden");
         $("kpiNoDeadlineCard").classList.remove("hidden");
 
+        showDashboardTab(activeDashboardTab);
         return;
       }
 
@@ -1109,8 +1248,10 @@
         $("bureauPanel").classList.add("hidden");
         $("departmentPanel").classList.remove("hidden");
         $("reminderSection").classList.remove("hidden");
+        $("reminderTab").classList.remove("hidden");
         $("kpiNoDeadlineCard").classList.add("hidden");
 
+        showDashboardTab(activeDashboardTab);
         return;
       }
 
@@ -1125,7 +1266,10 @@
       $("bureauPanel").classList.add("hidden");
       $("departmentPanel").classList.add("hidden");
       $("reminderSection").classList.add("hidden");
+      $("reminderTab").classList.add("hidden");
       $("kpiNoDeadlineCard").classList.add("hidden");
+
+      showDashboardTab(activeDashboardTab);
     }
 
     /* =========================================================
@@ -1422,6 +1566,8 @@
         grist.ready({
           requiredAccess:"full"
         });
+
+        bindDashboardTabs();
 
         await loadUserContext();
         await loadData();
