@@ -724,7 +724,7 @@
 <script>
 /* =============================================================
    TÂCHTIK — CONTRIBUTIONS
-   Version 2
+   Version 3
 
    Objectif :
    - vue métier commune Administrateur / Bureau contributeur / Lecteur ;
@@ -732,6 +732,9 @@
           couleurs basées sur CONTRIBUTIONS.Alerte ;
           affichage de Jours_restants ;
           ajout d'un filtre Alerte ;
+   - V3 : lorsqu'une contribution est au statut "Fait",
+          aucune pastille d'alerte d'échéance n'est affichée.
+          Le statut "Fait" reste visible dans sa pastille de statut.
    - affichage des lignes déjà filtrées par les ACL Grist ;
    - Lecteur = consultation uniquement ;
    - Administrateur = gestion complète ;
@@ -878,11 +881,16 @@ function isDone(record){
 
 function alertInfo(record){
   if(isDone(record)){
+    /*
+      V3 :
+      Une contribution terminée n'a plus d'alerte d'échéance.
+      On conserve uniquement le statut "Fait" affiché en haut de la carte.
+    */
     return {
       category:"done",
       css:"done",
-      icon:"✅",
-      label:"Terminée"
+      icon:"",
+      label:""
     };
   }
 
@@ -1301,7 +1309,9 @@ function renderList(){
     const remaining = remainingDaysLabel(record);
 
     const card = document.createElement("article");
-    card.className = `card alert-${alert.css}`;
+    card.className = done
+      ? "card"
+      : `card alert-${alert.css}`;
 
     card.innerHTML = `
       <div class="card-top">
@@ -1326,22 +1336,26 @@ function renderList(){
 
       </div>
 
-      <div class="deadline-box deadline-${alert.css}">
+      <div class="deadline-box ${done ? "deadline-neutral" : `deadline-${alert.css}`}">
         <div class="deadline-main">
           <span class="deadline-date">
             📅 Échéance : ${escapeHtml(formatDate(record.Echeance))}
           </span>
 
           ${
-            remaining
+            !done && remaining
               ? `<span class="deadline-days">• ${escapeHtml(remaining)}</span>`
               : ""
           }
         </div>
 
-        <span class="deadline-badge deadline-${alert.css}">
-          ${alert.icon} ${escapeHtml(alert.label)}
-        </span>
+        ${
+          done
+            ? ""
+            : `<span class="deadline-badge deadline-${alert.css}">
+                 ${alert.icon} ${escapeHtml(alert.label)}
+               </span>`
+        }
       </div>
 
       <div class="meta">
@@ -1410,14 +1424,19 @@ function openDetail(recordId){
   setDetail("detailEcheance",formatDate(record.Echeance));
 
   const alert = alertInfo(record);
+
   setDetail(
     "detailAlerte",
-    `${alert.icon} ${alert.label}`
+    isDone(record)
+      ? "—"
+      : `${alert.icon} ${alert.label}`
   );
 
   setDetail(
     "detailJours",
-    remainingDaysLabel(record) || "—"
+    isDone(record)
+      ? "—"
+      : (remainingDaysLabel(record) || "—")
   );
 
   setDetail("detailCommentaire",record.Commentaire);
