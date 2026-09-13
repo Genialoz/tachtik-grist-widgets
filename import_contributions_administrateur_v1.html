@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Tâchtik — Import contributions Administrateur</title>
+  <title>Importer des contributions — Administrateur</title>
 
   <!-- SDK Grist -->
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
@@ -329,7 +329,7 @@
   <section class="hero">
     <h1>📥 Importer des contributions</h1>
     <p>
-      Importez plusieurs contributions Tâchtik en choisissant un bureau
+      Importez plusieurs contributions en choisissant un bureau
       d'origine pour l'ensemble du fichier.
     </p>
     <div id="profileInfo" class="profile">Identification du profil…</div>
@@ -357,7 +357,7 @@
       </p>
 
       <div class="field">
-        <label for="bureauOrigine">Bureau d'origine *</label>
+        <label for="bureauOrigine">Bureau demandeur *</label>
         <select id="bureauOrigine">
           <option value="">— Sélectionner un bureau —</option>
         </select>
@@ -411,7 +411,7 @@
         </div>
 
         <div class="stat">
-          <div class="label">Bureau d'origine</div>
+          <div class="label">Bureau demandeur</div>
           <div id="statBureau" class="value" style="font-size:18px">—</div>
         </div>
       </div>
@@ -458,7 +458,7 @@
 
 <script>
 /* =============================================================
-   TÂCHTIK — IMPORT CONTRIBUTIONS / ADMINISTRATEUR
+   IMPORT CONTRIBUTIONS / ADMINISTRATEUR
    Version 1
 
    Objectif :
@@ -607,7 +607,7 @@ async function identifyProfile(){
   const profile = created[0] || null;
 
   if(!profile){
-    throw new Error("Profil Tâchtik non identifié.");
+    throw new Error("Profil utilisateur non identifié.");
   }
 
   try{
@@ -663,7 +663,7 @@ async function loadContext(){
   }
 
   if(!isActiveUser()){
-    throw new Error("Votre compte Tâchtik est inactif.");
+    throw new Error("Votre compte utilisateur est inactif.");
   }
 
   departmentByCode = new Map();
@@ -1052,7 +1052,7 @@ async function analyzeFile(){
   if(!bureau){
     showNotice(
       "fileError",
-      "Sélectionnez d'abord le Bureau d'origine."
+      "Sélectionnez d'abord le Bureau demandeur."
     );
     return;
   }
