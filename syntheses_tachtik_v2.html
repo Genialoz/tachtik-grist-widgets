@@ -263,6 +263,134 @@
     line-height:1.5;
   }
 
+  /* =========================================
+     V5 — PARAMÉTRAGE DE LA SYNTHÈSE AUTOMATIQUE
+     ========================================= */
+
+  .schedule-grid{
+    display:grid;
+    grid-template-columns:
+      repeat(4,minmax(0,1fr));
+    gap:12px;
+    margin-top:12px;
+  }
+
+  .schedule-field label{
+    display:block;
+    font-size:12px;
+    font-weight:700;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+
+  .schedule-field select,
+  .schedule-field input{
+    width:100%;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:9px 10px;
+    background:#fff;
+    font:inherit;
+    color:var(--text);
+  }
+
+  .schedule-switch{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    background:#fff;
+    padding:11px 12px;
+  }
+
+  .schedule-switch-text{
+    font-size:13px;
+    font-weight:800;
+  }
+
+  .schedule-switch-help{
+    margin-top:3px;
+    color:var(--muted);
+    font-size:11px;
+    font-weight:400;
+    line-height:1.4;
+  }
+
+  .switch{
+    position:relative;
+    display:inline-block;
+    width:44px;
+    height:24px;
+    flex:0 0 auto;
+  }
+
+  .switch input{
+    opacity:0;
+    width:0;
+    height:0;
+  }
+
+  .slider{
+    position:absolute;
+    inset:0;
+    cursor:pointer;
+    background:#cbd5e1;
+    border-radius:999px;
+    transition:.18s;
+  }
+
+  .slider:before{
+    content:"";
+    position:absolute;
+    width:18px;
+    height:18px;
+    left:3px;
+    top:3px;
+    background:#fff;
+    border-radius:50%;
+    box-shadow:0 1px 3px rgba(0,0,0,.24);
+    transition:.18s;
+  }
+
+  .switch input:checked + .slider{
+    background:var(--primary);
+  }
+
+  .switch input:checked + .slider:before{
+    transform:translateX(20px);
+  }
+
+  .schedule-note{
+    margin-top:12px;
+    padding:11px 12px;
+    border:1px solid #f1d58a;
+    border-radius:12px;
+    background:#fff8e1;
+    color:#765300;
+    font-size:12px;
+    line-height:1.5;
+  }
+
+  .schedule-actions{
+    display:flex;
+    justify-content:flex-end;
+    margin-top:12px;
+  }
+
+  .schedule-status{
+    min-height:20px;
+    margin-top:8px;
+    font-size:12px;
+    font-weight:700;
+    color:var(--success);
+  }
+
+  .schedule-status.error{
+    color:var(--danger);
+  }
+
   .hidden{
     display:none !important;
   }
@@ -285,6 +413,10 @@
 
     .select-wrap select{
       max-width:60%;
+    }
+
+    .schedule-grid{
+      grid-template-columns:1fr 1fr;
     }
   }
 </style>
@@ -589,6 +721,134 @@
 
 
     <!-- =====================================
+         V5 — PLANIFICATION DE LA SYNTHÈSE
+         ===================================== -->
+
+    <div
+      id="schedulePanel"
+      class="options-box hidden"
+    >
+
+      <div class="options-title">
+        ⏱️ Préparation de l'envoi automatique
+      </div>
+
+      <div class="schedule-switch">
+
+        <div>
+          <div class="schedule-switch-text">
+            Activer l'envoi automatique de la synthèse
+          </div>
+
+          <div class="schedule-switch-help">
+            Ce réglage prépare la future automatisation.
+            Tant que le moteur d'envoi n'est pas activé,
+            aucun courriel ne part automatiquement.
+          </div>
+        </div>
+
+        <label
+          class="switch"
+          aria-label="Activer l'envoi automatique de la synthèse"
+        >
+          <input
+            type="checkbox"
+            id="scheduleActive"
+          >
+          <span class="slider"></span>
+        </label>
+
+      </div>
+
+      <div class="schedule-grid">
+
+        <div class="schedule-field">
+          <label for="scheduleFrequency">
+            Fréquence
+          </label>
+
+          <select id="scheduleFrequency">
+            <option value="Quotidienne">
+              Quotidienne
+            </option>
+            <option value="Hebdomadaire">
+              Hebdomadaire
+            </option>
+            <option value="Mensuelle">
+              Mensuelle
+            </option>
+          </select>
+        </div>
+
+        <div class="schedule-field">
+          <label for="scheduleDay">
+            Jour
+          </label>
+
+          <select id="scheduleDay">
+            <option value="Lundi">Lundi</option>
+            <option value="Mardi">Mardi</option>
+            <option value="Mercredi">Mercredi</option>
+            <option value="Jeudi">Jeudi</option>
+            <option value="Vendredi">Vendredi</option>
+            <option value="Samedi">Samedi</option>
+            <option value="Dimanche">Dimanche</option>
+          </select>
+        </div>
+
+        <div class="schedule-field">
+          <label for="scheduleTime">
+            Heure
+          </label>
+
+          <input
+            id="scheduleTime"
+            type="text"
+            inputmode="numeric"
+            placeholder="09:00"
+          >
+        </div>
+
+        <div class="schedule-field">
+          <label>
+            Règle appliquée
+          </label>
+
+          <div
+            id="scheduleRule"
+            class="notice"
+            style="margin-top:0"
+          ></div>
+        </div>
+
+      </div>
+
+      <div class="schedule-note">
+        <strong>Fréquence mensuelle :</strong>
+        lorsque « Mensuelle » est choisie, l'envoi est prévu
+        le <strong>premier jour sélectionné du mois</strong>.
+        Exemple : « Mensuelle + Lundi » = le premier lundi du mois.
+      </div>
+
+      <div class="schedule-actions">
+        <button
+          id="saveScheduleBtn"
+          class="primary"
+          type="button"
+        >
+          💾 Enregistrer la planification
+        </button>
+      </div>
+
+      <div
+        id="scheduleStatus"
+        class="schedule-status"
+      ></div>
+
+    </div>
+
+
+    <!-- =====================================
          ACTIONS
          ===================================== -->
 
@@ -701,6 +961,27 @@
 <script>
 
 "use strict";
+
+
+/* =========================================
+   SYNTHÈSES — V5
+
+   Ajout :
+   - préparation de l'envoi automatique ;
+   - Synthese_active ;
+   - Frequence_synthese ;
+   - Jour_synthese ;
+   - Heure_synthese ;
+   - Destinataires_synthese enregistré avec la planification.
+
+   Règle mensuelle validée :
+   "Mensuelle + Jour" = premier Jour du mois.
+
+   IMPORTANT :
+   ce widget ne déclenche encore aucun envoi automatique.
+   Il prépare uniquement les paramètres qui pourront être
+   utilisés par le futur moteur d'automatisation.
+   ========================================= */
 
 
 /* =========================================
@@ -824,6 +1105,40 @@ function isBureauContributor(){
 
   return (
     state.role === "Bureau contributeur"
+  );
+
+}
+
+
+/*
+  V5 :
+  seuls l'Administrateur et le Bureau contributeur
+  peuvent enregistrer les paramètres de planification.
+*/
+function canManageSchedule(){
+
+  if(
+    !state.params
+  ){
+    return false;
+  }
+
+  if(
+    hasGlobalAccess()
+  ){
+    return true;
+  }
+
+  return (
+    isBureauContributor()
+    &&
+    Number(
+      state.params.Bureau
+    )
+    ===
+    Number(
+      state.bureauId
+    )
   );
 
 }
@@ -2446,6 +2761,384 @@ function renderSubject(template){
 
 
 /* =========================================
+   V5 — PLANIFICATION DE LA SYNTHÈSE
+   ========================================= */
+
+function boolValue(value){
+
+  const normalized =
+    normalizeText(
+      value
+    );
+
+  return (
+    value === true
+    ||
+    value === 1
+    ||
+    normalized === "true"
+    ||
+    normalized === "oui"
+    ||
+    normalized === "1"
+  );
+
+}
+
+
+function updateScheduleRule(){
+
+  const frequency =
+    $("scheduleFrequency")
+      .value;
+
+  const day =
+    $("scheduleDay")
+      .value;
+
+  const time =
+    $("scheduleTime")
+      .value
+      .trim()
+    ||
+    "heure non renseignée";
+
+
+  if(
+    frequency === "Quotidienne"
+  ){
+
+    $("scheduleRule")
+      .textContent =
+        "Tous les jours à "
+        +
+        time;
+
+  }
+  else if(
+    frequency === "Hebdomadaire"
+  ){
+
+    $("scheduleRule")
+      .textContent =
+        "Chaque "
+        +
+        day.toLowerCase()
+        +
+        " à "
+        +
+        time;
+
+  }
+  else{
+
+    $("scheduleRule")
+      .textContent =
+        "Le premier "
+        +
+        day.toLowerCase()
+        +
+        " du mois à "
+        +
+        time;
+
+  }
+
+}
+
+
+function renderSchedule(){
+
+  const panel =
+    $("schedulePanel");
+
+
+  if(
+    !canManageSchedule()
+  ){
+
+    panel.classList.add(
+      "hidden"
+    );
+
+    return;
+
+  }
+
+
+  panel.classList.remove(
+    "hidden"
+  );
+
+
+  $("scheduleActive")
+    .checked =
+      boolValue(
+        state.params
+          ?.Synthese_active
+      );
+
+
+  $("scheduleFrequency")
+    .value =
+      state.params
+        ?.Frequence_synthese
+      ||
+      "Hebdomadaire";
+
+
+  $("scheduleDay")
+    .value =
+      state.params
+        ?.Jour_synthese
+      ||
+      "Lundi";
+
+
+  $("scheduleTime")
+    .value =
+      state.params
+        ?.Heure_synthese
+      ||
+      "";
+
+
+  $("scheduleStatus")
+    .textContent =
+      "";
+
+
+  updateScheduleRule();
+
+}
+
+
+function validScheduleTime(value){
+
+  if(
+    !value
+  ){
+    return true;
+  }
+
+  return /^([01]\d|2[0-3]):[0-5]\d$/
+    .test(
+      value
+    );
+
+}
+
+
+async function saveSchedule(){
+
+  const status =
+    $("scheduleStatus");
+
+  const button =
+    $("saveScheduleBtn");
+
+
+  status.textContent =
+    "";
+
+  status.classList.remove(
+    "error"
+  );
+
+
+  if(
+    !canManageSchedule()
+  ){
+
+    status.textContent =
+      "Vous n'êtes pas autorisé à modifier cette planification.";
+
+    status.classList.add(
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  const frequency =
+    $("scheduleFrequency")
+      .value;
+
+
+  const day =
+    $("scheduleDay")
+      .value;
+
+
+  const time =
+    $("scheduleTime")
+      .value
+      .trim();
+
+
+  if(
+    ![
+      "Quotidienne",
+      "Hebdomadaire",
+      "Mensuelle"
+    ].includes(
+      frequency
+    )
+  ){
+
+    status.textContent =
+      "Fréquence invalide.";
+
+    status.classList.add(
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if(
+    ![
+      "Lundi",
+      "Mardi",
+      "Mercredi",
+      "Jeudi",
+      "Vendredi",
+      "Samedi",
+      "Dimanche"
+    ].includes(
+      day
+    )
+  ){
+
+    status.textContent =
+      "Jour invalide.";
+
+    status.classList.add(
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if(
+    !validScheduleTime(
+      time
+    )
+  ){
+
+    status.textContent =
+      "L'heure doit être saisie au format HH:MM, par exemple 09:00.";
+
+    status.classList.add(
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  const values = {
+
+    Synthese_active:
+      $("scheduleActive")
+        .checked,
+
+    Frequence_synthese:
+      frequency,
+
+    Jour_synthese:
+      day,
+
+    Heure_synthese:
+      time,
+
+    Destinataires_synthese:
+      $("recipients")
+        .value
+        .trim()
+
+  };
+
+
+  try{
+
+    button.disabled =
+      true;
+
+    button.textContent =
+      "Enregistrement…";
+
+
+    await grist.docApi
+      .applyUserActions([
+        [
+          "UpdateRecord",
+          "PARAMETRES_BUREAUX",
+          Number(
+            state.params.id
+          ),
+          values
+        ]
+      ]);
+
+
+    Object.assign(
+      state.params,
+      values
+    );
+
+
+    status.textContent =
+      "✓ Planification enregistrée";
+
+
+    setTimeout(
+      () => {
+
+        status.textContent =
+          "";
+
+      },
+      2500
+    );
+
+  }
+  catch(error){
+
+    console.error(
+      error
+    );
+
+    status.textContent =
+      "Impossible d'enregistrer la planification. Vérifiez vos droits d'accès.";
+
+    status.classList.add(
+      "error"
+    );
+
+  }
+  finally{
+
+    button.disabled =
+      false;
+
+    button.textContent =
+      "💾 Enregistrer la planification";
+
+  }
+
+}
+
+
+
+/* =========================================
    RENDU
    ========================================= */
 
@@ -2540,6 +3233,14 @@ function render(){
   $("scopeMeta")
     .textContent =
       scope;
+
+
+  /*
+    V5 :
+    affichage des paramètres de planification
+    uniquement pour les profils autorisés.
+  */
+  renderSchedule();
 
 }
 
@@ -3190,6 +3891,38 @@ $("resetFiltersBtn")
   .addEventListener(
     "click",
     resetFilters
+  );
+
+
+/*
+  V5 — événements de planification.
+*/
+
+$("scheduleFrequency")
+  .addEventListener(
+    "change",
+    updateScheduleRule
+  );
+
+
+$("scheduleDay")
+  .addEventListener(
+    "change",
+    updateScheduleRule
+  );
+
+
+$("scheduleTime")
+  .addEventListener(
+    "input",
+    updateScheduleRule
+  );
+
+
+$("saveScheduleBtn")
+  .addEventListener(
+    "click",
+    saveSchedule
   );
 
 
