@@ -23,10 +23,16 @@
 <body>
 <div class="wrap">
   <section class="hero"><h1>✉️ Modèles de messages</h1><p>Personnalisez les messages utilisés pour chaque bureau demandeur. Les modèles sont enregistrés dans <strong>PARAMETRES_BUREAUX</strong>.</p></section>
-  <div class="grid">
+  <div id="accessDenied" class="notice" style="display:none;margin-bottom:18px;background:#fff4ed;border-color:#fed7aa;color:#9a3412">
+      <strong>Accès refusé.</strong><br>
+      Cette page est réservée aux rôles <strong>Administrateur</strong> et <strong>Bureau contributeur</strong>.
+    </div>
+
+    <div id="mainGrid" class="grid" style="display:none">
     <aside class="card">
       <h2>⚙️ Paramétrage</h2>
       <label for="bureau">Bureau demandeur</label><select id="bureau"></select>
+      <div class="hint">Administrateur : tous les bureaux. Bureau contributeur : uniquement votre bureau.</div>
       <div class="notice">Une ligne contenant une variable vide est automatiquement masquée dans le message final. Par exemple, <strong>Description : [DESCRIPTION]</strong> disparaît si aucune description n'est renseignée.</div>
       <label>Variables disponibles</label>
       <div class="variables" id="variables"></div>
@@ -47,23 +53,174 @@
       </div>
     </main>
   </div>
+  </div>
 </div>
 <script>
-  const $=id=>document.getElementById(id); let rows=[], bureaux=[], currentType='envoi', activeField=null, dirty=false;
+  const $=id=>document.getElementById(id);
+  let rows=[], bureaux=[], currentType='envoi', activeField=null, dirty=false;
+  let currentProfile=null, currentUser=null, currentUserBureauId=null;
   const VARS=['[NUMERO]','[TITRE]','[DESCRIPTION]','[DEMANDEUR]','[CONTRIBUTEUR]','[ECHEANCE]','[PRIORITE]','[JOURS_RESTANTS]','[SITUATION_ECHEANCE]','[DERNIERE_RELANCE]','[NOM_SIGNATURE]','[EMAIL_CONTACT]'];
   const fields={envoi:['Objet_mail_envoi','Corps_mail_envoi'],relance:['Objet_mail_relance','Corps_mail_relance'],synthese:['Objet_mail_synthese','Corps_mail_synthese']};
   const samples={'[NUMERO]':'CONT-0012','[TITRE]':'Contribution exemple','[DESCRIPTION]':'Description de la contribution','[DEMANDEUR]':'Bureau E1','[CONTRIBUTEUR]':'A1-1','[ECHEANCE]':'18/09/2026','[PRIORITE]':'Haute','[JOURS_RESTANTS]':'9','[SITUATION_ECHEANCE]':"Échéance dans 9 jours",'[DERNIERE_RELANCE]':'09/09/2026','[NOM_SIGNATURE]':'Équipe E1','[EMAIL_CONTACT]':'contact@exemple.fr'};
   function text(v){return String(v==null?'':v)} function rowsFrom(t){if(!t)return[];return (t.id||[]).map((id,i)=>{let r={id};for(const k of Object.keys(t))if(k!=='id')r[k]=t[k][i];return r})}
   function codeMap(){const m=new Map();for(const b of bureaux)m.set(Number(b.id),text(b.Code)||text(b.Nom));return m}
+
+  function clean(v){
+    return text(v).trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  }
+
+  function isAdministrator(){
+    return clean(currentProfile?.Role)==="administrateur";
+  }
+
+  function isBureauContributor(){
+    return clean(currentProfile?.Role)==="bureau contributeur";
+  }
+
+  function isActiveUser(){
+    const value=currentUser?.Actif;
+    return !(
+      value===false
+      || value===0
+      || clean(value)==="false"
+      || clean(value)==="non"
+      || clean(value)==="inactif"
+      || clean(value)==="desactive"
+    );
+  }
+
+  async function identifyProfile(){
+    const before=rowsFrom(await grist.docApi.fetchTable("SESSION_WIDGET"));
+    const previousIds=new Set(before.map(r=>Number(r.id)));
+
+    await grist.docApi.applyUserActions([
+      ["AddRecord","SESSION_WIDGET",null,{}]
+    ]);
+
+    await new Promise(resolve=>setTimeout(resolve,800));
+
+    const after=rowsFrom(await grist.docApi.fetchTable("SESSION_WIDGET"));
+    const created=after
+      .filter(r=>!previousIds.has(Number(r.id)))
+      .sort((a,b)=>Number(b.id)-Number(a.id));
+
+    const profile=created[0]||null;
+
+    if(profile){
+      try{
+        await grist.docApi.applyUserActions([
+          ["BulkRemoveRecord","SESSION_WIDGET",[Number(profile.id)]]
+        ]);
+      }catch(error){
+        console.warn("Nettoyage SESSION_WIDGET impossible :",error);
+      }
+    }
+
+    return profile;
+  }
+
+  async function loadUserContext(){
+    currentProfile=await identifyProfile();
+
+    if(!currentProfile){
+      throw new Error("Profil utilisateur non identifié.");
+    }
+
+    const users=rowsFrom(await grist.docApi.fetchTable("UTILISATEURS"));
+    const email=clean(currentProfile.Email);
+
+    currentUser=users.find(r=>clean(r.Email)===email)||null;
+
+    if(!currentUser){
+      throw new Error("Votre profil n'a pas été retrouvé dans UTILISATEURS.");
+    }
+
+    if(!isActiveUser()){
+      throw new Error("Votre compte utilisateur est inactif.");
+    }
+
+    if(!isAdministrator() && !isBureauContributor()){
+      return false;
+    }
+
+    if(isBureauContributor()){
+      currentUserBureauId=Number(currentUser.Bureau)||null;
+
+      if(!currentUserBureauId){
+        throw new Error("Aucun bureau n'est associé à votre profil Bureau contributeur.");
+      }
+    }
+
+    return true;
+  }
+
   function selected(){return rows.find(r=>Number(r.id)===Number($('bureau').value))}
   let statusTimer=null;function setStatus(msg,cls='',autoClear=false){const e=$('status');if(statusTimer){clearTimeout(statusTimer);statusTimer=null}e.textContent=msg;e.className='status '+cls;if(autoClear&&msg){statusTimer=setTimeout(()=>{e.textContent='';e.className='status'},3500)}}
-  function renderBureaux(){const map=codeMap();$('bureau').innerHTML=rows.map(r=>`<option value="${r.id}">${escapeHtml(map.get(Number(r.Bureau))||'Bureau non défini')}</option>`).join(''); if(!rows.length){$('editor').innerHTML='<div class="empty">Aucun paramétrage de bureau disponible.</div>'}}
+  function renderBureaux(){
+    const map=codeMap();
+
+    const visibleRows=isAdministrator()
+      ? rows
+      : rows.filter(r=>Number(r.Bureau)===Number(currentUserBureauId));
+
+    rows=visibleRows;
+
+    $('bureau').innerHTML=visibleRows
+      .map(r=>`<option value="${r.id}">${escapeHtml(map.get(Number(r.Bureau))||'Bureau non défini')}</option>`)
+      .join('');
+
+    if(isBureauContributor()){
+      $('bureau').disabled=true;
+    }
+
+    if(!visibleRows.length){
+      $('editor').innerHTML='<div class="empty">Aucun paramétrage de message n’est disponible pour votre bureau.</div>';
+    }
+  }
   function escapeHtml(v){return text(v).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;')}
   function loadEditor(){const r=selected();if(!r)return;const [o,c]=fields[currentType];$('objet').value=text(r[o]);$('corps').value=text(r[c]);dirty=false;preview();setStatus('')}
   function preview(){let o=$('objet').value,b=$('corps').value;for(const [k,v] of Object.entries(samples)){o=o.split(k).join(v);b=b.split(k).join(v)}$('preview-subject').textContent=o||'—';$('preview-body').textContent=b||'Aucun contenu.'}
   function insertVar(v){const el=activeField||$('corps');const start=el.selectionStart??el.value.length,end=el.selectionEnd??start;el.value=el.value.slice(0,start)+v+el.value.slice(end);el.focus();el.selectionStart=el.selectionEnd=start+v.length;dirty=true;preview()}
-  async function save(){const r=selected();if(!r)return;const [o,c]=fields[currentType];const btn=$('save');const originalLabel='💾 Enregistrer le modèle';btn.disabled=true;btn.textContent='Enregistrement…';setStatus('');try{await grist.docApi.applyUserActions([['UpdateRecord','PARAMETRES_BUREAUX',Number(r.id),{[o]:$('objet').value,[c]:$('corps').value}]]);r[o]=$('objet').value;r[c]=$('corps').value;dirty=false;btn.textContent='✓ Enregistré';setStatus('✓ Modèle enregistré avec succès','ok flash',true);setTimeout(()=>{btn.textContent=originalLabel;btn.disabled=false},1800)}catch(e){console.error(e);btn.textContent=originalLabel;btn.disabled=false;setStatus("Impossible d'enregistrer le modèle. Vérifiez vos droits d'accès.",'err')}}
-  async function init(){try{const [p,b]=await Promise.all([grist.docApi.fetchTable('PARAMETRES_BUREAUX'),grist.docApi.fetchTable('BUREAUX_ORIGINE')]);rows=rowsFrom(p);bureaux=rowsFrom(b);renderBureaux();loadEditor()}catch(e){console.error(e);setStatus("Impossible de charger les paramètres. Vérifiez l'accès aux tables PARAMETRES_BUREAUX et BUREAUX_ORIGINE.",'err')}}
+  async function save(){
+    const r=selected();
+    if(!r)return;
+
+    if(!isAdministrator()){
+      if(!isBureauContributor() || Number(r.Bureau)!==Number(currentUserBureauId)){
+        setStatus("Vous n'êtes pas autorisé à modifier ce modèle.",'err');
+        return;
+      }
+    }const [o,c]=fields[currentType];const btn=$('save');const originalLabel='💾 Enregistrer le modèle';btn.disabled=true;btn.textContent='Enregistrement…';setStatus('');try{await grist.docApi.applyUserActions([['UpdateRecord','PARAMETRES_BUREAUX',Number(r.id),{[o]:$('objet').value,[c]:$('corps').value}]]);r[o]=$('objet').value;r[c]=$('corps').value;dirty=false;btn.textContent='✓ Enregistré';setStatus('✓ Modèle enregistré avec succès','ok flash',true);setTimeout(()=>{btn.textContent=originalLabel;btn.disabled=false},1800)}catch(e){console.error(e);btn.textContent=originalLabel;btn.disabled=false;setStatus("Impossible d'enregistrer le modèle. Vérifiez vos droits d'accès.",'err')}}
+  async function init(){
+    try{
+      const allowed=await loadUserContext();
+
+      if(!allowed){
+        $('accessDenied').style.display='block';
+        $('mainGrid').style.display='none';
+        return;
+      }
+
+      const [p,b]=await Promise.all([
+        grist.docApi.fetchTable('PARAMETRES_BUREAUX'),
+        grist.docApi.fetchTable('BUREAUX_ORIGINE')
+      ]);
+
+      rows=rowsFrom(p);
+      bureaux=rowsFrom(b);
+
+      renderBureaux();
+      loadEditor();
+
+      $('mainGrid').style.display='grid';
+
+    }catch(e){
+      console.error(e);
+      $('accessDenied').style.display='block';
+      $('accessDenied').innerHTML='<strong>Impossible d’ouvrir la page.</strong><br>'+escapeHtml(e.message||e);
+      $('mainGrid').style.display='none';
+    }
+  }
   $('variables').innerHTML=VARS.map(v=>`<button class="var" data-v="${v}">${v}</button>`).join('');
   $('variables').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b)insertVar(b.dataset.v)});
   document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{currentType=b.dataset.type;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));loadEditor()}));
