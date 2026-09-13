@@ -470,14 +470,18 @@
 <script>
 /* =============================================================
    TÂCHTIK — CONTRIBUTIONS TERMINÉES
-   Version 1
+   Version 2
 
    Règles :
    - Administrateur : voit toutes les lignes accessibles et peut réouvrir.
    - Bureau contributeur : voit les lignes autorisées par les ACL Grist
-     et peut réouvrir uniquement ses propres contributions modifiables.
+     et peut réouvrir toute contribution appartenant à son Bureau_origine.
    - Lecteur : consultation uniquement.
    - Les ACL Grist restent la protection de sécurité principale.
+
+   MODIFICATION V2 :
+   - suppression du contrôle Cree_par pour le Bureau contributeur ;
+   - les droits d'action reposent sur Bureau_origine == UTILISATEURS.Bureau.
    ============================================================= */
 
 const $ = id => document.getElementById(id);
@@ -762,17 +766,20 @@ function canRestoreRecord(record){
   }
 
   if(isBureauContributor()){
+    /*
+      RÈGLE MÉTIER TÂCHTIK :
+      le Bureau contributeur peut agir sur toute contribution
+      dont Bureau_origine correspond à son bureau, qu'elle ait
+      été créée manuellement ou importée pour ce bureau.
+
+      On ne contrôle donc PAS Cree_par ici.
+    */
     const sameBureau =
       currentUserBureauId
       && record._BureauId
       && Number(record._BureauId) === Number(currentUserBureauId);
 
-    const sameCreator =
-      currentUser
-      && clean(record.Cree_par)
-      && clean(record.Cree_par) === clean(currentUser.Email);
-
-    return Boolean(sameBureau && sameCreator);
+    return Boolean(sameBureau);
   }
 
   return false;
