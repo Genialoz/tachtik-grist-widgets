@@ -470,7 +470,7 @@
 <script>
 /* =============================================================
    TÂCHTIK — CONTRIBUTIONS TERMINÉES
-   Version 2
+   Version 3
 
    Règles :
    - Administrateur : voit toutes les lignes accessibles et peut réouvrir.
@@ -479,9 +479,12 @@
    - Lecteur : consultation uniquement.
    - Les ACL Grist restent la protection de sécurité principale.
 
-   MODIFICATION V2 :
-   - suppression du contrôle Cree_par pour le Bureau contributeur ;
-   - les droits d'action reposent sur Bureau_origine == UTILISATEURS.Bureau.
+   MODIFICATIONS :
+   - V2 : suppression du contrôle Cree_par pour le Bureau contributeur ;
+          les droits d'action reposent sur Bureau_origine == UTILISATEURS.Bureau.
+   - V3 : la réouverture ne modifie plus Date_finalisation ;
+          elle met uniquement Statut = "À faire", comme dans
+          contributions_a_traiter.html.
    ============================================================= */
 
 const $ = id => document.getElementById(id);
@@ -1051,8 +1054,14 @@ async function restoreContribution(){
         "CONTRIBUTIONS",
         Number(record.id),
         {
-          Statut:"À faire",
-          Date_finalisation:null
+          /*
+            IMPORTANT V3 :
+            on modifie uniquement Statut, exactement comme dans
+            contributions_a_traiter.html. Date_finalisation n'est pas
+            modifiée ici afin de ne pas déclencher une ACL de colonne
+            plus restrictive.
+          */
+          Statut:"À faire"
         }
       ]
     ]);
