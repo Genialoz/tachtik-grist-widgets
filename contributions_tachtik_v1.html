@@ -485,6 +485,7 @@
     <h1>📋 Contributions</h1>
     <p>
       Consultez les contributions accessibles selon votre profil et votre périmètre Tâchtik.
+      Cette page est dédiée à la consultation.
     </p>
     <div id="profileInfo" class="profile">Profil en cours d’identification…</div>
   </section>
@@ -639,76 +640,6 @@
 
         </div>
 
-        <div id="actionButtons" class="actions hidden">
-          <button id="editBtn" type="button" class="btn-secondary">
-            ✏️ Modifier
-          </button>
-
-          <button id="statusBtn" type="button" class="btn-primary"></button>
-
-          <button id="deleteBtn" type="button" class="btn-danger">
-            🗑️ Supprimer
-          </button>
-        </div>
-      </div>
-
-      <!-- =====================================================
-           FORMULAIRE DE MODIFICATION
-           ===================================================== -->
-      <div id="editForm" class="hidden">
-
-        <div class="edit-grid">
-
-          <div class="field full">
-            <label for="editTitle">Titre *</label>
-            <input id="editTitle" type="text">
-          </div>
-
-          <div class="field full">
-            <label for="editDescription">Description</label>
-            <textarea id="editDescription"></textarea>
-          </div>
-
-          <div class="field">
-            <label for="editDemandeur">Demandeur</label>
-            <input id="editDemandeur" type="text">
-          </div>
-
-          <div class="field">
-            <label for="editContributeur">Contributeur *</label>
-            <select id="editContributeur"></select>
-          </div>
-
-          <div class="field">
-            <label for="editEcheance">Échéance</label>
-            <input id="editEcheance" type="date">
-          </div>
-
-          <div class="field">
-            <label for="editPriorite">Priorité</label>
-            <select id="editPriorite">
-              <option value="Normale">Normale</option>
-              <option value="Haute">Haute</option>
-              <option value="Urgente">Urgente</option>
-            </select>
-          </div>
-
-          <div class="field full">
-            <label for="editCommentaire">Commentaire</label>
-            <textarea id="editCommentaire"></textarea>
-          </div>
-
-        </div>
-
-        <div class="actions">
-          <button id="cancelEditBtn" type="button" class="btn-secondary">
-            Annuler
-          </button>
-
-          <button id="saveEditBtn" type="button" class="btn-primary">
-            Enregistrer
-          </button>
-        </div>
 
       </div>
 
@@ -724,17 +655,16 @@
 <script>
 /* =============================================================
    TÂCHTIK — CONTRIBUTIONS
-   Version 3
+   Version 4
 
    Objectif :
    - vue métier commune Administrateur / Bureau contributeur / Lecteur ;
-   - V2 : mise en avant forte de l'échéance et de l'alerte ;
-          couleurs basées sur CONTRIBUTIONS.Alerte ;
-          affichage de Jours_restants ;
-          ajout d'un filtre Alerte ;
-   - V3 : lorsqu'une contribution est au statut "Fait",
-          aucune pastille d'alerte d'échéance n'est affichée.
-          Le statut "Fait" reste visible dans sa pastille de statut.
+   - page volontairement en CONSULTATION UNIQUEMENT ;
+   - aucune modification, suppression ou changement de statut ici ;
+   - les actions opérationnelles restent dans "Contributions à traiter" ;
+   - mise en avant forte de l'échéance et de l'alerte ;
+   - pour les contributions "À faire" : seule la pastille d'alerte est affichée ;
+   - pour les contributions "Fait" : seule la pastille "✓ Fait" est affichée.
    - affichage des lignes déjà filtrées par les ACL Grist ;
    - Lecteur = consultation uniquement ;
    - Administrateur = gestion complète ;
@@ -1137,30 +1067,6 @@ async function loadData(){
 }
 
 /* =============================================================
-   DROITS D'ACTION
-   ============================================================= */
-
-function canManageRecord(record){
-  if(!record){
-    return false;
-  }
-
-  if(isAdministrator()){
-    return true;
-  }
-
-  if(isBureauContributor()){
-    return Boolean(
-      currentUserBureauId
-      && record._BureauId
-      && Number(currentUserBureauId) === Number(record._BureauId)
-    );
-  }
-
-  return false;
-}
-
-/* =============================================================
    FILTRES
    ============================================================= */
 
@@ -1330,9 +1236,11 @@ function renderList(){
           </div>
         </div>
 
-        <span class="badge ${done ? "done" : "todo"}">
-          ${done ? "✓ Fait" : "À faire"}
-        </span>
+        ${
+          done
+            ? `<span class="badge done">✓ Fait</span>`
+            : ""
+        }
 
       </div>
 
@@ -1441,20 +1349,7 @@ function openDetail(recordId){
 
   setDetail("detailCommentaire",record.Commentaire);
 
-  const canManage = canManageRecord(record);
-
-  $("actionButtons").classList.toggle(
-    "hidden",
-    !canManage
-  );
-
-  $("statusBtn").textContent =
-    isDone(record)
-      ? "↩ Remettre en « À faire »"
-      : "✓ Marquer comme fait";
-
   $("detailContent").classList.remove("hidden");
-  $("editForm").classList.add("hidden");
 
   showNotice("successBox","");
   showNotice("errorBox","");
@@ -1473,272 +1368,6 @@ function closeDetail(){
 }
 
 /* =============================================================
-   MODIFICATION
-   ============================================================= */
-
-function populateEditDepartments(){
-  const select = $("editContributeur");
-  select.innerHTML = "";
-
-  const sorted = [...departments].sort((a,b)=>{
-    const aLabel = text(a.Code || a.Nom || a.id);
-    const bLabel = text(b.Code || b.Nom || b.id);
-
-    return aLabel.localeCompare(
-      bLabel,
-      "fr",
-      {numeric:true}
-    );
-  });
-
-  for(const row of sorted){
-    const option = document.createElement("option");
-    option.value = Number(row.id);
-
-    const code = text(row.Code).trim();
-    const nom = text(row.Nom).trim();
-
-    option.textContent =
-      code && nom
-        ? `${code} — ${nom}`
-        : (code || nom || `Département ${row.id}`);
-
-    select.appendChild(option);
-  }
-}
-
-function enterEditMode(){
-  const record = getSelectedRecord();
-
-  if(!record || !canManageRecord(record)){
-    return;
-  }
-
-  populateEditDepartments();
-
-  $("editTitle").value = text(record.Titre);
-  $("editDescription").value = text(record.Description);
-  $("editDemandeur").value = text(record.Demandeur);
-  $("editContributeur").value = record._ContributeurId || "";
-  $("editEcheance").value = dateToInput(record.Echeance);
-  $("editPriorite").value = text(record.Priorite) || "Normale";
-  $("editCommentaire").value = text(record.Commentaire);
-
-  $("detailContent").classList.add("hidden");
-  $("editForm").classList.remove("hidden");
-}
-
-function cancelEdit(){
-  $("editForm").classList.add("hidden");
-  $("detailContent").classList.remove("hidden");
-}
-
-async function saveEdit(){
-  const record = getSelectedRecord();
-
-  if(!record || !canManageRecord(record)){
-    return;
-  }
-
-  const title = $("editTitle").value.trim();
-  const contributorId = Number($("editContributeur").value);
-
-  if(!title){
-    showNotice("errorBox","Le titre est obligatoire.");
-    return;
-  }
-
-  if(!contributorId){
-    showNotice("errorBox","Le contributeur est obligatoire.");
-    return;
-  }
-
-  const button = $("saveEditBtn");
-  button.disabled = true;
-
-  try{
-    await grist.docApi.applyUserActions([
-      [
-        "UpdateRecord",
-        "CONTRIBUTIONS",
-        Number(record.id),
-        {
-          Titre:title,
-          Description:$("editDescription").value.trim(),
-          Demandeur:$("editDemandeur").value.trim(),
-          Contributeur:contributorId,
-          Echeance:inputToGristDate($("editEcheance").value),
-          Priorite:$("editPriorite").value,
-          Commentaire:$("editCommentaire").value.trim()
-        }
-      ]
-    ]);
-
-    await refreshAfterAction();
-
-    showNotice(
-      "successBox",
-      "✓ Contribution mise à jour."
-    );
-
-    cancelEdit();
-    openDetail(record.id);
-
-  }catch(error){
-    console.error(error);
-
-    showNotice(
-      "errorBox",
-      "Impossible d'enregistrer les modifications. Vérifiez les droits Grist."
-    );
-  }finally{
-    button.disabled = false;
-  }
-}
-
-/* =============================================================
-   CHANGEMENT DE STATUT
-   ============================================================= */
-
-async function toggleStatus(){
-  const record = getSelectedRecord();
-
-  if(!record || !canManageRecord(record)){
-    return;
-  }
-
-  const newStatus =
-    isDone(record)
-      ? "À faire"
-      : "Fait";
-
-  const button = $("statusBtn");
-  button.disabled = true;
-
-  try{
-    /*
-      Comme dans contributions_a_traiter.html :
-      modification du Statut uniquement.
-    */
-    await grist.docApi.applyUserActions([
-      [
-        "UpdateRecord",
-        "CONTRIBUTIONS",
-        Number(record.id),
-        {
-          Statut:newStatus
-        }
-      ]
-    ]);
-
-    await refreshAfterAction();
-
-    showNotice(
-      "successBox",
-      newStatus === "Fait"
-        ? "✓ Contribution marquée comme faite."
-        : "✓ Contribution remise en « À faire »."
-    );
-
-    openDetail(record.id);
-
-  }catch(error){
-    console.error(error);
-
-    showNotice(
-      "errorBox",
-      "Impossible de modifier le statut. Vérifiez les droits Grist."
-    );
-  }finally{
-    button.disabled = false;
-  }
-}
-
-/* =============================================================
-   SUPPRESSION
-   ============================================================= */
-
-async function deleteContribution(){
-  const record = getSelectedRecord();
-
-  if(!record || !canManageRecord(record)){
-    return;
-  }
-
-  const confirmed = window.confirm(
-    "Supprimer définitivement cette contribution ?"
-  );
-
-  if(!confirmed){
-    return;
-  }
-
-  const button = $("deleteBtn");
-  button.disabled = true;
-
-  try{
-    await grist.docApi.applyUserActions([
-      [
-        "RemoveRecord",
-        "CONTRIBUTIONS",
-        Number(record.id)
-      ]
-    ]);
-
-    await refreshAfterAction();
-
-    selectedRecordId = null;
-
-    $("detailView").classList.add("hidden");
-    $("listView").classList.remove("hidden");
-
-    renderList();
-
-  }catch(error){
-    console.error(error);
-
-    showNotice(
-      "errorBox",
-      "Impossible de supprimer la contribution. Vérifiez les droits Grist."
-    );
-  }finally{
-    button.disabled = false;
-  }
-}
-
-/* =============================================================
-   RAFRAÎCHISSEMENT APRÈS ACTION
-   ============================================================= */
-
-async function refreshAfterAction(){
-  const priority = $("priorityFilter").value;
-  const alertCategory = $("alertFilter").value;
-  const department = $("departmentFilter").value;
-  const origin = $("originFilter").value;
-
-  await new Promise(resolve => setTimeout(resolve,400));
-  await loadData();
-  populateFilters();
-
-  $("priorityFilter").value = priority;
-  $("alertFilter").value = alertCategory;
-
-  if(
-    [...$("departmentFilter").options]
-      .some(option => option.value === department)
-  ){
-    $("departmentFilter").value = department;
-  }
-
-  if(
-    [...$("originFilter").options]
-      .some(option => option.value === origin)
-  ){
-    $("originFilter").value = origin;
-  }
-}
-
-/* =============================================================
    INITIALISATION
    ============================================================= */
 
@@ -1746,10 +1375,10 @@ async function init(){
   try{
     grist.ready({
       /*
-        Accès complet nécessaire pour Administrateur / Bureau contributeur.
-        Le Lecteur reste protégé par les ACL Grist et n'a aucun bouton d'action.
+        V4 :
+        Cette page est volontairement en consultation uniquement.
+        Les ACL Grist restent l'autorité sur les lignes visibles.
       */
-      requiredAccess:"full"
     });
 
     await loadUserContext();
@@ -1793,11 +1422,6 @@ $("departmentFilter").addEventListener("change",renderList);
 $("originFilter").addEventListener("change",renderList);
 
 $("backBtn").addEventListener("click",closeDetail);
-$("editBtn").addEventListener("click",enterEditMode);
-$("cancelEditBtn").addEventListener("click",cancelEdit);
-$("saveEditBtn").addEventListener("click",saveEdit);
-$("statusBtn").addEventListener("click",toggleStatus);
-$("deleteBtn").addEventListener("click",deleteContribution);
 
 init();
 </script>
