@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Accueil Lecteur</title>
+
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+
+  <style>
+    :root{
+      --bg:#f5f8fb;
+      --card:#ffffff;
+      --text:#17324a;
+      --muted:#6f8293;
+      --line:#dbe5ed;
+      --blue:#2f6fdd;
+      --blue-dark:#245bb7;
+      --blue-soft:#eef4ff;
+      --shadow:0 12px 34px rgba(28,61,89,.10);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    .app{
+      width:min(980px,100%);
+      margin:0 auto;
+      padding:24px;
+    }
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      padding:26px 28px;
+      border-radius:24px;
+      color:white;
+      background:linear-gradient(135deg,#173d66 0%,#245f9a 62%,#2f6fdd 100%);
+      box-shadow:0 16px 40px rgba(23,61,102,.18);
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      width:260px;
+      height:260px;
+      right:-80px;
+      top:-130px;
+      border-radius:50%;
+      background:rgba(255,255,255,.08);
+    }
+
+    .hero-content{
+      position:relative;
+      z-index:1;
+    }
+
+    .hero h1{
+      margin:0;
+      font-size:clamp(28px,4vw,40px);
+      line-height:1.15;
+    }
+
+    .hero p{
+      margin:10px 0 0;
+      max-width:720px;
+      color:rgba(255,255,255,.84);
+      font-size:14px;
+      line-height:1.55;
+    }
+
+    .profile{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      margin-top:16px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.18);
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .section{
+      margin-top:22px;
+    }
+
+    .section-title{
+      margin:0;
+      font-size:19px;
+      font-weight:900;
+    }
+
+    .section-subtitle{
+      margin:5px 0 12px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.5;
+    }
+
+    .card{
+      display:flex;
+      align-items:flex-start;
+      gap:14px;
+      padding:20px;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:var(--card);
+      box-shadow:0 6px 18px rgba(28,61,89,.055);
+      text-decoration:none;
+      color:inherit;
+      transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease;
+    }
+
+    .card:hover{
+      transform:translateY(-2px);
+      border-color:#b9cce0;
+      box-shadow:0 10px 26px rgba(28,61,89,.10);
+    }
+
+    .icon{
+      flex:0 0 auto;
+      width:48px;
+      height:48px;
+      display:grid;
+      place-items:center;
+      border-radius:14px;
+      font-size:23px;
+      background:var(--blue-soft);
+      color:var(--blue);
+    }
+
+    .card-content{
+      min-width:0;
+      flex:1;
+    }
+
+    .card-title{
+      margin:0;
+      font-size:17px;
+      font-weight:900;
+    }
+
+    .card-text{
+      margin:7px 0 0;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.55;
+    }
+
+    .card-link{
+      display:inline-flex;
+      margin-top:12px;
+      font-size:11px;
+      font-weight:850;
+      color:var(--blue-dark);
+    }
+
+    .loading{
+      margin-top:18px;
+      padding:24px;
+      text-align:center;
+      color:var(--muted);
+    }
+
+    .access-denied{
+      display:none;
+      margin-top:18px;
+      padding:18px;
+      border-radius:16px;
+      border:1px solid #f4c48c;
+      background:#fff8ec;
+      color:#8c5a11;
+      line-height:1.5;
+    }
+
+    .hidden{display:none!important}
+
+    @media(max-width:700px){
+      .app{padding:14px}
+      .hero{padding:22px}
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+
+    <!-- =========================================================
+         ENTÊTE
+         ========================================================= -->
+    <section class="hero">
+      <div class="hero-content">
+        <h1>Accueil Lecteur</h1>
+        <p>
+          Consultez les contributions accessibles selon votre périmètre.
+        </p>
+        <div id="profileInfo" class="profile">👤 Identification du profil…</div>
+      </div>
+    </section>
+
+    <div id="loadingBox" class="loading">
+      Chargement de l’accueil…
+    </div>
+
+    <section id="accessDenied" class="access-denied">
+      <strong>Accès réservé.</strong><br>
+      Cette page est destinée aux utilisateurs ayant le rôle <strong>Lecteur</strong>.
+    </section>
+
+    <div id="readerContent" class="hidden">
+
+      <!-- =======================================================
+           CONSULTATION
+           ======================================================= -->
+      <section class="section">
+        <h2 class="section-title">Consultation</h2>
+        <p class="section-subtitle">
+          Accédez aux contributions de votre périmètre, y compris aux contributions terminées.
+        </p>
+
+        <a
+          class="card"
+          href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/31"
+          target="_top"
+        >
+          <div class="icon">📋</div>
+
+          <div class="card-content">
+            <h3 class="card-title">Contributions</h3>
+            <p class="card-text">
+              Consultez les contributions accessibles selon votre périmètre de lecture et utilisez les filtres pour retrouver rapidement celles qui vous intéressent.
+            </p>
+            <span class="card-link">Ouvrir la page →</span>
+          </div>
+        </a>
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    "use strict";
+
+    const $ = id => document.getElementById(id);
+
+    let currentProfile = null;
+
+    /* =========================================================
+       OUTILS
+       ========================================================= */
+
+    function text(value){
+      return String(value == null ? "" : value);
+    }
+
+    function clean(value){
+      return text(value)
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g,"");
+    }
+
+    function tableToRows(table){
+      if(!table){ return []; }
+
+      const ids = table.id || [];
+
+      return ids.map((id,index)=>{
+        const row = {id};
+
+        for(const column of Object.keys(table)){
+          if(column === "id"){ continue; }
+
+          row[column] = Array.isArray(table[column])
+            ? table[column][index]
+            : table[column];
+        }
+
+        return row;
+      });
+    }
+
+    function isReader(){
+      return clean(currentProfile?.Role) === "lecteur";
+    }
+
+    /* =========================================================
+       IDENTIFICATION DU PROFIL
+
+       Pour le rôle Lecteur, SESSION_WIDGET peut être inaccessible
+       selon les ACL. On tente d'abord cette méthode.
+       ========================================================= */
+
+    async function identifyUser(){
+      try{
+        const before = tableToRows(
+          await grist.docApi.fetchTable("SESSION_WIDGET")
+        );
+
+        const previousIds = new Set(
+          before.map(row => Number(row.id))
+        );
+
+        await grist.docApi.applyUserActions([
+          ["AddRecord","SESSION_WIDGET",null,{}]
+        ]);
+
+        await new Promise(resolve => setTimeout(resolve,800));
+
+        const after = tableToRows(
+          await grist.docApi.fetchTable("SESSION_WIDGET")
+        );
+
+        const created = after
+          .filter(row => !previousIds.has(Number(row.id)))
+          .sort((a,b)=>Number(b.id)-Number(a.id));
+
+        const profile = created[0] || null;
+
+        if(profile){
+          try{
+            await grist.docApi.applyUserActions([
+              ["BulkRemoveRecord","SESSION_WIDGET",[Number(profile.id)]]
+            ]);
+          }catch(error){
+            console.warn("Nettoyage SESSION_WIDGET impossible :",error);
+          }
+        }
+
+        return profile;
+
+      }catch(error){
+        console.warn("SESSION_WIDGET indisponible pour ce profil :",error);
+        return null;
+      }
+    }
+
+    /* =========================================================
+       INITIALISATION
+       ========================================================= */
+
+    async function init(){
+      grist.ready({
+        requiredAccess:"read table"
+      });
+
+      currentProfile = await identifyUser();
+
+      $("loadingBox").classList.add("hidden");
+
+      /*
+        Si SESSION_WIDGET est indisponible pour le Lecteur,
+        on laisse l'accueil accessible en consultation.
+        La sécurité réelle reste assurée par les ACL de Grist
+        sur la page Contributions.
+      */
+      if(!currentProfile){
+        $("profileInfo").textContent = "👤 Consultation";
+        $("readerContent").classList.remove("hidden");
+        return;
+      }
+
+      $("profileInfo").textContent =
+        "👤 " + (text(currentProfile.Role).trim() || "Consultation");
+
+      if(!isReader()){
+        $("accessDenied").style.display = "block";
+        return;
+      }
+
+      $("readerContent").classList.remove("hidden");
+    }
+
+    init();
+  </script>
+</body>
+</html>
