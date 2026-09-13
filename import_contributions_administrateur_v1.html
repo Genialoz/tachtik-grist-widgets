@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Importer des contributions — Administrateur</title>
+  <title>Tâchtik — Import contributions Administrateur</title>
 
   <!-- SDK Grist -->
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
@@ -329,7 +329,7 @@
   <section class="hero">
     <h1>📥 Importer des contributions</h1>
     <p>
-      Importez plusieurs contributions en choisissant un bureau
+      Importez plusieurs contributions Tâchtik en choisissant un bureau
       d'origine pour l'ensemble du fichier.
     </p>
     <div id="profileInfo" class="profile">Identification du profil…</div>
@@ -357,7 +357,7 @@
       </p>
 
       <div class="field">
-        <label for="bureauOrigine">Bureau demandeur *</label>
+        <label for="bureauOrigine">Bureau d'origine *</label>
         <select id="bureauOrigine">
           <option value="">— Sélectionner un bureau —</option>
         </select>
@@ -411,7 +411,7 @@
         </div>
 
         <div class="stat">
-          <div class="label">Bureau demandeur</div>
+          <div class="label">Bureau d'origine</div>
           <div id="statBureau" class="value" style="font-size:18px">—</div>
         </div>
       </div>
@@ -456,9 +456,15 @@
 
 </div>
 
+<!-- =========================================================
+     IMPORT CONTRIBUTIONS — ADMINISTRATEUR — V3
+     Ajout : CONTRIBUTIONS.Source = "Import" pour toutes les lignes importées.
+     Aucun envoi automatique n'est déclenché dans cette version.
+     ========================================================= -->
+
 <script>
 /* =============================================================
-   IMPORT CONTRIBUTIONS / ADMINISTRATEUR
+   TÂCHTIK — IMPORT CONTRIBUTIONS / ADMINISTRATEUR
    Version 1
 
    Objectif :
@@ -607,7 +613,7 @@ async function identifyProfile(){
   const profile = created[0] || null;
 
   if(!profile){
-    throw new Error("Profil utilisateur non identifié.");
+    throw new Error("Profil Tâchtik non identifié.");
   }
 
   try{
@@ -663,7 +669,7 @@ async function loadContext(){
   }
 
   if(!isActiveUser()){
-    throw new Error("Votre compte utilisateur est inactif.");
+    throw new Error("Votre compte Tâchtik est inactif.");
   }
 
   departmentByCode = new Map();
@@ -934,7 +940,15 @@ function validateRow(source,index){
       même Bureau_origine pour toutes les lignes du fichier.
     */
     Bureau_origine:Number(selectedBureauId),
-    Cree_par:text(currentUser.Email).trim()
+    Cree_par:text(currentUser.Email).trim(),
+
+    /*
+      V3 — TRAÇABILITÉ DES IMPORTS
+      Permet de distinguer une contribution importée d'une contribution
+      créée manuellement. Ce champ servira plus tard à appliquer
+      PARAMETRES_BUREAUX.Envoi_import_actif.
+    */
+    Source:"Import"
   };
 
   return {
@@ -1052,7 +1066,7 @@ async function analyzeFile(){
   if(!bureau){
     showNotice(
       "fileError",
-      "Sélectionnez d'abord le Bureau demandeur."
+      "Sélectionnez d'abord le Bureau d'origine."
     );
     return;
   }
