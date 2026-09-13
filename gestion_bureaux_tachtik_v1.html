@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+from pathlib import Path
+
+html = r'''<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
@@ -16,14 +18,8 @@
   --line:#dfe5ec;
   --blue:#2563eb;
   --blue-dark:#1d4ed8;
-  --blue-soft:#eff6ff;
-  --green:#047857;
-  --green-soft:#ecfdf5;
   --red:#b42318;
   --red-soft:#fef3f2;
-  --orange:#b54708;
-  --orange-soft:#fffaeb;
-  --grey-soft:#f2f4f7;
   --shadow:0 10px 30px rgba(31,41,55,.08);
   --radius:18px;
 }
@@ -37,7 +33,7 @@ body{
   color:var(--text);
 }
 
-button,input,select{font:inherit}
+button,input{font:inherit}
 
 .hidden{display:none !important}
 
@@ -146,14 +142,6 @@ button,input,select{font:inherit}
   color:var(--text);
 }
 
-.select{
-  border:1px solid var(--line);
-  border-radius:12px;
-  padding:10px 12px;
-  background:#fff;
-  color:var(--text);
-}
-
 .btn{
   border:0;
   border-radius:12px;
@@ -198,7 +186,7 @@ button:disabled{
 table{
   width:100%;
   border-collapse:collapse;
-  min-width:850px;
+  min-width:760px;
   background:#fff;
 }
 
@@ -218,37 +206,11 @@ th{
 }
 
 tbody tr:last-child td{border-bottom:0}
-
 tbody tr:hover{background:#fbfdff}
 
 .code{
   font-weight:800;
   color:#1d4ed8;
-}
-
-.badge{
-  display:inline-flex;
-  align-items:center;
-  border-radius:999px;
-  padding:5px 9px;
-  font-size:12px;
-  font-weight:800;
-  white-space:nowrap;
-}
-
-.badge.admin{
-  background:var(--blue-soft);
-  color:#1d4ed8;
-}
-
-.badge.contrib{
-  background:var(--green-soft);
-  color:var(--green);
-}
-
-.badge.other{
-  background:var(--grey-soft);
-  color:#475467;
 }
 
 .actions{
@@ -311,8 +273,7 @@ tbody tr:hover{background:#fbfdff}
   margin-bottom:6px;
 }
 
-.field input,
-.field select{
+.field input{
   width:100%;
   border:1px solid var(--line);
   border-radius:12px;
@@ -392,7 +353,7 @@ tbody tr:hover{background:#fbfdff}
        ========================================= -->
   <section class="hero">
     <h1>🏢 Gestion des bureaux d'origine</h1>
-    <p>Administrez les bureaux utilisés pour identifier l'origine des contributions et les profils partenaires.</p>
+    <p>Administrez les bureaux utilisés pour identifier l'origine des contributions.</p>
     <div id="profileInfo" class="profile">Identification du profil…</div>
   </section>
 
@@ -406,6 +367,8 @@ tbody tr:hover{background:#fbfdff}
 
   <!-- =========================================
        CONTENU ADMINISTRATEUR
+       MODIFICATION : la notion de "Type" a été retirée.
+       Les rôles sont désormais gérés uniquement dans UTILISATEURS.
        ========================================= -->
   <div id="adminContent" class="hidden">
 
@@ -415,12 +378,12 @@ tbody tr:hover{background:#fbfdff}
         <div id="kpiTotal" class="value">0</div>
       </div>
       <div class="kpi">
-        <div class="label">Type Administrateur</div>
-        <div id="kpiAdmin" class="value">0</div>
+        <div class="label">Utilisateurs rattachés à un bureau</div>
+        <div id="kpiUsers" class="value">0</div>
       </div>
       <div class="kpi">
-        <div class="label">Type Contributeur outil</div>
-        <div id="kpiContributor" class="value">0</div>
+        <div class="label">Contributions avec bureau d'origine</div>
+        <div id="kpiContributions" class="value">0</div>
       </div>
     </section>
 
@@ -428,11 +391,6 @@ tbody tr:hover{background:#fbfdff}
       <div class="toolbar">
         <div class="toolbar-left">
           <input id="searchInput" class="search" type="search" placeholder="Rechercher par code ou nom…">
-          <select id="typeFilter" class="select">
-            <option value="">Tous les types</option>
-            <option value="Administrateur">Administrateur</option>
-            <option value="Contributeur outil">Contributeur outil</option>
-          </select>
         </div>
 
         <div class="toolbar-right">
@@ -450,7 +408,6 @@ tbody tr:hover{background:#fbfdff}
               <tr>
                 <th>Code</th>
                 <th>Nom</th>
-                <th>Type</th>
                 <th>Utilisateurs</th>
                 <th>Contributions</th>
                 <th>Actions</th>
@@ -459,7 +416,7 @@ tbody tr:hover{background:#fbfdff}
             <tbody id="bureauBody"></tbody>
           </table>
         </div>
-        <div id="emptyState" class="empty hidden">Aucun bureau ne correspond aux filtres.</div>
+        <div id="emptyState" class="empty hidden">Aucun bureau ne correspond à la recherche.</div>
       </div>
     </section>
   </div>
@@ -467,27 +424,23 @@ tbody tr:hover{background:#fbfdff}
 
 <!-- =========================================
      MODALE AJOUT / MODIFICATION
+     Le champ Type a été supprimé.
      ========================================= -->
 <div id="editBackdrop" class="modal-backdrop hidden">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editTitle">
     <h2 id="editTitle">Ajouter un bureau</h2>
-    <p class="modal-intro">Les valeurs sont enregistrées directement dans la table <strong>BUREAUX_ORIGINE</strong>.</p>
+    <p class="modal-intro">
+      Les valeurs sont enregistrées directement dans la table
+      <strong>BUREAUX_ORIGINE</strong>.
+    </p>
 
     <div class="form-grid">
       <div class="field">
         <label for="bureauCode">Code *</label>
-        <input id="bureauCode" type="text" autocomplete="off" placeholder="ex. E1">
+        <input id="bureauCode" type="text" autocomplete="off" placeholder="ex. D1-1">
       </div>
 
       <div class="field">
-        <label for="bureauType">Type *</label>
-        <select id="bureauType">
-          <option value="Administrateur">Administrateur</option>
-          <option value="Contributeur outil">Contributeur outil</option>
-        </select>
-      </div>
-
-      <div class="field full">
         <label for="bureauName">Nom *</label>
         <input id="bureauName" type="text" autocomplete="off" placeholder="Nom complet du bureau">
       </div>
@@ -539,11 +492,6 @@ let currentProfile = null;
 let selectedBureauId = null;
 let deleteCandidateId = null;
 let toastTimer = null;
-
-const ALLOWED_TYPES = [
-  "Administrateur",
-  "Contributeur outil"
-];
 
 /* =========================================
    OUTILS
@@ -701,28 +649,26 @@ function usageForBureau(id){
 
 /* =========================================
    AFFICHAGE
+   La colonne Type n'est plus lue ni affichée.
    ========================================= */
-
-function badgeClass(type){
-  if(clean(type) === "administrateur"){ return "admin"; }
-  if(clean(type) === "contributeur outil"){ return "contrib"; }
-  return "other";
-}
 
 function renderKpis(){
   $("kpiTotal").textContent = bureaux.length;
-  $("kpiAdmin").textContent = bureaux.filter(b => clean(b.Type) === "administrateur").length;
-  $("kpiContributor").textContent = bureaux.filter(b => clean(b.Type) === "contributeur outil").length;
+
+  $("kpiUsers").textContent = users.filter(row =>
+    Number(row.Bureau) > 0
+  ).length;
+
+  $("kpiContributions").textContent = contributions.filter(row =>
+    Number(row.Bureau_origine) > 0
+  ).length;
 }
 
 function filteredBureaux(){
   const query = clean($("searchInput").value);
-  const type = clean($("typeFilter").value);
 
   return bureaux
     .filter(bureau => {
-      if(type && clean(bureau.Type) !== type){ return false; }
-
       if(query){
         const haystack = clean(`${bureau.Code || ""} ${bureau.Nom || ""}`);
         if(!haystack.includes(query)){ return false; }
@@ -746,7 +692,6 @@ function renderTable(){
     tr.innerHTML = `
       <td><span class="code">${escapeHtml(bureau.Code || "")}</span></td>
       <td>${escapeHtml(bureau.Nom || "")}</td>
-      <td><span class="badge ${badgeClass(bureau.Type)}">${escapeHtml(bureau.Type || "Non renseigné")}</span></td>
       <td>${usage.users}</td>
       <td>${usage.contributions}</td>
       <td>
@@ -772,6 +717,9 @@ function renderAll(){
 
 /* =========================================
    FORMULAIRE AJOUT / MODIFICATION
+   Seuls Code et Nom sont gérés.
+   Email_expediteur reste intact s'il existe déjà.
+   La colonne Type n'est plus écrite.
    ========================================= */
 
 function openAddModal(){
@@ -781,7 +729,6 @@ function openAddModal(){
   $("editTitle").textContent = "Ajouter un bureau";
   $("bureauCode").value = "";
   $("bureauName").value = "";
-  $("bureauType").value = "Administrateur";
 
   $("editBackdrop").classList.remove("hidden");
   setTimeout(() => $("bureauCode").focus(),50);
@@ -797,9 +744,6 @@ function openEditModal(id){
   $("editTitle").textContent = `Modifier ${bureau.Code || "le bureau"}`;
   $("bureauCode").value = bureau.Code || "";
   $("bureauName").value = bureau.Nom || "";
-  $("bureauType").value = ALLOWED_TYPES.includes(bureau.Type)
-    ? bureau.Type
-    : "Administrateur";
 
   $("editBackdrop").classList.remove("hidden");
   setTimeout(() => $("bureauCode").focus(),50);
@@ -813,11 +757,9 @@ function closeEditModal(){
 function validateBureauForm(){
   const code = text($("bureauCode").value).trim();
   const name = text($("bureauName").value).trim();
-  const type = text($("bureauType").value).trim();
 
   if(!code){ return "Le code du bureau est obligatoire."; }
   if(!name){ return "Le nom du bureau est obligatoire."; }
-  if(!ALLOWED_TYPES.includes(type)){ return "Le type sélectionné n'est pas autorisé."; }
 
   const duplicate = bureaux.find(row =>
     Number(row.id) !== Number(selectedBureauId)
@@ -841,10 +783,15 @@ async function saveBureau(){
   setFormError("");
   $("saveBtn").disabled = true;
 
+  /*
+   * IMPORTANT :
+   * on ne transmet volontairement que Code et Nom.
+   * - Type n'est plus utilisé par la nouvelle architecture Tâchtik.
+   * - Email_expediteur n'est pas modifié par ce widget.
+   */
   const fields = {
     Code:text($("bureauCode").value).trim(),
-    Nom:text($("bureauName").value).trim(),
-    Type:text($("bureauType").value).trim()
+    Nom:text($("bureauName").value).trim()
   };
 
   try{
@@ -992,7 +939,6 @@ async function load(){
 $("addBtn").addEventListener("click",openAddModal);
 $("refreshBtn").addEventListener("click",loadDataOnly);
 $("searchInput").addEventListener("input",renderTable);
-$("typeFilter").addEventListener("change",renderTable);
 
 $("cancelEditBtn").addEventListener("click",closeEditModal);
 $("saveBtn").addEventListener("click",saveBureau);
@@ -1034,6 +980,7 @@ document.addEventListener("keydown",event => {
 
 /* =========================================
    DÉMARRAGE GRIST
+   Accès complet conservé : nécessaire au widget d'administration.
    ========================================= */
 
 grist.ready({
@@ -1044,3 +991,8 @@ load();
 </script>
 </body>
 </html>
+'''
+
+path = Path("/mnt/data/gestion_bureaux_tachtik_v1.html")
+path.write_text(html, encoding="utf-8")
+print(f"Fichier créé : {path}")
