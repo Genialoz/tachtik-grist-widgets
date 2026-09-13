@@ -499,21 +499,101 @@
     /* =========================================================
        NAVIGATION VERS LES PAGES GRIST
 
-       IMPORTANT :
-       on ne connaît pas encore les identifiants numériques / slugs
-       exacts des pages Grist. Les cartes sont donc préparées mais
-       aucune URL arbitraire n'est inventée ici.
+       V2 :
+       - lecture des pages du document via _grist_Pages ;
+       - lecture de leur nom via _grist_Views ;
+       - construction automatique du lien /p/<id_page> ;
+       - aucun identifiant de page Grist n'est codé en dur.
        ========================================================= */
+
+    let pageUrlByName = new Map();
+
+    function normalizePageName(value){
+      return text(value)
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g,"");
+    }
+
+    function getDocumentBaseUrl(){
+      const referrer = document.referrer || "";
+
+      if(!referrer){
+        return "";
+      }
+
+      try{
+        const url = new URL(referrer);
+
+        url.search = "";
+        url.hash = "";
+
+        // Une page Grist se termine normalement par /p/<id>.
+        url.pathname = url.pathname.replace(/\/p\/\d+\/?$/,"");
+
+        return url.toString().replace(/\/$/,"");
+      }catch(error){
+        console.warn("Impossible de déterminer l'URL de base du document Grist :",error);
+        return "";
+      }
+    }
+
+    async function loadPageNavigation(){
+      const [pagesTable,viewsTable] = await Promise.all([
+        grist.docApi.fetchTable("_grist_Pages"),
+        grist.docApi.fetchTable("_grist_Views")
+      ]);
+
+      const pages = tableToRows(pagesTable);
+      const views = tableToRows(viewsTable);
+
+      const viewNameById = new Map(
+        views.map(view => [Number(view.id),text(view.name).trim()])
+      );
+
+      const baseUrl = getDocumentBaseUrl();
+
+      if(!baseUrl){
+        throw new Error("URL de base du document Grist introuvable.");
+      }
+
+      pageUrlByName = new Map();
+
+      for(const page of pages){
+        const pageName = viewNameById.get(Number(page.viewRef)) || "";
+
+        if(!pageName){
+          continue;
+        }
+
+        pageUrlByName.set(
+          normalizePageName(pageName),
+          `${baseUrl}/p/${Number(page.id)}`
+        );
+      }
+    }
 
     function bindNavigation(){
       document.querySelectorAll("[data-page]").forEach(card=>{
+        const pageName = card.dataset.page || "";
+        const pageUrl = pageUrlByName.get(normalizePageName(pageName));
+
+        if(pageUrl){
+          card.href = pageUrl;
+          card.target = "_top";
+          card.removeAttribute("aria-disabled");
+          return;
+        }
+
+        card.href = "#";
+        card.setAttribute("aria-disabled","true");
+
         card.addEventListener("click",event=>{
           event.preventDefault();
 
-          const pageName = card.dataset.page || "";
-
           window.alert(
-            `La navigation vers « ${pageName} » sera activée dès que l'URL exacte de cette page Grist sera renseignée.`
+            `La page Grist « ${pageName} » n'a pas été trouvée. Vérifiez son nom exact dans le menu des pages.`
           );
         });
       });
@@ -546,6 +626,8 @@
           $("accessDenied").style.display = "block";
           return;
         }
+
+        await loadPageNavigation();
 
         $("adminContent").classList.remove("hidden");
         bindNavigation();
