@@ -2240,18 +2240,20 @@
       }
     }
 
-    function isAdminOrManager() {
-      return (
-        currentRole.startsWith("admin")
-        || currentRole === "gestionnaire e1"
-      );
+    /* =========================
+       DROITS SELON LA NOUVELLE ARCHITECTURE TÂCHTIK
+       - Administrateur : accès global aux actions d'écriture
+       - Bureau contributeur : actions autorisées uniquement
+         sur les contributions de son propre bureau
+       - Lecteur : aucune action d'écriture
+       ========================= */
+
+    function isAdministrator() {
+      return currentRole === "administrateur";
     }
 
-    function isPartnerRole() {
-      return (
-        currentRole === "bureau saisie"
-        || currentRole === "bureau import"
-      );
+    function isBureauContributor() {
+      return currentRole === "bureau contributeur";
     }
 
     function canManageReminder(record) {
@@ -2259,11 +2261,11 @@
         return false;
       }
 
-      if (isAdminOrManager()) {
+      if (isAdministrator()) {
         return true;
       }
 
-      if (isPartnerRole()) {
+      if (isBureauContributor()) {
         return Boolean(
           currentUserBureauId
           && record._BureauId
@@ -2316,7 +2318,7 @@
         currentRole = clean(role);
         currentUserEmail = clean(profile.Email);
 
-        canEdit = isAdminOrManager();
+        canEdit = isAdministrator();
 
         if (currentUserEmail) {
           const matchingUser = utilisateurRows.find(
