@@ -466,7 +466,7 @@
     /* =========================================================
        NAVIGATION VERS LES PAGES GRIST
 
-       V2 :
+       V3 :
        - les URLS réelles des pages ont été relevées directement
          dans le document Grist ;
        - aucun identifiant n'est calculé automatiquement ;
@@ -483,53 +483,13 @@
       "Modèles de messages": "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/25"
     };
 
-    function getAclAsUserParam(){
-      /*
-        V2 :
-        Lorsqu'un Administrateur teste le document avec "Voir comme"
-        (paramètre aclAsUser_), Grist ajoute ce paramètre dans l'URL
-        de la page principale, mais pas dans l'URL du widget hébergé.
-
-        On le récupère donc depuis document.referrer et on le propage
-        uniquement pendant ce mode de test.
-
-        Pour un vrai Bureau contributeur connecté normalement,
-        aucun paramètre aclAsUser_ n'est ajouté.
-      */
-      try{
-        const referrer = document.referrer || "";
-
-        if(!referrer){
-          return "";
-        }
-
-        const url = new URL(referrer);
-        return url.searchParams.get("aclAsUser_") || "";
-      }catch(error){
-        console.warn("Impossible de lire aclAsUser_ depuis la page Grist :",error);
-        return "";
-      }
-    }
-
-    function withCurrentAclContext(pageUrl){
-      const aclAsUser = getAclAsUserParam();
-
-      if(!aclAsUser){
-        return pageUrl;
-      }
-
-      const url = new URL(pageUrl);
-      url.searchParams.set("aclAsUser_",aclAsUser);
-      return url.toString();
-    }
-
     function bindNavigation(){
       document.querySelectorAll("[data-page]").forEach(card=>{
         const pageName = card.dataset.page || "";
         const pageUrl = PAGE_URLS[pageName];
 
         if(pageUrl){
-          card.href = withCurrentAclContext(pageUrl);
+          card.href = pageUrl;
           card.target = "_top";
           card.removeAttribute("aria-disabled");
           return;
