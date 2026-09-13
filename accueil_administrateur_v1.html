@@ -499,7 +499,7 @@
     /* =========================================================
        NAVIGATION VERS LES PAGES GRIST
 
-       V2 :
+       V3 :
        - lecture des pages du document via _grist_Pages ;
        - lecture de leur nom via _grist_Views ;
        - construction automatique du lien /p/<id_page> ;
@@ -567,9 +567,15 @@
           continue;
         }
 
+        /*
+          IMPORTANT V3 :
+          dans l'URL Grist /p/<numéro>, le numéro correspond
+          à l'identifiant de la vue (viewRef), pas à l'id de la ligne
+          de _grist_Pages.
+        */
         pageUrlByName.set(
           normalizePageName(pageName),
-          `${baseUrl}/p/${Number(page.id)}`
+          `${baseUrl}/p/${Number(page.viewRef)}`
         );
       }
     }
