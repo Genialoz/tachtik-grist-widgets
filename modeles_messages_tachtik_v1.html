@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tâchtik — Modèles de messages</title>
+  <title>Modèles de messages</title>
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
   <style>
     :root{--blue:#2f6fdd;--blue2:#eaf2ff;--ink:#17324a;--muted:#6f8293;--line:#dbe5ed;--bg:#f5f8fb;--ok:#147a52;--danger:#b83a3a;--shadow:0 12px 34px rgba(28,61,89,.10)}
@@ -22,11 +22,11 @@
 </head>
 <body>
 <div class="wrap">
-  <section class="hero"><h1>✉️ Modèles de messages</h1><p>Personnalisez les messages utilisés par Tâchtik pour chaque bureau d'origine. Les modèles sont enregistrés dans <strong>PARAMETRES_BUREAUX</strong>.</p></section>
+  <section class="hero"><h1>✉️ Modèles de messages</h1><p>Personnalisez les messages utilisés pour chaque bureau demandeur. Les modèles sont enregistrés dans <strong>PARAMETRES_BUREAUX</strong>.</p></section>
   <div class="grid">
     <aside class="card">
       <h2>⚙️ Paramétrage</h2>
-      <label for="bureau">Bureau d'origine</label><select id="bureau"></select>
+      <label for="bureau">Bureau demandeur</label><select id="bureau"></select>
       <div class="notice">Une ligne contenant une variable vide est automatiquement masquée dans le message final. Par exemple, <strong>Description : [DESCRIPTION]</strong> disparaît si aucune description n'est renseignée.</div>
       <label>Variables disponibles</label>
       <div class="variables" id="variables"></div>
@@ -43,7 +43,7 @@
         <label for="objet">Objet du message</label><input id="objet" type="text">
         <label for="corps">Corps du message</label><textarea id="corps"></textarea>
         <div class="actions"><button id="reset" class="btn secondary">↩ Annuler les modifications</button><button id="save" class="btn primary">💾 Enregistrer le modèle</button></div>
-        <section class="preview"><h2>👁️ Aperçu du modèle</h2><div class="preview-meta"><b>Objet</b><span id="preview-subject"></span></div><div id="preview-body" class="preview-box"></div><div class="hint">L'aperçu utilise des exemples. Lors d'un vrai envoi, Tâchtik remplace ces variables par les données de la contribution.</div></section>
+        <section class="preview"><h2>👁️ Aperçu du modèle</h2><div class="preview-meta"><b>Objet</b><span id="preview-subject"></span></div><div id="preview-body" class="preview-box"></div><div class="hint">L'aperçu utilise des exemples. Lors d'un vrai envoi, ces variables sont remplacées par les données de la contribution.</div></section>
       </div>
     </main>
   </div>
