@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Tâchtik — Nouvelle contribution Administrateur</title>
+  <title>Nouvelle contribution — Administrateur</title>
 
   <!-- SDK Grist -->
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
@@ -244,7 +244,7 @@
   <section class="hero">
     <h1>➕ Nouvelle contribution</h1>
     <p>
-      Créez une contribution Tâchtik en choisissant son bureau d'origine
+      Créez une contribution en choisissant son bureau demandeur
       et son département contributeur.
     </p>
     <div id="profileInfo" class="profile">Identification du profil…</div>
@@ -280,7 +280,7 @@
         <div class="form-grid">
 
           <div class="field">
-            <label for="bureauOrigine" class="required">Bureau d'origine</label>
+            <label for="bureauOrigine" class="required">Bureau demandeur</label>
             <select id="bureauOrigine" required>
               <option value="">— Sélectionner un bureau —</option>
             </select>
@@ -363,7 +363,7 @@
 
 <script>
 /* =============================================================
-   TÂCHTIK — NOUVELLE CONTRIBUTION / ADMINISTRATEUR
+   NOUVELLE CONTRIBUTION / ADMINISTRATEUR
    Version 1
 
    Objectif :
@@ -481,7 +481,7 @@ async function identifyProfile(){
   const profile = created[0] || null;
 
   if(!profile){
-    throw new Error("Profil Tâchtik non identifié.");
+    throw new Error("Profil utilisateur non identifié.");
   }
 
   try{
@@ -537,7 +537,7 @@ async function loadContext(){
   }
 
   if(!isActiveUser()){
-    throw new Error("Votre compte Tâchtik est inactif.");
+    throw new Error("Votre compte utilisateur est inactif.");
   }
 
   return true;
@@ -653,7 +653,7 @@ async function createContribution(event){
   if(!bureauOrigine){
     showNotice(
       "errorBox",
-      "Sélectionnez le Bureau d'origine."
+      "Sélectionnez le Bureau demandeur."
     );
     return;
   }
@@ -716,7 +716,7 @@ async function createContribution(event){
     );
 
     /*
-      On conserve Bureau d'origine et Contributeur après création
+      On conserve Bureau demandeur et Contributeur après création
       uniquement le temps que l'utilisateur puisse constater le succès.
       Les autres champs sont vidés pour faciliter une nouvelle saisie.
     */
