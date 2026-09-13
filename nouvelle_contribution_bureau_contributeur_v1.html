@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tâchtik — Nouvelle contribution</title>
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+  <style>
+    :root{--bg:#f6f7fb;--card:#fff;--text:#1d2939;--muted:#667085;--line:#e4e7ec;--primary:#4f46e5;--primary-hover:#4338ca;--success:#067647;--success-bg:#ecfdf3;--danger:#b42318;--danger-bg:#fef3f2;--shadow:0 10px 30px rgba(16,24,40,.08)}
+    *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+    .app{max-width:980px;margin:0 auto;padding:24px}.hero{background:linear-gradient(135deg,#312e81,#6366f1);color:#fff;border-radius:20px;padding:24px 26px;box-shadow:var(--shadow);margin-bottom:20px}.hero h1{margin:0 0 8px;font-size:28px}.hero p{margin:0;opacity:.92;line-height:1.5}.profile{display:inline-flex;margin-top:14px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.16);font-size:13px;font-weight:700}
+    .panel{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:24px}.panel-title{margin:0 0 4px;font-size:21px}.panel-sub{margin:0 0 22px;color:var(--muted);line-height:1.5}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.field{min-width:0}.field.full{grid-column:1/-1}
+    label{display:block;margin-bottom:7px;font-size:13px;font-weight:800;color:#344054}.required::after{content:" *";color:#d92d20}input,select,textarea{width:100%;border:1px solid #d0d5dd;border-radius:12px;padding:11px 12px;font:inherit;color:var(--text);background:#fff;outline:none}input:focus,select:focus,textarea:focus{border-color:#818cf8;box-shadow:0 0 0 3px rgba(99,102,241,.12)}textarea{resize:vertical;min-height:120px}.help{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.4}
+    .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}button{border:0;border-radius:12px;padding:11px 16px;font:inherit;font-weight:800;cursor:pointer}button:disabled{cursor:not-allowed;opacity:.6}.btn-secondary{background:#f2f4f7;color:#344054}.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover:not(:disabled){background:var(--primary-hover)}
+    .notice{display:none;margin-bottom:18px;border-radius:14px;padding:14px 16px;line-height:1.5}.notice.show{display:block}.notice.success{color:var(--success);background:var(--success-bg);border:1px solid #abefc6}.notice.danger{color:var(--danger);background:var(--danger-bg);border:1px solid #fecdca}.hidden{display:none!important}.loading{padding:26px;text-align:center;color:var(--muted)}
+    @media(max-width:760px){.app{padding:14px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.actions{flex-direction:column-reverse}.actions button{width:100%}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <section class="hero">
+    <h1>➕ Nouvelle contribution</h1>
+    <p>Créez une contribution pour votre bureau. Le bureau d'origine et l'utilisateur créateur sont renseignés automatiquement par Tâchtik.</p>
+    <div id="profileInfo" class="profile">Identification du profil…</div>
+  </section>
+
+  <div id="loadingBox" class="loading">Chargement du formulaire…</div>
+
+  <div id="accessDenied" class="notice danger">
+    <strong>Accès refusé.</strong><br>
+    Cette page est réservée aux utilisateurs ayant le rôle <strong>Bureau contributeur</strong>.
+  </div>
+
+  <section id="formPanel" class="panel hidden">
+    <h2 class="panel-title">Informations de la contribution</h2>
+    <p class="panel-sub">Les champs marqués d’un astérisque sont obligatoires.</p>
+
+    <div id="successBox" class="notice success"></div>
+    <div id="errorBox" class="notice danger"></div>
+
+    <form id="contributionForm">
+      <div class="form-grid">
+        <div class="field full"><label for="titre" class="required">Titre</label><input id="titre" type="text" autocomplete="off" required></div>
+        <div class="field full"><label for="description">Description</label><textarea id="description"></textarea></div>
+        <div class="field"><label for="demandeur">Demandeur</label><input id="demandeur" type="text" autocomplete="off"></div>
+        <div class="field"><label for="contributeur" class="required">Contributeur</label><select id="contributeur" required><option value="">Chargement…</option></select><div class="help">Département auquel la contribution est adressée.</div></div>
+        <div class="field"><label for="echeance">Échéance</label><input id="echeance" type="date"></div>
+        <div class="field"><label for="priorite">Priorité</label><select id="priorite"><option value="Normale" selected>Normale</option><option value="Haute">Haute</option><option value="Urgente">Urgente</option></select></div>
+        <div class="field"><label for="statut">Statut</label><select id="statut"><option value="À faire" selected>À faire</option><option value="Fait">Fait</option></select></div>
+        <div class="field full"><label for="commentaire">Commentaire</label><textarea id="commentaire"></textarea></div>
+      </div>
+
+      <div class="actions">
+        <button id="resetBtn" type="button" class="btn-secondary">Effacer</button>
+        <button id="saveBtn" type="submit" class="btn-primary">✓ Créer la contribution</button>
+      </div>
+    </form>
+  </section>
+</div>
+
+<script>
+/* =============================================================
+   TÂCHTIK — NOUVELLE CONTRIBUTION / BUREAU CONTRIBUTEUR
+   Version 1
+
+   Objectif :
+   - créer une contribution depuis une interface Tâchtik ;
+   - identifier le Bureau contributeur connecté ;
+   - envoyer Bureau_origine et Cree_par dès le premier AddRecord ;
+   - éviter le CENSORED temporaire observé avec la Fiche Grist native ;
+   - ne jamais permettre à l'utilisateur de choisir son Bureau_origine.
+   ============================================================= */
+
+const $ = id => document.getElementById(id);
+let currentProfile = null;
+let currentUser = null;
+let currentUserBureauId = null;
+let departments = [];
+
+function text(value){ return String(value == null ? "" : value); }
+function clean(value){ return text(value).trim().toLowerCase(); }
+
+function tableToRows(table){
+  if(!table){ return []; }
+  const ids = table.id || [];
+  return ids.map((id,index)=>{
+    const row = {id};
+    for(const column of Object.keys(table)){
+      if(column === "id"){ continue; }
+      row[column] = table[column][index];
+    }
+    return row;
+  });
+}
+
+function inputToGristDate(value){
+  if(!value){ return null; }
+  const parts = value.split("-").map(Number);
+  return Date.UTC(parts[0],parts[1]-1,parts[2]) / 1000;
+}
+
+function setError(message){
+  const box = $("errorBox");
+  if(!message){ box.textContent=""; box.classList.remove("show"); return; }
+  box.textContent = message;
+  box.classList.add("show");
+}
+
+function setSuccess(message){
+  const box = $("successBox");
+  if(!message){ box.textContent=""; box.classList.remove("show"); return; }
+  box.textContent = message;
+  box.classList.add("show");
+}
+
+function isBureauContributor(){ return clean(currentProfile?.Role) === "bureau contributeur"; }
+
+function isActiveUser(){
+  const value = currentUser?.Actif;
+  return !(value === false || value === 0 || clean(value) === "false" || clean(value) === "non");
+}
+
+/* =============================================================
+   IDENTIFICATION DU PROFIL VIA SESSION_WIDGET
+   ============================================================= */
+async function identifyProfile(){
+  const before = tableToRows(await grist.docApi.fetchTable("SESSION_WIDGET"));
+  const previousIds = new Set(before.map(row => Number(row.id)));
+
+  await grist.docApi.applyUserActions([
+    ["AddRecord","SESSION_WIDGET",null,{}]
+  ]);
+
+  await new Promise(resolve => setTimeout(resolve,800));
+
+  const after = tableToRows(await grist.docApi.fetchTable("SESSION_WIDGET"));
+  const created = after
+    .filter(row => !previousIds.has(Number(row.id)))
+    .sort((a,b) => Number(b.id) - Number(a.id));
+
+  const profile = created[0] || null;
+  if(!profile){ throw new Error("Profil Tâchtik non identifié."); }
+
+  try{
+    await grist.docApi.applyUserActions([
+      ["BulkRemoveRecord","SESSION_WIDGET",[Number(profile.id)]]
+    ]);
+  }catch(cleanupError){
+    console.error("Nettoyage SESSION_WIDGET :",cleanupError);
+  }
+
+  return profile;
+}
+
+/* =============================================================
+   CHARGEMENT DU PROFIL ET DES DÉPARTEMENTS
+   ============================================================= */
+async function loadContext(){
+  const [userTable,departmentTable] = await Promise.all([
+    grist.docApi.fetchTable("UTILISATEURS"),
+    grist.docApi.fetchTable("DEPARTEMENTS")
+  ]);
+
+  const users = tableToRows(userTable);
+  departments = tableToRows(departmentTable);
+
+  currentProfile = await identifyProfile();
+  const profileEmail = text(currentProfile.Email).trim();
+
+  currentUser = users.find(row => clean(row.Email) === clean(profileEmail)) || null;
+  currentUserBureauId = currentUser ? Number(currentUser.Bureau) || null : null;
+
+  $("profileInfo").textContent = "👤 " + (text(currentProfile.Role) || "Profil non défini") + (currentUserBureauId ? " — bureau identifié" : "");
+
+  if(!currentUser){ throw new Error("Votre profil n'a pas été retrouvé dans la table UTILISATEURS."); }
+  if(!isBureauContributor()){
+    $("accessDenied").classList.add("show");
+    return false;
+  }
+  if(!isActiveUser()){ throw new Error("Votre compte Tâchtik est inactif."); }
+  if(!currentUserBureauId){ throw new Error("Aucun bureau n'est associé à votre profil Bureau contributeur."); }
+
+  return true;
+}
+
+function populateDepartments(){
+  const select = $("contributeur");
+  select.innerHTML = '<option value="">Sélectionner un département…</option>';
+
+  const sorted = departments.slice().sort((a,b)=>text(a.Code).localeCompare(text(b.Code),"fr",{sensitivity:"base"}));
+
+  for(const row of sorted){
+    const option = document.createElement("option");
+    option.value = Number(row.id);
+    option.textContent = row.Code && row.Nom ? `${text(row.Code)} — ${text(row.Nom)}` : text(row.Code || row.Nom || row.id);
+    select.appendChild(option);
+  }
+}
+
+function resetForm(){
+  $("contributionForm").reset();
+  $("priorite").value = "Normale";
+  $("statut").value = "À faire";
+  setError("");
+  setSuccess("");
+  $("titre").focus();
+}
+
+async function createContribution(event){
+  event.preventDefault();
+  setError("");
+  setSuccess("");
+
+  const title = $("titre").value.trim();
+  const contributorId = Number($("contributeur").value);
+
+  if(!title){ setError("Le titre est obligatoire."); $("titre").focus(); return; }
+  if(!contributorId){ setError("Le contributeur est obligatoire."); $("contributeur").focus(); return; }
+  if(!currentUser || !currentUserBureauId){ setError("Le profil Tâchtik n'est pas suffisamment renseigné pour créer une contribution."); return; }
+
+  /*
+    MODIFICATION PRINCIPALE v1 :
+    Bureau_origine et Cree_par sont inclus DIRECTEMENT dans AddRecord.
+  */
+  const values = {
+    Titre: title,
+    Description: $("description").value.trim(),
+    Demandeur: $("demandeur").value.trim(),
+    Contributeur: contributorId,
+    Echeance: inputToGristDate($("echeance").value),
+    Priorite: $("priorite").value,
+    Statut: $("statut").value,
+    Commentaire: $("commentaire").value.trim(),
+    Bureau_origine: Number(currentUserBureauId),
+    Cree_par: text(currentUser.Email).trim()
+  };
+
+  const button = $("saveBtn");
+  button.disabled = true;
+  button.textContent = "Création…";
+
+  try{
+    await grist.docApi.applyUserActions([
+      ["AddRecord","CONTRIBUTIONS",null,values]
+    ]);
+
+    setSuccess("✓ Contribution créée avec succès.");
+    $("contributionForm").reset();
+    $("priorite").value = "Normale";
+    $("statut").value = "À faire";
+    $("titre").focus();
+  }catch(error){
+    console.error(error);
+    setError("Impossible de créer la contribution. Vérifiez les droits d'accès et les données saisies.");
+  }finally{
+    button.disabled = false;
+    button.textContent = "✓ Créer la contribution";
+  }
+}
+
+async function init(){
+  try{
+    grist.ready({requiredAccess:"full"});
+
+    const allowed = await loadContext();
+    $("loadingBox").classList.add("hidden");
+
+    if(!allowed){ return; }
+
+    populateDepartments();
+    $("formPanel").classList.remove("hidden");
+    $("titre").focus();
+  }catch(error){
+    console.error(error);
+    $("loadingBox").classList.add("hidden");
+    $("accessDenied").innerHTML = "<strong>Impossible d'ouvrir le formulaire.</strong><br>" + text(error.message || error);
+    $("accessDenied").classList.add("show");
+  }
+}
+
+$("contributionForm").addEventListener("submit",createContribution);
+$("resetBtn").addEventListener("click",resetForm);
+init();
+</script>
+</body>
+</html>
