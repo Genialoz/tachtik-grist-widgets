@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tâchtik — Contributions terminées</title>
+
+  <!-- SDK Grist -->
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --text:#1d2939;
+      --muted:#667085;
+      --line:#e4e7ec;
+      --primary:#4f46e5;
+      --primary-hover:#4338ca;
+      --soft:#eef2ff;
+      --success:#067647;
+      --success-bg:#ecfdf3;
+      --danger:#b42318;
+      --danger-bg:#fef3f2;
+      --shadow:0 10px 30px rgba(16,24,40,.08);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    .app{
+      max-width:1180px;
+      margin:0 auto;
+      padding:24px;
+    }
+
+    .hero{
+      background:linear-gradient(135deg,#065f46,#059669);
+      color:#fff;
+      border-radius:20px;
+      padding:24px 26px;
+      box-shadow:var(--shadow);
+      margin-bottom:20px;
+    }
+
+    .hero h1{
+      margin:0 0 8px;
+      font-size:28px;
+    }
+
+    .hero p{
+      margin:0;
+      opacity:.92;
+      line-height:1.5;
+    }
+
+    .profile{
+      display:inline-flex;
+      margin-top:14px;
+      padding:7px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.16);
+      font-size:13px;
+      font-weight:700;
+    }
+
+    .panel{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      padding:18px;
+      margin-bottom:18px;
+    }
+
+    .toolbar{
+      display:grid;
+      grid-template-columns:2fr 1fr 1fr 1fr;
+      gap:12px;
+    }
+
+    input, select{
+      width:100%;
+      border:1px solid #d0d5dd;
+      border-radius:12px;
+      padding:11px 12px;
+      font:inherit;
+      background:#fff;
+      color:var(--text);
+      outline:none;
+    }
+
+    input:focus,select:focus{
+      border-color:#818cf8;
+      box-shadow:0 0 0 3px rgba(99,102,241,.12);
+    }
+
+    .results-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin:8px 2px 12px;
+    }
+
+    .results-title{
+      font-size:18px;
+      font-weight:900;
+    }
+
+    .results-count{
+      color:var(--muted);
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .list{
+      display:grid;
+      gap:12px;
+    }
+
+    .card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:16px;
+      box-shadow:0 6px 18px rgba(16,24,40,.05);
+      padding:16px;
+      cursor:pointer;
+    }
+
+    .card:hover{
+      border-color:#c7d2fe;
+      box-shadow:0 10px 24px rgba(16,24,40,.08);
+    }
+
+    .card-top{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+    }
+
+    .title{
+      font-weight:900;
+      font-size:17px;
+      line-height:1.35;
+    }
+
+    .number{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
+      margin-bottom:4px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      padding:5px 9px;
+      border-radius:999px;
+      background:var(--success-bg);
+      color:var(--success);
+      font-size:12px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .meta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px 14px;
+      margin-top:12px;
+      color:#475467;
+      font-size:13px;
+    }
+
+    .meta strong{
+      color:#344054;
+    }
+
+    .empty{
+      background:#fff;
+      border:1px dashed #cbd5e1;
+      border-radius:16px;
+      padding:34px;
+      text-align:center;
+      color:var(--muted);
+    }
+
+    .hidden{display:none!important}
+
+    .detail-toolbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    button{
+      border:0;
+      border-radius:12px;
+      padding:10px 14px;
+      font:inherit;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    button:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
+    .btn-secondary{
+      background:#f2f4f7;
+      color:#344054;
+    }
+
+    .btn-primary{
+      background:var(--primary);
+      color:#fff;
+    }
+
+    .btn-primary:hover:not(:disabled){
+      background:var(--primary-hover);
+    }
+
+    .detail-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+
+    .detail-item{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:13px;
+      background:#fff;
+    }
+
+    .detail-item.full{grid-column:1 / -1}
+
+    .detail-label{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.03em;
+      margin-bottom:5px;
+    }
+
+    .detail-value{
+      white-space:pre-wrap;
+      line-height:1.5;
+    }
+
+    .action-box{
+      margin-top:16px;
+      border:1px solid #c7d2fe;
+      background:var(--soft);
+      border-radius:14px;
+      padding:14px;
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      align-items:center;
+    }
+
+    .action-box p{
+      margin:3px 0 0;
+      color:#475467;
+      font-size:13px;
+      line-height:1.4;
+    }
+
+    .notice{
+      display:none;
+      margin-top:14px;
+      padding:12px 14px;
+      border-radius:12px;
+      line-height:1.45;
+    }
+
+    .notice.show{display:block}
+
+    .notice.success{
+      background:var(--success-bg);
+      color:var(--success);
+      border:1px solid #abefc6;
+    }
+
+    .notice.danger{
+      background:var(--danger-bg);
+      color:var(--danger);
+      border:1px solid #fecdca;
+    }
+
+    .loading{
+      padding:34px;
+      text-align:center;
+      color:var(--muted);
+    }
+
+    @media(max-width:850px){
+      .app{padding:14px}
+      .toolbar{grid-template-columns:1fr}
+      .detail-grid{grid-template-columns:1fr}
+      .detail-item.full{grid-column:auto}
+      .action-box{align-items:flex-start;flex-direction:column}
+    }
+  </style>
+</head>
+
+<body>
+<div class="app">
+
+  <!-- =========================================================
+       ENTÊTE
+       ========================================================= -->
+  <section class="hero">
+    <h1>✅ Contributions terminées</h1>
+    <p>
+      Consultez l’historique des contributions finalisées accessibles selon vos droits Tâchtik.
+    </p>
+    <div id="profileInfo" class="profile">Profil en cours d’identification…</div>
+  </section>
+
+  <div id="loadingBox" class="loading">
+    Chargement des contributions terminées…
+  </div>
+
+  <!-- =========================================================
+       VUE LISTE
+       ========================================================= -->
+  <main id="listView" class="hidden">
+
+    <section class="panel">
+      <div class="toolbar">
+
+        <input
+          id="search"
+          type="search"
+          placeholder="🔎 Rechercher un titre, numéro, demandeur..."
+        >
+
+        <select id="priorityFilter">
+          <option value="">Toutes les priorités</option>
+          <option value="Normale">Normale</option>
+          <option value="Haute">Haute</option>
+          <option value="Urgente">Urgente</option>
+        </select>
+
+        <select id="departmentFilter">
+          <option value="">Tous les départements</option>
+        </select>
+
+        <select id="originFilter">
+          <option value="">Tous les bureaux</option>
+        </select>
+
+      </div>
+    </section>
+
+    <div class="results-head">
+      <div class="results-title">Historique</div>
+      <div id="resultsCount" class="results-count">0 contribution</div>
+    </div>
+
+    <section id="contributionList" class="list"></section>
+
+  </main>
+
+  <!-- =========================================================
+       VUE DÉTAIL
+       ========================================================= -->
+  <main id="detailView" class="hidden">
+
+    <div class="detail-toolbar">
+      <button id="backBtn" type="button" class="btn-secondary">
+        ← Retour à la liste
+      </button>
+      <span id="detailNumber" class="number"></span>
+    </div>
+
+    <section class="panel">
+      <div class="detail-grid">
+
+        <div class="detail-item full">
+          <div class="detail-label">Titre</div>
+          <div id="detailTitle" class="detail-value"></div>
+        </div>
+
+        <div class="detail-item full">
+          <div class="detail-label">Description</div>
+          <div id="detailDescription" class="detail-value"></div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-label">Demandeur</div>
+          <div id="detailDemandeur" class="detail-value"></div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-label">Contributeur</div>
+          <div id="detailContributeur" class="detail-value"></div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-label">Bureau d'origine</div>
+          <div id="detailBureau" class="detail-value"></div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-label">Priorité</div>
+          <div id="detailPriorite" class="detail-value"></div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-label">Échéance</div>
+          <div id="detailEcheance" class="detail-value"></div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-label">Date de finalisation</div>
+          <div id="detailFinalisation" class="detail-value"></div>
+        </div>
+
+        <div class="detail-item full">
+          <div class="detail-label">Commentaire</div>
+          <div id="detailCommentaire" class="detail-value"></div>
+        </div>
+
+      </div>
+
+      <!-- =====================================================
+           OPTION B :
+           Administrateur ou Bureau contributeur autorisé
+           peut remettre sa contribution en "À faire".
+           Lecteur = consultation uniquement.
+           ===================================================== -->
+      <div id="restoreBox" class="action-box hidden">
+        <div>
+          <strong>↩️ Réouvrir cette contribution</strong>
+          <p>
+            Utilisez cette action si la contribution a été finalisée par erreur.
+            Elle réapparaîtra dans « Contributions à traiter ».
+          </p>
+        </div>
+
+        <button id="restoreBtn" type="button" class="btn-primary">
+          Remettre en « À faire »
+        </button>
+      </div>
+
+      <div id="successBox" class="notice success"></div>
+      <div id="errorBox" class="notice danger"></div>
+
+    </section>
+
+  </main>
+
+</div>
+
+<script>
+/* =============================================================
+   TÂCHTIK — CONTRIBUTIONS TERMINÉES
+   Version 1
+
+   Règles :
+   - Administrateur : voit toutes les lignes accessibles et peut réouvrir.
+   - Bureau contributeur : voit les lignes autorisées par les ACL Grist
+     et peut réouvrir uniquement ses propres contributions modifiables.
+   - Lecteur : consultation uniquement.
+   - Les ACL Grist restent la protection de sécurité principale.
+   ============================================================= */
+
+const $ = id => document.getElementById(id);
+
+let currentProfile = null;
+let currentUser = null;
+let currentRole = "";
+let currentUserBureauId = null;
+
+let allRecords = [];
+let departments = [];
+let bureaux = [];
+
+let departmentById = new Map();
+let bureauById = new Map();
+
+let selectedRecordId = null;
+
+/* =============================================================
+   OUTILS
+   ============================================================= */
+
+function text(value){
+  return String(value == null ? "" : value);
+}
+
+function clean(value){
+  return text(value).trim().toLowerCase();
+}
+
+function escapeHtml(value){
+  return text(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;");
+}
+
+function tableToRows(table){
+  if(!table){
+    return [];
+  }
+
+  const ids = table.id || [];
+
+  return ids.map((id,index)=>{
+    const row = {id};
+
+    for(const column of Object.keys(table)){
+      if(column === "id"){
+        continue;
+      }
+
+      row[column] = table[column][index];
+    }
+
+    return row;
+  });
+}
+
+function showNotice(id,message){
+  const box = $(id);
+
+  if(!message){
+    box.textContent = "";
+    box.classList.remove("show");
+    return;
+  }
+
+  box.textContent = message;
+  box.classList.add("show");
+}
+
+function dateValue(value){
+  if(!value){
+    return null;
+  }
+
+  if(typeof value === "number"){
+    return new Date(value * 1000);
+  }
+
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function formatDate(value){
+  const d = dateValue(value);
+
+  if(!d){
+    return "—";
+  }
+
+  return new Intl.DateTimeFormat("fr-FR").format(d);
+}
+
+function isAdministrator(){
+  return currentRole === "administrateur";
+}
+
+function isBureauContributor(){
+  return currentRole === "bureau contributeur";
+}
+
+/* =============================================================
+   IDENTIFICATION UTILISATEUR
+   ============================================================= */
+
+async function identifyProfile(){
+  /*
+    SESSION_WIDGET peut être indisponible pour un Lecteur.
+    Dans ce cas on bascule volontairement en consultation seule.
+  */
+  try{
+    const before = tableToRows(
+      await grist.docApi.fetchTable("SESSION_WIDGET")
+    );
+
+    const previousIds = new Set(
+      before.map(row => Number(row.id))
+    );
+
+    await grist.docApi.applyUserActions([
+      ["AddRecord","SESSION_WIDGET",null,{}]
+    ]);
+
+    await new Promise(resolve => setTimeout(resolve,700));
+
+    const after = tableToRows(
+      await grist.docApi.fetchTable("SESSION_WIDGET")
+    );
+
+    const created = after
+      .filter(row => !previousIds.has(Number(row.id)))
+      .sort((a,b) => Number(b.id) - Number(a.id));
+
+    const profile = created[0] || null;
+
+    if(profile){
+      try{
+        await grist.docApi.applyUserActions([
+          ["BulkRemoveRecord","SESSION_WIDGET",[Number(profile.id)]]
+        ]);
+      }catch(cleanupError){
+        console.warn("Nettoyage SESSION_WIDGET impossible :",cleanupError);
+      }
+    }
+
+    return profile;
+
+  }catch(error){
+    console.warn(
+      "SESSION_WIDGET indisponible : widget maintenu en lecture seule.",
+      error
+    );
+
+    return null;
+  }
+}
+
+async function loadUserContext(){
+  currentProfile = await identifyProfile();
+
+  if(!currentProfile){
+    currentRole = "lecteur";
+    currentUser = null;
+    currentUserBureauId = null;
+    $("profileInfo").textContent = "👤 Consultation";
+    return;
+  }
+
+  currentRole = clean(currentProfile.Role);
+
+  try{
+    const users = tableToRows(
+      await grist.docApi.fetchTable("UTILISATEURS")
+    );
+
+    const email = clean(currentProfile.Email);
+
+    currentUser = users.find(
+      row => clean(row.Email) === email
+    ) || null;
+
+    currentUserBureauId =
+      currentUser && Number(currentUser.Bureau)
+        ? Number(currentUser.Bureau)
+        : null;
+
+  }catch(error){
+    /*
+      Sécurité : si UTILISATEURS n'est pas lisible,
+      on ne donne aucun droit d'action.
+    */
+    console.warn("UTILISATEURS indisponible :",error);
+    currentUser = null;
+    currentUserBureauId = null;
+  }
+
+  $("profileInfo").textContent =
+    "👤 " + (
+      text(currentProfile.Role).trim()
+      || "Consultation"
+    );
+}
+
+/* =============================================================
+   CHARGEMENT DES DONNÉES
+   ============================================================= */
+
+async function loadData(){
+  const contributionsTable =
+    await grist.docApi.fetchTable("CONTRIBUTIONS");
+
+  allRecords = tableToRows(contributionsTable)
+    .filter(row => clean(row.Statut) === "fait");
+
+  try{
+    departments = tableToRows(
+      await grist.docApi.fetchTable("DEPARTEMENTS")
+    );
+  }catch(error){
+    console.warn("DEPARTEMENTS indisponible :",error);
+    departments = [];
+  }
+
+  try{
+    bureaux = tableToRows(
+      await grist.docApi.fetchTable("BUREAUX_ORIGINE")
+    );
+  }catch(error){
+    console.warn("BUREAUX_ORIGINE indisponible :",error);
+    bureaux = [];
+  }
+
+  departmentById = new Map(
+    departments.map(row => [Number(row.id),row])
+  );
+
+  bureauById = new Map(
+    bureaux.map(row => [Number(row.id),row])
+  );
+
+  allRecords = allRecords.map(row => {
+    const depId = Number(row.Contributeur) || null;
+    const bureauId = Number(row.Bureau_origine) || null;
+
+    const dep = departmentById.get(depId);
+    const bureau = bureauById.get(bureauId);
+
+    return {
+      ...row,
+      _ContributeurId:depId,
+      _BureauId:bureauId,
+      _ContributeurLabel:dep
+        ? (
+            text(dep.Code).trim()
+            + (text(dep.Nom).trim() ? " — " + text(dep.Nom).trim() : "")
+          )
+        : text(row.Contributeur),
+      _BureauLabel:bureau
+        ? (
+            text(bureau.Code).trim()
+            + (text(bureau.Nom).trim() ? " — " + text(bureau.Nom).trim() : "")
+          )
+        : text(row.Bureau_origine)
+    };
+  });
+}
+
+/* =============================================================
+   DROITS D'ACTION
+   ============================================================= */
+
+function canRestoreRecord(record){
+  if(!record){
+    return false;
+  }
+
+  if(isAdministrator()){
+    return true;
+  }
+
+  if(isBureauContributor()){
+    const sameBureau =
+      currentUserBureauId
+      && record._BureauId
+      && Number(record._BureauId) === Number(currentUserBureauId);
+
+    const sameCreator =
+      currentUser
+      && clean(record.Cree_par)
+      && clean(record.Cree_par) === clean(currentUser.Email);
+
+    return Boolean(sameBureau && sameCreator);
+  }
+
+  return false;
+}
+
+/* =============================================================
+   FILTRES
+   ============================================================= */
+
+function populateFilters(){
+  const depSelect = $("departmentFilter");
+  const originSelect = $("originFilter");
+
+  const deps = [...new Set(
+    allRecords
+      .map(row => row._ContributeurLabel)
+      .filter(Boolean)
+  )].sort((a,b)=>a.localeCompare(b,"fr",{numeric:true}));
+
+  for(const label of deps){
+    const option = document.createElement("option");
+    option.value = label;
+    option.textContent = label;
+    depSelect.appendChild(option);
+  }
+
+  const origins = [...new Set(
+    allRecords
+      .map(row => row._BureauLabel)
+      .filter(Boolean)
+  )].sort((a,b)=>a.localeCompare(b,"fr",{numeric:true}));
+
+  for(const label of origins){
+    const option = document.createElement("option");
+    option.value = label;
+    option.textContent = label;
+    originSelect.appendChild(option);
+  }
+}
+
+function filteredRecords(){
+  const query = clean($("search").value);
+  const priority = $("priorityFilter").value;
+  const department = $("departmentFilter").value;
+  const origin = $("originFilter").value;
+
+  return allRecords
+    .filter(record => {
+      if(priority && text(record.Priorite) !== priority){
+        return false;
+      }
+
+      if(
+        department
+        && record._ContributeurLabel !== department
+      ){
+        return false;
+      }
+
+      if(
+        origin
+        && record._BureauLabel !== origin
+      ){
+        return false;
+      }
+
+      if(query){
+        const haystack = clean([
+          record.Numero,
+          record.Titre,
+          record.Description,
+          record.Demandeur,
+          record._ContributeurLabel,
+          record._BureauLabel,
+          record.Commentaire
+        ].join(" "));
+
+        if(!haystack.includes(query)){
+          return false;
+        }
+      }
+
+      return true;
+    })
+    .sort((a,b)=>{
+      const da =
+        dateValue(a.Date_finalisation)?.getTime()
+        || dateValue(a.Echeance)?.getTime()
+        || 0;
+
+      const db =
+        dateValue(b.Date_finalisation)?.getTime()
+        || dateValue(b.Echeance)?.getTime()
+        || 0;
+
+      return db - da;
+    });
+}
+
+/* =============================================================
+   LISTE
+   ============================================================= */
+
+function renderList(){
+  const list = $("contributionList");
+  list.innerHTML = "";
+
+  const records = filteredRecords();
+
+  $("resultsCount").textContent =
+    `${records.length} contribution${records.length > 1 ? "s" : ""}`;
+
+  if(!records.length){
+    list.innerHTML = `
+      <div class="empty">
+        Aucune contribution terminée ne correspond aux critères.
+      </div>
+    `;
+    return;
+  }
+
+  for(const record of records){
+    const card = document.createElement("article");
+    card.className = "card";
+
+    card.innerHTML = `
+      <div class="card-top">
+        <div>
+          <div class="number">
+            ${escapeHtml(
+              record.Numero
+                ? `N° ${record.Numero}`
+                : `Contribution ${record.id}`
+            )}
+          </div>
+
+          <div class="title">
+            ${escapeHtml(record.Titre || "Sans titre")}
+          </div>
+        </div>
+
+        <span class="badge">✓ Fait</span>
+      </div>
+
+      <div class="meta">
+        <span>
+          <strong>Contributeur :</strong>
+          ${escapeHtml(record._ContributeurLabel || "—")}
+        </span>
+
+        <span>
+          <strong>Bureau :</strong>
+          ${escapeHtml(record._BureauLabel || "—")}
+        </span>
+
+        <span>
+          <strong>Priorité :</strong>
+          ${escapeHtml(record.Priorite || "—")}
+        </span>
+
+        <span>
+          <strong>Finalisée :</strong>
+          ${escapeHtml(formatDate(record.Date_finalisation))}
+        </span>
+      </div>
+    `;
+
+    card.addEventListener("click",()=>{
+      openDetail(record.id);
+    });
+
+    list.appendChild(card);
+  }
+}
+
+/* =============================================================
+   DÉTAIL
+   ============================================================= */
+
+function getSelectedRecord(){
+  return allRecords.find(
+    row => Number(row.id) === Number(selectedRecordId)
+  ) || null;
+}
+
+function setDetail(id,value){
+  $(id).textContent = text(value).trim() || "—";
+}
+
+function openDetail(recordId){
+  selectedRecordId = Number(recordId);
+
+  const record = getSelectedRecord();
+
+  if(!record){
+    return;
+  }
+
+  $("detailNumber").textContent =
+    record.Numero
+      ? `N° ${record.Numero}`
+      : `Contribution ${record.id}`;
+
+  setDetail("detailTitle",record.Titre);
+  setDetail("detailDescription",record.Description);
+  setDetail("detailDemandeur",record.Demandeur);
+  setDetail("detailContributeur",record._ContributeurLabel);
+  setDetail("detailBureau",record._BureauLabel);
+  setDetail("detailPriorite",record.Priorite);
+  setDetail("detailEcheance",formatDate(record.Echeance));
+  setDetail("detailFinalisation",formatDate(record.Date_finalisation));
+  setDetail("detailCommentaire",record.Commentaire);
+
+  showNotice("successBox","");
+  showNotice("errorBox","");
+
+  $("restoreBox").classList.toggle(
+    "hidden",
+    !canRestoreRecord(record)
+  );
+
+  $("listView").classList.add("hidden");
+  $("detailView").classList.remove("hidden");
+}
+
+function closeDetail(){
+  selectedRecordId = null;
+
+  $("detailView").classList.add("hidden");
+  $("listView").classList.remove("hidden");
+
+  renderList();
+}
+
+/* =============================================================
+   RÉOUVERTURE
+   ============================================================= */
+
+async function restoreContribution(){
+  const record = getSelectedRecord();
+
+  if(!record || !canRestoreRecord(record)){
+    showNotice(
+      "errorBox",
+      "Vous n'êtes pas autorisé à modifier cette contribution."
+    );
+    return;
+  }
+
+  const confirmed = window.confirm(
+    "Remettre cette contribution en « À faire » ?"
+  );
+
+  if(!confirmed){
+    return;
+  }
+
+  const button = $("restoreBtn");
+  button.disabled = true;
+  button.textContent = "Mise à jour…";
+
+  showNotice("successBox","");
+  showNotice("errorBox","");
+
+  try{
+    await grist.docApi.applyUserActions([
+      [
+        "UpdateRecord",
+        "CONTRIBUTIONS",
+        Number(record.id),
+        {
+          Statut:"À faire",
+          Date_finalisation:null
+        }
+      ]
+    ]);
+
+    showNotice(
+      "successBox",
+      "✓ Contribution remise en « À faire »."
+    );
+
+    await new Promise(resolve => setTimeout(resolve,500));
+
+    await loadData();
+
+    /*
+      La contribution n'est désormais plus dans l'historique :
+      retour automatique à la liste.
+    */
+    selectedRecordId = null;
+    $("detailView").classList.add("hidden");
+    $("listView").classList.remove("hidden");
+
+    populateFiltersAfterReload();
+    renderList();
+
+  }catch(error){
+    console.error(error);
+
+    showNotice(
+      "errorBox",
+      "Impossible de remettre cette contribution en « À faire ». Vérifiez les droits Grist."
+    );
+  }finally{
+    button.disabled = false;
+    button.textContent = "Remettre en « À faire »";
+  }
+}
+
+function populateFiltersAfterReload(){
+  const priority = $("priorityFilter").value;
+  const department = $("departmentFilter").value;
+  const origin = $("originFilter").value;
+
+  $("departmentFilter").innerHTML =
+    '<option value="">Tous les départements</option>';
+
+  $("originFilter").innerHTML =
+    '<option value="">Tous les bureaux</option>';
+
+  populateFilters();
+
+  if(
+    [...$("departmentFilter").options]
+      .some(option => option.value === department)
+  ){
+    $("departmentFilter").value = department;
+  }
+
+  if(
+    [...$("originFilter").options]
+      .some(option => option.value === origin)
+  ){
+    $("originFilter").value = origin;
+  }
+
+  $("priorityFilter").value = priority;
+}
+
+/* =============================================================
+   INITIALISATION
+   ============================================================= */
+
+async function init(){
+  try{
+    /*
+      Accès complet demandé afin de permettre l'action
+      "Remettre en À faire" pour les profils autorisés.
+      Les ACL Grist restent prioritaires.
+    */
+    grist.ready({
+      requiredAccess:"full"
+    });
+
+    await loadUserContext();
+    await loadData();
+
+    populateFilters();
+    renderList();
+
+    $("loadingBox").classList.add("hidden");
+    $("listView").classList.remove("hidden");
+
+  }catch(error){
+    console.error(error);
+
+    $("loadingBox").textContent =
+      "Impossible de charger les contributions terminées.";
+  }
+}
+
+/* =============================================================
+   ÉVÉNEMENTS
+   ============================================================= */
+
+$("search").addEventListener("input",renderList);
+$("priorityFilter").addEventListener("change",renderList);
+$("departmentFilter").addEventListener("change",renderList);
+$("originFilter").addEventListener("change",renderList);
+
+$("backBtn").addEventListener("click",closeDetail);
+$("restoreBtn").addEventListener("click",restoreContribution);
+
+init();
+</script>
+</body>
+</html>
