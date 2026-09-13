@@ -58,6 +58,12 @@
   </section>
 </div>
 
+<!-- =========================================================
+     NOUVELLE CONTRIBUTION — BUREAU CONTRIBUTEUR — V3
+     Ajout : CONTRIBUTIONS.Source = "Manuelle".
+     Aucun envoi automatique n'est déclenché dans cette version.
+     ========================================================= -->
+
 <script>
 /* =============================================================
    NOUVELLE CONTRIBUTION / BUREAU CONTRIBUTEUR
@@ -232,7 +238,14 @@ async function createContribution(event){
     Statut: $("statut").value,
     Commentaire: $("commentaire").value.trim(),
     Bureau_origine: Number(currentUserBureauId),
-    Cree_par: text(currentUser.Email).trim()
+    Cree_par: text(currentUser.Email).trim(),
+
+    /*
+      V3 — TRAÇABILITÉ DE LA CRÉATION MANUELLE
+      Permet de distinguer une contribution saisie dans le formulaire
+      d'une contribution issue d'un import.
+    */
+    Source: "Manuelle"
   };
 
   const button = $("saveBtn");
