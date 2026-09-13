@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Nouvelle contribution — Administrateur</title>
+  <title>Tâchtik — Nouvelle contribution Administrateur</title>
 
   <!-- SDK Grist -->
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
@@ -244,7 +244,7 @@
   <section class="hero">
     <h1>➕ Nouvelle contribution</h1>
     <p>
-      Créez une contribution en choisissant son bureau demandeur
+      Créez une contribution Tâchtik en choisissant son bureau d'origine
       et son département contributeur.
     </p>
     <div id="profileInfo" class="profile">Identification du profil…</div>
@@ -280,7 +280,7 @@
         <div class="form-grid">
 
           <div class="field">
-            <label for="bureauOrigine" class="required">Bureau demandeur</label>
+            <label for="bureauOrigine" class="required">Bureau d'origine</label>
             <select id="bureauOrigine" required>
               <option value="">— Sélectionner un bureau —</option>
             </select>
@@ -361,9 +361,15 @@
   </main>
 </div>
 
+<!-- =========================================================
+     NOUVELLE CONTRIBUTION — ADMINISTRATEUR — V3
+     Ajout : CONTRIBUTIONS.Source = "Manuelle".
+     Aucun envoi automatique n'est déclenché dans cette version.
+     ========================================================= -->
+
 <script>
 /* =============================================================
-   NOUVELLE CONTRIBUTION / ADMINISTRATEUR
+   TÂCHTIK — NOUVELLE CONTRIBUTION / ADMINISTRATEUR
    Version 1
 
    Objectif :
@@ -481,7 +487,7 @@ async function identifyProfile(){
   const profile = created[0] || null;
 
   if(!profile){
-    throw new Error("Profil utilisateur non identifié.");
+    throw new Error("Profil Tâchtik non identifié.");
   }
 
   try{
@@ -537,7 +543,7 @@ async function loadContext(){
   }
 
   if(!isActiveUser()){
-    throw new Error("Votre compte utilisateur est inactif.");
+    throw new Error("Votre compte Tâchtik est inactif.");
   }
 
   return true;
@@ -653,7 +659,7 @@ async function createContribution(event){
   if(!bureauOrigine){
     showNotice(
       "errorBox",
-      "Sélectionnez le Bureau demandeur."
+      "Sélectionnez le Bureau d'origine."
     );
     return;
   }
@@ -703,7 +709,14 @@ async function createContribution(event){
         Créateur de la contribution :
         renseigné automatiquement à partir de UTILISATEURS.Email.
       */
-      Cree_par:text(currentUser.Email).trim()
+      Cree_par:text(currentUser.Email).trim(),
+
+      /*
+        V3 — TRAÇABILITÉ DE LA CRÉATION MANUELLE
+        Permet de distinguer une contribution saisie dans le formulaire
+        d'une contribution issue d'un import.
+      */
+      Source:"Manuelle"
     };
 
     await grist.docApi.applyUserActions([
@@ -716,7 +729,7 @@ async function createContribution(event){
     );
 
     /*
-      On conserve Bureau demandeur et Contributeur après création
+      On conserve Bureau d'origine et Contributeur après création
       uniquement le temps que l'utilisateur puisse constater le succès.
       Les autres champs sont vidés pour faciliter une nouvelle saisie.
     */
