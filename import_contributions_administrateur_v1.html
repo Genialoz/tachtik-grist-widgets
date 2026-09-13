@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Tâchtik — Import contributions Administrateur</title>
+
+  <!-- SDK Grist -->
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+
+  <!-- SheetJS -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --text:#1d2939;
+      --muted:#667085;
+      --line:#e4e7ec;
+      --primary:#4f46e5;
+      --primary-hover:#4338ca;
+      --soft:#eef2ff;
+      --success:#067647;
+      --success-bg:#ecfdf3;
+      --warning:#b54708;
+      --warning-bg:#fffaeb;
+      --danger:#b42318;
+      --danger-bg:#fef3f2;
+      --shadow:0 10px 30px rgba(16,24,40,.08);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    .app{
+      max-width:1180px;
+      margin:0 auto;
+      padding:24px;
+    }
+
+    .hero{
+      background:linear-gradient(135deg,#312e81,#6366f1);
+      color:#fff;
+      border-radius:20px;
+      padding:24px 26px;
+      box-shadow:var(--shadow);
+      margin-bottom:20px;
+    }
+
+    .hero h1{
+      margin:0 0 8px;
+      font-size:28px;
+    }
+
+    .hero p{
+      margin:0;
+      opacity:.92;
+      line-height:1.5;
+    }
+
+    .profile{
+      display:inline-flex;
+      margin-top:14px;
+      padding:7px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.16);
+      font-size:13px;
+      font-weight:700;
+    }
+
+    .panel{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      padding:22px;
+      margin-bottom:18px;
+    }
+
+    .panel h2{
+      margin:0 0 6px;
+      font-size:20px;
+    }
+
+    .panel p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.5;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:7px;
+      margin-top:16px;
+    }
+
+    label{
+      font-size:13px;
+      font-weight:800;
+      color:#344054;
+    }
+
+    select,
+    input[type="file"]{
+      width:100%;
+      border:1px solid #d0d5dd;
+      border-radius:12px;
+      padding:11px 12px;
+      font:inherit;
+      color:var(--text);
+      background:#fff;
+      outline:none;
+    }
+
+    select:focus,
+    input[type="file"]:focus{
+      border-color:#818cf8;
+      box-shadow:0 0 0 3px rgba(99,102,241,.12);
+    }
+
+    .upload-row{
+      display:flex;
+      gap:12px;
+      align-items:end;
+      flex-wrap:wrap;
+      margin-top:18px;
+    }
+
+    .upload-row .grow{
+      flex:1;
+      min-width:280px;
+    }
+
+    button{
+      border:0;
+      border-radius:12px;
+      padding:11px 16px;
+      font:inherit;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    button:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
+    .btn-primary{
+      background:var(--primary);
+      color:#fff;
+    }
+
+    .btn-primary:hover:not(:disabled){
+      background:var(--primary-hover);
+    }
+
+    .btn-secondary{
+      background:#f2f4f7;
+      color:#344054;
+    }
+
+    .technical-note{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:12px;
+      background:var(--soft);
+      color:#3730a3;
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    .notice{
+      display:none;
+      margin-top:16px;
+      border-radius:14px;
+      padding:13px 15px;
+      line-height:1.5;
+    }
+
+    .notice.show{display:block}
+
+    .notice.success{
+      color:var(--success);
+      background:var(--success-bg);
+      border:1px solid #abefc6;
+    }
+
+    .notice.warning{
+      color:var(--warning);
+      background:var(--warning-bg);
+      border:1px solid #fedf89;
+    }
+
+    .notice.danger{
+      color:var(--danger);
+      background:var(--danger-bg);
+      border:1px solid #fecdca;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:12px;
+      margin-top:18px;
+    }
+
+    .stat{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      background:#fff;
+    }
+
+    .stat .label{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.03em;
+    }
+
+    .stat .value{
+      margin-top:5px;
+      font-size:26px;
+      font-weight:900;
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border:1px solid var(--line);
+      border-radius:14px;
+      margin-top:16px;
+      max-height:560px;
+      background:#fff;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:1100px;
+    }
+
+    th,td{
+      padding:10px 11px;
+      border-bottom:1px solid var(--line);
+      text-align:left;
+      vertical-align:top;
+      font-size:13px;
+    }
+
+    th{
+      position:sticky;
+      top:0;
+      z-index:1;
+      background:#f9fafb;
+      color:#344054;
+      font-weight:900;
+    }
+
+    tr.invalid{background:#fff6f5}
+    tr.valid{background:#fbfffc}
+
+    .status-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:5px 8px;
+      border-radius:999px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .status-badge.ok{
+      color:var(--success);
+      background:var(--success-bg);
+    }
+
+    .status-badge.ko{
+      color:var(--danger);
+      background:var(--danger-bg);
+    }
+
+    .errors{
+      margin-top:4px;
+      color:var(--danger);
+      font-size:12px;
+      line-height:1.4;
+    }
+
+    .actions{
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      margin-top:18px;
+    }
+
+    .hidden{display:none !important}
+
+    .loading{
+      padding:30px;
+      text-align:center;
+      color:var(--muted);
+    }
+
+    @media(max-width:800px){
+      .app{padding:14px}
+      .stats{grid-template-columns:1fr 1fr}
+      .actions{flex-direction:column-reverse}
+      .actions button{width:100%}
+    }
+  </style>
+</head>
+
+<body>
+<div class="app">
+
+  <!-- =========================================================
+       ENTÊTE
+       ========================================================= -->
+  <section class="hero">
+    <h1>📥 Importer des contributions</h1>
+    <p>
+      Importez plusieurs contributions Tâchtik en choisissant un bureau
+      d'origine pour l'ensemble du fichier.
+    </p>
+    <div id="profileInfo" class="profile">Identification du profil…</div>
+  </section>
+
+  <div id="loadingBox" class="loading">
+    Chargement du widget…
+  </div>
+
+  <div id="accessDenied" class="notice danger">
+    <strong>Accès refusé.</strong><br>
+    Cette page est réservée aux utilisateurs ayant le rôle
+    <strong>Administrateur</strong>.
+  </div>
+
+  <main id="mainContent" class="hidden">
+
+    <!-- =========================================================
+         PARAMÈTRES D'IMPORT
+         ========================================================= -->
+    <section class="panel">
+      <h2>1. Choisir le bureau et le fichier Excel</h2>
+      <p>
+        Le bureau sélectionné sera appliqué à toutes les contributions du fichier.
+      </p>
+
+      <div class="field">
+        <label for="bureauOrigine">Bureau d'origine *</label>
+        <select id="bureauOrigine">
+          <option value="">— Sélectionner un bureau —</option>
+        </select>
+      </div>
+
+      <div class="technical-note">
+        Le fichier doit contenir une feuille <strong>Import</strong> avec les colonnes :
+        <strong>Titre, Description, Demandeur, Contributeur, Echeance,
+        Priorite, Statut, Commentaire</strong>.<br>
+        Pour <strong>Contributeur</strong>, utilisez le code du département
+        (par exemple <strong>B1-1</strong>).
+      </div>
+
+      <div class="upload-row">
+        <div class="grow">
+          <label for="excelFile">Fichier Excel</label>
+          <input id="excelFile" type="file" accept=".xlsx,.xls">
+        </div>
+
+        <button id="analyzeBtn" type="button" class="btn-primary">
+          🔎 Analyser le fichier
+        </button>
+      </div>
+
+      <div id="fileError" class="notice danger"></div>
+    </section>
+
+    <!-- =========================================================
+         APERÇU
+         ========================================================= -->
+    <section id="previewPanel" class="panel hidden">
+      <h2>2. Vérifier les lignes</h2>
+      <p>
+        Aucune contribution n'est créée tant qu'une erreur bloquante subsiste.
+      </p>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="label">Lignes détectées</div>
+          <div id="statTotal" class="value">0</div>
+        </div>
+
+        <div class="stat">
+          <div class="label">Lignes valides</div>
+          <div id="statValid" class="value">0</div>
+        </div>
+
+        <div class="stat">
+          <div class="label">Lignes en erreur</div>
+          <div id="statInvalid" class="value">0</div>
+        </div>
+
+        <div class="stat">
+          <div class="label">Bureau d'origine</div>
+          <div id="statBureau" class="value" style="font-size:18px">—</div>
+        </div>
+      </div>
+
+      <div id="validationMessage" class="notice warning"></div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>État</th>
+              <th>Titre</th>
+              <th>Demandeur</th>
+              <th>Contributeur</th>
+              <th>Échéance</th>
+              <th>Priorité</th>
+              <th>Statut</th>
+              <th>Commentaire</th>
+              <th>Contrôles</th>
+            </tr>
+          </thead>
+          <tbody id="previewBody"></tbody>
+        </table>
+      </div>
+
+      <div class="actions">
+        <button id="clearBtn" type="button" class="btn-secondary">
+          Effacer l'aperçu
+        </button>
+
+        <button id="importBtn" type="button" class="btn-primary" disabled>
+          📥 Importer les contributions
+        </button>
+      </div>
+
+      <div id="importSuccess" class="notice success"></div>
+      <div id="importError" class="notice danger"></div>
+    </section>
+
+  </main>
+
+</div>
+
+<script>
+/* =============================================================
+   TÂCHTIK — IMPORT CONTRIBUTIONS / ADMINISTRATEUR
+   Version 1
+
+   Objectif :
+   - réserver le widget au rôle Administrateur ;
+   - choisir Bureau_origine une fois pour tout le fichier ;
+   - valider les lignes avant import ;
+   - résoudre Contributeur via DEPARTEMENTS.Code ;
+   - renseigner Cree_par automatiquement ;
+   - importer les lignes dans CONTRIBUTIONS.
+   ============================================================= */
+
+const $ = id => document.getElementById(id);
+
+const EXPECTED_COLUMNS = [
+  "Titre",
+  "Description",
+  "Demandeur",
+  "Contributeur",
+  "Echeance",
+  "Priorite",
+  "Statut",
+  "Commentaire"
+];
+
+const ALLOWED_PRIORITIES = new Set([
+  "Normale",
+  "Haute",
+  "Urgente"
+]);
+
+const ALLOWED_STATUSES = new Set([
+  "À faire",
+  "Fait"
+]);
+
+let currentProfile = null;
+let currentUser = null;
+let bureaux = [];
+let departments = [];
+let departmentByCode = new Map();
+let analyzedRows = [];
+let selectedBureauId = null;
+let selectedBureauLabel = "";
+
+/* =============================================================
+   OUTILS
+   ============================================================= */
+
+function text(value){
+  return String(value == null ? "" : value);
+}
+
+function clean(value){
+  return text(value).trim().toLowerCase();
+}
+
+function normalizeCode(value){
+  return text(value).trim().toUpperCase();
+}
+
+function escapeHtml(value){
+  return text(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;");
+}
+
+function tableToRows(table){
+  if(!table){
+    return [];
+  }
+
+  const ids = table.id || [];
+
+  return ids.map((id,index)=>{
+    const row = {id};
+
+    for(const column of Object.keys(table)){
+      if(column === "id"){
+        continue;
+      }
+
+      row[column] = table[column][index];
+    }
+
+    return row;
+  });
+}
+
+function showNotice(id,message){
+  const box = $(id);
+
+  if(!message){
+    box.textContent = "";
+    box.classList.remove("show");
+    return;
+  }
+
+  box.textContent = message;
+  box.classList.add("show");
+}
+
+function isAdministrator(){
+  return clean(currentProfile?.Role) === "administrateur";
+}
+
+function isActiveUser(){
+  const value = currentUser?.Actif;
+
+  return !(
+    value === false
+    || value === 0
+    || clean(value) === "false"
+    || clean(value) === "non"
+  );
+}
+
+/* =============================================================
+   IDENTIFICATION VIA SESSION_WIDGET
+   ============================================================= */
+
+async function identifyProfile(){
+  const before = tableToRows(
+    await grist.docApi.fetchTable("SESSION_WIDGET")
+  );
+
+  const previousIds = new Set(
+    before.map(row => Number(row.id))
+  );
+
+  await grist.docApi.applyUserActions([
+    ["AddRecord","SESSION_WIDGET",null,{}]
+  ]);
+
+  await new Promise(resolve => setTimeout(resolve,800));
+
+  const after = tableToRows(
+    await grist.docApi.fetchTable("SESSION_WIDGET")
+  );
+
+  const created = after
+    .filter(row => !previousIds.has(Number(row.id)))
+    .sort((a,b) => Number(b.id) - Number(a.id));
+
+  const profile = created[0] || null;
+
+  if(!profile){
+    throw new Error("Profil Tâchtik non identifié.");
+  }
+
+  try{
+    await grist.docApi.applyUserActions([
+      ["BulkRemoveRecord","SESSION_WIDGET",[Number(profile.id)]]
+    ]);
+  }catch(cleanupError){
+    console.error("Nettoyage SESSION_WIDGET :",cleanupError);
+  }
+
+  return profile;
+}
+
+/* =============================================================
+   CONTEXTE
+   ============================================================= */
+
+async function loadContext(){
+  const [
+    usersTable,
+    bureauxTable,
+    departmentsTable
+  ] = await Promise.all([
+    grist.docApi.fetchTable("UTILISATEURS"),
+    grist.docApi.fetchTable("BUREAUX_ORIGINE"),
+    grist.docApi.fetchTable("DEPARTEMENTS")
+  ]);
+
+  const users = tableToRows(usersTable);
+  bureaux = tableToRows(bureauxTable);
+  departments = tableToRows(departmentsTable);
+
+  currentProfile = await identifyProfile();
+
+  const profileEmail = text(currentProfile.Email).trim();
+
+  currentUser = users.find(
+    row => clean(row.Email) === clean(profileEmail)
+  ) || null;
+
+  if(!currentUser){
+    throw new Error(
+      "Votre profil n'a pas été retrouvé dans la table UTILISATEURS."
+    );
+  }
+
+  $("profileInfo").textContent =
+    "👤 " + (text(currentProfile.Role) || "Profil non défini");
+
+  if(!isAdministrator()){
+    $("accessDenied").classList.add("show");
+    return false;
+  }
+
+  if(!isActiveUser()){
+    throw new Error("Votre compte Tâchtik est inactif.");
+  }
+
+  departmentByCode = new Map();
+
+  for(const row of departments){
+    const code = normalizeCode(row.Code);
+
+    if(code){
+      departmentByCode.set(code,row);
+    }
+  }
+
+  return true;
+}
+
+/* =============================================================
+   BUREAUX
+   ============================================================= */
+
+function populateBureaux(){
+  const select = $("bureauOrigine");
+
+  const sorted = [...bureaux].sort((a,b)=>{
+    const aLabel = text(a.Code || a.Nom || a.id);
+    const bLabel = text(b.Code || b.Nom || b.id);
+    return aLabel.localeCompare(bLabel,"fr",{numeric:true});
+  });
+
+  for(const row of sorted){
+    const option = document.createElement("option");
+    option.value = Number(row.id);
+
+    const code = text(row.Code).trim();
+    const nom = text(row.Nom).trim();
+
+    option.textContent =
+      code && nom
+        ? `${code} — ${nom}`
+        : (code || nom || `Bureau ${row.id}`);
+
+    select.appendChild(option);
+  }
+}
+
+function getSelectedBureau(){
+  const id = Number($("bureauOrigine").value) || null;
+
+  if(!id){
+    return null;
+  }
+
+  return bureaux.find(
+    row => Number(row.id) === Number(id)
+  ) || null;
+}
+
+/* =============================================================
+   DATES EXCEL
+   ============================================================= */
+
+function excelDateToGrist(value){
+  if(
+    value === null
+    || value === undefined
+    || value === ""
+  ){
+    return null;
+  }
+
+  if(value instanceof Date && !Number.isNaN(value.getTime())){
+    return Date.UTC(
+      value.getFullYear(),
+      value.getMonth(),
+      value.getDate()
+    ) / 1000;
+  }
+
+  if(typeof value === "number" && Number.isFinite(value)){
+    const parsed = XLSX.SSF.parse_date_code(value);
+
+    if(!parsed){
+      throw new Error("Date Excel invalide.");
+    }
+
+    return Date.UTC(
+      parsed.y,
+      parsed.m - 1,
+      parsed.d
+    ) / 1000;
+  }
+
+  const raw = text(value).trim();
+
+  if(!raw){
+    return null;
+  }
+
+  let match = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+
+  if(match){
+    return Date.UTC(
+      Number(match[3]),
+      Number(match[2]) - 1,
+      Number(match[1])
+    ) / 1000;
+  }
+
+  match = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+
+  if(match){
+    return Date.UTC(
+      Number(match[1]),
+      Number(match[2]) - 1,
+      Number(match[3])
+    ) / 1000;
+  }
+
+  throw new Error(
+    "Date invalide. Utilisez une vraie date Excel ou le format JJ/MM/AAAA."
+  );
+}
+
+function formatPreviewDate(gristTimestamp){
+  if(gristTimestamp == null){
+    return "";
+  }
+
+  const date = new Date(Number(gristTimestamp) * 1000);
+
+  return new Intl.DateTimeFormat("fr-FR",{
+    day:"2-digit",
+    month:"2-digit",
+    year:"numeric"
+  }).format(date);
+}
+
+/* =============================================================
+   LECTURE EXCEL
+   ============================================================= */
+
+async function readExcelFile(file){
+  const buffer = await file.arrayBuffer();
+
+  return XLSX.read(buffer,{
+    type:"array",
+    cellDates:true
+  });
+}
+
+function getImportSheet(workbook){
+  const sheetName = workbook.SheetNames.find(
+    name => clean(name) === "import"
+  );
+
+  if(!sheetName){
+    throw new Error(
+      'La feuille "Import" est absente du fichier Excel.'
+    );
+  }
+
+  return workbook.Sheets[sheetName];
+}
+
+function sheetToObjects(sheet){
+  return XLSX.utils.sheet_to_json(sheet,{
+    defval:"",
+    raw:true
+  });
+}
+
+function validateColumns(sheet){
+  const matrix = XLSX.utils.sheet_to_json(sheet,{
+    header:1,
+    defval:"",
+    raw:true
+  });
+
+  if(!matrix.length){
+    throw new Error("La feuille Import est vide.");
+  }
+
+  const headers = matrix[0].map(
+    value => text(value).trim()
+  );
+
+  const missing = EXPECTED_COLUMNS.filter(
+    column => !headers.includes(column)
+  );
+
+  if(missing.length){
+    throw new Error(
+      "Colonnes manquantes : " + missing.join(", ")
+    );
+  }
+}
+
+/* =============================================================
+   VALIDATION DES LIGNES
+   ============================================================= */
+
+function rowIsCompletelyEmpty(row){
+  return EXPECTED_COLUMNS.every(
+    column => !text(row[column]).trim()
+  );
+}
+
+function validateRow(source,index){
+  const errors = [];
+
+  const title = text(source.Titre).trim();
+  const description = text(source.Description).trim();
+  const demandeur = text(source.Demandeur).trim();
+  const contributorCode = normalizeCode(source.Contributeur);
+  const priority = text(source.Priorite).trim() || "Normale";
+  const status = text(source.Statut).trim() || "À faire";
+  const comment = text(source.Commentaire).trim();
+
+  if(!title){
+    errors.push("Titre obligatoire.");
+  }
+
+  let contributor = null;
+
+  if(!contributorCode){
+    errors.push("Contributeur obligatoire.");
+  }else{
+    contributor = departmentByCode.get(contributorCode) || null;
+
+    if(!contributor){
+      errors.push(
+        `Contributeur "${contributorCode}" introuvable dans DEPARTEMENTS.`
+      );
+    }
+  }
+
+  if(!ALLOWED_PRIORITIES.has(priority)){
+    errors.push(
+      `Priorité invalide : "${priority}".`
+    );
+  }
+
+  if(!ALLOWED_STATUSES.has(status)){
+    errors.push(
+      `Statut invalide : "${status}".`
+    );
+  }
+
+  let dueDate = null;
+
+  try{
+    dueDate = excelDateToGrist(source.Echeance);
+  }catch(error){
+    errors.push(error.message);
+  }
+
+  const values = {
+    Titre:title,
+    Description:description,
+    Demandeur:demandeur,
+    Contributeur:contributor ? Number(contributor.id) : null,
+    Echeance:dueDate,
+    Priorite:priority,
+    Statut:status,
+    Commentaire:comment,
+
+    /*
+      Paramètres administrateur :
+      même Bureau_origine pour toutes les lignes du fichier.
+    */
+    Bureau_origine:Number(selectedBureauId),
+    Cree_par:text(currentUser.Email).trim()
+  };
+
+  return {
+    excelRow:index + 2,
+    contributorCode,
+    dueDate,
+    errors,
+    valid:errors.length === 0,
+    values
+  };
+}
+
+/* =============================================================
+   APERÇU
+   ============================================================= */
+
+function renderPreview(){
+  const body = $("previewBody");
+  body.innerHTML = "";
+
+  const total = analyzedRows.length;
+  const valid = analyzedRows.filter(row => row.valid).length;
+  const invalid = total - valid;
+
+  $("statTotal").textContent = total;
+  $("statValid").textContent = valid;
+  $("statInvalid").textContent = invalid;
+  $("statBureau").textContent = selectedBureauLabel || "—";
+
+  for(const row of analyzedRows){
+    const tr = document.createElement("tr");
+    tr.className = row.valid ? "valid" : "invalid";
+
+    tr.innerHTML = `
+      <td>${row.excelRow}</td>
+      <td>
+        <span class="status-badge ${row.valid ? "ok" : "ko"}">
+          ${row.valid ? "✓ Valide" : "⚠ Erreur"}
+        </span>
+      </td>
+      <td>${escapeHtml(row.values.Titre)}</td>
+      <td>${escapeHtml(row.values.Demandeur)}</td>
+      <td>${escapeHtml(row.contributorCode)}</td>
+      <td>${escapeHtml(formatPreviewDate(row.dueDate))}</td>
+      <td>${escapeHtml(row.values.Priorite)}</td>
+      <td>${escapeHtml(row.values.Statut)}</td>
+      <td>${escapeHtml(row.values.Commentaire)}</td>
+      <td>
+        ${
+          row.valid
+            ? '<span style="color:#067647;font-weight:800">Aucune erreur</span>'
+            : `<div class="errors">${row.errors.map(
+                error => "• " + escapeHtml(error)
+              ).join("<br>")}</div>`
+        }
+      </td>
+    `;
+
+    body.appendChild(tr);
+  }
+
+  $("previewPanel").classList.remove("hidden");
+
+  if(total === 0){
+    showNotice(
+      "validationMessage",
+      "Aucune ligne de contribution n'a été trouvée dans la feuille Import."
+    );
+    $("importBtn").disabled = true;
+    return;
+  }
+
+  if(invalid > 0){
+    showNotice(
+      "validationMessage",
+      `${invalid} ligne(s) contiennent des erreurs. Corrigez le fichier Excel puis relancez l'analyse. Aucune ligne ne sera importée.`
+    );
+    $("importBtn").disabled = true;
+  }else{
+    showNotice(
+      "validationMessage",
+      `Toutes les lignes sont valides. ${valid} contribution(s) peuvent être importées.`
+    );
+    $("importBtn").disabled = false;
+  }
+}
+
+function clearPreview(){
+  analyzedRows = [];
+  selectedBureauId = null;
+  selectedBureauLabel = "";
+
+  $("excelFile").value = "";
+  $("bureauOrigine").value = "";
+  $("previewBody").innerHTML = "";
+  $("previewPanel").classList.add("hidden");
+
+  showNotice("fileError","");
+  showNotice("validationMessage","");
+  showNotice("importSuccess","");
+  showNotice("importError","");
+}
+
+/* =============================================================
+   ANALYSE
+   ============================================================= */
+
+async function analyzeFile(){
+  showNotice("fileError","");
+  showNotice("importSuccess","");
+  showNotice("importError","");
+
+  const bureau = getSelectedBureau();
+
+  if(!bureau){
+    showNotice(
+      "fileError",
+      "Sélectionnez d'abord le Bureau d'origine."
+    );
+    return;
+  }
+
+  const file = $("excelFile").files[0];
+
+  if(!file){
+    showNotice(
+      "fileError",
+      "Sélectionnez ensuite un fichier Excel."
+    );
+    return;
+  }
+
+  selectedBureauId = Number(bureau.id);
+
+  const code = text(bureau.Code).trim();
+  const nom = text(bureau.Nom).trim();
+
+  selectedBureauLabel =
+    code && nom
+      ? `${code} — ${nom}`
+      : (code || nom || `Bureau ${bureau.id}`);
+
+  const button = $("analyzeBtn");
+  button.disabled = true;
+  button.textContent = "Analyse…";
+
+  try{
+    const workbook = await readExcelFile(file);
+    const sheet = getImportSheet(workbook);
+
+    validateColumns(sheet);
+
+    const rows = sheetToObjects(sheet);
+
+    const nonEmpty = rows.filter(
+      row => !rowIsCompletelyEmpty(row)
+    );
+
+    analyzedRows = nonEmpty.map(
+      (row,index) => validateRow(row,index)
+    );
+
+    renderPreview();
+
+  }catch(error){
+    console.error(error);
+
+    analyzedRows = [];
+    $("previewPanel").classList.add("hidden");
+
+    showNotice(
+      "fileError",
+      error.message || "Impossible de lire le fichier Excel."
+    );
+  }finally{
+    button.disabled = false;
+    button.textContent = "🔎 Analyser le fichier";
+  }
+}
+
+/* =============================================================
+   IMPORT
+   ============================================================= */
+
+async function importRows(){
+  showNotice("importSuccess","");
+  showNotice("importError","");
+
+  if(!analyzedRows.length){
+    showNotice(
+      "importError",
+      "Aucune ligne n'est prête à être importée."
+    );
+    return;
+  }
+
+  if(analyzedRows.some(row => !row.valid)){
+    showNotice(
+      "importError",
+      "L'import est bloqué tant qu'une ligne contient une erreur."
+    );
+    return;
+  }
+
+  const button = $("importBtn");
+  button.disabled = true;
+  button.textContent = "Import en cours…";
+
+  try{
+    /*
+      Une seule opération Grist pour limiter le risque
+      d'import partiel.
+    */
+    const actions = analyzedRows.map(row => [
+      "AddRecord",
+      "CONTRIBUTIONS",
+      null,
+      row.values
+    ]);
+
+    await grist.docApi.applyUserActions(actions);
+
+    const count = analyzedRows.length;
+
+    showNotice(
+      "importSuccess",
+      `✓ ${count} contribution(s) importée(s) avec succès pour le bureau ${selectedBureauLabel}.`
+    );
+
+    $("importBtn").disabled = true;
+    $("excelFile").value = "";
+
+  }catch(error){
+    console.error(error);
+
+    showNotice(
+      "importError",
+      "Impossible d'importer les contributions. Vérifiez les droits Grist et les données avant de réessayer."
+    );
+
+    button.disabled = false;
+  }finally{
+    button.textContent = "📥 Importer les contributions";
+  }
+}
+
+/* =============================================================
+   INITIALISATION
+   ============================================================= */
+
+async function init(){
+  try{
+    grist.ready({
+      requiredAccess:"full"
+    });
+
+    const allowed = await loadContext();
+
+    $("loadingBox").classList.add("hidden");
+
+    if(!allowed){
+      return;
+    }
+
+    populateBureaux();
+
+    $("mainContent").classList.remove("hidden");
+
+  }catch(error){
+    console.error(error);
+
+    $("loadingBox").classList.add("hidden");
+
+    $("accessDenied").innerHTML =
+      "<strong>Impossible d'ouvrir le widget.</strong><br>"
+      + escapeHtml(error.message || error);
+
+    $("accessDenied").classList.add("show");
+  }
+}
+
+$("analyzeBtn").addEventListener("click",analyzeFile);
+$("clearBtn").addEventListener("click",clearPreview);
+$("importBtn").addEventListener("click",importRows);
+
+init();
+</script>
+</body>
+</html>
