@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Tâchtik — Nouvelle contribution Administrateur</title>
+
+  <!-- SDK Grist -->
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --text:#1d2939;
+      --muted:#667085;
+      --line:#e4e7ec;
+      --primary:#4f46e5;
+      --primary-hover:#4338ca;
+      --soft:#eef2ff;
+      --success:#067647;
+      --success-bg:#ecfdf3;
+      --danger:#b42318;
+      --danger-bg:#fef3f2;
+      --shadow:0 10px 30px rgba(16,24,40,.08);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    .app{
+      max-width:980px;
+      margin:0 auto;
+      padding:24px;
+    }
+
+    .hero{
+      background:linear-gradient(135deg,#312e81,#6366f1);
+      color:#fff;
+      border-radius:20px;
+      padding:24px 26px;
+      box-shadow:var(--shadow);
+      margin-bottom:20px;
+    }
+
+    .hero h1{
+      margin:0 0 8px;
+      font-size:28px;
+    }
+
+    .hero p{
+      margin:0;
+      opacity:.92;
+      line-height:1.5;
+    }
+
+    .profile{
+      display:inline-flex;
+      margin-top:14px;
+      padding:7px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.16);
+      font-size:13px;
+      font-weight:700;
+    }
+
+    .panel{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      padding:22px;
+      margin-bottom:18px;
+    }
+
+    .panel h2{
+      margin:0 0 6px;
+      font-size:20px;
+    }
+
+    .panel p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.5;
+    }
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+      margin-top:18px;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:7px;
+    }
+
+    .field.full{
+      grid-column:1 / -1;
+    }
+
+    label{
+      font-size:13px;
+      font-weight:800;
+      color:#344054;
+    }
+
+    .required::after{
+      content:" *";
+      color:var(--danger);
+    }
+
+    input,
+    textarea,
+    select{
+      width:100%;
+      border:1px solid #d0d5dd;
+      border-radius:12px;
+      padding:11px 12px;
+      font:inherit;
+      color:var(--text);
+      background:#fff;
+      outline:none;
+    }
+
+    textarea{
+      min-height:110px;
+      resize:vertical;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus{
+      border-color:#818cf8;
+      box-shadow:0 0 0 3px rgba(99,102,241,.12);
+    }
+
+    .hint{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.4;
+    }
+
+    .actions{
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      margin-top:20px;
+    }
+
+    button{
+      border:0;
+      border-radius:12px;
+      padding:11px 16px;
+      font:inherit;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    button:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
+    .btn-primary{
+      background:var(--primary);
+      color:#fff;
+    }
+
+    .btn-primary:hover:not(:disabled){
+      background:var(--primary-hover);
+    }
+
+    .btn-secondary{
+      background:#f2f4f7;
+      color:#344054;
+    }
+
+    .notice{
+      display:none;
+      margin-top:16px;
+      border-radius:14px;
+      padding:13px 15px;
+      line-height:1.5;
+    }
+
+    .notice.show{display:block}
+
+    .notice.success{
+      color:var(--success);
+      background:var(--success-bg);
+      border:1px solid #abefc6;
+    }
+
+    .notice.danger{
+      color:var(--danger);
+      background:var(--danger-bg);
+      border:1px solid #fecdca;
+    }
+
+    .technical-note{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:12px;
+      background:var(--soft);
+      color:#3730a3;
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    .hidden{display:none !important}
+
+    .loading{
+      padding:30px;
+      text-align:center;
+      color:var(--muted);
+    }
+
+    @media(max-width:760px){
+      .app{padding:14px}
+      .form-grid{grid-template-columns:1fr}
+      .field.full{grid-column:auto}
+      .actions{flex-direction:column-reverse}
+      .actions button{width:100%}
+    }
+  </style>
+</head>
+
+<body>
+<div class="app">
+
+  <!-- =========================================================
+       ENTÊTE
+       ========================================================= -->
+  <section class="hero">
+    <h1>➕ Nouvelle contribution</h1>
+    <p>
+      Créez une contribution Tâchtik en choisissant son bureau d'origine
+      et son département contributeur.
+    </p>
+    <div id="profileInfo" class="profile">Identification du profil…</div>
+  </section>
+
+  <div id="loadingBox" class="loading">
+    Chargement du widget…
+  </div>
+
+  <div id="accessDenied" class="notice danger">
+    <strong>Accès refusé.</strong><br>
+    Cette page est réservée aux utilisateurs ayant le rôle
+    <strong>Administrateur</strong>.
+  </div>
+
+  <main id="mainContent" class="hidden">
+
+    <!-- =========================================================
+         FORMULAIRE ADMINISTRATEUR
+         ========================================================= -->
+    <section class="panel">
+      <h2>Créer une contribution</h2>
+      <p>
+        Les champs marqués d'un astérisque sont obligatoires.
+      </p>
+
+      <div class="technical-note">
+        <strong>Cree_par</strong> sera renseigné automatiquement avec
+        l'adresse e-mail de l'Administrateur connecté.
+      </div>
+
+      <form id="contributionForm" novalidate>
+        <div class="form-grid">
+
+          <div class="field">
+            <label for="bureauOrigine" class="required">Bureau d'origine</label>
+            <select id="bureauOrigine" required>
+              <option value="">— Sélectionner un bureau —</option>
+            </select>
+            <div class="hint">
+              Valeurs chargées depuis <strong>BUREAUX_ORIGINE</strong>.
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="contributeur" class="required">Contributeur</label>
+            <select id="contributeur" required>
+              <option value="">— Sélectionner un département —</option>
+            </select>
+            <div class="hint">
+              Valeurs chargées depuis <strong>DEPARTEMENTS</strong>.
+            </div>
+          </div>
+
+          <div class="field full">
+            <label for="titre" class="required">Titre</label>
+            <input id="titre" type="text" maxlength="500" required>
+          </div>
+
+          <div class="field full">
+            <label for="description">Description</label>
+            <textarea id="description"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="demandeur">Demandeur</label>
+            <input id="demandeur" type="text">
+          </div>
+
+          <div class="field">
+            <label for="echeance">Échéance</label>
+            <input id="echeance" type="date">
+          </div>
+
+          <div class="field">
+            <label for="priorite">Priorité</label>
+            <select id="priorite">
+              <option value="Normale" selected>Normale</option>
+              <option value="Haute">Haute</option>
+              <option value="Urgente">Urgente</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="statut">Statut</label>
+            <select id="statut">
+              <option value="À faire" selected>À faire</option>
+              <option value="Fait">Fait</option>
+            </select>
+          </div>
+
+          <div class="field full">
+            <label for="commentaire">Commentaire</label>
+            <textarea id="commentaire"></textarea>
+          </div>
+
+        </div>
+
+        <div class="actions">
+          <button id="resetBtn" type="button" class="btn-secondary">
+            Effacer
+          </button>
+
+          <button id="createBtn" type="submit" class="btn-primary">
+            ➕ Créer la contribution
+          </button>
+        </div>
+      </form>
+
+      <div id="successBox" class="notice success"></div>
+      <div id="errorBox" class="notice danger"></div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+/* =============================================================
+   TÂCHTIK — NOUVELLE CONTRIBUTION / ADMINISTRATEUR
+   Version 1
+
+   Objectif :
+   - réserver le widget au rôle Administrateur ;
+   - permettre le choix de Bureau_origine ;
+   - permettre le choix de Contributeur ;
+   - renseigner automatiquement Cree_par avec l'e-mail connecté ;
+   - créer directement la ligne dans CONTRIBUTIONS.
+   ============================================================= */
+
+const $ = id => document.getElementById(id);
+
+let currentProfile = null;
+let currentUser = null;
+let bureaux = [];
+let departments = [];
+
+/* =============================================================
+   OUTILS GÉNÉRAUX
+   ============================================================= */
+
+function text(value){
+  return String(value == null ? "" : value);
+}
+
+function clean(value){
+  return text(value).trim().toLowerCase();
+}
+
+function escapeHtml(value){
+  return text(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;");
+}
+
+function tableToRows(table){
+  if(!table){
+    return [];
+  }
+
+  const ids = table.id || [];
+
+  return ids.map((id,index)=>{
+    const row = {id};
+
+    for(const column of Object.keys(table)){
+      if(column === "id"){
+        continue;
+      }
+
+      row[column] = table[column][index];
+    }
+
+    return row;
+  });
+}
+
+function showNotice(id,message){
+  const box = $(id);
+
+  if(!message){
+    box.textContent = "";
+    box.classList.remove("show");
+    return;
+  }
+
+  box.textContent = message;
+  box.classList.add("show");
+}
+
+function isAdministrator(){
+  return clean(currentProfile?.Role) === "administrateur";
+}
+
+function isActiveUser(){
+  const value = currentUser?.Actif;
+
+  return !(
+    value === false
+    || value === 0
+    || clean(value) === "false"
+    || clean(value) === "non"
+  );
+}
+
+/* =============================================================
+   IDENTIFICATION VIA SESSION_WIDGET
+   ============================================================= */
+
+async function identifyProfile(){
+  const before = tableToRows(
+    await grist.docApi.fetchTable("SESSION_WIDGET")
+  );
+
+  const previousIds = new Set(
+    before.map(row => Number(row.id))
+  );
+
+  await grist.docApi.applyUserActions([
+    ["AddRecord","SESSION_WIDGET",null,{}]
+  ]);
+
+  await new Promise(resolve => setTimeout(resolve,800));
+
+  const after = tableToRows(
+    await grist.docApi.fetchTable("SESSION_WIDGET")
+  );
+
+  const created = after
+    .filter(row => !previousIds.has(Number(row.id)))
+    .sort((a,b) => Number(b.id) - Number(a.id));
+
+  const profile = created[0] || null;
+
+  if(!profile){
+    throw new Error("Profil Tâchtik non identifié.");
+  }
+
+  try{
+    await grist.docApi.applyUserActions([
+      ["BulkRemoveRecord","SESSION_WIDGET",[Number(profile.id)]]
+    ]);
+  }catch(cleanupError){
+    console.error("Nettoyage SESSION_WIDGET :",cleanupError);
+  }
+
+  return profile;
+}
+
+/* =============================================================
+   CHARGEMENT DU CONTEXTE
+   ============================================================= */
+
+async function loadContext(){
+  const [
+    usersTable,
+    bureauxTable,
+    departmentsTable
+  ] = await Promise.all([
+    grist.docApi.fetchTable("UTILISATEURS"),
+    grist.docApi.fetchTable("BUREAUX_ORIGINE"),
+    grist.docApi.fetchTable("DEPARTEMENTS")
+  ]);
+
+  const users = tableToRows(usersTable);
+  bureaux = tableToRows(bureauxTable);
+  departments = tableToRows(departmentsTable);
+
+  currentProfile = await identifyProfile();
+
+  const profileEmail = text(currentProfile.Email).trim();
+
+  currentUser = users.find(
+    row => clean(row.Email) === clean(profileEmail)
+  ) || null;
+
+  if(!currentUser){
+    throw new Error(
+      "Votre profil n'a pas été retrouvé dans la table UTILISATEURS."
+    );
+  }
+
+  $("profileInfo").textContent =
+    "👤 " + (text(currentProfile.Role) || "Profil non défini");
+
+  if(!isAdministrator()){
+    $("accessDenied").classList.add("show");
+    return false;
+  }
+
+  if(!isActiveUser()){
+    throw new Error("Votre compte Tâchtik est inactif.");
+  }
+
+  return true;
+}
+
+/* =============================================================
+   LISTES BUREAUX / DÉPARTEMENTS
+   ============================================================= */
+
+function populateBureaux(){
+  const select = $("bureauOrigine");
+
+  const sorted = [...bureaux].sort((a,b)=>{
+    const aLabel = text(a.Code || a.Nom || a.id);
+    const bLabel = text(b.Code || b.Nom || b.id);
+    return aLabel.localeCompare(bLabel,"fr",{numeric:true});
+  });
+
+  for(const row of sorted){
+    const option = document.createElement("option");
+    option.value = Number(row.id);
+
+    const code = text(row.Code).trim();
+    const nom = text(row.Nom).trim();
+
+    option.textContent =
+      code && nom
+        ? `${code} — ${nom}`
+        : (code || nom || `Bureau ${row.id}`);
+
+    select.appendChild(option);
+  }
+}
+
+function populateDepartments(){
+  const select = $("contributeur");
+
+  const sorted = [...departments].sort((a,b)=>{
+    const aLabel = text(a.Code || a.Nom || a.id);
+    const bLabel = text(b.Code || b.Nom || b.id);
+    return aLabel.localeCompare(bLabel,"fr",{numeric:true});
+  });
+
+  for(const row of sorted){
+    const option = document.createElement("option");
+    option.value = Number(row.id);
+
+    const code = text(row.Code).trim();
+    const nom = text(row.Nom).trim();
+
+    option.textContent =
+      code && nom
+        ? `${code} — ${nom}`
+        : (code || nom || `Département ${row.id}`);
+
+    select.appendChild(option);
+  }
+}
+
+/* =============================================================
+   DATE
+   ============================================================= */
+
+function htmlDateToGrist(value){
+  const raw = text(value).trim();
+
+  if(!raw){
+    return null;
+  }
+
+  const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+  if(!match){
+    throw new Error("Échéance invalide.");
+  }
+
+  return Date.UTC(
+    Number(match[1]),
+    Number(match[2]) - 1,
+    Number(match[3])
+  ) / 1000;
+}
+
+/* =============================================================
+   FORMULAIRE
+   ============================================================= */
+
+function resetForm(){
+  $("contributionForm").reset();
+
+  $("priorite").value = "Normale";
+  $("statut").value = "À faire";
+
+  showNotice("successBox","");
+  showNotice("errorBox","");
+}
+
+async function createContribution(event){
+  event.preventDefault();
+
+  showNotice("successBox","");
+  showNotice("errorBox","");
+
+  const bureauOrigine = Number($("bureauOrigine").value) || null;
+  const contributeur = Number($("contributeur").value) || null;
+  const titre = text($("titre").value).trim();
+  const description = text($("description").value).trim();
+  const demandeur = text($("demandeur").value).trim();
+  const priorite = text($("priorite").value).trim();
+  const statut = text($("statut").value).trim();
+  const commentaire = text($("commentaire").value).trim();
+
+  if(!bureauOrigine){
+    showNotice(
+      "errorBox",
+      "Sélectionnez le Bureau d'origine."
+    );
+    return;
+  }
+
+  if(!contributeur){
+    showNotice(
+      "errorBox",
+      "Sélectionnez le Contributeur."
+    );
+    return;
+  }
+
+  if(!titre){
+    showNotice(
+      "errorBox",
+      "Le Titre est obligatoire."
+    );
+    return;
+  }
+
+  let echeance = null;
+
+  try{
+    echeance = htmlDateToGrist($("echeance").value);
+  }catch(error){
+    showNotice("errorBox",error.message);
+    return;
+  }
+
+  const createButton = $("createBtn");
+  createButton.disabled = true;
+  createButton.textContent = "Création…";
+
+  try{
+    const values = {
+      Bureau_origine:bureauOrigine,
+      Titre:titre,
+      Description:description,
+      Demandeur:demandeur,
+      Contributeur:contributeur,
+      Echeance:echeance,
+      Priorite:priorite,
+      Statut:statut,
+      Commentaire:commentaire,
+
+      /*
+        Créateur de la contribution :
+        renseigné automatiquement à partir de UTILISATEURS.Email.
+      */
+      Cree_par:text(currentUser.Email).trim()
+    };
+
+    await grist.docApi.applyUserActions([
+      ["AddRecord","CONTRIBUTIONS",null,values]
+    ]);
+
+    showNotice(
+      "successBox",
+      "✓ Contribution créée avec succès."
+    );
+
+    /*
+      On conserve Bureau d'origine et Contributeur après création
+      uniquement le temps que l'utilisateur puisse constater le succès.
+      Les autres champs sont vidés pour faciliter une nouvelle saisie.
+    */
+    $("titre").value = "";
+    $("description").value = "";
+    $("demandeur").value = "";
+    $("echeance").value = "";
+    $("priorite").value = "Normale";
+    $("statut").value = "À faire";
+    $("commentaire").value = "";
+
+    $("titre").focus();
+
+  }catch(error){
+    console.error(error);
+
+    showNotice(
+      "errorBox",
+      "Impossible de créer la contribution. Vérifiez les droits Grist et les données saisies."
+    );
+  }finally{
+    createButton.disabled = false;
+    createButton.textContent = "➕ Créer la contribution";
+  }
+}
+
+/* =============================================================
+   INITIALISATION
+   ============================================================= */
+
+async function init(){
+  try{
+    grist.ready({
+      requiredAccess:"full"
+    });
+
+    const allowed = await loadContext();
+
+    $("loadingBox").classList.add("hidden");
+
+    if(!allowed){
+      return;
+    }
+
+    populateBureaux();
+    populateDepartments();
+
+    $("mainContent").classList.remove("hidden");
+
+  }catch(error){
+    console.error(error);
+
+    $("loadingBox").classList.add("hidden");
+
+    $("accessDenied").innerHTML =
+      "<strong>Impossible d'ouvrir le widget.</strong><br>"
+      + escapeHtml(error.message || error);
+
+    $("accessDenied").classList.add("show");
+  }
+}
+
+$("contributionForm").addEventListener("submit",createContribution);
+$("resetBtn").addEventListener("click",resetForm);
+
+init();
+</script>
+</body>
+</html>
