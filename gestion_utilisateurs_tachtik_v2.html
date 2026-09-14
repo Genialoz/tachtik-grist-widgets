@@ -154,7 +154,7 @@ button:disabled{cursor:not-allowed;opacity:.55}
 
 .kpis{
   display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
+  grid-template-columns:repeat(5,minmax(0,1fr));
   gap:14px;
   margin-bottom:20px;
 }
@@ -579,6 +579,11 @@ tr:last-child td{border-bottom:0}
         <div class="kpi-label">Administrateurs</div>
         <div id="kpiAdmins" class="kpi-value">0</div>
       </div>
+
+      <div class="kpi">
+        <div class="kpi-label">Bureaux contributeurs</div>
+        <div id="kpiContributors" class="kpi-value">0</div>
+      </div>
     </section>
 
     <section class="panel">
@@ -820,6 +825,17 @@ tr:last-child td{border-bottom:0}
 "use strict";
 
 /* =========================================
+   GESTION DES UTILISATEURS — V2
+
+   Évolutions V2 :
+   - nettoyage automatique de la ligne temporaire SESSION_WIDGET
+     après identification de l'utilisateur ;
+   - ajout d'un KPI « Bureaux contributeurs » ;
+   - clarification du libellé « périmètre de réception »
+     pour le rôle Bureau contributeur ;
+   - conservation des rôles, ACL et règles métier existantes.
+
+   =========================================
    ÉTAT GLOBAL
    ========================================= */
 
@@ -1016,12 +1032,28 @@ async function identifyUser(){
     .filter(row => !previousIds.has(Number(row.id)))
     .sort((a,b) => Number(b.id) - Number(a.id));
 
+  const profile = created[0] || null;
+
   /*
-    Ne pas supprimer la ligne SESSION_WIDGET ici.
-    Cette version suit le mécanisme stable utilisé
-    dans les autres widgets.
+    V2 :
+    la ligne SESSION_WIDGET est temporaire.
+    On la supprime après identification pour éviter
+    l'accumulation de lignes techniques inutiles.
   */
-  return created[0] || null;
+  if(profile){
+    try{
+      await grist.docApi.applyUserActions([
+        ["BulkRemoveRecord","SESSION_WIDGET",[Number(profile.id)]]
+      ]);
+    }catch(cleanupError){
+      console.warn(
+        "Nettoyage SESSION_WIDGET impossible :",
+        cleanupError
+      );
+    }
+  }
+
+  return profile;
 }
 
 function isAdministrator(){
@@ -1152,7 +1184,7 @@ function updateFieldsForRole(){
     isReader
       ? "Obligatoire : choisissez un Service, une Sous-direction ou un Département."
       : isContributor
-        ? "Facultatif : définit le périmètre des contributions attribuées au Bureau contributeur."
+        ? "Facultatif : définit le périmètre de réception des contributions du Bureau contributeur."
         : "";
 }
 
@@ -1238,6 +1270,10 @@ function renderKpis(){
 
   $("kpiAdmins").textContent = users.filter(
     user => user.Role === "Administrateur"
+  ).length;
+
+  $("kpiContributors").textContent = users.filter(
+    user => user.Role === "Bureau contributeur"
   ).length;
 }
 
