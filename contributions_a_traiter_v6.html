@@ -1392,11 +1392,12 @@
           </div>
 
           <a
+            id="home-link"
             class="home-link"
             href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH"
             target="_top"
           >
-            ← Retour
+            ← Retour à l'accueil
           </a>
 
         </div>
@@ -2292,7 +2293,7 @@
   <script>
 
     /* =========================================================
-       CONTRIBUTIONS À TRAITER — V6
+       CONTRIBUTIONS À TRAITER — V7
 
        Évolutions V5 :
        - verrouillage optimiste via CONTRIBUTIONS.Version_modification ;
@@ -2302,7 +2303,13 @@
        - incrément de Version_modification lors des modifications effectuées ici ;
        - protection également des changements de statut et enregistrements d'envoi/relance.
 
-       Évolution V6 :
+       Évolution V7 :
+       - remplacement du lien « Retour » par « Retour à l'accueil » ;
+       - redirection automatique vers l'accueil correspondant au rôle ;
+       - Bureau contributeur et Lecteur renvoyés en mode singlePage ;
+       - aucun changement de droits ou de logique métier.
+
+       Évolution V6 conservée :
        - ajout d'un sélecteur de tri manuel visible ;
        - conservation du tri actuel « échéance la plus proche » par défaut ;
        - nouveaux tris : échéance décroissante, priorité, plus récentes,
@@ -2589,6 +2596,44 @@
     }
 
     /* =========================
+       V7 — RETOUR À L'ACCUEIL SELON LE RÔLE
+
+       Administrateur      -> Accueil Administrateur
+       Bureau contributeur -> Accueil Bureau contributeur en singlePage
+       Lecteur             -> Accueil Lecteur en singlePage
+
+       Ce lien ne modifie aucun droit.
+       ========================= */
+
+    function updateHomeLink() {
+      const link = $("home-link");
+
+      if (!link) {
+        return;
+      }
+
+      const base =
+        "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH";
+
+      if (isAdministrator()) {
+        link.href = `${base}/p/32`;
+        return;
+      }
+
+      if (isBureauContributor()) {
+        link.href = `${base}/p/33?style=singlePage`;
+        return;
+      }
+
+      if (currentRole === "lecteur") {
+        link.href = `${base}/p/34?style=singlePage`;
+        return;
+      }
+
+      link.href = base;
+    }
+
+    /* =========================
        V2 — PÉRIMÈTRE DE PILOTAGE DE CETTE PAGE
 
        - Administrateur : toutes les contributions.
@@ -2687,6 +2732,8 @@
         const role = text(profile.Role);
         currentRole = clean(role);
         currentUserEmail = clean(profile.Email);
+
+        updateHomeLink();
 
         canEdit = isAdministrator();
 
