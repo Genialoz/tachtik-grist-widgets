@@ -478,9 +478,11 @@
 </div>
 
 <!-- =========================================================
-     IMPORT CONTRIBUTIONS — BUREAU CONTRIBUTEUR — V6
+     IMPORT CONTRIBUTIONS — BUREAU CONTRIBUTEUR — V7
 
-     V6 :
+     V7 :
+     - correction de la détection "Aucun changement" après une mise à jour ;
+     - comparaison métier renforcée des références Grist et des dates ;
      - les doublons ambigus ne bloquent plus tout l'import :
        ils sont ignorés et signalés dans l'aperçu ;
      - une ligne strictement identique à l'existant est marquée
@@ -498,7 +500,7 @@
 <script>
 /* =============================================================
    IMPORT CONTRIBUTIONS / BUREAU CONTRIBUTEUR
-   Version 6
+   Version 7
 
    Objectif :
    - lire un fichier Excel ;
@@ -524,8 +526,9 @@
    3. même Type_contributeur ;
    4. même cible (Département / Sous-direction / Service) ;
    5. si plusieurs lignes correspondent, Demandeur est utilisé comme départage.
-   Si plusieurs contributions restent possibles, la ligne est bloquée pour éviter
-   toute mise à jour de la mauvaise contribution.
+   Si plusieurs contributions restent possibles, la ligne est ignorée comme doublon
+   afin d'éviter toute mise à jour de la mauvaise contribution, sans bloquer
+   les autres lignes du fichier.
 
    Limite volontaire :
    modifier le Titre ou le Contributeur d'une contribution existante depuis Excel
@@ -695,32 +698,69 @@ async function refreshExistingContributions(){
 
 
 
-function sameNullableNumber(a,b){
-  const na = (
-    a === null
-    || a === undefined
-    || a === ""
-  ) ? null : Number(a);
+function gristRefId(value){
+  /*
+    Selon le contexte, une référence Grist peut être renvoyée :
+    - comme un nombre ;
+    - comme une chaîne numérique ;
+    - comme une valeur de type ["L", id].
+    On normalise tout vers un identifiant numérique.
+  */
+  if(value === null || value === undefined || value === ""){
+    return null;
+  }
 
-  const nb = (
-    b === null
-    || b === undefined
-    || b === ""
-  ) ? null : Number(b);
+  if(Array.isArray(value)){
+    const last = value[value.length - 1];
+    const n = Number(last);
+    return Number.isFinite(n) ? n : null;
+  }
 
-  return na === nb;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function normalizeDateValue(value){
+  if(value === null || value === undefined || value === ""){
+    return null;
+  }
+
+  const n = Number(value);
+
+  if(Number.isFinite(n)){
+    /*
+      On compare à la journée près afin d'éviter un faux écart
+      lié à une représentation horaire différente.
+    */
+    return Math.floor(n / 86400);
+  }
+
+  return text(value).trim();
 }
 
 function isSameBusinessValues(existing,values){
+  const existingLevel = normalizeContributorLevel(existing.Type_contributeur);
+
+  const sameTarget = (
+    existingLevel === normalizeContributorLevel(values.Type_contributeur)
+    && (
+      (existingLevel === "Département"
+        && gristRefId(existing.Contributeur) === gristRefId(values.Contributeur))
+      ||
+      (existingLevel === "Sous-direction"
+        && gristRefId(existing.Contributeur_sous_direction) === gristRefId(values.Contributeur_sous_direction))
+      ||
+      (existingLevel === "Service"
+        && gristRefId(existing.Contributeur_service) === gristRefId(values.Contributeur_service))
+    )
+  );
+
   return (
     normalizeKey(existing.Titre) === normalizeKey(values.Titre)
     && text(existing.Description).trim() === text(values.Description).trim()
     && normalizeKey(existing.Demandeur) === normalizeKey(values.Demandeur)
-    && normalizeContributorLevel(existing.Type_contributeur) === normalizeContributorLevel(values.Type_contributeur)
-    && sameNullableNumber(existing.Contributeur,values.Contributeur)
-    && sameNullableNumber(existing.Contributeur_sous_direction,values.Contributeur_sous_direction)
-    && sameNullableNumber(existing.Contributeur_service,values.Contributeur_service)
-    && sameNullableNumber(existing.Echeance,values.Echeance)
+    && sameTarget
+    && normalizeDateValue(existing.Echeance) === normalizeDateValue(values.Echeance)
     && text(existing.Priorite).trim() === text(values.Priorite).trim()
     && text(existing.Statut).trim() === text(values.Statut).trim()
     && text(existing.Commentaire).trim() === text(values.Commentaire).trim()
@@ -1441,7 +1481,7 @@ async function analyzeFile(){
 
   try{
     /*
-      V5 — IMPORTANT :
+      V7 — IMPORTANT :
       on recharge CONTRIBUTIONS avant chaque analyse.
       Ainsi, une contribution créée lors d'un import précédent dans la même
       session est immédiatement reconnue comme existante lors d'une réimportation.
@@ -1561,7 +1601,7 @@ async function importRows(){
     );
 
     /*
-      V5 :
+      V7 :
       on actualise aussi le cache local immédiatement après l'import.
       Une seconde analyse dans la même session pourra donc détecter
       les contributions qui viennent d'être créées.
