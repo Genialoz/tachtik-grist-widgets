@@ -152,7 +152,7 @@
 </div>
 
 <!-- =========================================================
-     NOUVELLE CONTRIBUTION — BUREAU CONTRIBUTEUR — V6
+     NOUVELLE CONTRIBUTION — BUREAU CONTRIBUTEUR — V7
 
      Nouveautés V6 :
      - parcours intuitif par affectation :
@@ -610,6 +610,13 @@ function assignmentValues(assignment,commonValues,groupId){
     Commentaire:text(assignment.commentaire).trim(),
     Type_contributeur:assignment.type,
     Groupe_contribution:groupId,
+
+    /*
+      V7 — verrouillage optimiste :
+      toute nouvelle affectation commence à la version 1.
+    */
+    Version_modification:1,
+
     Contributeur:null,
     Contributeur_sous_direction:null,
     Contributeur_service:null
