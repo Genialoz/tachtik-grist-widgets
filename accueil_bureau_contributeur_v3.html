@@ -316,7 +316,7 @@
             <div class="card-content">
               <h3 class="card-title">Nouvelle contribution</h3>
               <p class="card-text">
-                Créez une nouvelle contribution pilotée par votre bureau et adressez-la au département contributeur concerné.
+                Créez une nouvelle contribution pilotée par votre bureau et adressez-la au contributeur concerné.
               </p>
               <span class="card-link">Ouvrir la page →</span>
             </div>
@@ -347,6 +347,17 @@
         </div>
 
         <div class="grid">
+          <a class="card" data-page="Tableau de bord" href="#">
+            <div class="icon">📊</div>
+            <div class="card-content">
+              <h3 class="card-title">Tableau de bord</h3>
+              <p class="card-text">
+                Visualisez les indicateurs, échéances, priorités et points d’attention des contributions pilotées par votre bureau.
+              </p>
+              <span class="card-link">Ouvrir la page →</span>
+            </div>
+          </a>
+
           <a class="card violet" data-page="Synthèses" href="#">
             <div class="icon">📨</div>
             <div class="card-content">
@@ -382,6 +393,16 @@
 
 <script>
     "use strict";
+
+    /* =========================================================
+       ACCUEIL BUREAU CONTRIBUTEUR — V4
+
+       Évolutions V4 :
+       - remplacement du libellé limité au département par
+         le terme générique « contributeur » ;
+       - ajout d'un accès direct au Tableau de bord ;
+       - conservation des droits et de la navigation existante.
+       ========================================================= */
 
     const $ = id => document.getElementById(id);
 
@@ -483,6 +504,7 @@
       "Contributions": "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/31?style=singlePage",
       "Contributions à traiter": "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/21?style=singlePage",
       "Contributions terminées": "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/10?style=singlePage",
+      "Tableau de bord": "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/11?style=singlePage",
       "Nouvelle contribution - Bureau contributeur": "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/17?style=singlePage",
       "Importer des contributions - Bureau contributeur": "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/29?style=singlePage",
       "Synthèses": "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/26?style=singlePage",
