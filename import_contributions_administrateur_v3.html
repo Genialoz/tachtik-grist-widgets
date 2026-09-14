@@ -490,9 +490,12 @@
 </div>
 
 <!-- =========================================================
-     IMPORT CONTRIBUTIONS — ADMINISTRATEUR — V4
+     IMPORT CONTRIBUTIONS — ADMINISTRATEUR — V5
 
-     V4 :
+     V5 :
+     - correction de la détection "Aucun changement" après une mise à jour ;
+     - comparaison métier renforcée des champs importés, notamment les références
+       Grist et les dates ;
      - cibles Département / Sous-direction / Service ;
      - Type_contributeur et Groupe_contribution ;
      - création + mise à jour des contributions existantes ;
@@ -505,7 +508,7 @@
 <script>
 /* =============================================================
    IMPORT CONTRIBUTIONS / ADMINISTRATEUR
-   Version 4
+   Version 5
 
    Objectif :
    - réserver le widget au rôle Administrateur ;
@@ -673,32 +676,69 @@ function sameContributorTarget(record,level,targetId){
   );
 }
 
-function sameNullableNumber(a,b){
-  const na = (
-    a === null
-    || a === undefined
-    || a === ""
-  ) ? null : Number(a);
+function gristRefId(value){
+  /*
+    Selon le contexte, une référence Grist peut être renvoyée :
+    - comme un nombre ;
+    - comme une chaîne numérique ;
+    - comme une valeur de type ["L", id].
+    On normalise tout vers un identifiant numérique.
+  */
+  if(value === null || value === undefined || value === ""){
+    return null;
+  }
 
-  const nb = (
-    b === null
-    || b === undefined
-    || b === ""
-  ) ? null : Number(b);
+  if(Array.isArray(value)){
+    const last = value[value.length - 1];
+    const n = Number(last);
+    return Number.isFinite(n) ? n : null;
+  }
 
-  return na === nb;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function normalizeDateValue(value){
+  if(value === null || value === undefined || value === ""){
+    return null;
+  }
+
+  const n = Number(value);
+
+  if(Number.isFinite(n)){
+    /*
+      On compare à la journée près pour éviter un faux écart lié
+      à une représentation horaire différente.
+    */
+    return Math.floor(n / 86400);
+  }
+
+  return text(value).trim();
 }
 
 function isSameBusinessValues(existing,values){
+  const existingLevel = normalizeContributorLevel(existing.Type_contributeur);
+
+  const sameTarget = (
+    existingLevel === normalizeContributorLevel(values.Type_contributeur)
+    && (
+      (existingLevel === "Département"
+        && gristRefId(existing.Contributeur) === gristRefId(values.Contributeur))
+      ||
+      (existingLevel === "Sous-direction"
+        && gristRefId(existing.Contributeur_sous_direction) === gristRefId(values.Contributeur_sous_direction))
+      ||
+      (existingLevel === "Service"
+        && gristRefId(existing.Contributeur_service) === gristRefId(values.Contributeur_service))
+    )
+  );
+
   return (
     normalizeKey(existing.Titre) === normalizeKey(values.Titre)
     && text(existing.Description).trim() === text(values.Description).trim()
     && normalizeKey(existing.Demandeur) === normalizeKey(values.Demandeur)
-    && normalizeContributorLevel(existing.Type_contributeur) === normalizeContributorLevel(values.Type_contributeur)
-    && sameNullableNumber(existing.Contributeur,values.Contributeur)
-    && sameNullableNumber(existing.Contributeur_sous_direction,values.Contributeur_sous_direction)
-    && sameNullableNumber(existing.Contributeur_service,values.Contributeur_service)
-    && sameNullableNumber(existing.Echeance,values.Echeance)
+    && sameTarget
+    && normalizeDateValue(existing.Echeance) === normalizeDateValue(values.Echeance)
     && text(existing.Priorite).trim() === text(values.Priorite).trim()
     && text(existing.Statut).trim() === text(values.Statut).trim()
     && text(existing.Commentaire).trim() === text(values.Commentaire).trim()
