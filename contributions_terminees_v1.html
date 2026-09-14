@@ -184,22 +184,6 @@
       color:#344054;
     }
 
-    /* V5 — demandes groupées / affectations terminées */
-    .group-card{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 6px 18px rgba(16,24,40,.05);padding:16px}
-    .group-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap}
-    .group-badge{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;background:var(--success-bg);color:var(--success);font-size:11px;font-weight:900;white-space:nowrap}
-    .group-meta{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px 14px;color:#475467;font-size:12px}
-    .assignment-list{display:grid;gap:10px;margin-top:14px}
-    .assignment-card{border:1px solid #e4e7ec;border-radius:14px;padding:13px;background:#fbfdfc;cursor:pointer;transition:.15s ease}
-    .assignment-card:hover{border-color:#abefc6;background:#f6fef9}
-    .assignment-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
-    .assignment-contributor{font-size:14px;font-weight:900;color:#344054}
-    .assignment-type{margin-top:3px;color:var(--muted);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.03em}
-    .assignment-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
-    .assignment-field{padding:9px 10px;border-radius:10px;background:#fff;border:1px solid #eaecf0;color:#475467;font-size:11px;line-height:1.4}
-    .assignment-field strong{display:block;margin-bottom:3px;color:#344054;font-size:10px;text-transform:uppercase}
-    @media(max-width:850px){.assignment-fields{grid-template-columns:1fr}}
-
     .empty{
       background:#fff;
       border:1px dashed #cbd5e1;
@@ -372,8 +356,8 @@
           <option value="Urgente">Urgente</option>
         </select>
 
-        <select id="contributorFilter">
-          <option value="">Tous les contributeurs</option>
+        <select id="departmentFilter">
+          <option value="">Tous les départements</option>
         </select>
 
         <select id="originFilter">
@@ -483,10 +467,20 @@
 
 </div>
 
+
+<!-- =============================================================
+     CONTRIBUTIONS TERMINÉES — V6
+     V6 :
+     - sécurisation de l'action « Remettre en À faire » ;
+     - contrôle de CONTRIBUTIONS.Version_modification juste avant l'écriture ;
+     - incrément de Version_modification après une réouverture réussie ;
+     - Date_finalisation reste volontairement inchangée.
+     ============================================================= -->
+
 <script>
 /* =============================================================
    CONTRIBUTIONS TERMINÉES
-   Version 5
+   Version 3
 
    Règles :
    - Administrateur : voit toutes les lignes accessibles et peut réouvrir.
@@ -499,12 +493,8 @@
    - V2 : suppression du contrôle Cree_par pour le Bureau contributeur ;
           les droits d'action reposent sur Bureau_origine == UTILISATEURS.Bureau.
    - V3 : la réouverture ne modifie plus Date_finalisation ;
-          elle met uniquement Statut = "À faire".
-   - V5 : prise en charge de Contributeur_affiche et des trois niveaux
-          Département / Sous-direction / Service.
-   - V5 : regroupement visuel des affectations partageant Groupe_contribution.
-   - V5 : filtre générique "Contributeur".
-   - V5 : exclusion des lignes CENSORED renvoyées par Grist.
+          elle met uniquement Statut = "À faire", comme dans
+          contributions_a_traiter.html.
    ============================================================= */
 
 const $ = id => document.getElementById(id);
@@ -516,13 +506,9 @@ let currentUserBureauId = null;
 
 let allRecords = [];
 let departments = [];
-let subDirections = [];
-let services = [];
 let bureaux = [];
 
 let departmentById = new Map();
-let subDirectionById = new Map();
-let serviceById = new Map();
 let bureauById = new Map();
 
 let selectedRecordId = null;
@@ -569,6 +555,61 @@ function tableToRows(table){
   });
 }
 
+/* =============================================================
+   V6 — VERROUILLAGE OPTIMISTE
+   Les anciennes contributions dont Version_modification est vide
+   sont considérées comme étant en version 0.
+   ============================================================= */
+
+function contributionVersion(record){
+  const raw = record ? record.Version_modification : null;
+  const value = Number(raw);
+
+  return Number.isFinite(value) && value > 0
+    ? Math.trunc(value)
+    : 0;
+}
+
+async function fetchFreshContribution(recordId){
+  const table = await grist.docApi.fetchTable("CONTRIBUTIONS");
+  const rows = tableToRows(table);
+
+  return rows.find(
+    row => Number(row.id) === Number(recordId)
+  ) || null;
+}
+
+async function ensureContributionUnchanged(recordId,expectedVersion){
+  const fresh = await fetchFreshContribution(recordId);
+
+  if(!fresh){
+    const error = new Error(
+      "Cette contribution n'existe plus dans Grist. Rechargez la liste avant de poursuivre."
+    );
+    error.code = "VERSION_CONFLICT";
+    throw error;
+  }
+
+  const currentVersion = contributionVersion(fresh);
+  const expected = Number(expectedVersion) || 0;
+
+  if(currentVersion !== expected){
+    const error = new Error(
+      "Cette contribution a été modifiée par un autre utilisateur. "
+      + "La réouverture n'a pas été enregistrée. Rechargez la contribution avant de poursuivre."
+    );
+    error.code = "VERSION_CONFLICT";
+    throw error;
+  }
+
+  return fresh;
+}
+
+function nextContributionVersion(record){
+  return contributionVersion(record) + 1;
+}
+
+
 function showNotice(id,message){
   const box = $(id);
 
@@ -580,48 +621,6 @@ function showNotice(id,message){
 
   box.textContent = message;
   box.classList.add("show");
-}
-
-function isCensoredValue(value){
-  if(Array.isArray(value)){
-    return value.length > 0 && String(value[0]).trim().toUpperCase() === "C";
-  }
-
-  if(value && typeof value === "object"){
-    const marker = value.type || value.kind || value._type || value.code || "";
-    if(String(marker).trim().toUpperCase() === "CENSORED"){
-      return true;
-    }
-  }
-
-  const normalized = clean(value);
-  return normalized === "censored" || normalized === "[censored]";
-}
-
-function isCensoredRecord(record){
-  return Object.entries(record).some(([key,value])=>{
-    if(key === "id") return false;
-    return isCensoredValue(value);
-  });
-}
-
-function contributorLabel(record){
-  if(!record) return "";
-  return text(record.Contributeur_affiche || record._ContributeurLabel || record.Contributeur).trim();
-}
-
-function contributorType(record){
-  const explicit = text(record && record.Type_contributeur).trim();
-  if(explicit) return explicit;
-  if(record && record._ContributeurId) return "Département";
-  if(record && record._ContributeurSousDirectionId) return "Sous-direction";
-  if(record && record._ContributeurServiceId) return "Service";
-  return "";
-}
-
-function groupKey(record){
-  const group = text(record && record.Groupe_contribution).trim();
-  return group ? `group:${group}` : `record:${Number(record.id)}`;
 }
 
 function dateValue(value){
@@ -766,40 +765,21 @@ async function loadData(){
     await grist.docApi.fetchTable("CONTRIBUTIONS");
 
   allRecords = tableToRows(contributionsTable)
-    .filter(row => !isCensoredRecord(row))
     .filter(row => clean(row.Statut) === "fait");
 
   try{
     departments = tableToRows(
       await grist.docApi.fetchTable("DEPARTEMENTS")
-    ).filter(row => !isCensoredRecord(row));
+    );
   }catch(error){
     console.warn("DEPARTEMENTS indisponible :",error);
     departments = [];
   }
 
   try{
-    subDirections = tableToRows(
-      await grist.docApi.fetchTable("SOUS_DIRECTIONS")
-    ).filter(row => !isCensoredRecord(row));
-  }catch(error){
-    console.warn("SOUS_DIRECTIONS indisponible :",error);
-    subDirections = [];
-  }
-
-  try{
-    services = tableToRows(
-      await grist.docApi.fetchTable("SERVICES")
-    ).filter(row => !isCensoredRecord(row));
-  }catch(error){
-    console.warn("SERVICES indisponible :",error);
-    services = [];
-  }
-
-  try{
     bureaux = tableToRows(
       await grist.docApi.fetchTable("BUREAUX_ORIGINE")
-    ).filter(row => !isCensoredRecord(row));
+    );
   }catch(error){
     console.warn("BUREAUX_ORIGINE indisponible :",error);
     bureaux = [];
@@ -808,45 +788,33 @@ async function loadData(){
   departmentById = new Map(
     departments.map(row => [Number(row.id),row])
   );
-  subDirectionById = new Map(
-    subDirections.map(row => [Number(row.id),row])
-  );
-  serviceById = new Map(
-    services.map(row => [Number(row.id),row])
-  );
+
   bureauById = new Map(
     bureaux.map(row => [Number(row.id),row])
   );
 
   allRecords = allRecords.map(row => {
     const depId = Number(row.Contributeur) || null;
-    const subDirectionId = Number(row.Contributeur_sous_direction) || null;
-    const serviceId = Number(row.Contributeur_service) || null;
     const bureauId = Number(row.Bureau_origine) || null;
 
     const dep = departmentById.get(depId);
-    const subDirection = subDirectionById.get(subDirectionId);
-    const service = serviceById.get(serviceId);
     const bureau = bureauById.get(bureauId);
-
-    let fallbackContributor = "";
-    if(dep){
-      fallbackContributor = text(dep.Code).trim() + (text(dep.Nom).trim() ? " — " + text(dep.Nom).trim() : "");
-    }else if(subDirection){
-      fallbackContributor = text(subDirection.Code).trim() + (text(subDirection.Nom).trim() ? " — " + text(subDirection.Nom).trim() : "");
-    }else if(service){
-      fallbackContributor = text(service.Code).trim() + (text(service.Nom).trim() ? " — " + text(service.Nom).trim() : "");
-    }
 
     return {
       ...row,
       _ContributeurId:depId,
-      _ContributeurSousDirectionId:subDirectionId,
-      _ContributeurServiceId:serviceId,
       _BureauId:bureauId,
-      _ContributeurLabel:text(row.Contributeur_affiche).trim() || fallbackContributor,
+      _ContributeurLabel:dep
+        ? (
+            text(dep.Code).trim()
+            + (text(dep.Nom).trim() ? " — " + text(dep.Nom).trim() : "")
+          )
+        : text(row.Contributeur),
       _BureauLabel:bureau
-        ? (text(bureau.Code).trim() + (text(bureau.Nom).trim() ? " — " + text(bureau.Nom).trim() : ""))
+        ? (
+            text(bureau.Code).trim()
+            + (text(bureau.Nom).trim() ? " — " + text(bureau.Nom).trim() : "")
+          )
         : text(row.Bureau_origine)
     };
   });
@@ -890,12 +858,12 @@ function canRestoreRecord(record){
    ============================================================= */
 
 function populateFilters(){
-  const contributorSelect = $("contributorFilter");
+  const depSelect = $("departmentFilter");
   const originSelect = $("originFilter");
 
   const deps = [...new Set(
     allRecords
-      .map(row => contributorLabel(row))
+      .map(row => row._ContributeurLabel)
       .filter(Boolean)
   )].sort((a,b)=>a.localeCompare(b,"fr",{numeric:true}));
 
@@ -903,7 +871,7 @@ function populateFilters(){
     const option = document.createElement("option");
     option.value = label;
     option.textContent = label;
-    contributorSelect.appendChild(option);
+    depSelect.appendChild(option);
   }
 
   const origins = [...new Set(
@@ -923,7 +891,7 @@ function populateFilters(){
 function filteredRecords(){
   const query = clean($("search").value);
   const priority = $("priorityFilter").value;
-  const contributor = $("contributorFilter").value;
+  const department = $("departmentFilter").value;
   const origin = $("originFilter").value;
 
   return allRecords
@@ -933,8 +901,8 @@ function filteredRecords(){
       }
 
       if(
-        contributor
-        && contributorLabel(record) !== contributor
+        department
+        && record._ContributeurLabel !== department
       ){
         return false;
       }
@@ -952,7 +920,7 @@ function filteredRecords(){
           record.Titre,
           record.Description,
           record.Demandeur,
-          contributorLabel(record),
+          record._ContributeurLabel,
           record._BureauLabel,
           record.Commentaire
         ].join(" "));
@@ -988,72 +956,70 @@ function renderList(){
   list.innerHTML = "";
 
   const records = filteredRecords();
-  const groupMap = new Map();
 
-  for(const record of records){
-    const key = groupKey(record);
-    if(!groupMap.has(key)) groupMap.set(key,[]);
-    groupMap.get(key).push(record);
-  }
+  $("resultsCount").textContent =
+    `${records.length} contribution${records.length > 1 ? "s" : ""}`;
 
-  const groups = [...groupMap.values()]
-    .map(groupRecords => ({records:groupRecords, first:groupRecords[0]}))
-    .sort((a,b)=>{
-      const da = Math.max(...a.records.map(record => dateValue(record.Date_finalisation)?.getTime() || dateValue(record.Echeance)?.getTime() || 0));
-      const db = Math.max(...b.records.map(record => dateValue(record.Date_finalisation)?.getTime() || dateValue(record.Echeance)?.getTime() || 0));
-      return db - da;
-    });
-
-  $("resultsCount").textContent = `${groups.length} demande${groups.length > 1 ? "s" : ""} · ${records.length} affectation${records.length > 1 ? "s" : ""}`;
-
-  if(!groups.length){
-    list.innerHTML = `<div class="empty">Aucune contribution terminée ne correspond aux critères.</div>`;
+  if(!records.length){
+    list.innerHTML = `
+      <div class="empty">
+        Aucune contribution terminée ne correspond aux critères.
+      </div>
+    `;
     return;
   }
 
-  for(const group of groups){
-    const recordsInGroup = group.records;
-    const first = group.first;
-    const groupCard = document.createElement("article");
-    groupCard.className = "group-card";
+  for(const record of records){
+    const card = document.createElement("article");
+    card.className = "card";
 
-    const assignments = recordsInGroup.map(record => `
-      <div class="assignment-card" data-record-id="${Number(record.id)}">
-        <div class="assignment-head">
-          <div>
-            <div class="assignment-contributor">👤 ${escapeHtml(contributorLabel(record) || "Contributeur non renseigné")}</div>
-            <div class="assignment-type">${escapeHtml(contributorType(record) || "Contributeur")}</div>
-          </div>
-          <span class="badge">✓ Fait</span>
-        </div>
-        <div class="assignment-fields">
-          <div class="assignment-field"><strong>Finalisée</strong>${escapeHtml(formatDate(record.Date_finalisation))}</div>
-          <div class="assignment-field"><strong>Échéance</strong>${escapeHtml(formatDate(record.Echeance))}</div>
-          <div class="assignment-field"><strong>Priorité</strong>${escapeHtml(record.Priorite || "—")}</div>
-        </div>
-      </div>
-    `).join("");
-
-    groupCard.innerHTML = `
-      <div class="group-head">
+    card.innerHTML = `
+      <div class="card-top">
         <div>
-          <div class="number">${escapeHtml(first.Numero ? `N° ${first.Numero}` : `Contribution ${first.id}`)}</div>
-          <div class="title">${escapeHtml(first.Titre || "Sans titre")}</div>
+          <div class="number">
+            ${escapeHtml(
+              record.Numero
+                ? `N° ${record.Numero}`
+                : `Contribution ${record.id}`
+            )}
+          </div>
+
+          <div class="title">
+            ${escapeHtml(record.Titre || "Sans titre")}
+          </div>
         </div>
-        <div class="group-badge">${recordsInGroup.length} ${recordsInGroup.length > 1 ? "affectations terminées" : "affectation terminée"}</div>
+
+        <span class="badge">✓ Fait</span>
       </div>
-      <div class="group-meta">
-        <span><strong>Bureau demandeur :</strong> ${escapeHtml(first._BureauLabel || "—")}</span>
-        <span><strong>Demandeur :</strong> ${escapeHtml(first.Demandeur || "—")}</span>
+
+      <div class="meta">
+        <span>
+          <strong>Contributeur :</strong>
+          ${escapeHtml(record._ContributeurLabel || "—")}
+        </span>
+
+        <span>
+          <strong>Bureau demandeur :</strong>
+          ${escapeHtml(record._BureauLabel || "—")}
+        </span>
+
+        <span>
+          <strong>Priorité :</strong>
+          ${escapeHtml(record.Priorite || "—")}
+        </span>
+
+        <span>
+          <strong>Finalisée :</strong>
+          ${escapeHtml(formatDate(record.Date_finalisation))}
+        </span>
       </div>
-      <div class="assignment-list">${assignments}</div>
     `;
 
-    groupCard.querySelectorAll("[data-record-id]").forEach(card=>{
-      card.addEventListener("click",()=>openDetail(Number(card.dataset.recordId)));
+    card.addEventListener("click",()=>{
+      openDetail(record.id);
     });
 
-    list.appendChild(groupCard);
+    list.appendChild(card);
   }
 }
 
@@ -1088,7 +1054,7 @@ function openDetail(recordId){
   setDetail("detailTitle",record.Titre);
   setDetail("detailDescription",record.Description);
   setDetail("detailDemandeur",record.Demandeur);
-  setDetail("detailContributeur",contributorLabel(record));
+  setDetail("detailContributeur",record._ContributeurLabel);
   setDetail("detailBureau",record._BureauLabel);
   setDetail("detailPriorite",record.Priorite);
   setDetail("detailEcheance",formatDate(record.Echeance));
@@ -1147,6 +1113,16 @@ async function restoreContribution(){
   showNotice("errorBox","");
 
   try{
+    /*
+      V6 — on vérifie que la contribution n'a pas été modifiée
+      depuis son affichage avant de la remettre en « À faire ».
+    */
+    const expectedVersion = contributionVersion(record);
+    const fresh = await ensureContributionUnchanged(
+      Number(record.id),
+      expectedVersion
+    );
+
     await grist.docApi.applyUserActions([
       [
         "UpdateRecord",
@@ -1154,13 +1130,12 @@ async function restoreContribution(){
         Number(record.id),
         {
           /*
-            IMPORTANT V3 :
-            on modifie uniquement Statut, exactement comme dans
-            contributions_a_traiter.html. Date_finalisation n'est pas
-            modifiée ici afin de ne pas déclencher une ACL de colonne
-            plus restrictive.
+            IMPORTANT :
+            Date_finalisation reste volontairement inchangée.
+            On modifie uniquement le statut métier et la version technique.
           */
-          Statut:"À faire"
+          Statut:"À faire",
+          Version_modification:nextContributionVersion(fresh)
         }
       ]
     ]);
@@ -1188,10 +1163,25 @@ async function restoreContribution(){
   }catch(error){
     console.error(error);
 
-    showNotice(
-      "errorBox",
-      "Impossible de remettre cette contribution en « À faire ». Vérifiez les droits Grist."
-    );
+    if(error && error.code === "VERSION_CONFLICT"){
+      showNotice(
+        "errorBox",
+        error.message
+      );
+
+      await loadData();
+      populateFiltersAfterReload();
+
+      const refreshed = getSelectedRecord();
+      if(refreshed){
+        openDetail(refreshed.id);
+      }
+    }else{
+      showNotice(
+        "errorBox",
+        "Impossible de remettre cette contribution en « À faire ». Vérifiez les droits Grist."
+      );
+    }
   }finally{
     button.disabled = false;
     button.textContent = "Remettre en « À faire »";
@@ -1200,11 +1190,11 @@ async function restoreContribution(){
 
 function populateFiltersAfterReload(){
   const priority = $("priorityFilter").value;
-  const contributor = $("contributorFilter").value;
+  const department = $("departmentFilter").value;
   const origin = $("originFilter").value;
 
-  $("contributorFilter").innerHTML =
-    '<option value="">Tous les contributeurs</option>';
+  $("departmentFilter").innerHTML =
+    '<option value="">Tous les départements</option>';
 
   $("originFilter").innerHTML =
     '<option value="">Tous les bureaux demandeurs</option>';
@@ -1212,10 +1202,10 @@ function populateFiltersAfterReload(){
   populateFilters();
 
   if(
-    [...$("contributorFilter").options]
-      .some(option => option.value === contributor)
+    [...$("departmentFilter").options]
+      .some(option => option.value === department)
   ){
-    $("contributorFilter").value = contributor;
+    $("departmentFilter").value = department;
   }
 
   if(
@@ -1266,7 +1256,7 @@ async function init(){
 
 $("search").addEventListener("input",renderList);
 $("priorityFilter").addEventListener("change",renderList);
-$("contributorFilter").addEventListener("change",renderList);
+$("departmentFilter").addEventListener("change",renderList);
 $("originFilter").addEventListener("change",renderList);
 
 $("backBtn").addEventListener("click",closeDetail);
