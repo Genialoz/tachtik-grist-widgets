@@ -721,6 +721,72 @@
 
 
     <!-- =====================================
+         V8 — PARAMÈTRES DU MESSAGE
+         Administrateur / Bureau contributeur
+         ===================================== -->
+
+    <div
+      id="messageSettingsPanel"
+      class="options-box hidden"
+    >
+
+      <div class="options-title">
+        ✍️ Paramètres du message
+      </div>
+
+      <div class="schedule-switch-help" style="margin-bottom:14px">
+        Ces informations sont utilisées dans les variables
+        <strong>[NOM_SIGNATURE]</strong> et
+        <strong>[EMAIL_CONTACT]</strong> du modèle de synthèse.
+      </div>
+
+      <div class="schedule-grid">
+
+        <div class="schedule-field">
+          <label for="messageSignature">
+            Nom de signature
+          </label>
+
+          <input
+            id="messageSignature"
+            type="text"
+            placeholder="ex. Bureau E1"
+          >
+        </div>
+
+        <div class="schedule-field">
+          <label for="messageContactEmail">
+            Email de contact
+          </label>
+
+          <input
+            id="messageContactEmail"
+            type="email"
+            placeholder="ex. bureau-e1@..."
+          >
+        </div>
+
+      </div>
+
+      <div class="schedule-actions">
+        <button
+          id="saveMessageSettingsBtn"
+          class="primary"
+          type="button"
+        >
+          💾 Enregistrer les paramètres du message
+        </button>
+      </div>
+
+      <div
+        id="messageSettingsStatus"
+        class="schedule-status"
+      ></div>
+
+    </div>
+
+
+    <!-- =====================================
          V5 — PLANIFICATION DE LA SYNTHÈSE
          ===================================== -->
 
@@ -964,9 +1030,16 @@
 
 
 /* =========================================
-   SYNTHÈSES — V7
+   SYNTHÈSES — V8
 
-   Évolutions V7 :
+   Évolutions V8 :
+   - ajout d'un bloc « Paramètres du message » dans la page Synthèses ;
+   - modification de Nom_signature et Email_contact directement depuis le widget ;
+   - accès réservé à l'Administrateur et au Bureau contributeur autorisé ;
+   - le Bureau contributeur ne peut toujours modifier que les paramètres
+     de son propre bureau grâce aux droits existants sur PARAMETRES_BUREAUX.
+
+   Évolutions V7 conservées :
    - affichage simplifié des contributions dans les synthèses ;
    - présentation sous forme de tableau texte avec les colonnes :
      Titre | Contributeur | Échéance | Jours restants ;
@@ -2924,6 +2997,175 @@ function updateScheduleRule(){
 }
 
 
+function renderMessageSettings(){
+
+  const panel =
+    $("messageSettingsPanel");
+
+
+  if(
+    !canManageSchedule()
+  ){
+
+    panel.classList.add(
+      "hidden"
+    );
+
+    return;
+
+  }
+
+
+  panel.classList.remove(
+    "hidden"
+  );
+
+
+  $("messageSignature")
+    .value =
+      state.params
+        ?.Nom_signature
+      ||
+      "";
+
+
+  $("messageContactEmail")
+    .value =
+      state.params
+        ?.Email_contact
+      ||
+      "";
+
+
+  $("messageSettingsStatus")
+    .textContent =
+      "";
+
+}
+
+
+async function saveMessageSettings(){
+
+  const status =
+    $("messageSettingsStatus");
+
+  const button =
+    $("saveMessageSettingsBtn");
+
+
+  status.textContent =
+    "";
+
+  status.classList.remove(
+    "error"
+  );
+
+
+  if(
+    !canManageSchedule()
+  ){
+
+    status.textContent =
+      "Vous n'êtes pas autorisé à modifier ces paramètres.";
+
+    status.classList.add(
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  const values = {
+
+    Nom_signature:
+      $("messageSignature")
+        .value
+        .trim(),
+
+    Email_contact:
+      $("messageContactEmail")
+        .value
+        .trim()
+
+  };
+
+
+  try{
+
+    button.disabled =
+      true;
+
+    button.textContent =
+      "Enregistrement…";
+
+
+    await grist.docApi
+      .applyUserActions([
+        [
+          "UpdateRecord",
+          "PARAMETRES_BUREAUX",
+          Number(
+            state.params.id
+          ),
+          values
+        ]
+      ]);
+
+
+    Object.assign(
+      state.params,
+      values
+    );
+
+
+    refreshGeneratedMessage();
+
+
+    status.textContent =
+      "✓ Paramètres du message enregistrés";
+
+
+    setTimeout(
+      () => {
+
+        status.textContent =
+          "";
+
+      },
+      2500
+    );
+
+  }
+  catch(error){
+
+    console.error(
+      error
+    );
+
+    status.textContent =
+      "Impossible d'enregistrer ces paramètres. Vérifiez vos droits d'accès.";
+
+    status.classList.add(
+      "error"
+    );
+
+  }
+  finally{
+
+    button.disabled =
+      false;
+
+    button.textContent =
+      "💾 Enregistrer les paramètres du message";
+
+  }
+
+}
+
+
+
 function renderSchedule(){
 
   const panel =
@@ -3313,10 +3555,12 @@ function render(){
 
 
   /*
-    V5 :
-    affichage des paramètres de planification
-    uniquement pour les profils autorisés.
+    V8 :
+    affichage des paramètres du message
+    et de la planification uniquement
+    pour les profils autorisés.
   */
+  renderMessageSettings();
   renderSchedule();
 
 }
@@ -4050,6 +4294,17 @@ $("resetFiltersBtn")
   .addEventListener(
     "click",
     resetFilters
+  );
+
+
+/*
+  V8 — paramètres du message.
+*/
+
+$("saveMessageSettingsBtn")
+  .addEventListener(
+    "click",
+    saveMessageSettings
   );
 
 
