@@ -107,6 +107,12 @@
       line-height:1.5;
     }
 
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+    }
+
     .card{
       display:flex;
       align-items:flex-start;
@@ -187,6 +193,7 @@
 
     @media(max-width:700px){
       .app{padding:14px}
+      .grid{grid-template-columns:1fr}
       .hero{padding:22px}
     }
   </style>
@@ -195,9 +202,6 @@
 <body>
   <main class="app">
 
-    <!-- =========================================================
-         ENTÊTE
-         ========================================================= -->
     <section class="hero">
       <div class="hero-content">
         <h1>Accueil Lecteur</h1>
@@ -219,51 +223,66 @@
 
     <div id="readerContent" class="hidden">
 
-      <!-- =======================================================
-           CONSULTATION
-           ======================================================= -->
       <section class="section">
         <h2 class="section-title">Consultation</h2>
         <p class="section-subtitle">
-          Accédez aux contributions de votre périmètre, y compris aux contributions terminées.
+          Consultez les contributions et les indicateurs accessibles dans votre périmètre de lecture.
         </p>
 
-        <a
-          class="card"
-          href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/31?style=singlePage"
-          target="_top"
-        >
-          <div class="icon">📋</div>
+        <div class="grid">
+          <a
+            class="card"
+            href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/31?style=singlePage"
+            target="_top"
+          >
+            <div class="icon">📋</div>
 
-          <div class="card-content">
-            <h3 class="card-title">Contributions</h3>
-            <p class="card-text">
-              Consultez les contributions accessibles selon votre périmètre de lecture et utilisez les filtres pour retrouver rapidement celles qui vous intéressent.
-            </p>
-            <span class="card-link">Ouvrir la page →</span>
-          </div>
-        </a>
+            <div class="card-content">
+              <h3 class="card-title">Contributions</h3>
+              <p class="card-text">
+                Consultez les contributions accessibles selon votre périmètre de lecture et utilisez les filtres pour retrouver rapidement celles qui vous intéressent.
+              </p>
+              <span class="card-link">Ouvrir la page →</span>
+            </div>
+          </a>
+
+          <a
+            class="card"
+            href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/11?style=singlePage"
+            target="_top"
+          >
+            <div class="icon">📊</div>
+
+            <div class="card-content">
+              <h3 class="card-title">Tableau de bord</h3>
+              <p class="card-text">
+                Consultez une vue synthétique des contributions accessibles dans votre périmètre : état d’avancement, échéances, priorités et points d’attention.
+              </p>
+              <span class="card-link">Ouvrir la page →</span>
+            </div>
+          </a>
+        </div>
       </section>
 
     </div>
   </main>
 
-  <!-- =========================================================
-       MISE À JOUR NAVIGATION SINGLE PAGE
-       Tous les liens internes vers les pages Grist sont ouverts
-       avec ?style=singlePage afin de conserver l'interface épurée.
-       ========================================================= -->
-
 <script>
     "use strict";
+
+    /* =========================================================
+       ACCUEIL LECTEUR — V2
+
+       Évolutions V2 :
+       - ajout d'un accès direct au Tableau de bord ;
+       - texte d'introduction adapté à la consultation des
+         contributions et des indicateurs ;
+       - conservation du mode Lecture et des ACL existantes.
+       ========================================================= */
 
     const $ = id => document.getElementById(id);
 
     let currentProfile = null;
-
-    /* =========================================================
-       OUTILS
-       ========================================================= */
 
     function text(value){
       return String(value == null ? "" : value);
@@ -300,13 +319,6 @@
     function isReader(){
       return clean(currentProfile?.Role) === "lecteur";
     }
-
-    /* =========================================================
-       IDENTIFICATION DU PROFIL
-
-       Pour le rôle Lecteur, SESSION_WIDGET peut être inaccessible
-       selon les ACL. On tente d'abord cette méthode.
-       ========================================================= */
 
     async function identifyUser(){
       try{
@@ -352,10 +364,6 @@
       }
     }
 
-    /* =========================================================
-       INITIALISATION
-       ========================================================= */
-
     async function init(){
       grist.ready({
         requiredAccess:"read table"
@@ -365,12 +373,6 @@
 
       $("loadingBox").classList.add("hidden");
 
-      /*
-        Si SESSION_WIDGET est indisponible pour le Lecteur,
-        on laisse l'accueil accessible en consultation.
-        La sécurité réelle reste assurée par les ACL de Grist
-        sur la page Contributions.
-      */
       if(!currentProfile){
         $("profileInfo").textContent = "👤 Consultation";
         $("readerContent").classList.remove("hidden");
