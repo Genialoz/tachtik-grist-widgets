@@ -3,2185 +3,4412 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
-<title>Gestion des utilisateurs</title>
+<title>Synthèses</title>
 
 <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
-:root{
-  --bg:#f5f7fb;
-  --card:#ffffff;
-  --text:#172033;
-  --muted:#667085;
-  --line:#dfe5ec;
-  --blue:#2563eb;
-  --blue-dark:#1d4ed8;
-  --blue-soft:#eff6ff;
-  --green:#047857;
-  --green-soft:#ecfdf5;
-  --red:#b42318;
-  --red-soft:#fef3f2;
-  --orange:#b54708;
-  --orange-soft:#fffaeb;
-  --grey-soft:#f2f4f7;
-  --shadow:0 10px 30px rgba(31,41,55,.08);
-  --radius:18px;
-}
-
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  background:var(--bg);
-  color:var(--text);
-}
-
-button,input,select{font:inherit}
-button{cursor:pointer}
-button:disabled{cursor:not-allowed;opacity:.55}
-
-.app{
-  max-width:1320px;
-  margin:0 auto;
-  padding:24px;
-}
-
-.hero{
-  padding:25px 28px;
-  margin-bottom:20px;
-  border-radius:22px;
-  background:linear-gradient(135deg,#1d4ed8,#3b82f6);
-  color:white;
-  box-shadow:var(--shadow);
-}
-
-.hero-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:20px;
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:13px;
-}
-
-.brand-mark{
-  width:42px;
-  height:42px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:13px;
-  background:rgba(255,255,255,.18);
-  font-size:21px;
-  font-weight:900;
-}
-
-.brand-name{
-  font-size:13px;
-  font-weight:900;
-  letter-spacing:.12em;
-}
-
-.brand-sub{
-  margin-top:2px;
-  font-size:12px;
-  opacity:.82;
-}
-
-.hero-content{margin-top:24px}
-
-.hero h1{
-  margin:0 0 7px;
-  font-size:29px;
-}
-
-.hero p{
-  margin:0;
-  max-width:760px;
-  line-height:1.5;
-  opacity:.92;
-}
-
-.profile{
-  margin-top:13px;
-  font-size:13px;
-  opacity:.9;
-}
-
-.btn{
-  border:1px solid transparent;
-  border-radius:11px;
-  padding:10px 14px;
-  font-size:13px;
-  font-weight:800;
-  transition:.15s ease;
-}
-
-.btn:hover:not(:disabled){transform:translateY(-1px)}
-
-.btn-primary{background:var(--blue);color:white}
-.btn-primary:hover:not(:disabled){background:var(--blue-dark)}
-
-.btn-secondary{
-  border-color:#d8e0ea;
-  background:white;
-  color:var(--text);
-}
-
-.btn-danger{
-  border-color:#fecaca;
-  background:var(--red-soft);
-  color:var(--red);
-}
-
-.btn-warning{
-  border-color:#fedf89;
-  background:var(--orange-soft);
-  color:#7a2e0e;
-}
-
-.btn-small{
-  padding:8px 11px;
-  font-size:12px;
-}
-
-.kpis{
-  display:grid;
-  grid-template-columns:repeat(5,minmax(0,1fr));
-  gap:14px;
-  margin-bottom:20px;
-}
-
-.kpi{
-  padding:18px;
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  background:white;
-  box-shadow:var(--shadow);
-}
-
-.kpi-label{
-  margin-bottom:7px;
-  font-size:13px;
-  color:var(--muted);
-}
-
-.kpi-value{
-  font-size:29px;
-  font-weight:900;
-}
-
-.panel{
-  margin-bottom:18px;
-  padding:20px;
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  background:white;
-  box-shadow:var(--shadow);
-}
-
-.panel-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:15px;
-  margin-bottom:17px;
-}
-
-.panel-actions{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-}
-
-.panel-title{
-  margin:0;
-  font-size:20px;
-}
-
-.panel-subtitle{
-  margin:5px 0 0;
-  color:var(--muted);
-  font-size:13px;
-}
-
-.toolbar{
-  display:flex;
-  flex-wrap:wrap;
-  align-items:center;
-  gap:10px;
-  margin-bottom:16px;
-}
-
-.search{
-  flex:1;
-  min-width:230px;
-  border:1px solid var(--line);
-  border-radius:11px;
-  padding:10px 12px;
-  background:white;
-}
-
-.filter-select{
-  min-width:170px;
-  border:1px solid var(--line);
-  border-radius:11px;
-  padding:10px 11px;
-  background:white;
-}
-
-.table-wrap{
-  width:100%;
-  overflow-x:auto;
-  border:1px solid var(--line);
-  border-radius:14px;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  background:white;
-}
-
-th{
-  padding:12px 13px;
-  border-bottom:1px solid var(--line);
-  background:#f8fafc;
-  text-align:left;
-  white-space:nowrap;
-  font-size:12px;
-  color:#475467;
-}
-
-td{
-  padding:13px;
-  border-bottom:1px solid #edf1f5;
-  vertical-align:middle;
-  font-size:13px;
-}
-
-tr:last-child td{border-bottom:0}
-
-.user-name{font-weight:800}
-.user-email{color:#475467}
-.muted{color:var(--muted)}
-
-.actions{
-  display:flex;
-  align-items:center;
-  gap:7px;
-  white-space:nowrap;
-}
-
-.badge{
-  display:inline-flex;
-  align-items:center;
-  padding:5px 9px;
-  border-radius:999px;
-  font-size:11px;
-  font-weight:800;
-}
-
-.badge-admin{background:#eef2ff;color:#4338ca}
-.badge-contributor{background:var(--blue-soft);color:#1d4ed8}
-.badge-reader{background:var(--green-soft);color:var(--green)}
-.badge-other{background:var(--grey-soft);color:#475467}
-.badge-active{background:var(--green-soft);color:var(--green)}
-.badge-inactive{background:var(--grey-soft);color:#667085}
-.badge-error{background:var(--red-soft);color:var(--red)}
-.badge-warning{background:var(--orange-soft);color:var(--orange)}
-.badge-new{background:var(--green-soft);color:var(--green)}
-.badge-update{background:var(--blue-soft);color:var(--blue-dark)}
-.badge-same{background:var(--grey-soft);color:#475467}
-
-.modal-backdrop{
-  position:fixed;
-  inset:0;
-  z-index:1000;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  background:rgba(15,23,42,.48);
-}
-
-.modal-backdrop.open{display:flex}
-
-.modal{
-  width:min(820px,100%);
-  max-height:calc(100vh - 40px);
-  overflow:auto;
-  border-radius:20px;
-  background:white;
-  box-shadow:0 25px 70px rgba(15,23,42,.24);
-}
-
-.modal.large{width:min(1180px,100%)}
-
-.modal-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  padding:20px 22px;
-  border-bottom:1px solid var(--line);
-}
-
-.modal-title{
-  margin:0;
-  font-size:20px;
-}
-
-.modal-close{
-  width:35px;
-  height:35px;
-  border:0;
-  border-radius:10px;
-  background:#f2f4f7;
-  font-size:18px;
-}
-
-.modal-body{padding:22px}
-
-.form-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:16px;
-}
-
-.form-group{min-width:0}
-.form-group.full{grid-column:1 / -1}
-
-.form-label{
-  display:block;
-  margin-bottom:6px;
-  font-size:12px;
-  font-weight:800;
-  color:#475467;
-}
-
-.form-control{
-  width:100%;
-  padding:11px 12px;
-  border:1px solid #d5dde7;
-  border-radius:11px;
-  background:white;
-  color:var(--text);
-}
-
-.form-control:focus{
-  outline:none;
-  border-color:#80a6ed;
-  box-shadow:0 0 0 3px rgba(37,99,235,.08);
-}
-
-.form-help{
-  margin-top:6px;
-  font-size:11px;
-  line-height:1.4;
-  color:var(--muted);
-}
-
-.form-error{
-  display:none;
-  margin-top:8px;
-  padding:10px 12px;
-  border-radius:10px;
-  background:var(--red-soft);
-  color:var(--red);
-  font-size:12px;
-  font-weight:700;
-}
-
-.form-error.show{display:block}
-
-.modal-actions{
-  display:flex;
-  justify-content:flex-end;
-  gap:9px;
-  margin-top:22px;
-}
-
-.access-denied{
-  display:none;
-  padding:35px;
-  border:1px solid #fedf89;
-  border-radius:18px;
-  background:var(--orange-soft);
-  text-align:center;
-  color:#7a2e0e;
-}
-
-.access-denied h2{margin-top:0}
-
-.empty{
-  padding:38px;
-  text-align:center;
-  color:var(--muted);
-}
-
-.toast{
-  position:fixed;
-  right:22px;
-  bottom:22px;
-  z-index:3000;
-  display:none;
-  max-width:440px;
-  padding:13px 16px;
-  border-radius:12px;
-  background:#15324b;
-  color:white;
-  font-size:13px;
-  font-weight:750;
-  box-shadow:0 15px 40px rgba(21,50,75,.28);
-}
-
-.import-drop{
-  border:2px dashed #cbd5e1;
-  border-radius:16px;
-  padding:24px;
-  text-align:center;
-  background:#f8fafc;
-}
-
-.import-drop input{display:none}
-
-.import-file{
-  margin-top:10px;
-  color:var(--muted);
-  font-size:12px;
-}
-
-.import-summary{
-  display:grid;
-  grid-template-columns:repeat(5,minmax(0,1fr));
-  gap:10px;
-  margin:18px 0;
-}
-
-.import-stat{
-  padding:12px;
-  border:1px solid var(--line);
-  border-radius:12px;
-  background:#fff;
-}
-
-.import-stat strong{
-  display:block;
-  font-size:22px;
-}
-
-.import-stat span{
-  font-size:11px;
-  color:var(--muted);
-}
-
-.import-table td,.import-table th{
-  font-size:12px;
-  padding:9px 10px;
-}
-
-.notice{
-  margin-top:14px;
-  padding:12px 14px;
-  border-radius:11px;
-  background:var(--blue-soft);
-  color:#1e40af;
-  font-size:12px;
-  line-height:1.45;
-}
-
-.notice.warning{
-  background:var(--orange-soft);
-  color:#7a2e0e;
-}
-
-@media(max-width:900px){
-  .kpis{grid-template-columns:1fr 1fr}
-  .form-grid{grid-template-columns:1fr}
-  .form-group.full{grid-column:auto}
-  .hero-top{flex-direction:column}
-  .import-summary{grid-template-columns:1fr 1fr}
-}
-
-@media(max-width:560px){
-  .kpis{grid-template-columns:1fr}
-  .app{padding:12px}
-  .panel-header{align-items:flex-start;flex-direction:column}
-}
+  :root{
+    --bg:#f6f8fb;
+    --card:#ffffff;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --line:#e5e7eb;
+    --primary:#2563eb;
+    --primary-soft:#eff6ff;
+    --danger:#b91c1c;
+    --danger-soft:#fef2f2;
+    --warning:#b45309;
+    --warning-soft:#fffbeb;
+    --success:#047857;
+    --success-soft:#ecfdf5;
+    --shadow:0 10px 30px rgba(31,41,55,.08);
+    --radius:18px;
+  }
+
+  *{
+    box-sizing:border-box;
+  }
+
+  body{
+    margin:0;
+    font-family:
+      Inter,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding:24px;
+  }
+
+  .hero{
+    background:
+      linear-gradient(
+        135deg,
+        #1d4ed8,
+        #3b82f6
+      );
+    color:#fff;
+    border-radius:22px;
+    padding:24px 26px;
+    box-shadow:var(--shadow);
+    margin-bottom:20px;
+  }
+
+  .hero h1{
+    margin:0 0 6px;
+    font-size:28px;
+  }
+
+  .hero p{
+    margin:0;
+    opacity:.92;
+  }
+
+  .meta{
+    margin-top:12px;
+    font-size:13px;
+    opacity:.9;
+  }
+
+  .grid-kpi{
+    display:grid;
+    grid-template-columns:
+      repeat(
+        4,
+        minmax(0,1fr)
+      );
+    gap:14px;
+    margin-bottom:20px;
+  }
+
+  .kpi{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:18px;
+    box-shadow:var(--shadow);
+  }
+
+  .kpi .label{
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:8px;
+  }
+
+  .kpi .value{
+    font-size:30px;
+    font-weight:800;
+  }
+
+  .kpi.danger{
+    background:var(--danger-soft);
+  }
+
+  .kpi.warning{
+    background:var(--warning-soft);
+  }
+
+  .kpi.success{
+    background:var(--success-soft);
+  }
+
+  .panel{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px;
+    box-shadow:var(--shadow);
+    margin-bottom:18px;
+  }
+
+  .panel h2{
+    margin:0 0 14px;
+    font-size:20px;
+  }
+
+  .controls{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+    margin-bottom:16px;
+  }
+
+  .options-box{
+    border:1px solid var(--line);
+    border-radius:14px;
+    background:#fafafa;
+    padding:14px 16px;
+    margin-bottom:16px;
+  }
+
+  .options-title{
+    font-weight:800;
+    margin-bottom:10px;
+  }
+
+  .options-row{
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+
+  .check{
+    display:flex;
+    gap:7px;
+    align-items:center;
+    font-size:14px;
+  }
+
+  .check input{
+    width:17px;
+    height:17px;
+  }
+
+  .select-wrap{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    font-size:14px;
+  }
+
+  .select-wrap select{
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:8px 10px;
+    background:#fff;
+    font:inherit;
+  }
+
+  button{
+    border:0;
+    border-radius:12px;
+    padding:11px 15px;
+    font-weight:700;
+    cursor:pointer;
+    background:#eef2f7;
+    color:#111827;
+  }
+
+  button.primary{
+    background:var(--primary);
+    color:#fff;
+  }
+
+  button:hover{
+    filter:brightness(.98);
+  }
+
+  button:disabled{
+    opacity:.5;
+    cursor:not-allowed;
+  }
+
+  .status{
+    min-height:22px;
+    margin:4px 0 12px;
+    font-size:14px;
+    color:var(--success);
+    font-weight:700;
+  }
+
+  .mail-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+
+  .field label{
+    display:block;
+    font-size:12px;
+    font-weight:700;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+
+  .field input,
+  .field textarea{
+    width:100%;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:11px 12px;
+    font:inherit;
+    background:#fff;
+    color:var(--text);
+  }
+
+  .field textarea{
+    min-height:420px;
+    resize:vertical;
+    white-space:pre-wrap;
+  }
+
+  .preview{
+    border:1px solid var(--line);
+    border-radius:14px;
+    background:#fafafa;
+    padding:16px;
+    white-space:pre-wrap;
+    min-height:420px;
+    line-height:1.5;
+  }
+
+  /* =========================================
+     V5 — PARAMÉTRAGE DE LA SYNTHÈSE AUTOMATIQUE
+     ========================================= */
+
+  .schedule-grid{
+    display:grid;
+    grid-template-columns:
+      repeat(4,minmax(0,1fr));
+    gap:12px;
+    margin-top:12px;
+  }
+
+  .schedule-field label{
+    display:block;
+    font-size:12px;
+    font-weight:700;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+
+  .schedule-field select,
+  .schedule-field input{
+    width:100%;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:9px 10px;
+    background:#fff;
+    font:inherit;
+    color:var(--text);
+  }
+
+  .schedule-switch{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    background:#fff;
+    padding:11px 12px;
+  }
+
+  .schedule-switch-text{
+    font-size:13px;
+    font-weight:800;
+  }
+
+  .schedule-switch-help{
+    margin-top:3px;
+    color:var(--muted);
+    font-size:11px;
+    font-weight:400;
+    line-height:1.4;
+  }
+
+  .switch{
+    position:relative;
+    display:inline-block;
+    width:44px;
+    height:24px;
+    flex:0 0 auto;
+  }
+
+  .switch input{
+    opacity:0;
+    width:0;
+    height:0;
+  }
+
+  .slider{
+    position:absolute;
+    inset:0;
+    cursor:pointer;
+    background:#cbd5e1;
+    border-radius:999px;
+    transition:.18s;
+  }
+
+  .slider:before{
+    content:"";
+    position:absolute;
+    width:18px;
+    height:18px;
+    left:3px;
+    top:3px;
+    background:#fff;
+    border-radius:50%;
+    box-shadow:0 1px 3px rgba(0,0,0,.24);
+    transition:.18s;
+  }
+
+  .switch input:checked + .slider{
+    background:var(--primary);
+  }
+
+  .switch input:checked + .slider:before{
+    transform:translateX(20px);
+  }
+
+  .schedule-note{
+    margin-top:12px;
+    padding:11px 12px;
+    border:1px solid #f1d58a;
+    border-radius:12px;
+    background:#fff8e1;
+    color:#765300;
+    font-size:12px;
+    line-height:1.5;
+  }
+
+  .schedule-actions{
+    display:flex;
+    justify-content:flex-end;
+    margin-top:12px;
+  }
+
+  .schedule-status{
+    min-height:20px;
+    margin-top:8px;
+    font-size:12px;
+    font-weight:700;
+    color:var(--success);
+  }
+
+  .schedule-status.error{
+    color:var(--danger);
+  }
+
+  .hidden{
+    display:none !important;
+  }
+
+  @media(max-width:800px){
+
+    .grid-kpi{
+      grid-template-columns:
+        repeat(2,1fr);
+    }
+
+    .mail-grid{
+      grid-template-columns:1fr;
+    }
+
+    .select-wrap{
+      width:100%;
+      justify-content:space-between;
+    }
+
+    .select-wrap select{
+      max-width:60%;
+    }
+
+    .schedule-grid{
+      grid-template-columns:1fr 1fr;
+    }
+  }
 </style>
 </head>
 
+
 <body>
-<main class="app">
 
-  <!-- =========================================
+<div class="wrap">
+
+  <!-- =========================================================
+       NAVIGATION — RETOUR À L'ACCUEIL SELON LE RÔLE
+       ========================================================= -->
+  <nav style="margin:0 0 14px 0;">
+    <a
+      id="homeLink"
+      href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH"
+      target="_top"
+      style="
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        padding:9px 13px;
+        border:1px solid #d7e2ea;
+        border-radius:10px;
+        background:#ffffff;
+        color:#244a68;
+        text-decoration:none;
+        font-size:13px;
+        font-weight:800;
+        box-shadow:0 3px 10px rgba(25,55,80,.06);
+      "
+    >← Retour à l'accueil</a>
+  </nav>
+
+  <!-- =====================================
        ENTÊTE
-       ========================================= -->
+       ===================================== -->
+
   <section class="hero">
-    <div class="hero-top">
-      <div class="brand">
-        <div class="brand-mark">👤</div>
-        <div>
-          <div class="brand-name">GESTION DES UTILISATEURS</div>
-          <div class="brand-sub">Administration des accès et des profils</div>
-        </div>
+
+    <h1>📊 Synthèses</h1>
+
+    <p>
+      Générez une synthèse des contributions à traiter,
+      prête à être copiée ou ouverte dans votre messagerie.
+    </p>
+
+    <div
+      id="scopeMeta"
+      class="meta"
+    >
+      Chargement du périmètre…
+    </div>
+
+  </section>
+
+
+  <div
+    id="errorBox"
+    class="error hidden"
+  ></div>
+
+
+  <!-- =====================================
+       KPI
+       ===================================== -->
+
+  <section class="grid-kpi">
+
+    <div class="kpi">
+      <div class="label">
+        À traiter
+      </div>
+      <div
+        id="kpiTodo"
+        class="value"
+      >
+        0
       </div>
     </div>
 
-    <div class="hero-content">
-      <h1>Gestion des utilisateurs</h1>
-      <p>
-        Gérez les profils utilisateurs, leurs rôles, leurs périmètres
-        et les imports en nombre depuis Excel.
-      </p>
-      <div id="profileInfo" class="profile">Identification…</div>
+
+    <div class="kpi danger">
+      <div class="label">
+        En retard
+      </div>
+      <div
+        id="kpiLate"
+        class="value"
+      >
+        0
+      </div>
     </div>
+
+
+    <div class="kpi warning">
+      <div class="label">
+        À relancer
+      </div>
+      <div
+        id="kpiReminder"
+        class="value"
+      >
+        0
+      </div>
+    </div>
+
+
+    <div class="kpi success">
+      <div class="label">
+        Urgentes
+      </div>
+      <div
+        id="kpiUrgent"
+        class="value"
+      >
+        0
+      </div>
+    </div>
+
   </section>
 
-  <!-- =========================================
-       ACCÈS REFUSÉ
-       ========================================= -->
-  <section id="accessDenied" class="access-denied">
-    <h2>🔒 Accès réservé</h2>
-    <p>Cette fonction est réservée aux administrateurs.</p>
-  </section>
 
-  <!-- =========================================
-       CONTENU ADMINISTRATEUR
-       ========================================= -->
-  <div id="adminContent" style="display:none">
+  <!-- =====================================
+       PRÉPARATION
+       ===================================== -->
 
-    <section class="kpis">
-      <div class="kpi">
-        <div class="kpi-label">Utilisateurs</div>
-        <div id="kpiUsers" class="kpi-value">0</div>
+  <section class="panel">
+
+    <h2>
+      ✉️ Préparer la synthèse
+    </h2>
+
+
+    <!-- =====================================
+         CONTENU
+         ===================================== -->
+
+    <div class="options-box">
+
+      <div class="options-title">
+        Contenu de la synthèse
       </div>
 
-      <div class="kpi">
-        <div class="kpi-label">Actifs</div>
-        <div id="kpiActive" class="kpi-value">0</div>
+      <div class="options-row">
+
+        <label class="check">
+
+          <input
+            type="checkbox"
+            id="includeLate"
+            checked
+          >
+
+          Contributions en retard
+
+        </label>
+
+
+        <label class="check">
+
+          <input
+            type="checkbox"
+            id="includeReminders"
+            checked
+          >
+
+          Contributions à relancer
+
+        </label>
+
+
+        <label class="check">
+
+          <input
+            type="checkbox"
+            id="includeUpcoming"
+            checked
+          >
+
+          Prochaines échéances
+
+        </label>
+
+
+        <label class="select-wrap">
+
+          Période des prochaines échéances
+
+          <select id="upcomingDays">
+
+            <option value="7">
+              7 jours
+            </option>
+
+            <option
+              value="15"
+              selected
+            >
+              15 jours
+            </option>
+
+            <option value="30">
+              30 jours
+            </option>
+
+            <option value="all">
+              Toutes
+            </option>
+
+          </select>
+
+        </label>
+
       </div>
 
-      <div class="kpi">
-        <div class="kpi-label">Lecteurs</div>
-        <div id="kpiReaders" class="kpi-value">0</div>
+    </div>
+
+
+    <!-- =====================================
+         FILTRES
+         ===================================== -->
+
+    <div class="options-box">
+
+      <div class="options-title">
+        🔎 Filtrer la synthèse
       </div>
 
-      <div class="kpi">
-        <div class="kpi-label">Administrateurs</div>
-        <div id="kpiAdmins" class="kpi-value">0</div>
-      </div>
+      <div class="options-row">
 
-      <div class="kpi">
-        <div class="kpi-label">Bureaux contributeurs</div>
-        <div id="kpiContributors" class="kpi-value">0</div>
-      </div>
-    </section>
 
-    <section class="panel">
-      <div class="panel-header">
-        <div>
-          <h2 class="panel-title">Utilisateurs</h2>
-          <p class="panel-subtitle">
-            Les droits métier sont pilotés par la table UTILISATEURS et les règles ACL de Grist.
-          </p>
-        </div>
+        <!--
+          NOUVEAU v62 :
+          bureau d'origine.
 
-        <div class="panel-actions">
-          <button id="importUsersBtn" class="btn btn-secondary" type="button">
-            📥 Importer des utilisateurs
-          </button>
-          <button id="newUserBtn" class="btn btn-primary" type="button">
-            ＋ Ajouter un utilisateur
-          </button>
-        </div>
-      </div>
+          Ce filtre est réservé à l'Administrateur,
+          seul profil ayant un accès global à plusieurs
+          bureaux dans cette interface.
+        -->
 
-      <div class="toolbar">
-        <input
-          id="searchInput"
-          class="search"
-          type="search"
-          placeholder="Rechercher par nom, e-mail, rôle, périmètre ou bureau…"
+        <label
+          class="select-wrap hidden"
+          id="bureauFilterWrap"
         >
 
-        <select id="roleFilter" class="filter-select">
-          <option value="">Tous les rôles</option>
-        </select>
+          Bureau demandeur
 
-        <select id="activeFilter" class="filter-select">
-          <option value="">Tous les états</option>
-          <option value="active">Actifs</option>
-          <option value="inactive">Inactifs</option>
-        </select>
+          <select id="filterBureau">
+
+            <option value="">
+              Tous les bureaux demandeurs
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <label class="select-wrap">
+
+          Contributeur
+
+          <select id="filterContributor">
+
+            <option value="">
+              Tous les contributeurs
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <label class="select-wrap">
+
+          Priorité
+
+          <select id="filterPriority">
+
+            <option value="">
+              Toutes les priorités
+            </option>
+
+          </select>
+
+        </label>
+
+<label class="select-wrap">
+
+          Type
+
+          <select id="filterType">
+
+            <option value="">
+              Toutes les contributions à traiter
+            </option>
+
+            <option value="late">
+              En retard uniquement
+            </option>
+
+            <option value="reminder">
+              À relancer uniquement
+            </option>
+
+            <option value="urgent">
+              Urgentes uniquement
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <button
+          id="resetFiltersBtn"
+          type="button"
+        >
+          ↺ Réinitialiser les filtres
+        </button>
+
       </div>
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Utilisateur</th>
-              <th>Rôle</th>
-              <th>Périmètre</th>
-              <th>Bureau</th>
-              <th>État</th>
-              <th>Contrôle</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="usersBody"></tbody>
-        </table>
-      </div>
-    </section>
-  </div>
-</main>
-
-<!-- =========================================
-     MODALE AJOUT / MODIFICATION
-     NOUVELLE ARCHITECTURE :
-     Administrateur / Lecteur / Bureau contributeur
-     ========================================= -->
-<div id="userModal" class="modal-backdrop">
-  <div class="modal">
-    <div class="modal-header">
-      <h2 id="modalTitle" class="modal-title">Ajouter un utilisateur</h2>
-      <button id="closeModalBtn" class="modal-close" type="button">×</button>
     </div>
 
-    <div class="modal-body">
-      <div class="form-grid">
 
-        <div class="form-group">
-          <label for="userName" class="form-label">Nom et prénom *</label>
-          <input id="userName" class="form-control" type="text">
-        </div>
+    <!-- =====================================
+         V8 — PARAMÈTRES DU MESSAGE
+         Administrateur / Bureau contributeur
+         ===================================== -->
 
-        <div class="form-group">
-          <label for="userEmail" class="form-label">Adresse e-mail *</label>
-          <input id="userEmail" class="form-control" type="email" autocomplete="off">
-          <div class="form-help">
-            L'adresse doit correspondre au compte utilisé pour accéder à Grist.
-          </div>
-        </div>
+    <div
+      id="messageSettingsPanel"
+      class="options-box hidden"
+    >
 
-        <div class="form-group">
-          <label for="userRole" class="form-label">Rôle *</label>
-          <select id="userRole" class="form-control">
-            <option value="">Sélectionner…</option>
-            <option value="Administrateur">Administrateur</option>
-            <option value="Lecteur">Lecteur</option>
-            <option value="Bureau contributeur">Bureau contributeur</option>
-          </select>
-        </div>
+      <div class="options-title">
+        ✍️ Paramètres du message
+      </div>
 
-        <div class="form-group">
-          <label for="userActive" class="form-label">État du compte</label>
-          <select id="userActive" class="form-control">
-            <option value="true">Actif</option>
-            <option value="false">Désactivé</option>
-          </select>
-        </div>
+      <div class="schedule-switch-help" style="margin-bottom:14px">
+        Ces informations sont utilisées dans les variables
+        <strong>[NOM_SIGNATURE]</strong> et
+        <strong>[EMAIL_CONTACT]</strong> du modèle de synthèse.
+      </div>
 
-        <div id="perimeterTypeGroup" class="form-group">
-          <label for="perimeterType" class="form-label">Niveau de périmètre</label>
-          <select id="perimeterType" class="form-control">
-            <option value="">Aucun</option>
-            <option value="Service">Service</option>
-            <option value="Sous_direction">Sous-direction</option>
-            <option value="Departement">Département</option>
-          </select>
-          <div id="perimeterHelp" class="form-help">
-            Un lecteur doit avoir un seul niveau de périmètre.
-          </div>
-        </div>
+      <div class="schedule-grid">
 
-        <div id="perimeterValueGroup" class="form-group" style="display:none">
-          <label id="perimeterValueLabel" for="perimeterValue" class="form-label">
-            Périmètre
+        <div class="schedule-field">
+          <label for="messageSignature">
+            Nom de signature
           </label>
-          <select id="perimeterValue" class="form-control"></select>
+
+          <input
+            id="messageSignature"
+            type="text"
+            placeholder="ex. Bureau E1"
+          >
         </div>
 
-        <div id="bureauGroup" class="form-group full" style="display:none">
-          <label for="userBureau" class="form-label">Bureau *</label>
-          <select id="userBureau" class="form-control">
-            <option value="">Sélectionner…</option>
+        <div class="schedule-field">
+          <label for="messageContactEmail">
+            Email de contact à afficher
+          </label>
+
+          <input
+            id="messageContactEmail"
+            type="email"
+            placeholder="ex. bureau-e1@..."
+          >
+        </div>
+
+      </div>
+
+      <div class="schedule-actions">
+        <button
+          id="saveMessageSettingsBtn"
+          class="primary"
+          type="button"
+        >
+          💾 Enregistrer les paramètres du message
+        </button>
+      </div>
+
+      <div
+        id="messageSettingsStatus"
+        class="schedule-status"
+      ></div>
+
+    </div>
+
+
+    <!-- =====================================
+         V5 — PLANIFICATION DE LA SYNTHÈSE
+         ===================================== -->
+
+    <div
+      id="schedulePanel"
+      class="options-box hidden"
+    >
+
+      <div class="options-title">
+        ⏱️ Préparation de l'envoi automatique
+      </div>
+
+      <div class="schedule-switch">
+
+        <div>
+          <div class="schedule-switch-text">
+            Activer l'envoi automatique de la synthèse
+          </div>
+
+          <div class="schedule-switch-help">
+            Ce réglage prépare la future automatisation.
+            Tant que le moteur d'envoi n'est pas activé,
+            aucun courriel ne part automatiquement.
+          </div>
+        </div>
+
+        <label
+          class="switch"
+          aria-label="Activer l'envoi automatique de la synthèse"
+        >
+          <input
+            type="checkbox"
+            id="scheduleActive"
+          >
+          <span class="slider"></span>
+        </label>
+
+      </div>
+
+      <div class="schedule-grid">
+
+        <div class="schedule-field">
+          <label for="scheduleFrequency">
+            Fréquence
+          </label>
+
+          <select id="scheduleFrequency">
+            <option value="Quotidienne">
+              Quotidienne
+            </option>
+            <option value="Hebdomadaire">
+              Hebdomadaire
+            </option>
+            <option value="Mensuelle">
+              Mensuelle
+            </option>
           </select>
-          <div class="form-help">
-            Obligatoire pour le rôle Bureau contributeur.
-          </div>
+        </div>
+
+        <div class="schedule-field">
+          <label for="scheduleDay">
+            Jour
+          </label>
+
+          <select id="scheduleDay">
+            <option value="Lundi">Lundi</option>
+            <option value="Mardi">Mardi</option>
+            <option value="Mercredi">Mercredi</option>
+            <option value="Jeudi">Jeudi</option>
+            <option value="Vendredi">Vendredi</option>
+            <option value="Samedi">Samedi</option>
+            <option value="Dimanche">Dimanche</option>
+          </select>
+        </div>
+
+        <div class="schedule-field">
+          <label for="scheduleTime">
+            Heure
+          </label>
+
+          <input
+            id="scheduleTime"
+            type="text"
+            inputmode="numeric"
+            placeholder="09:00"
+          >
+        </div>
+
+        <div class="schedule-field">
+          <label>
+            Règle appliquée
+          </label>
+
+          <div
+            id="scheduleRule"
+            class="notice"
+            style="margin-top:0"
+          ></div>
         </div>
 
       </div>
 
-      <div id="formError" class="form-error"></div>
-
-      <div class="modal-actions">
-        <button id="cancelBtn" class="btn btn-secondary" type="button">Annuler</button>
-        <button id="saveBtn" class="btn btn-primary" type="button">💾 Enregistrer</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- =========================================
-     MODALE IMPORT EXCEL
-     ========================================= -->
-<div id="importModal" class="modal-backdrop">
-  <div class="modal large">
-    <div class="modal-header">
-      <h2 class="modal-title">Importer des utilisateurs depuis Excel</h2>
-      <button id="closeImportBtn" class="modal-close" type="button">×</button>
-    </div>
-
-    <div class="modal-body">
-
-      <div class="import-drop">
-        <div style="font-size:34px;margin-bottom:8px">📄</div>
-        <strong>Sélectionnez un fichier Excel .xlsx ou .xls</strong>
-        <div class="form-help" style="margin:7px auto 14px;max-width:760px">
-          Colonnes attendues :
-          Email, Nom, Role, Service, Sous_direction, Departement, Bureau, Actif.
-        </div>
-
-        <button id="chooseImportBtn" class="btn btn-primary" type="button">
-          Choisir le fichier Excel
-        </button>
-        <input id="importFile" type="file" accept=".xlsx,.xls">
-        <div id="importFileName" class="import-file">Aucun fichier sélectionné</div>
+      <div class="schedule-note">
+        <strong>Fréquence mensuelle :</strong>
+        lorsque « Mensuelle » est choisie, l'envoi est prévu
+        le <strong>premier jour sélectionné du mois</strong>.
+        Exemple : « Mensuelle + Lundi » = le premier lundi du mois.
       </div>
 
-      <div class="notice">
-        L'adresse e-mail sert de clé : une adresse absente de Grist sera créée ;
-        une adresse déjà présente sera mise à jour. Les utilisateurs absents du fichier
-        ne seront jamais supprimés ni désactivés automatiquement.
-      </div>
-
-      <div id="importAnalysis" style="display:none">
-        <div class="import-summary">
-          <div class="import-stat">
-            <strong id="importTotal">0</strong>
-            <span>Lignes analysées</span>
-          </div>
-          <div class="import-stat">
-            <strong id="importNew">0</strong>
-            <span>Nouveaux</span>
-          </div>
-          <div class="import-stat">
-            <strong id="importUpdate">0</strong>
-            <span>À mettre à jour</span>
-          </div>
-          <div class="import-stat">
-            <strong id="importSame">0</strong>
-            <span>Sans changement</span>
-          </div>
-          <div class="import-stat">
-            <strong id="importErrors">0</strong>
-            <span>Erreurs bloquantes</span>
-          </div>
-        </div>
-
-        <div class="table-wrap">
-          <table class="import-table">
-            <thead>
-              <tr>
-                <th>Ligne</th>
-                <th>Email</th>
-                <th>Nom</th>
-                <th>Rôle</th>
-                <th>Périmètre</th>
-                <th>Bureau</th>
-                <th>Résultat</th>
-              </tr>
-            </thead>
-            <tbody id="importBody"></tbody>
-          </table>
-        </div>
-
-        <div id="importErrorMessage" class="notice warning" style="display:none"></div>
-      </div>
-
-      <div class="modal-actions">
-        <button id="cancelImportBtn" class="btn btn-secondary" type="button">Annuler</button>
-        <button id="confirmImportBtn" class="btn btn-primary" type="button" disabled>
-          Confirmer l'import
+      <div class="schedule-actions">
+        <button
+          id="saveScheduleBtn"
+          class="primary"
+          type="button"
+        >
+          💾 Enregistrer la planification
         </button>
       </div>
+
+      <div
+        id="scheduleStatus"
+        class="schedule-status"
+      ></div>
+
     </div>
-  </div>
+
+
+    <!-- =====================================
+         ACTIONS
+         ===================================== -->
+
+    <div class="controls">
+
+      <button
+        class="primary"
+        id="refreshBtn"
+      >
+        🔄 Actualiser
+      </button>
+
+      <button id="copyBtn">
+        📋 Copier la synthèse
+      </button>
+
+      <button id="mailtoBtn">
+        📨 Ouvrir dans la messagerie
+      </button>
+
+    </div>
+
+
+    <div
+      id="status"
+      class="status"
+    ></div>
+
+
+    <!-- =====================================
+         DESTINATAIRES
+         ===================================== -->
+
+    <div
+      class="field"
+      style="margin-bottom:14px"
+    >
+
+      <label>
+        Destinataires
+      </label>
+
+      <input
+        id="recipients"
+        type="text"
+        placeholder="ex. bureau-e1@..."
+      >
+
+    </div>
+
+
+    <!-- =====================================
+         OBJET
+         ===================================== -->
+
+    <div
+      class="field"
+      style="margin-bottom:14px"
+    >
+
+      <label>
+        Objet
+      </label>
+
+      <input
+        id="subject"
+        type="text"
+      >
+
+    </div>
+
+
+    <!-- =====================================
+         MESSAGE + APERÇU
+         ===================================== -->
+
+    <div class="mail-grid">
+
+      <div class="field">
+
+        <label>
+          Message généré
+        </label>
+
+        <textarea id="body"></textarea>
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          Aperçu
+        </label>
+
+        <div
+          id="preview"
+          class="preview"
+        ></div>
+
+      </div>
+
+    </div>
+
+  </section>
+
 </div>
 
-<div id="toast" class="toast"></div>
 
 <script>
+
 "use strict";
 
-/* =========================================
-   GESTION DES UTILISATEURS — V2
-
-   Évolutions V2 :
-   - nettoyage automatique de la ligne temporaire SESSION_WIDGET
-     après identification de l'utilisateur ;
-   - ajout d'un KPI « Bureaux contributeurs » ;
-   - clarification du libellé « périmètre de réception »
-     pour le rôle Bureau contributeur ;
-   - conservation des rôles, ACL et règles métier existantes.
-
-   =========================================
-   ÉTAT GLOBAL
-   ========================================= */
-
-const $ = id => document.getElementById(id);
-
-let users = [];
-let services = [];
-let subDirections = [];
-let departments = [];
-let bureaux = [];
-
-let currentProfile = null;
-let selectedUserId = null;
-let importPlan = [];
-let toastTimer = null;
 
 /* =========================================
-   CONSTANTES MÉTIER
-   RÔLES ACTUELS
+   SYNTHÈSES — V9
+
+   Évolutions V10 :
+   - renommage du libellé « Email de contact » en
+     « Email de contact à afficher » pour éviter toute confusion
+     avec l'adresse de destination du message.
+
+   Évolutions V8 conservées :
+   - ajout d'un bloc « Paramètres du message » dans la page Synthèses ;
+   - modification de Nom_signature et Email_contact directement depuis le widget ;
+   - accès réservé à l'Administrateur et au Bureau contributeur autorisé ;
+   - le Bureau contributeur ne peut toujours modifier que les paramètres
+     de son propre bureau grâce aux droits existants sur PARAMETRES_BUREAUX.
+
+   Évolutions V7 conservées :
+   - affichage simplifié des contributions dans les synthèses ;
+   - présentation sous forme de tableau texte avec les colonnes :
+     Titre | Contributeur | Échéance | Jours restants ;
+   - conservation des filtres, des KPI, des modèles de message
+     et de la planification existante.
+
+   Évolutions V6 conservées :
+   - prise en charge de Contributeur_affiche ;
+   - prise en charge des cibles Département / Sous-direction / Service ;
+   - filtre générique "Contributeur" ;
+   - conservation des affectations individuelles dans les synthèses :
+     chaque échéance, relance et priorité reste propre à l'affectation ;
+   - prise en charge de Groupe_contribution sans fusionner les échéances
+     ni les statuts de plusieurs affectations ;
+   - conservation complète de la préparation de l'envoi automatique.
+
+   Règle mensuelle validée :
+   "Mensuelle + Jour" = premier Jour du mois.
+
+   IMPORTANT :
+   ce widget ne déclenche encore aucun envoi automatique.
+   Il prépare uniquement les paramètres qui pourront être
+   utilisés par le futur moteur d'automatisation.
    ========================================= */
 
-const ALLOWED_ROLES = [
-  "Administrateur",
-  "Lecteur",
-  "Bureau contributeur"
-];
-
-const REQUIRED_IMPORT_COLUMNS = [
-  "Email",
-  "Nom",
-  "Role",
-  "Service",
-  "Sous_direction",
-  "Departement",
-  "Bureau",
-  "Actif"
-];
 
 /* =========================================
-   OUTILS GÉNÉRAUX
+   OUTILS
    ========================================= */
 
-function text(value){
-  return String(value == null ? "" : value);
+const $ =
+  (id) =>
+    document.getElementById(id);
+
+
+
+let state = {
+
+  user:null,
+
+  profile:null,
+
+  bureauId:null,
+
+  bureauCode:"",
+
+  role:"",
+
+  params:null,
+
+  bureaux:[],
+
+  departements:[],
+
+  sousDirections:[],
+
+  services:[],
+
+  contributions:[],
+
+  filtered:[]
+
+};
+
+
+
+/* =========================================
+   ERREURS
+   ========================================= */
+
+function showError(err){
+
+  const box =
+    $("errorBox");
+
+  box.textContent =
+    "Erreur : "
+    +
+    (
+      err?.message
+      ||
+      String(err)
+    );
+
+  box.classList.remove(
+    "hidden"
+  );
+
 }
 
-function clean(value){
-  return text(value)
+
+
+function clearError(){
+
+  $("errorBox")
+    .classList
+    .add(
+      "hidden"
+    );
+
+}
+
+
+
+/* =========================================
+   NORMALISATION
+   ========================================= */
+
+function normalizeText(v){
+
+  return String(
+    v ?? ""
+  )
     .trim()
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g,"");
+    .replace(
+      /[\u0300-\u036f]/g,
+      ""
+    );
+
 }
 
-function escapeHtml(value){
-  return text(value)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;");
+
+
+/* =========================================
+   PROFILS
+   ========================================= */
+
+function hasGlobalAccess(){
+
+  /*
+    Rôles actuels :
+    - Administrateur : accès global ;
+    - Bureau contributeur : périmètre de son bureau ;
+    - Lecteur : périmètre déterminé par les ACL Grist.
+
+    IMPORTANT :
+    le Lecteur n'est pas bloqué techniquement dans ce widget.
+    Dans sa future page d'accueil, aucun lien vers "Synthèses"
+    ne lui sera proposé.
+  */
+  return (
+    state.role === "Administrateur"
+  );
+
 }
 
-function tableToRows(table){
-  if(!table){ return []; }
 
-  const ids = table.id || [];
+function isBureauContributor(){
 
-  return ids.map((id,index) => {
-    const row = {id};
+  return (
+    state.role === "Bureau contributeur"
+  );
 
-    for(const column of Object.keys(table)){
-      if(column === "id"){ continue; }
-
-      row[column] = Array.isArray(table[column])
-        ? table[column][index]
-        : table[column];
-    }
-
-    return row;
-  });
 }
 
-function showToast(message){
-  const toast = $("toast");
-  toast.textContent = message;
-  toast.style.display = "block";
 
-  clearTimeout(toastTimer);
+function updateHomeLink(){
+  const link = document.getElementById("homeLink");
+  if(!link){ return; }
 
-  toastTimer = setTimeout(() => {
-    toast.style.display = "none";
-  },3000);
-}
+  const role = String(state.role || "").trim().toLowerCase();
 
-function setFormError(message){
-  const box = $("formError");
-
-  if(message){
-    box.textContent = message;
-    box.classList.add("show");
-  }else{
-    box.textContent = "";
-    box.classList.remove("show");
-  }
-}
-
-function isFalseValue(value){
-  return value === false
-    || value === 0
-    || clean(value) === "non"
-    || clean(value) === "false"
-    || clean(value) === "inactif"
-    || clean(value) === "desactive";
-}
-
-function parseActive(value){
-  if(value === "" || value == null){
-    return true;
+  if(role === "administrateur"){
+    link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/32";
+    return;
   }
 
-  if(isFalseValue(value)){
+  if(role === "bureau contributeur"){
+    link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/33?style=singlePage";
+    return;
+  }
+
+  if(role === "lecteur"){
+    link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/34?style=singlePage";
+    return;
+  }
+
+  link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH";
+}
+
+
+/*
+  V5 :
+  seuls l'Administrateur et le Bureau contributeur
+  peuvent enregistrer les paramètres de planification.
+*/
+function canManageSchedule(){
+
+  if(
+    !state.params
+  ){
     return false;
   }
 
-  const normalized = clean(value);
-
   if(
-    value === true
-    || value === 1
-    || normalized === "oui"
-    || normalized === "true"
-    || normalized === "actif"
-    || normalized === "1"
+    hasGlobalAccess()
   ){
     return true;
   }
 
-  return null;
-}
-
-function sameRef(a,b){
-  return Number(a || 0) === Number(b || 0);
-}
-
-function refLabel(rows,id){
-  const row = rows.find(item => Number(item.id) === Number(id));
-
-  if(!row){ return ""; }
-
-  if(row.Code && row.Nom){
-    return `${row.Code} — ${row.Nom}`;
-  }
-
-  return row.Code || row.Nom || "";
-}
-
-function findReferenceByCode(rows,code){
-  const normalized = clean(code);
-
-  if(!normalized){ return null; }
-
-  return rows.find(row =>
-    clean(row.Code) === normalized
-    || clean(row.Nom) === normalized
-  ) || null;
-}
-
-/* =========================================
-   IDENTIFICATION UTILISATEUR
-   IMPORTANT :
-   mécanisme SESSION_WIDGET conservé inchangé.
-   ========================================= */
-
-async function identifyUser(){
-  const before = tableToRows(
-    await grist.docApi.fetchTable("SESSION_WIDGET")
-  );
-
-  const previousIds = new Set(
-    before.map(row => Number(row.id))
-  );
-
-  await grist.docApi.applyUserActions([
-    ["AddRecord","SESSION_WIDGET",null,{}]
-  ]);
-
-  await new Promise(resolve => setTimeout(resolve,800));
-
-  const after = tableToRows(
-    await grist.docApi.fetchTable("SESSION_WIDGET")
-  );
-
-  const created = after
-    .filter(row => !previousIds.has(Number(row.id)))
-    .sort((a,b) => Number(b.id) - Number(a.id));
-
-  const profile = created[0] || null;
-
-  /*
-    V2 :
-    la ligne SESSION_WIDGET est temporaire.
-    On la supprime après identification pour éviter
-    l'accumulation de lignes techniques inutiles.
-  */
-  if(profile){
-    try{
-      await grist.docApi.applyUserActions([
-        ["BulkRemoveRecord","SESSION_WIDGET",[Number(profile.id)]]
-      ]);
-    }catch(cleanupError){
-      console.warn(
-        "Nettoyage SESSION_WIDGET impossible :",
-        cleanupError
-      );
-    }
-  }
-
-  return profile;
-}
-
-function isAdministrator(){
-  return clean(currentProfile?.Role) === "administrateur";
-}
-
-function renderAccess(){
-  const allowed = isAdministrator();
-
-  $("adminContent").style.display = allowed ? "block" : "none";
-  $("accessDenied").style.display = allowed ? "none" : "block";
-
-  if(currentProfile){
-    $("profileInfo").textContent =
-      "Profil connecté : "
-      + (currentProfile.Email || "")
-      + " — "
-      + (currentProfile.Role || "rôle non défini");
-  }else{
-    $("profileInfo").textContent = "Profil non identifié";
-  }
-}
-
-/* =========================================
-   RÉFÉRENTIELS
-   ========================================= */
-
-function fillReferenceSelect(select,rows,emptyLabel){
-  select.innerHTML = "";
-
-  const empty = document.createElement("option");
-  empty.value = "";
-  empty.textContent = emptyLabel;
-  select.appendChild(empty);
-
-  rows
-    .slice()
-    .sort((a,b) =>
-      text(a.Code || a.Nom).localeCompare(
-        text(b.Code || b.Nom),
-        "fr",
-        {sensitivity:"base"}
-      )
+  return (
+    isBureauContributor()
+    &&
+    Number(
+      state.params.Bureau
     )
-    .forEach(row => {
-      const option = document.createElement("option");
-      option.value = row.id;
-      option.textContent = row.Code && row.Nom
-        ? `${row.Code} — ${row.Nom}`
-        : row.Code || row.Nom || row.id;
-      select.appendChild(option);
-    });
-}
-
-function populateBureaux(){
-  fillReferenceSelect(
-    $("userBureau"),
-    bureaux,
-    "Sélectionner…"
+    ===
+    Number(
+      state.bureauId
+    )
   );
+
 }
 
-function perimeterRows(type){
-  if(type === "Service"){ return services; }
-  if(type === "Sous_direction"){ return subDirections; }
-  if(type === "Departement"){ return departments; }
-  return [];
-}
 
-function updatePerimeterSelector(){
-  const type = $("perimeterType").value;
-  const group = $("perimeterValueGroup");
-
-  if(!type){
-    group.style.display = "none";
-    $("perimeterValue").innerHTML = "";
-    return;
-  }
-
-  group.style.display = "";
-
-  $("perimeterValueLabel").textContent =
-    type === "Service"
-      ? "Service"
-      : type === "Sous_direction"
-        ? "Sous-direction"
-        : "Département";
-
-  fillReferenceSelect(
-    $("perimeterValue"),
-    perimeterRows(type),
-    "Sélectionner…"
-  );
-}
 
 /* =========================================
-   AFFICHAGE DES CHAMPS SELON LE RÔLE
-   - Administrateur : pas de périmètre, pas de bureau
-   - Lecteur : périmètre obligatoire
-   - Bureau contributeur : bureau obligatoire,
-     périmètre de réception facultatif
+   STATUTS
    ========================================= */
 
-function updateFieldsForRole(){
-  const role = $("userRole").value;
-  const isContributor = role === "Bureau contributeur";
-  const isReader = role === "Lecteur";
-  const isAdmin = role === "Administrateur";
+function isDone(rec){
 
-  $("bureauGroup").style.display = isContributor ? "" : "none";
-  $("perimeterTypeGroup").style.display = isAdmin ? "none" : "";
+  return (
+    normalizeText(
+      rec.Statut
+    )
+    ===
+    normalizeText(
+      "Fait"
+    )
+  );
 
-  if(isAdmin){
-    $("perimeterType").value = "";
-    $("perimeterValue").innerHTML = "";
-    $("perimeterValueGroup").style.display = "none";
-    $("userBureau").value = "";
-  }else{
-    $("perimeterValueGroup").style.display =
-      $("perimeterType").value ? "" : "none";
+}
 
-    if(!isContributor){
-      $("userBureau").value = "";
+
+
+function isUrgent(rec){
+
+  return (
+    normalizeText(
+      rec.Priorite
+    )
+    ===
+    normalizeText(
+      "Urgente"
+    )
+  );
+
+}
+
+
+
+function isReminder(rec){
+
+  return normalizeText(
+    rec.Rappel_a_faire
+  )
+    .includes(
+      "relancer"
+    );
+
+}
+
+
+
+/* =========================================
+   DATES
+   ========================================= */
+
+function gristDateToDate(v){
+
+  if(
+    v === null
+    ||
+    v === undefined
+    ||
+    v === ""
+  ){
+    return null;
+  }
+
+
+  if(
+    v instanceof Date
+  ){
+    return v;
+  }
+
+
+  const n =
+    Number(v);
+
+
+  if(
+    Number.isFinite(n)
+  ){
+
+    return new Date(
+      n * 1000
+    );
+
+  }
+
+
+  const d =
+    new Date(v);
+
+
+  return Number.isNaN(
+    d.getTime()
+  )
+    ? null
+    : d;
+
+}
+
+
+
+function formatDate(v){
+
+  const d =
+    gristDateToDate(v);
+
+
+  if(!d){
+    return "";
+  }
+
+
+  return new Intl.DateTimeFormat(
+    "fr-FR",
+    {
+      day:"2-digit",
+      month:"2-digit",
+      year:"numeric"
     }
-  }
+  )
+  .format(d);
 
-  $("perimeterHelp").textContent =
-    isReader
-      ? "Obligatoire : choisissez un Service, une Sous-direction ou un Département."
-      : isContributor
-        ? "Facultatif : définit le périmètre de réception des contributions du Bureau contributeur."
-        : "";
 }
+
+
+
+function todayFr(){
+
+  return new Intl.DateTimeFormat(
+    "fr-FR",
+    {
+      day:"numeric",
+      month:"long",
+      year:"numeric"
+    }
+  )
+  .format(
+    new Date()
+  );
+
+}
+
+
 
 /* =========================================
-   LIBELLÉS / BADGES
+   TABLES GRIST
    ========================================= */
 
-function roleBadge(role){
-  const normalized = clean(role);
-  let css = "badge-other";
+function rowsFromTable(t){
 
-  if(normalized === "administrateur"){
-    css = "badge-admin";
-  }else if(normalized === "bureau contributeur"){
-    css = "badge-contributor";
-  }else if(normalized === "lecteur"){
-    css = "badge-reader";
+  if(
+    !t
+    ||
+    !t.id
+  ){
+    return [];
   }
 
-  return `<span class="badge ${css}">${escapeHtml(role || "Non défini")}</span>`;
+
+  const n =
+    t.id.length;
+
+
+  const rows =
+    [];
+
+
+  for(
+    let i=0;
+    i<n;
+    i++
+  ){
+
+    const row =
+      {};
+
+
+    for(
+      const [key,value]
+      of Object.entries(t)
+    ){
+
+      row[key] =
+        Array.isArray(value)
+          ? value[i]
+          : value;
+
+    }
+
+
+    rows.push(
+      row
+    );
+
+  }
+
+
+  return rows;
+
 }
 
-function controlBadge(user){
-  const value = user.Controle_utilisateur || "";
 
-  if(clean(value).includes("incorrecte") || value.startsWith("🔴")){
-    return `<span class="badge badge-error">${escapeHtml(value || "Erreur")}</span>`;
-  }
 
-  if(clean(value).includes("verifier") || value.startsWith("🟠")){
-    return `<span class="badge badge-warning">${escapeHtml(value || "À vérifier")}</span>`;
-  }
+async function safeFetch(name){
 
-  return `<span class="badge badge-active">${escapeHtml(value || "OK")}</span>`;
-}
+  try{
 
-function perimeterLabel(user){
-  if(user.Departement){
-    return `Département : ${refLabel(departments,user.Departement)}`;
-  }
-
-  if(user.Sous_direction){
-    return `Sous-direction : ${refLabel(subDirections,user.Sous_direction)}`;
-  }
-
-  if(user.Service){
-    return `Service : ${refLabel(services,user.Service)}`;
-  }
-
-  return "—";
-}
-
-/* =========================================
-   KPI / FILTRES / TABLEAU
-   ========================================= */
-
-function populateRoleFilter(){
-  const current = $("roleFilter").value;
-
-  $("roleFilter").innerHTML =
-    `<option value="">Tous les rôles</option>`;
-
-  ALLOWED_ROLES.forEach(role => {
-    const option = document.createElement("option");
-    option.value = role;
-    option.textContent = role;
-    $("roleFilter").appendChild(option);
-  });
-
-  $("roleFilter").value = current;
-}
-
-function renderKpis(){
-  $("kpiUsers").textContent = users.length;
-
-  $("kpiActive").textContent = users.filter(
-    user => !isFalseValue(user.Actif)
-  ).length;
-
-  $("kpiReaders").textContent = users.filter(
-    user => user.Role === "Lecteur"
-  ).length;
-
-  $("kpiAdmins").textContent = users.filter(
-    user => user.Role === "Administrateur"
-  ).length;
-
-  $("kpiContributors").textContent = users.filter(
-    user => user.Role === "Bureau contributeur"
-  ).length;
-}
-
-function filteredUsers(){
-  const search = clean($("searchInput").value);
-  const role = $("roleFilter").value;
-  const activeFilter = $("activeFilter").value;
-
-  return users
-    .filter(user => {
-      if(role && user.Role !== role){
-        return false;
-      }
-
-      if(activeFilter === "active" && isFalseValue(user.Actif)){
-        return false;
-      }
-
-      if(activeFilter === "inactive" && !isFalseValue(user.Actif)){
-        return false;
-      }
-
-      if(search){
-        const haystack = clean([
-          user.Nom,
-          user.Email,
-          user.Role,
-          perimeterLabel(user),
-          refLabel(bureaux,user.Bureau),
-          user.Controle_utilisateur
-        ].join(" "));
-
-        if(!haystack.includes(search)){
-          return false;
-        }
-      }
-
-      return true;
-    })
-    .sort((a,b) =>
-      text(a.Nom || a.Email).localeCompare(
-        text(b.Nom || b.Email),
-        "fr",
-        {sensitivity:"base"}
+    return rowsFromTable(
+      await grist.docApi.fetchTable(
+        name
       )
     );
-}
 
-function renderUsers(){
-  const rows = filteredUsers();
+  }
+  catch(error){
 
-  if(rows.length === 0){
-    $("usersBody").innerHTML = `
-      <tr>
-        <td colspan="7" class="empty">Aucun utilisateur trouvé.</td>
-      </tr>
-    `;
-    return;
+    console.warn(
+      "Table inaccessible :",
+      name,
+      error
+    );
+
+    return [];
+
   }
 
-  $("usersBody").innerHTML = rows.map(user => {
-    const active = !isFalseValue(user.Actif);
-    const isSelf = clean(user.Email) === clean(currentProfile?.Email);
-
-    return `
-      <tr>
-        <td>
-          <div class="user-name">${escapeHtml(user.Nom || "—")}</div>
-          <div class="user-email">${escapeHtml(user.Email || "")}</div>
-        </td>
-
-        <td>${roleBadge(user.Role)}</td>
-
-        <td>${escapeHtml(perimeterLabel(user))}</td>
-
-        <td>${escapeHtml(refLabel(bureaux,user.Bureau) || "—")}</td>
-
-        <td>
-          <span class="badge ${active ? "badge-active" : "badge-inactive"}">
-            ${active ? "Actif" : "Inactif"}
-          </span>
-        </td>
-
-        <td>${controlBadge(user)}</td>
-
-        <td>
-          <div class="actions">
-            <button
-              class="btn btn-secondary btn-small edit-user"
-              data-id="${Number(user.id)}"
-              type="button"
-            >
-              ✏️ Modifier
-            </button>
-
-            <button
-              class="btn ${active ? "btn-warning" : "btn-secondary"} btn-small toggle-user"
-              data-id="${Number(user.id)}"
-              type="button"
-              ${isSelf ? "disabled" : ""}
-            >
-              ${active ? "⏸ Désactiver" : "▶ Réactiver"}
-            </button>
-
-            <button
-              class="btn btn-danger btn-small delete-user"
-              data-id="${Number(user.id)}"
-              type="button"
-              ${isSelf ? "disabled" : ""}
-            >
-              🗑 Supprimer
-            </button>
-          </div>
-        </td>
-      </tr>
-    `;
-  }).join("");
-
-  document.querySelectorAll(".edit-user").forEach(button => {
-    button.addEventListener("click",() => {
-      openEditUser(Number(button.dataset.id));
-    });
-  });
-
-  document.querySelectorAll(".toggle-user").forEach(button => {
-    button.addEventListener("click",() => {
-      toggleUserActive(Number(button.dataset.id));
-    });
-  });
-
-  document.querySelectorAll(".delete-user").forEach(button => {
-    button.addEventListener("click",() => {
-      deleteUser(Number(button.dataset.id));
-    });
-  });
 }
 
-function renderAll(){
-  populateRoleFilter();
-  renderKpis();
-  renderUsers();
-}
+
 
 /* =========================================
-   MODALE UTILISATEUR
+   UTILISATEUR COURANT
    ========================================= */
 
-function resetUserForm(){
-  selectedUserId = null;
+async function resolveCurrentUser(){
 
-  $("modalTitle").textContent = "Ajouter un utilisateur";
-  $("userName").value = "";
-  $("userEmail").value = "";
-  $("userRole").value = "";
-  $("userActive").value = "true";
-  $("perimeterType").value = "";
-  $("perimeterValue").innerHTML = "";
-  $("perimeterValueGroup").style.display = "none";
-  $("userBureau").value = "";
-  $("bureauGroup").style.display = "none";
-  $("perimeterTypeGroup").style.display = "";
-  setFormError("");
-}
+  /*
+    Méthode utilisée par  :
 
-function openNewUser(){
-  resetUserForm();
-  $("userModal").classList.add("open");
-}
+    une ligne temporaire est créée
+    dans SESSION_WIDGET afin que les
+    trigger formulas Grist déterminent
+    l'utilisateur courant.
+  */
 
-function openEditUser(id){
-  const user = users.find(item => Number(item.id) === Number(id));
+  const actions = [
+    [
+      "AddRecord",
+      "SESSION_WIDGET",
+      null,
+      {}
+    ]
+  ];
 
-  if(!user){ return; }
 
-  selectedUserId = Number(id);
+  const result =
+    await grist.docApi
+      .applyUserActions(
+        actions
+      );
 
-  $("modalTitle").textContent = "Modifier un utilisateur";
-  $("userName").value = user.Nom || "";
-  $("userEmail").value = user.Email || "";
-  $("userRole").value = user.Role || "";
-  $("userActive").value = isFalseValue(user.Actif) ? "false" : "true";
-  $("userBureau").value = user.Bureau || "";
 
-  let type = "";
-  let value = "";
+  let newId =
+    null;
 
-  if(user.Departement){
-    type = "Departement";
-    value = user.Departement;
-  }else if(user.Sous_direction){
-    type = "Sous_direction";
-    value = user.Sous_direction;
-  }else if(user.Service){
-    type = "Service";
-    value = user.Service;
-  }
 
-  $("perimeterType").value = type;
-  updatePerimeterSelector();
+  if(
+    Array.isArray(result)
+  ){
 
-  if(type){
-    $("perimeterValue").value = value;
-  }
+    for(
+      const item
+      of result
+    ){
 
-  updateFieldsForRole();
-  setFormError("");
+      if(
+        Array.isArray(item)
+        &&
+        item[0] === "AddRecord"
+      ){
 
-  $("userModal").classList.add("open");
-}
+        newId =
+          item[2];
 
-function closeUserModal(){
-  $("userModal").classList.remove("open");
-  selectedUserId = null;
-  setFormError("");
-}
+      }
 
-function validateUserForm(){
-  const name = $("userName").value.trim();
-  const email = $("userEmail").value.trim();
-  const role = $("userRole").value;
-  const type = $("perimeterType").value;
-  const perimeterValue = $("perimeterValue").value;
-  const bureau = $("userBureau").value;
-
-  if(!name){
-    return "Le nom et prénom sont obligatoires.";
-  }
-
-  if(!email || !email.includes("@")){
-    return "L'adresse e-mail n'est pas valide.";
-  }
-
-  if(!ALLOWED_ROLES.includes(role)){
-    return "Le rôle est obligatoire.";
-  }
-
-  const duplicate = users.find(user =>
-    clean(user.Email) === clean(email)
-    && Number(user.id) !== Number(selectedUserId)
-  );
-
-  if(duplicate){
-    return "Cette adresse e-mail existe déjà dans UTILISATEURS.";
-  }
-
-  if(role === "Lecteur"){
-    if(!type || !perimeterValue){
-      return "Un Lecteur doit avoir un Service, une Sous-direction ou un Département.";
     }
+
   }
 
-  if(role === "Administrateur" && type){
-    return "Un Administrateur ne doit pas avoir de périmètre de lecture.";
+
+  const sessions =
+    await safeFetch(
+      "SESSION_WIDGET"
+    );
+
+
+  let row =
+    null;
+
+
+  if(newId){
+
+    row =
+      sessions.find(
+        r =>
+          Number(r.id)
+          ===
+          Number(newId)
+      );
+
   }
 
-  if(role === "Bureau contributeur" && !bureau){
-    return "Le Bureau est obligatoire pour un Bureau contributeur.";
+
+  if(
+    !row
+    &&
+    sessions.length
+  ){
+
+    row =
+      sessions[
+        sessions.length - 1
+      ];
+
+  }
+
+
+  /*
+    Suppression de la ligne temporaire.
+  */
+
+  if(row?.id){
+
+    try{
+
+      await grist.docApi
+        .applyUserActions([
+          [
+            "BulkRemoveRecord",
+            "SESSION_WIDGET",
+            [row.id]
+          ]
+        ]);
+
+    }
+    catch(error){
+
+      console.warn(
+        "Nettoyage SESSION_WIDGET impossible",
+        error
+      );
+
+    }
+
+  }
+
+
+  return row || null;
+
+}
+
+
+
+/* =========================================
+   V6 — CONTRIBUTEUR / GROUPE
+   ========================================= */
+
+function contributorLabel(r){
+
+  return String(
+    r?.Contributeur_affiche
+    ??
+    r?.Contributeur_code
+    ??
+    r?.Contributeur_label
+    ??
+    r?.Contributeur
+    ??
+    ""
+  ).trim();
+
+}
+
+
+function contributorType(r){
+
+  const explicit =
+    String(
+      r?.Type_contributeur
+      ??
+      ""
+    ).trim();
+
+  if(explicit){
+    return explicit;
+  }
+
+  if(Number(r?.Contributeur)){
+    return "Département";
+  }
+
+  if(Number(r?.Contributeur_sous_direction)){
+    return "Sous-direction";
+  }
+
+  if(Number(r?.Contributeur_service)){
+    return "Service";
   }
 
   return "";
+
 }
 
-function formValues(){
-  const role = $("userRole").value;
-  const type = $("perimeterType").value;
-  const value = Number($("perimeterValue").value) || null;
-  const contributor = role === "Bureau contributeur";
 
-  return {
-    Email:$("userEmail").value.trim(),
-    Nom:$("userName").value.trim(),
-    Role:role,
-    Service:type === "Service" ? value : null,
-    Sous_direction:type === "Sous_direction" ? value : null,
-    Departement:type === "Departement" ? value : null,
-    Bureau:contributor ? (Number($("userBureau").value) || null) : null,
-    Actif:$("userActive").value === "true"
-  };
+function groupContributionLabel(r){
+
+  return String(
+    r?.Groupe_contribution
+    ??
+    ""
+  ).trim();
+
 }
 
-async function saveUser(){
-  if(!isAdministrator()){ return; }
-
-  const error = validateUserForm();
-
-  if(error){
-    setFormError(error);
-    return;
-  }
-
-  setFormError("");
-  $("saveBtn").disabled = true;
-
-  try{
-    const values = formValues();
-
-    if(selectedUserId === null){
-      await grist.docApi.applyUserActions([
-        ["AddRecord","UTILISATEURS",null,values]
-      ]);
-      showToast("✓ Utilisateur ajouté");
-    }else{
-      await grist.docApi.applyUserActions([
-        ["UpdateRecord","UTILISATEURS",Number(selectedUserId),values]
-      ]);
-      showToast("✓ Utilisateur mis à jour");
-    }
-
-    closeUserModal();
-    await loadUsers();
-  }catch(error){
-    console.error(error);
-    setFormError("Impossible d'enregistrer l'utilisateur. Vérifiez les ACL et les données saisies.");
-  }finally{
-    $("saveBtn").disabled = false;
-  }
-}
 
 /* =========================================
-   ACTIVER / DÉSACTIVER
+   V7 — AFFICHAGE D'UNE CONTRIBUTION
+   Une ligne = Titre | Contributeur | Échéance | Jours restants
    ========================================= */
 
-async function toggleUserActive(id){
-  if(!isAdministrator()){ return; }
+function contributionLine(r){
 
-  const user = users.find(item => Number(item.id) === Number(id));
-  if(!user){ return; }
+  const title =
+    String(
+      r?.Titre
+      ??
+      "(Sans titre)"
+    )
+    .trim();
 
-  if(clean(user.Email) === clean(currentProfile?.Email)){
-    showToast("Vous ne pouvez pas désactiver votre propre compte.");
-    return;
-  }
 
-  const currentlyActive = !isFalseValue(user.Actif);
-  const actionLabel = currentlyActive ? "désactiver" : "réactiver";
-  const label = user.Nom || user.Email;
+  const contributor =
+    contributorLabel(r)
+    ||
+    "—";
 
-  if(!window.confirm(`${actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1)} ${label} ?`)){
-    return;
-  }
 
-  try{
-    await grist.docApi.applyUserActions([
-      ["UpdateRecord","UTILISATEURS",Number(id),{
-        Actif:!currentlyActive
-      }]
-    ]);
+  const due =
+    formatDate(
+      r?.Echeance
+    )
+    ||
+    "—";
 
-    showToast(currentlyActive ? "✓ Utilisateur désactivé" : "✓ Utilisateur réactivé");
-    await loadUsers();
-  }catch(error){
-    console.error(error);
-    showToast("Impossible de modifier l'état de cet utilisateur.");
-  }
-}
 
-/* =========================================
-   SUPPRESSION
-   ========================================= */
+  const rawDays =
+    Number(
+      r?.Jours_restants
+    );
 
-async function deleteUser(id){
-  if(!isAdministrator()){ return; }
 
-  const user = users.find(item => Number(item.id) === Number(id));
-  if(!user){ return; }
+  const days =
+    Number.isFinite(rawDays)
+      ? String(rawDays)
+      : "—";
 
-  if(clean(user.Email) === clean(currentProfile?.Email)){
-    showToast("Vous ne pouvez pas supprimer votre propre compte administrateur.");
-    return;
-  }
 
-  const label = user.Nom || user.Email || "cet utilisateur";
-
-  const confirmed = window.confirm(
-    `Supprimer définitivement ${label} ?\n\n`
-    + `Cette action supprime son profil UTILISATEURS. `
-    + `Pour une suspension temporaire, utilisez plutôt Désactiver.`
+  return [
+    title,
+    contributor,
+    due,
+    days
+  ]
+  .join(
+    " | "
   );
 
-  if(!confirmed){ return; }
+}
 
-  try{
-    await grist.docApi.applyUserActions([
-      ["BulkRemoveRecord","UTILISATEURS",[Number(id)]]
-    ]);
 
-    showToast("✓ Utilisateur supprimé");
-    await loadUsers();
-  }catch(error){
-    console.error(error);
-    showToast("Impossible de supprimer cet utilisateur.");
+
+/* =========================================
+   TRI ÉCHÉANCE
+   ========================================= */
+
+function sortByDue(a,b){
+
+  const da =
+    gristDateToDate(
+      a.Echeance
+    );
+
+
+  const db =
+    gristDateToDate(
+      b.Echeance
+    );
+
+
+  if(
+    !da
+    &&
+    !db
+  ){
+    return 0;
   }
+
+
+  if(!da){
+    return 1;
+  }
+
+
+  if(!db){
+    return -1;
+  }
+
+
+  return da - db;
+
 }
+
+
 
 /* =========================================
-   IMPORT EXCEL - OUVERTURE / FERMETURE
+   VALEURS UNIQUES DES FILTRES
    ========================================= */
 
-function resetImport(){
-  importPlan = [];
-  $("importFile").value = "";
-  $("importFileName").textContent = "Aucun fichier sélectionné";
-  $("importAnalysis").style.display = "none";
-  $("importBody").innerHTML = "";
-  $("importErrorMessage").style.display = "none";
-  $("confirmImportBtn").disabled = true;
+function uniqueSortedValues(values){
+
+  return [
+    ...new Set(
+
+      values
+        .map(
+          value =>
+            String(
+              value ?? ""
+            )
+            .trim()
+        )
+        .filter(Boolean)
+
+    )
+  ]
+  .sort(
+    (a,b) =>
+      a.localeCompare(
+        b,
+        "fr",
+        {
+          sensitivity:"base"
+        }
+      )
+  );
+
 }
 
-function openImportModal(){
-  resetImport();
-  $("importModal").classList.add("open");
-}
 
-function closeImportModal(){
-  $("importModal").classList.remove("open");
-  resetImport();
-}
 
 /* =========================================
-   IMPORT EXCEL - ANALYSE
+   REMPLISSAGE D'UN SELECT
    ========================================= */
 
-function normalizedExcelRow(row){
-  const result = {};
+function fillFilterSelect(
+  selectId,
+  values,
+  emptyLabel
+){
 
-  REQUIRED_IMPORT_COLUMNS.forEach(column => {
-    result[column] = row[column] == null ? "" : row[column];
-  });
+  const select =
+    $(selectId);
 
-  return result;
+
+  const previousValue =
+    select.value;
+
+
+  select.innerHTML =
+    "";
+
+
+  const emptyOption =
+    document.createElement(
+      "option"
+    );
+
+
+  emptyOption.value =
+    "";
+
+
+  emptyOption.textContent =
+    emptyLabel;
+
+
+  select.appendChild(
+    emptyOption
+  );
+
+
+  values.forEach(
+    value => {
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+
+      option.value =
+        value;
+
+
+      option.textContent =
+        value;
+
+
+      select.appendChild(
+        option
+      );
+
+    }
+  );
+
+
+  const stillExists =
+    [
+      ...select.options
+    ]
+    .some(
+      option =>
+        option.value
+        ===
+        previousValue
+    );
+
+
+  if(
+    previousValue
+    &&
+    stillExists
+  ){
+
+    select.value =
+      previousValue;
+
+  }
+
 }
 
-function rowPerimeterText(row){
-  if(row.Departement){ return `Département : ${row.Departement}`; }
-  if(row.Sous_direction){ return `Sous-direction : ${row.Sous_direction}`; }
-  if(row.Service){ return `Service : ${row.Service}`; }
-  return "—";
+
+
+/* =========================================
+   NOUVEAU v62
+   BUREAU DEMANDEUR
+   ========================================= */
+
+function bureauLabelFromId(id){
+
+  const bureau =
+    state.bureaux.find(
+      b =>
+        Number(b.id)
+        ===
+        Number(id)
+    );
+
+
+  if(!bureau){
+    return "";
+  }
+
+
+  return (
+    bureau.Code
+    ||
+    bureau.Nom
+    ||
+    String(id)
+  );
+
 }
 
-function userComparable(user){
+
+
+function populateBureauFilter(){
+
+  const wrap =
+    $("bureauFilterWrap");
+
+
+  /*
+    Ce filtre n'a d'intérêt que
+    pour les profils ayant accès
+    à plusieurs bureaux.
+  */
+
+  if(
+    !hasGlobalAccess()
+  ){
+
+    wrap.classList.add(
+      "hidden"
+    );
+
+    $("filterBureau").value =
+      "";
+
+    return;
+
+  }
+
+
+  wrap.classList.remove(
+    "hidden"
+  );
+
+
+  const todo =
+    state.filtered.filter(
+      r =>
+        !isDone(r)
+    );
+
+
+  /*
+    On récupère uniquement les bureaux
+    qui ont effectivement au moins
+    une contribution dans le périmètre.
+  */
+
+  const bureauIds =
+    [
+      ...new Set(
+        todo
+          .map(
+            r =>
+              Number(
+                r.Bureau_origine
+              )
+          )
+          .filter(
+            id =>
+              Number.isFinite(id)
+              &&
+              id > 0
+          )
+      )
+    ];
+
+
+  const values =
+    bureauIds
+      .map(
+        id => ({
+          id,
+          label:
+            bureauLabelFromId(id)
+            ||
+            String(id)
+        })
+      )
+      .sort(
+        (a,b) =>
+          a.label.localeCompare(
+            b.label,
+            "fr",
+            {
+              sensitivity:"base"
+            }
+          )
+      );
+
+
+  const select =
+    $("filterBureau");
+
+
+  const previousValue =
+    select.value;
+
+
+  select.innerHTML =
+    "";
+
+
+  const allOption =
+    document.createElement(
+      "option"
+    );
+
+
+  allOption.value =
+    "";
+
+
+  allOption.textContent =
+    "Tous les bureaux demandeurs";
+
+
+  select.appendChild(
+    allOption
+  );
+
+
+  values.forEach(
+    bureau => {
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+
+      /*
+        On stocke l'ID Grist,
+        mais on affiche le code métier.
+      */
+
+      option.value =
+        String(
+          bureau.id
+        );
+
+
+      option.textContent =
+        bureau.label;
+
+
+      select.appendChild(
+        option
+      );
+
+    }
+  );
+
+
+  if(
+    previousValue
+    &&
+    [
+      ...select.options
+    ]
+    .some(
+      option =>
+        option.value
+        ===
+        previousValue
+    )
+  ){
+
+    select.value =
+      previousValue;
+
+  }
+
+}
+
+
+
+/* =========================================
+   AUTRES FILTRES
+   ========================================= */
+
+function populateSynthFilters(){
+
+  const todo =
+    state.filtered.filter(
+      r =>
+        !isDone(r)
+    );
+
+
+  populateBureauFilter();
+
+
+  const contributors =
+    uniqueSortedValues(
+      todo.map(
+        r =>
+          contributorLabel(r)
+      )
+    );
+
+
+  const priorities =
+    uniqueSortedValues(
+      todo.map(
+        r =>
+          r.Priorite
+      )
+    );
+
+fillFilterSelect(
+    "filterContributor",
+    contributors,
+    "Tous les contributeurs"
+  );
+
+
+  fillFilterSelect(
+    "filterPriority",
+    priorities,
+    "Toutes les priorités"
+  );
+
+}
+
+
+
+/* =========================================
+   APPLICATION DES FILTRES
+   ========================================= */
+
+function getFilteredContributions(){
+
+  const bureauId =
+    $("filterBureau")
+      .value;
+
+
+  const contributor =
+    $("filterContributor")
+      .value;
+
+
+  const priority =
+    $("filterPriority")
+      .value;
+
+const type =
+    $("filterType")
+      .value;
+
+
+  /*
+    IMPORTANT :
+
+    on repart toujours de state.filtered.
+
+    Les filtres ne peuvent donc jamais
+    élargir les droits de l'utilisateur.
+  */
+
+  let rows =
+    state.filtered.filter(
+      r =>
+        !isDone(r)
+    );
+
+
+  /* Bureau demandeur */
+
+  if(
+    hasGlobalAccess()
+    &&
+    bureauId
+  ){
+
+    rows =
+      rows.filter(
+        r =>
+          Number(
+            r.Bureau_origine
+          )
+          ===
+          Number(
+            bureauId
+          )
+      );
+
+  }
+
+
+  /* Contributeur */
+
+  if(contributor){
+
+    rows =
+      rows.filter(
+        r =>
+          normalizeText(
+            contributorLabel(r)
+          )
+          ===
+          normalizeText(
+            contributor
+          )
+      );
+
+  }
+
+
+  /* Priorité */
+
+  if(priority){
+
+    rows =
+      rows.filter(
+        r =>
+          normalizeText(
+            r.Priorite
+          )
+          ===
+          normalizeText(
+            priority
+          )
+      );
+
+  }
+
+/* En retard */
+
+  if(
+    type === "late"
+  ){
+
+    rows =
+      rows.filter(
+        r => {
+
+          const days =
+            Number(
+              r.Jours_restants
+            );
+
+
+          return (
+            Number.isFinite(days)
+            &&
+            days < 0
+          );
+
+        }
+      );
+
+  }
+
+
+  /* À relancer */
+
+  if(
+    type === "reminder"
+  ){
+
+    rows =
+      rows.filter(
+        isReminder
+      );
+
+  }
+
+
+  /* Urgente */
+
+  if(
+    type === "urgent"
+  ){
+
+    rows =
+      rows.filter(
+        isUrgent
+      );
+
+  }
+
+
+  return rows;
+
+}
+
+
+
+/* =========================================
+   DONNÉES COURANTES
+   ========================================= */
+
+function currentData(){
+
+  const todo =
+    getFilteredContributions();
+
+
+  const late =
+    todo
+      .filter(
+        r => {
+
+          const days =
+            Number(
+              r.Jours_restants
+            );
+
+
+          return (
+            Number.isFinite(days)
+            &&
+            days < 0
+          );
+
+        }
+      )
+      .sort(
+        sortByDue
+      );
+
+
+  const reminders =
+    todo
+      .filter(
+        isReminder
+      )
+      .sort(
+        sortByDue
+      );
+
+
+  const urgent =
+    todo
+      .filter(
+        isUrgent
+      )
+      .sort(
+        sortByDue
+      );
+
+
   return {
-    Email:text(user.Email).trim(),
-    Nom:text(user.Nom).trim(),
-    Role:text(user.Role).trim(),
-    Service:Number(user.Service || 0),
-    Sous_direction:Number(user.Sous_direction || 0),
-    Departement:Number(user.Departement || 0),
-    Bureau:Number(user.Bureau || 0),
-    Actif:!isFalseValue(user.Actif)
+    todo,
+    late,
+    reminders,
+    urgent
   };
+
 }
 
-function valuesEqual(a,b){
-  return clean(a.Email) === clean(b.Email)
-    && text(a.Nom).trim() === text(b.Nom).trim()
-    && a.Role === b.Role
-    && sameRef(a.Service,b.Service)
-    && sameRef(a.Sous_direction,b.Sous_direction)
-    && sameRef(a.Departement,b.Departement)
-    && sameRef(a.Bureau,b.Bureau)
-    && Boolean(a.Actif) === Boolean(b.Actif);
+
+
+/* =========================================
+   PROCHAINES ÉCHÉANCES
+   ========================================= */
+
+function getUpcoming(data){
+
+  const choice =
+    $("upcomingDays")
+      .value;
+
+
+  const now =
+    new Date();
+
+
+  now.setHours(
+    0,
+    0,
+    0,
+    0
+  );
+
+
+  return data.todo
+
+    .filter(
+      r =>
+        !data.late.includes(r)
+    )
+
+    .filter(
+      r =>
+        r.Echeance
+    )
+
+    .filter(
+      r => {
+
+        if(
+          choice === "all"
+        ){
+          return true;
+        }
+
+
+        const date =
+          gristDateToDate(
+            r.Echeance
+          );
+
+
+        if(!date){
+          return false;
+        }
+
+
+        date.setHours(
+          0,
+          0,
+          0,
+          0
+        );
+
+
+        const diff =
+          Math.ceil(
+            (
+              date - now
+            )
+            /
+            86400000
+          );
+
+
+        return (
+          diff >= 0
+          &&
+          diff <= Number(choice)
+        );
+
+      }
+    )
+
+    .sort(
+      sortByDue
+    );
+
 }
 
-function validateImportRow(row,lineNumber){
-  const errors = [];
 
-  const email = text(row.Email).trim();
-  const name = text(row.Nom).trim();
-  const role = text(row.Role).trim();
 
-  if(!email || !email.includes("@")){
-    errors.push("Email manquant ou invalide");
+/* =========================================
+   CORPS PAR DÉFAUT
+   ========================================= */
+
+function buildDefaultBody(data){
+
+  const lines =
+    [];
+
+
+  lines.push(
+    "Bonjour,"
+  );
+
+
+  lines.push(
+    ""
+  );
+
+
+  lines.push(
+    `Voici la synthèse des contributions au ${todayFr()}.`
+  );
+
+
+  lines.push(
+    ""
+  );
+
+
+  lines.push(
+    `${data.todo.length} contribution(s) à traiter`
+  );
+
+
+  lines.push(
+    `- ${data.late.length} en retard`
+  );
+
+
+  lines.push(
+    `- ${data.reminders.length} à relancer`
+  );
+
+
+  lines.push(
+    `- ${data.urgent.length} urgente(s)`
+  );
+
+
+  lines.push(
+    ""
+  );
+
+
+  if(
+    $("includeLate").checked
+    &&
+    data.late.length
+  ){
+
+    lines.push(
+      "🔴 Contributions en retard"
+    );
+
+
+    data.late.forEach(
+      r =>
+        lines.push(
+          "• "
+          +
+          contributionLine(r)
+        )
+    );
+
+
+    lines.push(
+      ""
+    );
+
   }
 
-  if(!name){
-    errors.push("Nom manquant");
+
+  if(
+    $("includeReminders").checked
+    &&
+    data.reminders.length
+  ){
+
+    lines.push(
+      "🔔 Contributions à relancer"
+    );
+
+
+    data.reminders.forEach(
+      r =>
+        lines.push(
+          "• "
+          +
+          contributionLine(r)
+        )
+    );
+
+
+    lines.push(
+      ""
+    );
+
   }
 
-  if(!ALLOWED_ROLES.includes(role)){
-    errors.push("Rôle non autorisé");
+
+  const upcoming =
+    getUpcoming(
+      data
+    );
+
+
+  if(
+    $("includeUpcoming").checked
+    &&
+    upcoming.length
+  ){
+
+    lines.push(
+      "📅 Prochaines échéances"
+    );
+
+
+    upcoming.forEach(
+      r =>
+        lines.push(
+          "• "
+          +
+          contributionLine(r)
+        )
+    );
+
+
+    lines.push(
+      ""
+    );
+
   }
 
-  const perimeterCount = [
-    row.Service,
-    row.Sous_direction,
-    row.Departement
-  ].filter(value => text(value).trim() !== "").length;
 
-  if(perimeterCount > 1){
-    errors.push("Plusieurs périmètres renseignés");
+  lines.push(
+    "Bien cordialement,"
+  );
+
+
+  lines.push(
+    ""
+  );
+
+
+  lines.push(
+    state.params?.Nom_signature
+    ||
+    state.bureauCode
+    ||
+    ""
+  );
+
+
+  return lines.join(
+    "\n"
+  );
+
+}
+
+
+
+/* =========================================
+   V7 — BLOCS DE DÉTAIL
+   Tableau texte compact pour rester lisible dans un mail.
+   ========================================= */
+
+function detailBlock(list){
+
+  if(
+    !list.length
+  ){
+    return "Aucune";
   }
 
-  if(role === "Lecteur" && perimeterCount !== 1){
-    errors.push("Un Lecteur doit avoir exactement un périmètre");
+
+  const header =
+    "Titre | Contributeur | Échéance | Jours restants";
+
+
+  const separator =
+    "------------------------------------------------------------";
+
+
+  const rows =
+    list.map(
+      r =>
+        contributionLine(r)
+    );
+
+
+  return [
+    header,
+    separator,
+    ...rows
+  ]
+  .join(
+    "\n"
+  );
+
+}
+
+
+
+/* =========================================
+   NETTOYAGE MODÈLE
+   ========================================= */
+
+function cleanEmptyLines(text){
+
+  return String(
+    text ?? ""
+  )
+
+    .split(
+      "\n"
+    )
+
+    .filter(
+      line => {
+
+        const trimmed =
+          line.trim();
+
+
+        if(!trimmed){
+          return true;
+        }
+
+
+        if(
+          /^[^:\n]+:\s*$/
+            .test(
+              trimmed
+            )
+        ){
+          return false;
+        }
+
+
+        return true;
+
+      }
+    )
+
+    .join(
+      "\n"
+    )
+
+    .replace(
+      /\n{3,}/g,
+      "\n\n"
+    )
+
+    .trim();
+
+}
+
+
+
+/* =========================================
+   MODÈLE DE MAIL
+   ========================================= */
+
+function renderTemplate(
+  template,
+  data
+){
+
+  if(!template){
+
+    return buildDefaultBody(
+      data
+    );
+
   }
 
-  if(role === "Administrateur" && perimeterCount > 0){
-    errors.push("Administrateur : périmètre inutile");
+
+  const upcoming =
+    getUpcoming(
+      data
+    );
+
+
+  const vars = {
+
+    "[DATE]":
+      todayFr(),
+
+    "[NB_A_TRAITER]":
+      String(
+        data.todo.length
+      ),
+
+    "[NB_EN_RETARD]":
+      String(
+        data.late.length
+      ),
+
+    "[NB_A_RELANCER]":
+      String(
+        data.reminders.length
+      ),
+
+    "[NB_URGENTES]":
+      String(
+        data.urgent.length
+      ),
+
+    "[DETAIL_EN_RETARD]":
+      $("includeLate").checked
+        ? detailBlock(
+            data.late
+          )
+        : "",
+
+    "[DETAIL_A_RELANCER]":
+      $("includeReminders").checked
+        ? detailBlock(
+            data.reminders
+          )
+        : "",
+
+    "[DETAIL_PROCHAINES]":
+      $("includeUpcoming").checked
+        ? detailBlock(
+            upcoming
+          )
+        : "",
+
+    "[NOM_SIGNATURE]":
+      state.params?.Nom_signature
+      ||
+      state.bureauCode
+      ||
+      "",
+
+    "[EMAIL_CONTACT]":
+      state.params?.Email_contact
+      ||
+      ""
+
+  };
+
+
+  let out =
+    String(
+      template
+    );
+
+
+  for(
+    const [key,value]
+    of Object.entries(vars)
+  ){
+
+    out =
+      out
+        .split(key)
+        .join(value);
+
   }
 
-  const service = text(row.Service).trim()
-    ? findReferenceByCode(services,row.Service)
-    : null;
 
-  const subDirection = text(row.Sous_direction).trim()
-    ? findReferenceByCode(subDirections,row.Sous_direction)
-    : null;
+  if(
+    !$("includeLate").checked
+  ){
 
-  const department = text(row.Departement).trim()
-    ? findReferenceByCode(departments,row.Departement)
-    : null;
+    out =
+      out.replace(
+        /^.*Contributions en retard.*\n?/gmi,
+        ""
+      );
 
-  const bureau = text(row.Bureau).trim()
-    ? findReferenceByCode(bureaux,row.Bureau)
-    : null;
-
-  if(text(row.Service).trim() && !service){
-    errors.push(`Service introuvable : ${row.Service}`);
   }
 
-  if(text(row.Sous_direction).trim() && !subDirection){
-    errors.push(`Sous-direction introuvable : ${row.Sous_direction}`);
+
+  if(
+    !$("includeReminders").checked
+  ){
+
+    out =
+      out.replace(
+        /^.*Contributions à relancer.*\n?/gmi,
+        ""
+      );
+
   }
 
-  if(text(row.Departement).trim() && !department){
-    errors.push(`Département introuvable : ${row.Departement}`);
+
+  if(
+    !$("includeUpcoming").checked
+  ){
+
+    out =
+      out.replace(
+        /^.*Prochaines échéances.*\n?/gmi,
+        ""
+      );
+
   }
 
-  const contributor = role === "Bureau contributeur";
 
-  if(contributor && !text(row.Bureau).trim()){
-    errors.push("Bureau obligatoire pour un Bureau contributeur");
+  return cleanEmptyLines(
+    out
+  );
+
+}
+
+
+
+/* =========================================
+   OBJET MAIL
+   ========================================= */
+
+function renderSubject(template){
+
+  const base =
+    template
+    ||
+    "Synthèse des contributions – [DATE]";
+
+
+  return base
+    .split(
+      "[DATE]"
+    )
+    .join(
+      todayFr()
+    );
+
+}
+
+
+
+/* =========================================
+   V5 — PLANIFICATION DE LA SYNTHÈSE
+   ========================================= */
+
+function boolValue(value){
+
+  const normalized =
+    normalizeText(
+      value
+    );
+
+  return (
+    value === true
+    ||
+    value === 1
+    ||
+    normalized === "true"
+    ||
+    normalized === "oui"
+    ||
+    normalized === "1"
+  );
+
+}
+
+
+function updateScheduleRule(){
+
+  const frequency =
+    $("scheduleFrequency")
+      .value;
+
+  const day =
+    $("scheduleDay")
+      .value;
+
+  const time =
+    $("scheduleTime")
+      .value
+      .trim()
+    ||
+    "heure non renseignée";
+
+
+  if(
+    frequency === "Quotidienne"
+  ){
+
+    $("scheduleRule")
+      .textContent =
+        "Tous les jours à "
+        +
+        time;
+
+  }
+  else if(
+    frequency === "Hebdomadaire"
+  ){
+
+    $("scheduleRule")
+      .textContent =
+        "Chaque "
+        +
+        day.toLowerCase()
+        +
+        " à "
+        +
+        time;
+
+  }
+  else{
+
+    $("scheduleRule")
+      .textContent =
+        "Le premier "
+        +
+        day.toLowerCase()
+        +
+        " du mois à "
+        +
+        time;
+
   }
 
-  if(text(row.Bureau).trim() && !bureau){
-    errors.push(`Bureau introuvable : ${row.Bureau}`);
+}
+
+
+function renderMessageSettings(){
+
+  const panel =
+    $("messageSettingsPanel");
+
+
+  if(
+    !canManageSchedule()
+  ){
+
+    panel.classList.add(
+      "hidden"
+    );
+
+    return;
+
   }
 
-  if(!contributor && text(row.Bureau).trim()){
-    errors.push("Bureau renseigné pour un rôle autre que Bureau contributeur");
+
+  panel.classList.remove(
+    "hidden"
+  );
+
+
+  $("messageSignature")
+    .value =
+      state.params
+        ?.Nom_signature
+      ||
+      "";
+
+
+  $("messageContactEmail")
+    .value =
+      state.params
+        ?.Email_contact
+      ||
+      "";
+
+
+  $("messageSettingsStatus")
+    .textContent =
+      "";
+
+}
+
+
+async function saveMessageSettings(){
+
+  const status =
+    $("messageSettingsStatus");
+
+  const button =
+    $("saveMessageSettingsBtn");
+
+
+  status.textContent =
+    "";
+
+  status.classList.remove(
+    "error"
+  );
+
+
+  if(
+    !canManageSchedule()
+  ){
+
+    status.textContent =
+      "Vous n'êtes pas autorisé à modifier ces paramètres.";
+
+    status.classList.add(
+      "error"
+    );
+
+    return;
+
   }
 
-  const active = parseActive(row.Actif);
-
-  if(active === null){
-    errors.push("Actif doit valoir Oui/Non, Actif/Inactif, TRUE/FALSE ou 1/0");
-  }
 
   const values = {
-    Email:email,
-    Nom:name,
-    Role:role,
-    Service:service ? Number(service.id) : null,
-    Sous_direction:subDirection ? Number(subDirection.id) : null,
-    Departement:department ? Number(department.id) : null,
-    Bureau:contributor && bureau ? Number(bureau.id) : null,
-    Actif:active === null ? true : active
+
+    Nom_signature:
+      $("messageSignature")
+        .value
+        .trim(),
+
+    Email_contact:
+      $("messageContactEmail")
+        .value
+        .trim()
+
   };
 
-  return {
-    lineNumber,
-    source:row,
-    values,
-    errors
-  };
-}
-
-function buildImportPlan(rawRows){
-  const seenEmails = new Set();
-
-  importPlan = rawRows.map((raw,index) => {
-    const row = normalizedExcelRow(raw);
-    const checked = validateImportRow(row,index + 2);
-
-    const emailKey = clean(checked.values.Email);
-
-    if(emailKey){
-      if(seenEmails.has(emailKey)){
-        checked.errors.push("Adresse e-mail en doublon dans le fichier");
-      }
-      seenEmails.add(emailKey);
-    }
-
-    const existing = users.find(
-      user => clean(user.Email) === emailKey
-    );
-
-    let mode = "new";
-
-    if(existing){
-      mode = valuesEqual(
-        userComparable(existing),
-        checked.values
-      )
-        ? "same"
-        : "update";
-    }
-
-    if(checked.errors.length){
-      mode = "error";
-    }
-
-    return {
-      ...checked,
-      existing,
-      mode
-    };
-  });
-}
-
-function renderImportPlan(){
-  const count = mode =>
-    importPlan.filter(item => item.mode === mode).length;
-
-  const errors = count("error");
-  const changes = count("new") + count("update");
-
-  $("importTotal").textContent = importPlan.length;
-  $("importNew").textContent = count("new");
-  $("importUpdate").textContent = count("update");
-  $("importSame").textContent = count("same");
-  $("importErrors").textContent = errors;
-
-  $("importBody").innerHTML = importPlan.map(item => {
-    let resultHtml = "";
-
-    if(item.mode === "error"){
-      resultHtml = `
-        <span class="badge badge-error">Erreur</span>
-        <div class="muted" style="margin-top:5px">
-          ${escapeHtml(item.errors.join(" • "))}
-        </div>
-      `;
-    }else if(item.mode === "new"){
-      resultHtml = `<span class="badge badge-new">Nouveau</span>`;
-    }else if(item.mode === "update"){
-      resultHtml = `<span class="badge badge-update">Mise à jour</span>`;
-    }else{
-      resultHtml = `<span class="badge badge-same">Sans changement</span>`;
-    }
-
-    return `
-      <tr>
-        <td>${item.lineNumber}</td>
-        <td>${escapeHtml(item.values.Email)}</td>
-        <td>${escapeHtml(item.values.Nom)}</td>
-        <td>${escapeHtml(item.values.Role)}</td>
-        <td>${escapeHtml(rowPerimeterText(item.source))}</td>
-        <td>${escapeHtml(item.source.Bureau || "—")}</td>
-        <td>${resultHtml}</td>
-      </tr>
-    `;
-  }).join("");
-
-  $("importAnalysis").style.display = "";
-
-  if(errors){
-    $("importErrorMessage").style.display = "";
-    $("importErrorMessage").textContent =
-      `${errors} erreur(s) bloquante(s) détectée(s). `
-      + `Corrigez le fichier Excel puis rechargez-le. Aucun utilisateur n'a été modifié.`;
-  }else{
-    $("importErrorMessage").style.display = "none";
-  }
-
-  $("confirmImportBtn").disabled =
-    errors > 0 || changes === 0;
-}
-
-async function analyseExcelFile(file){
-  if(typeof XLSX === "undefined"){
-    throw new Error("La bibliothèque de lecture Excel n'a pas pu être chargée.");
-  }
-
-  const buffer = await file.arrayBuffer();
-  const workbook = XLSX.read(buffer,{type:"array"});
-
-  if(!workbook.SheetNames.length){
-    throw new Error("Le classeur ne contient aucune feuille.");
-  }
-
-  const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(worksheet,{
-    defval:"",
-    raw:false
-  });
-
-  if(!rows.length){
-    throw new Error("La première feuille du fichier est vide.");
-  }
-
-  const headers = Object.keys(rows[0]);
-  const missing = REQUIRED_IMPORT_COLUMNS.filter(
-    column => !headers.includes(column)
-  );
-
-  if(missing.length){
-    throw new Error(
-      "Colonnes manquantes : " + missing.join(", ")
-    );
-  }
-
-  buildImportPlan(rows);
-  renderImportPlan();
-}
-
-/* =========================================
-   IMPORT EXCEL - ÉCRITURE DANS GRIST
-   ========================================= */
-
-async function confirmImport(){
-  if(!isAdministrator()){ return; }
-
-  const errors = importPlan.filter(item => item.mode === "error");
-
-  if(errors.length){
-    showToast("L'import est bloqué tant qu'il reste des erreurs.");
-    return;
-  }
-
-  const changes = importPlan.filter(
-    item => item.mode === "new" || item.mode === "update"
-  );
-
-  if(!changes.length){
-    showToast("Aucune modification à importer.");
-    return;
-  }
-
-  const confirmed = window.confirm(
-    `Confirmer l'import ?\n\n`
-    + `${changes.filter(item => item.mode === "new").length} création(s)\n`
-    + `${changes.filter(item => item.mode === "update").length} mise(s) à jour\n\n`
-    + `Les utilisateurs absents du fichier ne seront pas modifiés.`
-  );
-
-  if(!confirmed){ return; }
-
-  $("confirmImportBtn").disabled = true;
 
   try{
-    const actions = changes.map(item => {
-      if(item.mode === "new"){
-        return [
-          "AddRecord",
-          "UTILISATEURS",
-          null,
-          item.values
-        ];
-      }
 
-      return [
-        "UpdateRecord",
-        "UTILISATEURS",
-        Number(item.existing.id),
-        item.values
-      ];
-    });
+    button.disabled =
+      true;
 
-    await grist.docApi.applyUserActions(actions);
+    button.textContent =
+      "Enregistrement…";
 
-    showToast(`✓ Import terminé : ${changes.length} utilisateur(s) traité(s)`);
-    closeImportModal();
-    await loadUsers();
-  }catch(error){
-    console.error(error);
-    showToast("Échec de l'import. Aucune nouvelle tentative automatique n'a été lancée.");
-    $("confirmImportBtn").disabled = false;
+
+    await grist.docApi
+      .applyUserActions([
+        [
+          "UpdateRecord",
+          "PARAMETRES_BUREAUX",
+          Number(
+            state.params.id
+          ),
+          values
+        ]
+      ]);
+
+
+    Object.assign(
+      state.params,
+      values
+    );
+
+
+    refreshGeneratedMessage();
+
+
+    status.textContent =
+      "✓ Paramètres du message enregistrés";
+
+
+    setTimeout(
+      () => {
+
+        status.textContent =
+          "";
+
+      },
+      2500
+    );
+
   }
+  catch(error){
+
+    console.error(
+      error
+    );
+
+    status.textContent =
+      "Impossible d'enregistrer ces paramètres. Vérifiez vos droits d'accès.";
+
+    status.classList.add(
+      "error"
+    );
+
+  }
+  finally{
+
+    button.disabled =
+      false;
+
+    button.textContent =
+      "💾 Enregistrer les paramètres du message";
+
+  }
+
 }
 
-/* =========================================
-   CHARGEMENT DES DONNÉES
-   ========================================= */
 
-async function loadUsers(){
-  users = tableToRows(
-    await grist.docApi.fetchTable("UTILISATEURS")
+
+function renderSchedule(){
+
+  const panel =
+    $("schedulePanel");
+
+
+  if(
+    !canManageSchedule()
+  ){
+
+    panel.classList.add(
+      "hidden"
+    );
+
+    return;
+
+  }
+
+
+  panel.classList.remove(
+    "hidden"
   );
 
-  renderAll();
+
+  $("scheduleActive")
+    .checked =
+      boolValue(
+        state.params
+          ?.Synthese_active
+      );
+
+
+  $("scheduleFrequency")
+    .value =
+      state.params
+        ?.Frequence_synthese
+      ||
+      "Hebdomadaire";
+
+
+  $("scheduleDay")
+    .value =
+      state.params
+        ?.Jour_synthese
+      ||
+      "Lundi";
+
+
+  $("scheduleTime")
+    .value =
+      state.params
+        ?.Heure_synthese
+      ||
+      "";
+
+
+  $("scheduleStatus")
+    .textContent =
+      "";
+
+
+  updateScheduleRule();
+
 }
+
+
+function validScheduleTime(value){
+
+  if(
+    !value
+  ){
+    return true;
+  }
+
+  return /^([01]\d|2[0-3]):[0-5]\d$/
+    .test(
+      value
+    );
+
+}
+
+
+async function saveSchedule(){
+
+  const status =
+    $("scheduleStatus");
+
+  const button =
+    $("saveScheduleBtn");
+
+
+  status.textContent =
+    "";
+
+  status.classList.remove(
+    "error"
+  );
+
+
+  if(
+    !canManageSchedule()
+  ){
+
+    status.textContent =
+      "Vous n'êtes pas autorisé à modifier cette planification.";
+
+    status.classList.add(
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  const frequency =
+    $("scheduleFrequency")
+      .value;
+
+
+  const day =
+    $("scheduleDay")
+      .value;
+
+
+  const time =
+    $("scheduleTime")
+      .value
+      .trim();
+
+
+  if(
+    ![
+      "Quotidienne",
+      "Hebdomadaire",
+      "Mensuelle"
+    ].includes(
+      frequency
+    )
+  ){
+
+    status.textContent =
+      "Fréquence invalide.";
+
+    status.classList.add(
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if(
+    ![
+      "Lundi",
+      "Mardi",
+      "Mercredi",
+      "Jeudi",
+      "Vendredi",
+      "Samedi",
+      "Dimanche"
+    ].includes(
+      day
+    )
+  ){
+
+    status.textContent =
+      "Jour invalide.";
+
+    status.classList.add(
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if(
+    !validScheduleTime(
+      time
+    )
+  ){
+
+    status.textContent =
+      "L'heure doit être saisie au format HH:MM, par exemple 09:00.";
+
+    status.classList.add(
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  const values = {
+
+    Synthese_active:
+      $("scheduleActive")
+        .checked,
+
+    Frequence_synthese:
+      frequency,
+
+    Jour_synthese:
+      day,
+
+    Heure_synthese:
+      time,
+
+    Destinataires_synthese:
+      $("recipients")
+        .value
+        .trim()
+
+  };
+
+
+  try{
+
+    button.disabled =
+      true;
+
+    button.textContent =
+      "Enregistrement…";
+
+
+    await grist.docApi
+      .applyUserActions([
+        [
+          "UpdateRecord",
+          "PARAMETRES_BUREAUX",
+          Number(
+            state.params.id
+          ),
+          values
+        ]
+      ]);
+
+
+    Object.assign(
+      state.params,
+      values
+    );
+
+
+    status.textContent =
+      "✓ Planification enregistrée";
+
+
+    setTimeout(
+      () => {
+
+        status.textContent =
+          "";
+
+      },
+      2500
+    );
+
+  }
+  catch(error){
+
+    console.error(
+      error
+    );
+
+    status.textContent =
+      "Impossible d'enregistrer la planification. Vérifiez vos droits d'accès.";
+
+    status.classList.add(
+      "error"
+    );
+
+  }
+  finally{
+
+    button.disabled =
+      false;
+
+    button.textContent =
+      "💾 Enregistrer la planification";
+
+  }
+
+}
+
+
+
+/* =========================================
+   RENDU
+   ========================================= */
+
+function render(){
+
+  const data =
+    currentData();
+
+
+  $("kpiTodo")
+    .textContent =
+      data.todo.length;
+
+
+  $("kpiLate")
+    .textContent =
+      data.late.length;
+
+
+  $("kpiReminder")
+    .textContent =
+      data.reminders.length;
+
+
+  $("kpiUrgent")
+    .textContent =
+      data.urgent.length;
+
+
+  $("recipients")
+    .value =
+      state.params
+        ?.Destinataires_synthese
+      ||
+      "";
+
+
+  $("subject")
+    .value =
+      renderSubject(
+        state.params
+          ?.Objet_mail_synthese
+      );
+
+
+  $("body")
+    .value =
+      renderTemplate(
+        state.params
+          ?.Corps_mail_synthese,
+        data
+      );
+
+
+  $("preview")
+    .textContent =
+      $("body").value;
+
+
+  let scope =
+    "Périmètre : ";
+
+
+  if(
+    hasGlobalAccess()
+  ){
+
+    scope +=
+      "ensemble des contributions";
+
+  }
+  else if(
+    isBureauContributor()
+    &&
+    state.bureauCode
+  ){
+
+    scope +=
+      "contributions du bureau demandeur "
+      +
+      state.bureauCode;
+
+  }
+  else{
+
+    scope +=
+      "contributions accessibles";
+
+  }
+
+
+  $("scopeMeta")
+    .textContent =
+      scope;
+
+
+  /*
+    V8 :
+    affichage des paramètres du message
+    et de la planification uniquement
+    pour les profils autorisés.
+  */
+  renderMessageSettings();
+  renderSchedule();
+
+}
+
+
+
+/* =========================================
+   RAFRAÎCHISSEMENT DU MESSAGE
+   ========================================= */
+
+function refreshGeneratedMessage(){
+
+  const data =
+    currentData();
+
+
+  $("kpiTodo")
+    .textContent =
+      data.todo.length;
+
+
+  $("kpiLate")
+    .textContent =
+      data.late.length;
+
+
+  $("kpiReminder")
+    .textContent =
+      data.reminders.length;
+
+
+  $("kpiUrgent")
+    .textContent =
+      data.urgent.length;
+
+
+  $("subject")
+    .value =
+      renderSubject(
+        state.params
+          ?.Objet_mail_synthese
+      );
+
+
+  $("body")
+    .value =
+      renderTemplate(
+        state.params
+          ?.Corps_mail_synthese,
+        data
+      );
+
+
+  $("preview")
+    .textContent =
+      $("body").value;
+
+}
+
+
+
+/* =========================================
+   CHARGEMENT
+   ========================================= */
 
 async function load(){
-  try{
-    currentProfile = await identifyUser();
-    renderAccess();
 
-    if(!isAdministrator()){
-      return;
-    }
+  clearError();
+
+
+  $("status")
+    .textContent =
+      "Chargement…";
+
+
+  try{
+
+
+    state.user =
+      await resolveCurrentUser();
+
 
     const [
-      userTable,
-      servicesTable,
-      subDirectionsTable,
-      departmentsTable,
-      bureauxTable
-    ] = await Promise.all([
-      grist.docApi.fetchTable("UTILISATEURS"),
-      grist.docApi.fetchTable("SERVICES"),
-      grist.docApi.fetchTable("SOUS_DIRECTIONS"),
-      grist.docApi.fetchTable("DEPARTEMENTS"),
-      grist.docApi.fetchTable("BUREAUX_ORIGINE")
-    ]);
+      users,
+      bureaux,
+      params,
+      contribs,
+      depts,
+      subDirs,
+      services
+    ] =
+      await Promise.all([
 
-    users = tableToRows(userTable);
-    services = tableToRows(servicesTable);
-    subDirections = tableToRows(subDirectionsTable);
-    departments = tableToRows(departmentsTable);
-    bureaux = tableToRows(bureauxTable);
+        safeFetch(
+          "UTILISATEURS"
+        ),
 
-    populateBureaux();
-    renderAll();
-  }catch(error){
-    console.error(error);
+        safeFetch(
+          "BUREAUX_ORIGINE"
+        ),
 
-    $("profileInfo").textContent =
-      "⚠ Impossible de charger la gestion des utilisateurs";
+        safeFetch(
+          "PARAMETRES_BUREAUX"
+        ),
 
-    showToast("Erreur lors du chargement.");
+        safeFetch(
+          "CONTRIBUTIONS"
+        ),
+
+        safeFetch(
+          "DEPARTEMENTS"
+        ),
+
+        safeFetch(
+          "SOUS_DIRECTIONS"
+        ),
+
+        safeFetch(
+          "SERVICES"
+        )
+
+      ]);
+
+
+    state.bureaux =
+      bureaux;
+
+
+    state.departements =
+      depts;
+
+
+    state.sousDirections =
+      subDirs;
+
+
+    state.services =
+      services;
+
+
+    const email =
+      state.user?.Email
+      ||
+      "";
+
+
+    state.profile =
+      users.find(
+        u =>
+          normalizeText(
+            u.Email
+          )
+          ===
+          normalizeText(
+            email
+          )
+      )
+      ||
+      null;
+
+
+    state.bureauId =
+      state.profile?.Bureau
+      ||
+      state.user?.Bureau
+      ||
+      null;
+
+
+    const bureau =
+      bureaux.find(
+        b =>
+          Number(b.id)
+          ===
+          Number(
+            state.bureauId
+          )
+      );
+
+
+    state.bureauCode =
+      bureau?.Code
+      ||
+      "";
+
+
+    /*
+      Rôle courant.
+    */
+
+    state.role =
+      state.profile?.Role
+      ||
+      state.user?.Role
+      ||
+      "";
+
+    updateHomeLink();
+
+
+    /*
+      Référentiels contributeurs :
+      Département / Sous-direction / Service.
+    */
+
+    const deptMap =
+      new Map(
+        depts.map(
+          d => [
+            Number(d.id),
+            d.Code
+            || d.Nom
+            || ""
+          ]
+        )
+      );
+
+
+    const subDirMap =
+      new Map(
+        subDirs.map(
+          s => [
+            Number(s.id),
+            s.Code
+            || s.Nom
+            || ""
+          ]
+        )
+      );
+
+
+    const serviceMap =
+      new Map(
+        services.map(
+          s => [
+            Number(s.id),
+            s.Code
+            || s.Nom
+            || ""
+          ]
+        )
+      );
+
+
+    /*
+      Enrichissement des contributions.
+    */
+
+    state.contributions =
+      contribs.map(
+        r => {
+
+          const departmentLabel =
+            deptMap.get(
+              Number(
+                r.Contributeur
+              )
+            )
+            ||
+            "";
+
+          const subDirectionLabel =
+            subDirMap.get(
+              Number(
+                r.Contributeur_sous_direction
+              )
+            )
+            ||
+            "";
+
+          const serviceLabel =
+            serviceMap.get(
+              Number(
+                r.Contributeur_service
+              )
+            )
+            ||
+            "";
+
+          const fallbackContributor =
+            departmentLabel
+            ||
+            subDirectionLabel
+            ||
+            serviceLabel
+            ||
+            "";
+
+          return {
+
+            ...r,
+
+            Contributeur_code:
+              String(
+                r.Contributeur_affiche
+                ||
+                fallbackContributor
+                ||
+                ""
+              ).trim()
+
+          };
+
+        }
+      );
+
+
+    /*
+      Administrateur :
+      accès global.
+    */
+
+    if(
+      hasGlobalAccess()
+    ){
+
+      state.filtered =
+        state.contributions;
+
+
+      const e1 =
+        bureaux.find(
+          b =>
+            normalizeText(
+              b.Code
+            )
+            ===
+            "e1"
+        );
+
+
+      const paramBureauId =
+        e1?.id
+        ||
+        state.bureauId;
+
+
+      state.params =
+        params.find(
+          p =>
+            Number(
+              p.Bureau
+            )
+            ===
+            Number(
+              paramBureauId
+            )
+        )
+        ||
+        params[0]
+        ||
+        null;
+
+    }
+
+
+    /*
+      Bureau contributeur :
+      uniquement les contributions dont Bureau_origine
+      correspond à son bureau.
+
+      IMPORTANT :
+      l'autorisation repose sur Bureau_origine,
+      jamais sur Cree_par.
+    */
+
+    else if(
+      isBureauContributor()
+      &&
+      state.bureauId
+    ){
+
+      state.filtered =
+        state.contributions
+          .filter(
+            r =>
+              Number(
+                r.Bureau_origine
+              )
+              ===
+              Number(
+                state.bureauId
+              )
+          );
+
+
+      state.params =
+        params.find(
+          p =>
+            Number(
+              p.Bureau
+            )
+            ===
+            Number(
+              state.bureauId
+            )
+        )
+        ||
+        null;
+
+    }
+
+
+    /*
+      Lecteur et cas de secours :
+      on ne rajoute aucun filtrage métier ici.
+
+      Les lignes déjà retournées par fetchTable("CONTRIBUTIONS")
+      sont celles autorisées par les ACL Grist du profil courant.
+      Cela permet notamment de respecter correctement les périmètres
+      Département / Sous-direction / Service des Lecteurs.
+    */
+
+    else{
+
+      state.filtered =
+        state.contributions;
+
+
+      state.params =
+        params[0]
+        ||
+        null;
+
+    }
+
+
+    /*
+      ANCRE v62 :
+      remplissage de tous les filtres.
+    */
+
+    populateSynthFilters();
+
+
+    render();
+
+
+    $("status")
+      .textContent =
+        "✓ Synthèse actualisée";
+
+
+    setTimeout(
+      () => {
+
+        $("status")
+          .textContent =
+            "";
+
+      },
+      2200
+    );
+
+
   }
+  catch(error){
+
+    showError(
+      error
+    );
+
+
+    $("status")
+      .textContent =
+        "";
+
+  }
+
 }
+
+
+
+/* =========================================
+   COPIER LA SYNTHÈSE
+   ========================================= */
+
+async function copySummary(){
+
+  const text =
+`À : ${$("recipients").value}
+
+Objet : ${$("subject").value}
+
+${$("body").value}`;
+
+
+  try{
+
+    await navigator
+      .clipboard
+      .writeText(
+        text
+      );
+
+
+    $("status")
+      .textContent =
+        "✓ Synthèse copiée dans le presse-papiers";
+
+  }
+  catch(error){
+
+    $("body")
+      .focus();
+
+
+    $("body")
+      .select();
+
+
+    document.execCommand(
+      "copy"
+    );
+
+
+    $("status")
+      .textContent =
+        "✓ Message copié";
+
+  }
+
+
+  setTimeout(
+    () => {
+
+      $("status")
+        .textContent =
+          "";
+
+    },
+    2500
+  );
+
+}
+
+
+
+/* =========================================
+   OUVRIR DANS LA MESSAGERIE
+   ========================================= */
+
+function openMail(){
+
+  const to =
+    $("recipients")
+      .value
+      .trim();
+
+
+  const subject =
+    $("subject")
+      .value;
+
+
+  const body =
+    $("body")
+      .value;
+
+
+  window.location.href =
+
+    "mailto:"
+    +
+    encodeURIComponent(
+      to
+    )
+
+    +
+    "?subject="
+    +
+    encodeURIComponent(
+      subject
+    )
+
+    +
+    "&body="
+    +
+    encodeURIComponent(
+      body
+    );
+
+}
+
+
+
+/* =========================================
+   RÉINITIALISER LES FILTRES
+   ========================================= */
+
+function resetFilters(){
+
+  $("filterBureau")
+    .value =
+      "";
+
+
+  $("filterContributor")
+    .value =
+      "";
+
+
+  $("filterPriority")
+    .value =
+      "";
+
+$("filterType")
+    .value =
+      "";
+
+
+  refreshGeneratedMessage();
+
+
+  $("status")
+    .textContent =
+      "✓ Filtres réinitialisés";
+
+
+  setTimeout(
+    () => {
+
+      $("status")
+        .textContent =
+          "";
+
+    },
+    1800
+  );
+
+}
+
+
 
 /* =========================================
    ÉVÉNEMENTS
    ========================================= */
 
-$("newUserBtn").addEventListener("click",openNewUser);
-$("importUsersBtn").addEventListener("click",openImportModal);
+$("refreshBtn")
+  .addEventListener(
+    "click",
+    load
+  );
 
-$("closeModalBtn").addEventListener("click",closeUserModal);
-$("cancelBtn").addEventListener("click",closeUserModal);
-$("saveBtn").addEventListener("click",saveUser);
 
-$("userRole").addEventListener("change",updateFieldsForRole);
+$("copyBtn")
+  .addEventListener(
+    "click",
+    copySummary
+  );
 
-$("perimeterType").addEventListener("change",() => {
-  updatePerimeterSelector();
-  updateFieldsForRole();
-});
 
-$("searchInput").addEventListener("input",renderUsers);
-$("roleFilter").addEventListener("change",renderUsers);
-$("activeFilter").addEventListener("change",renderUsers);
+$("mailtoBtn")
+  .addEventListener(
+    "click",
+    openMail
+  );
 
-$("userModal").addEventListener("click",event => {
-  if(event.target === $("userModal")){
-    closeUserModal();
-  }
-});
 
-$("closeImportBtn").addEventListener("click",closeImportModal);
-$("cancelImportBtn").addEventListener("click",closeImportModal);
+$("body")
+  .addEventListener(
+    "input",
+    () => {
 
-$("chooseImportBtn").addEventListener("click",() => {
-  $("importFile").click();
-});
+      $("preview")
+        .textContent =
+          $("body").value;
 
-$("importFile").addEventListener("change",async event => {
-  const file = event.target.files?.[0];
+    }
+  );
 
-  resetImport();
 
-  if(!file){
-    return;
-  }
+$("includeLate")
+  .addEventListener(
+    "change",
+    refreshGeneratedMessage
+  );
 
-  $("importFileName").textContent = file.name;
 
-  try{
-    await analyseExcelFile(file);
-  }catch(error){
-    console.error(error);
+$("includeReminders")
+  .addEventListener(
+    "change",
+    refreshGeneratedMessage
+  );
 
-    $("importAnalysis").style.display = "";
-    $("importBody").innerHTML = "";
-    $("importErrorMessage").style.display = "";
-    $("importErrorMessage").textContent = error.message || "Impossible de lire ce fichier.";
-    $("confirmImportBtn").disabled = true;
-  }
-});
 
-$("confirmImportBtn").addEventListener("click",confirmImport);
+$("includeUpcoming")
+  .addEventListener(
+    "change",
+    refreshGeneratedMessage
+  );
 
-$("importModal").addEventListener("click",event => {
-  if(event.target === $("importModal")){
-    closeImportModal();
-  }
-});
 
-document.addEventListener("keydown",event => {
-  if(event.key === "Escape"){
-    closeUserModal();
-    closeImportModal();
-  }
-});
+$("upcomingDays")
+  .addEventListener(
+    "change",
+    refreshGeneratedMessage
+  );
+
+
+/*
+  NOUVEAU v62
+*/
+
+$("filterBureau")
+  .addEventListener(
+    "change",
+    refreshGeneratedMessage
+  );
+
+
+$("filterContributor")
+  .addEventListener(
+    "change",
+    refreshGeneratedMessage
+  );
+
+
+$("filterPriority")
+  .addEventListener(
+    "change",
+    refreshGeneratedMessage
+  );
+
+$("filterType")
+  .addEventListener(
+    "change",
+    refreshGeneratedMessage
+  );
+
+
+$("resetFiltersBtn")
+  .addEventListener(
+    "click",
+    resetFilters
+  );
+
+
+/*
+  V8 — paramètres du message.
+*/
+
+$("saveMessageSettingsBtn")
+  .addEventListener(
+    "click",
+    saveMessageSettings
+  );
+
+
+/*
+  V5 — événements de planification.
+*/
+
+$("scheduleFrequency")
+  .addEventListener(
+    "change",
+    updateScheduleRule
+  );
+
+
+$("scheduleDay")
+  .addEventListener(
+    "change",
+    updateScheduleRule
+  );
+
+
+$("scheduleTime")
+  .addEventListener(
+    "input",
+    updateScheduleRule
+  );
+
+
+$("saveScheduleBtn")
+  .addEventListener(
+    "click",
+    saveSchedule
+  );
+
+
 
 /* =========================================
-   GRIST
-   IMPORTANT : accès complet nécessaire.
+   DÉMARRAGE GRIST
    ========================================= */
 
 grist.ready({
   requiredAccess:"full"
 });
 
+
 load();
+
 </script>
 
 </body>
