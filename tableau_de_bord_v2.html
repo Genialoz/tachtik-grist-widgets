@@ -707,12 +707,12 @@
             <div id="bureauBars" class="bars"></div>
           </article>
 
-          <article id="departmentPanel" class="panel">
-            <h3 class="panel-title">Par département contributeur</h3>
+          <article id="contributorPanel" class="panel">
+            <h3 class="panel-title">Par contributeur</h3>
             <p class="panel-subtitle">
-              Répartition des contributions par département destinataire.
+              Répartition des contributions selon le contributeur destinataire.
             </p>
-            <div id="departmentBars" class="bars"></div>
+            <div id="contributorBars" class="bars"></div>
           </article>
 
           <article class="panel">
@@ -759,14 +759,20 @@
     "use strict";
 
     /* =========================================================
-       TABLEAU DE BORD — VERSION 2
+       TABLEAU DE BORD — VERSION 3
 
-       Nouvelle présentation :
-       - chaque grand bloc est désormais affiché dans un onglet ;
+       Évolutions V3 :
+       - prise en charge des contributeurs Département / Sous-direction / Service ;
+       - utilisation prioritaire de CONTRIBUTIONS.Contributeur_affiche ;
+       - conservation de Type_contributeur pour identifier le niveau ;
+       - remplacement des libellés visibles limités au département
+         par le terme générique « contributeur » ;
+       - conservation des rôles, périmètres, KPI et onglets existants.
+
+       Évolutions V2 conservées :
+       - chaque grand bloc est affiché dans un onglet ;
        - les onglets sont adaptés au rôle ;
-       - l'onglet Relances est masqué pour le Lecteur ;
-       - les règles de périmètre et les indicateurs de la V1
-         sont conservés à l'identique.
+       - l'onglet Relances est masqué pour le Lecteur.
        ========================================================= */
 
     const $ = id => document.getElementById(id);
@@ -780,9 +786,13 @@
     let dashboardRecords = [];
 
     let departments = [];
+    let subdirections = [];
+    let services = [];
     let bureaux = [];
 
     let departmentById = new Map();
+    let subdirectionById = new Map();
+    let serviceById = new Map();
     let bureauById = new Map();
 
     /* =========================================================
@@ -1061,14 +1071,24 @@
       const [
         contributionTable,
         departmentTable,
+        subdirectionTable,
+        serviceTable,
         bureauTable
       ] = await Promise.all([
         grist.docApi.fetchTable("CONTRIBUTIONS"),
         safeFetch("DEPARTEMENTS"),
+        safeFetch("SOUS_DIRECTIONS"),
+        safeFetch("SERVICES"),
         safeFetch("BUREAUX_ORIGINE")
       ]);
 
       departments = tableToRows(departmentTable)
+        .filter(row => !isCensoredRecord(row));
+
+      subdirections = tableToRows(subdirectionTable)
+        .filter(row => !isCensoredRecord(row));
+
+      services = tableToRows(serviceTable)
         .filter(row => !isCensoredRecord(row));
 
       bureaux = tableToRows(bureauTable)
@@ -1076,6 +1096,14 @@
 
       departmentById = new Map(
         departments.map(row => [Number(row.id),row])
+      );
+
+      subdirectionById = new Map(
+        subdirections.map(row => [Number(row.id),row])
+      );
+
+      serviceById = new Map(
+        services.map(row => [Number(row.id),row])
       );
 
       bureauById = new Map(
@@ -1086,38 +1114,90 @@
         .filter(row => !isCensoredRecord(row))
         .map(row=>{
           const departmentId = Number(row.Contributeur) || null;
+          const subdirectionId = Number(row.Contributeur_sous_direction) || null;
+          const serviceId = Number(row.Contributeur_service) || null;
           const bureauId = Number(row.Bureau_origine) || null;
 
           const dep = departmentById.get(departmentId);
+          const subdir = subdirectionById.get(subdirectionId);
+          const service = serviceById.get(serviceId);
           const bureau = bureauById.get(bureauId);
+
+          const contributorDisplay =
+            text(row.Contributeur_affiche).trim();
+
+          const contributorType =
+            text(row.Type_contributeur).trim();
+
+          let contributorFallback = "";
+
+          if(dep){
+            contributorFallback =
+              text(dep.Code).trim()
+              + (
+                  text(dep.Nom).trim()
+                    ? " — " + text(dep.Nom).trim()
+                    : ""
+                );
+          }
+          else if(subdir){
+            contributorFallback =
+              text(subdir.Code).trim()
+              + (
+                  text(subdir.Nom).trim()
+                    ? " — " + text(subdir.Nom).trim()
+                    : ""
+                );
+          }
+          else if(service){
+            contributorFallback =
+              text(service.Code).trim()
+              + (
+                  text(service.Nom).trim()
+                    ? " — " + text(service.Nom).trim()
+                    : ""
+                );
+          }
+          else{
+            contributorFallback =
+              text(
+                row.Contributeur
+                || row.Contributeur_sous_direction
+                || row.Contributeur_service
+              ).trim();
+          }
 
           return {
             ...row,
 
-            _ContributeurId:departmentId,
-            _BureauId:bureauId,
+            _ContributeurId:
+              departmentId
+              || subdirectionId
+              || serviceId
+              || null,
 
-            _ContributeurLabel:dep
-              ? (
-                  text(dep.Code).trim()
-                  + (
-                      text(dep.Nom).trim()
-                      ? " — " + text(dep.Nom).trim()
-                      : ""
-                    )
-                )
-              : text(row.Contributeur).trim(),
+            _ContributeurType:
+              contributorType,
 
-            _BureauLabel:bureau
-              ? (
-                  text(bureau.Code).trim()
-                  + (
-                      text(bureau.Nom).trim()
-                      ? " — " + text(bureau.Nom).trim()
-                      : ""
-                    )
-                )
-              : text(row.Bureau_origine).trim()
+            _BureauId:
+              bureauId,
+
+            _ContributeurLabel:
+              contributorDisplay
+              || contributorFallback
+              || "—",
+
+            _BureauLabel:
+              bureau
+                ? (
+                    text(bureau.Code).trim()
+                    + (
+                        text(bureau.Nom).trim()
+                          ? " — " + text(bureau.Nom).trim()
+                          : ""
+                      )
+                  )
+                : text(row.Bureau_origine).trim()
           };
         });
     }
@@ -1227,7 +1307,7 @@
         note.classList.remove("hidden");
 
         $("bureauPanel").classList.remove("hidden");
-        $("departmentPanel").classList.remove("hidden");
+        $("contributorPanel").classList.remove("hidden");
         $("reminderSection").classList.remove("hidden");
         $("reminderTab").classList.remove("hidden");
         $("kpiNoDeadlineCard").classList.remove("hidden");
@@ -1246,7 +1326,7 @@
         note.classList.remove("hidden");
 
         $("bureauPanel").classList.add("hidden");
-        $("departmentPanel").classList.remove("hidden");
+        $("contributorPanel").classList.remove("hidden");
         $("reminderSection").classList.remove("hidden");
         $("reminderTab").classList.remove("hidden");
         $("kpiNoDeadlineCard").classList.add("hidden");
@@ -1264,7 +1344,7 @@
       note.classList.remove("hidden");
 
       $("bureauPanel").classList.add("hidden");
-      $("departmentPanel").classList.add("hidden");
+      $("contributorPanel").classList.add("hidden");
       $("reminderSection").classList.add("hidden");
       $("reminderTab").classList.add("hidden");
       $("kpiNoDeadlineCard").classList.add("hidden");
@@ -1305,6 +1385,8 @@
 
     /* =========================================================
        RÉPARTITIONS
+       V3 : le contributeur peut être un Département,
+       une Sous-direction ou un Service.
        ========================================================= */
 
     function countBy(records,getLabel){
@@ -1388,7 +1470,7 @@
       );
 
       renderBars(
-        "departmentBars",
+        "contributorBars",
         countBy(
           dashboardRecords,
           record => record._ContributeurLabel
@@ -1517,7 +1599,7 @@
                     ? `Bureau demandeur : ${escapeHtml(record._BureauLabel || "—")} · `
                     : ""
                 }
-                Département contributeur :
+                Contributeur :
                 ${escapeHtml(record._ContributeurLabel || "—")}
               </div>
             </div>
