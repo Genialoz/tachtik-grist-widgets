@@ -269,7 +269,7 @@
             <div class="card-content">
               <h3 class="card-title">Contributions</h3>
               <p class="card-text">
-                Consulter l’ensemble des contributions et utiliser les filtres pour retrouver rapidement celles d’un bureau, d’un département ou d’un statut.
+                Consulter l’ensemble des contributions et utiliser les filtres pour retrouver rapidement celles d’un bureau demandeur, d’un contributeur ou d’un statut.
               </p>
               <span class="card-link">Ouvrir la page →</span>
             </div>
@@ -327,7 +327,7 @@
             <div class="card-content">
               <h3 class="card-title">Nouvelle contribution</h3>
               <p class="card-text">
-                Créer une contribution en choisissant le bureau demandeur et le département contributeur.
+                Créer une contribution en choisissant le bureau demandeur et un ou plusieurs contributeurs.
               </p>
               <span class="card-link">Ouvrir la page →</span>
             </div>
@@ -408,6 +408,14 @@
   </main>
 
   <script>
+    /* =========================================================
+       ACCUEIL ADMINISTRATEUR — V2
+
+       Évolutions V2 :
+       - vocabulaire adapté aux contributeurs multi-niveaux ;
+       - formulation générique pour les contributeurs ;
+       - aucun changement de droits, de navigation ou de logique métier.
+       ========================================================= */
     "use strict";
 
     const $ = id => document.getElementById(id);
