@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tâchtik - Gestion des bureaux d'origine</title>
+<title>Gestion des bureaux demandeurs</title>
 
 <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
 
@@ -350,8 +350,8 @@ tbody tr:hover{background:#fbfdff}
        ENTÊTE
        ========================================= -->
   <section class="hero">
-    <h1>🏢 Gestion des bureaux d'origine</h1>
-    <p>Administrez les bureaux utilisés pour identifier l'origine des contributions.</p>
+    <h1>🏢 Gestion des bureaux demandeurs</h1>
+    <p>Administrez les bureaux demandeurs utilisés pour identifier le bureau à l'origine de chaque contribution.</p>
     <div id="profileInfo" class="profile">Identification du profil…</div>
   </section>
 
@@ -360,7 +360,7 @@ tbody tr:hover{background:#fbfdff}
        ========================================= -->
   <div id="accessDenied" class="notice danger hidden">
     <strong>Accès réservé aux administrateurs.</strong><br>
-    Votre profil Tâchtik ne permet pas de gérer les bureaux d'origine.
+    Votre profil ne permet pas de gérer les bureaux demandeurs.
   </div>
 
   <!-- =========================================
@@ -380,7 +380,7 @@ tbody tr:hover{background:#fbfdff}
         <div id="kpiUsers" class="value">0</div>
       </div>
       <div class="kpi">
-        <div class="label">Contributions avec bureau d'origine</div>
+        <div class="label">Contributions avec bureau demandeur</div>
         <div id="kpiContributions" class="value">0</div>
       </div>
     </section>
@@ -477,6 +477,16 @@ tbody tr:hover{background:#fbfdff}
 "use strict";
 
 /* =========================================
+   GESTION DES BUREAUX — V2
+
+   Évolutions V2 :
+   - vocabulaire visible harmonisé sur « Bureau demandeur » ;
+   - suppression des références visibles à l'ancien nom de l'application ;
+   - nettoyage automatique de la ligne temporaire SESSION_WIDGET ;
+   - conservation de Code, Nom et Email_expediteur ;
+   - la colonne Type reste ignorée car les rôles sont gérés dans UTILISATEURS.
+
+   =========================================
    ÉTAT GLOBAL
    ========================================= */
 
@@ -567,8 +577,8 @@ function setDeleteError(message){
 
 /* =========================================
    IDENTIFICATION UTILISATEUR
-   Mécanisme SESSION_WIDGET stable Tâchtik.
-   La ligne créée n'est pas supprimée ici.
+   La ligne SESSION_WIDGET est temporaire
+   et supprimée après identification.
    ========================================= */
 
 async function identifyUser(){
@@ -594,7 +604,28 @@ async function identifyUser(){
     .filter(row => !previousIds.has(Number(row.id)))
     .sort((a,b) => Number(b.id) - Number(a.id));
 
-  return created[0] || null;
+  const profile = created[0] || null;
+
+  /*
+    V2 :
+    la ligne SESSION_WIDGET est temporaire.
+    On la supprime après identification pour éviter
+    l'accumulation de lignes techniques inutiles.
+  */
+  if(profile){
+    try{
+      await grist.docApi.applyUserActions([
+        ["BulkRemoveRecord","SESSION_WIDGET",[Number(profile.id)]]
+      ]);
+    }catch(cleanupError){
+      console.warn(
+        "Nettoyage SESSION_WIDGET impossible :",
+        cleanupError
+      );
+    }
+  }
+
+  return profile;
 }
 
 function isAdministrator(){
@@ -784,7 +815,7 @@ async function saveBureau(){
   /*
    * IMPORTANT :
    * on ne transmet volontairement que Code et Nom.
-   * - Type n'est plus utilisé par la nouvelle architecture Tâchtik.
+   * - Type n'est plus utilisé par la nouvelle architecture.
    * - Email_expediteur n'est pas modifié par ce widget.
    */
   const fields = {
