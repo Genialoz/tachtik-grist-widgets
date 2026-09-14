@@ -478,9 +478,12 @@
 </div>
 
 <!-- =========================================================
-     IMPORT CONTRIBUTIONS — BUREAU CONTRIBUTEUR — V7
+     IMPORT CONTRIBUTIONS — BUREAU CONTRIBUTEUR — V8
 
-     V7 :
+     V8 :
+     - intégration de CONTRIBUTIONS.Version_modification ;
+     - toute création issue de l'import commence à Version_modification = 1 ;
+     - toute mise à jour issue de l'import incrémente Version_modification ;
      - correction de la détection "Aucun changement" après une mise à jour ;
      - comparaison métier renforcée des références Grist et des dates ;
      - les doublons ambigus ne bloquent plus tout l'import :
@@ -500,7 +503,7 @@
 <script>
 /* =============================================================
    IMPORT CONTRIBUTIONS / BUREAU CONTRIBUTEUR
-   Version 7
+   Version 8
 
    Objectif :
    - lire un fichier Excel ;
@@ -736,6 +739,20 @@ function normalizeDateValue(value){
   }
 
   return text(value).trim();
+}
+
+
+function contributionVersion(record){
+  /*
+    Les anciennes contributions peuvent avoir Version_modification vide.
+    Dans ce cas, elles sont considérées comme version 0.
+  */
+  const raw = record ? record.Version_modification : null;
+  const value = Number(raw);
+
+  return Number.isFinite(value) && value > 0
+    ? Math.trunc(value)
+    : 0;
 }
 
 function isSameBusinessValues(existing,values){
@@ -1570,13 +1587,27 @@ async function importRows(){
       return;
     }
 
+    /*
+      V8 — cohérence avec le verrouillage optimiste :
+      - création => Version_modification = 1 ;
+      - mise à jour => version existante + 1.
+      Ainsi, une modification effectuée par import est détectable par les
+      autres widgets qui auraient la contribution ouverte en modification.
+    */
     const actions = executableRows.map(row => {
       if(row.action === "update"){
+        const existing = existingContributions.find(
+          record => Number(record.id) === Number(row.existingRecordId)
+        );
+
         return [
           "UpdateRecord",
           "CONTRIBUTIONS",
           Number(row.existingRecordId),
-          row.values
+          {
+            ...row.values,
+            Version_modification: contributionVersion(existing) + 1
+          }
         ];
       }
 
@@ -1584,7 +1615,10 @@ async function importRows(){
         "AddRecord",
         "CONTRIBUTIONS",
         null,
-        row.values
+        {
+          ...row.values,
+          Version_modification: 1
+        }
       ];
     });
 
