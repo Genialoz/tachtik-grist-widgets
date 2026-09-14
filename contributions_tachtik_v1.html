@@ -335,6 +335,118 @@
 
     .meta strong{color:#344054}
 
+    /* =========================================================
+       V10 — DEMANDES GROUPÉES / AFFECTATIONS
+       ========================================================= */
+    .group-card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:16px;
+      box-shadow:0 6px 18px rgba(16,24,40,.05);
+      padding:16px;
+    }
+
+    .group-head{
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      align-items:flex-start;
+      flex-wrap:wrap;
+    }
+
+    .group-badge{
+      display:inline-flex;
+      align-items:center;
+      padding:5px 9px;
+      border-radius:999px;
+      background:var(--soft);
+      color:var(--primary);
+      font-size:11px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .group-meta{
+      margin-top:10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px 14px;
+      color:#475467;
+      font-size:12px;
+    }
+
+    .assignment-list{
+      display:grid;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .assignment-card{
+      border:1px solid #e4e7ec;
+      border-radius:14px;
+      padding:13px;
+      background:#fafbff;
+      cursor:pointer;
+      transition:.15s ease;
+    }
+
+    .assignment-card:hover{
+      border-color:#c7d2fe;
+      background:#f8f9ff;
+    }
+
+    .assignment-head{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      flex-wrap:wrap;
+    }
+
+    .assignment-contributor{
+      font-size:14px;
+      font-weight:900;
+      color:#344054;
+    }
+
+    .assignment-type{
+      margin-top:3px;
+      color:var(--muted);
+      font-size:10px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.03em;
+    }
+
+    .assignment-fields{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .assignment-field{
+      padding:9px 10px;
+      border-radius:10px;
+      background:#fff;
+      border:1px solid #eaecf0;
+      color:#475467;
+      font-size:11px;
+      line-height:1.4;
+    }
+
+    .assignment-field strong{
+      display:block;
+      margin-bottom:3px;
+      color:#344054;
+      font-size:10px;
+      text-transform:uppercase;
+    }
+
+    @media(max-width:850px){
+      .assignment-fields{grid-template-columns:1fr}
+    }
+
     .empty{
       background:#fff;
       border:1px dashed #cbd5e1;
@@ -489,8 +601,8 @@
         </div>
 
         <div class="filter-field">
-          <label class="filter-label" for="departmentFilter">Département contributeur</label>
-          <select id="departmentFilter">
+          <label class="filter-label" for="contributorFilter">Contributeur</label>
+          <select id="contributorFilter">
             <option value="">Tous</option>
           </select>
         </div>
@@ -594,7 +706,7 @@
 <script>
 /* =============================================================
    CONTRIBUTIONS
-   Version 9
+   Version 10
 
    Objectif :
    - page de CONSULTATION uniquement ;
@@ -605,9 +717,10 @@
      (Département, Sous-direction ou Service), quelle que soit leur origine ;
    - "Contributions à traiter" reste la page de pilotage des demandes émises
      par le bureau via Bureau_origine ;
-   - V9 : suppression complète des lignes CENSORED renvoyées par Grist ;
-   - V9 : filtrage métier supplémentaire du Bureau contributeur sur son
-     périmètre de réponse ;
+   - V10 : utilisation de Contributeur_affiche ;
+   - V10 : prise en charge des cibles Département / Sous-direction / Service ;
+   - V10 : regroupement visuel des affectations partageant Groupe_contribution ;
+   - V10 : filtre générique "Contributeur" ;
    - aucune modification, suppression ou changement de statut ici.
    ============================================================= */
 
@@ -619,9 +732,13 @@ let currentRole = "";
 
 let allRecords = [];
 let departments = [];
+let subDirections = [];
+let services = [];
 let bureaux = [];
 
 let departmentById = new Map();
+let subDirectionById = new Map();
+let serviceById = new Map();
 let bureauById = new Map();
 
 let selectedRecordId = null;
@@ -724,6 +841,52 @@ function isCensoredRecord(record){
 
     return isCensoredValue(value);
   });
+}
+
+/* =============================================================
+   V10 — CONTRIBUTEUR / GROUPE
+   ============================================================= */
+
+function contributorLabel(record){
+  if(!record){
+    return "";
+  }
+
+  return text(
+    record.Contributeur_affiche
+    || record._ContributeurLabel
+    || record.Contributeur
+  ).trim();
+}
+
+function contributorType(record){
+  const explicit = text(record && record.Type_contributeur).trim();
+
+  if(explicit){
+    return explicit;
+  }
+
+  if(record && record._ContributeurId){
+    return "Département";
+  }
+
+  if(record && record._ContributeurSousDirectionId){
+    return "Sous-direction";
+  }
+
+  if(record && record._ContributeurServiceId){
+    return "Service";
+  }
+
+  return "";
+}
+
+function groupKey(record){
+  const group = text(record && record.Groupe_contribution).trim();
+
+  return group
+    ? `group:${group}`
+    : `record:${Number(record.id)}`;
 }
 
 /* =============================================================
@@ -1012,6 +1175,24 @@ async function loadData(){
   }
 
   try{
+    subDirections = tableToRows(
+      await grist.docApi.fetchTable("SOUS_DIRECTIONS")
+    ).filter(record => !isCensoredRecord(record));
+  }catch(error){
+    console.warn("SOUS_DIRECTIONS indisponible :",error);
+    subDirections = [];
+  }
+
+  try{
+    services = tableToRows(
+      await grist.docApi.fetchTable("SERVICES")
+    ).filter(record => !isCensoredRecord(record));
+  }catch(error){
+    console.warn("SERVICES indisponible :",error);
+    services = [];
+  }
+
+  try{
     bureaux = tableToRows(
       await grist.docApi.fetchTable("BUREAUX_ORIGINE")
     ).filter(record => !isCensoredRecord(record));
@@ -1024,27 +1205,54 @@ async function loadData(){
     departments.map(row => [Number(row.id),row])
   );
 
+  subDirectionById = new Map(
+    subDirections.map(row => [Number(row.id),row])
+  );
+
+  serviceById = new Map(
+    services.map(row => [Number(row.id),row])
+  );
+
   bureauById = new Map(
     bureaux.map(row => [Number(row.id),row])
   );
 
   allRecords = allRecords.map(row => {
     const depId = Number(row.Contributeur) || null;
+    const subDirectionId = Number(row.Contributeur_sous_direction) || null;
+    const serviceId = Number(row.Contributeur_service) || null;
     const bureauId = Number(row.Bureau_origine) || null;
 
     const dep = departmentById.get(depId);
+    const subDirection = subDirectionById.get(subDirectionId);
+    const service = serviceById.get(serviceId);
     const bureau = bureauById.get(bureauId);
+
+    let fallbackContributor = "";
+
+    if(dep){
+      fallbackContributor =
+        text(dep.Code).trim()
+        + (text(dep.Nom).trim() ? " — " + text(dep.Nom).trim() : "");
+    }
+    else if(subDirection){
+      fallbackContributor =
+        text(subDirection.Code).trim()
+        + (text(subDirection.Nom).trim() ? " — " + text(subDirection.Nom).trim() : "");
+    }
+    else if(service){
+      fallbackContributor =
+        text(service.Code).trim()
+        + (text(service.Nom).trim() ? " — " + text(service.Nom).trim() : "");
+    }
 
     return {
       ...row,
       _ContributeurId:depId,
+      _ContributeurSousDirectionId:subDirectionId,
+      _ContributeurServiceId:serviceId,
       _BureauId:bureauId,
-      _ContributeurLabel:dep
-        ? (
-            text(dep.Code).trim()
-            + (text(dep.Nom).trim() ? " — " + text(dep.Nom).trim() : "")
-          )
-        : text(row.Contributeur),
+      _ContributeurLabel:text(row.Contributeur_affiche).trim() || fallbackContributor,
       _BureauLabel:bureau
         ? (
             text(bureau.Code).trim()
@@ -1060,22 +1268,22 @@ async function loadData(){
    ============================================================= */
 
 function populateFilters(){
-  const depSelect = $("departmentFilter");
+  const contributorSelect = $("contributorFilter");
 
-  depSelect.innerHTML =
+  contributorSelect.innerHTML =
     '<option value="">Tous</option>';
 
-  const deps = [...new Set(
+  const contributors = [...new Set(
     allRecords
-      .map(row => row._ContributeurLabel)
+      .map(row => contributorLabel(row))
       .filter(Boolean)
   )].sort((a,b)=>a.localeCompare(b,"fr",{numeric:true}));
 
-  for(const label of deps){
+  for(const label of contributors){
     const option = document.createElement("option");
     option.value = label;
     option.textContent = label;
-    depSelect.appendChild(option);
+    contributorSelect.appendChild(option);
   }
 }
 
@@ -1088,6 +1296,7 @@ function renderBureauNav(){
   nav.innerHTML = "";
 
   const counts = new Map();
+  const allGroupKeys = new Set();
 
   for(const record of allRecords){
     const key = record._BureauId
@@ -1098,27 +1307,30 @@ function renderBureauNav(){
       record._BureauLabel
       || "Bureau demandeur non renseigné";
 
+    const contributionGroupKey = groupKey(record);
+    allGroupKeys.add(contributionGroupKey);
+
     if(!counts.has(key)){
       counts.set(key,{
         label,
-        count:0
+        groups:new Set()
       });
     }
 
-    counts.get(key).count += 1;
+    counts.get(key).groups.add(contributionGroupKey);
   }
 
   const buttons = [
     {
       key:"",
       label:"Tous",
-      count:allRecords.length
+      count:allGroupKeys.size
     },
     ...[...counts.entries()]
       .map(([key,value])=>({
         key,
         label:value.label,
-        count:value.count
+        count:value.groups.size
       }))
       .sort((a,b)=>a.label.localeCompare(
         b.label,
@@ -1153,7 +1365,7 @@ function filteredRecords(){
   const query = clean($("search").value);
   const priority = $("priorityFilter").value;
   const alertCategory = $("alertFilter").value;
-  const department = $("departmentFilter").value;
+  const contributor = $("contributorFilter").value;
 
   return allRecords
     .filter(record => {
@@ -1177,8 +1389,8 @@ function filteredRecords(){
       }
 
       if(
-        department
-        && record._ContributeurLabel !== department
+        contributor
+        && contributorLabel(record) !== contributor
       ){
         return false;
       }
@@ -1199,7 +1411,7 @@ function filteredRecords(){
           record.Titre,
           record.Description,
           record.Demandeur,
-          record._ContributeurLabel,
+          contributorLabel(record),
           record._BureauLabel,
           record.Commentaire
         ].join(" "));
@@ -1234,8 +1446,40 @@ function renderList(){
 
   const records = filteredRecords();
 
+  const groupMap = new Map();
+
+  for(const record of records){
+    const key = groupKey(record);
+
+    if(!groupMap.has(key)){
+      groupMap.set(key,[]);
+    }
+
+    groupMap.get(key).push(record);
+  }
+
+  const groups = [...groupMap.values()]
+    .map(groupRecords => ({
+      records:groupRecords,
+      first:groupRecords[0]
+    }))
+    .sort((a,b)=>{
+      const da =
+        Math.min(...a.records.map(record =>
+          dateValue(record.Echeance)?.getTime() || 9999999999999
+        ));
+
+      const db =
+        Math.min(...b.records.map(record =>
+          dateValue(record.Echeance)?.getTime() || 9999999999999
+        ));
+
+      return da - db;
+    });
+
   $("resultsCount").textContent =
-    `${records.length} contribution${records.length > 1 ? "s" : ""}`;
+    `${groups.length} demande${groups.length > 1 ? "s" : ""}`
+    + ` · ${records.length} affectation${records.length > 1 ? "s" : ""}`;
 
   const activeBureauLabel = currentBureauFilter
     ? (
@@ -1262,7 +1506,7 @@ function renderList(){
       ? `${baseTitle} — ${activeBureauLabel}`
       : baseTitle;
 
-  if(!records.length){
+  if(!groups.length){
     list.innerHTML = `
       <div class="empty">
         Aucune contribution ne correspond aux critères.
@@ -1271,81 +1515,113 @@ function renderList(){
     return;
   }
 
-  for(const record of records){
-    const done = isDone(record);
-    const alert = alertInfo(record);
-    const remaining = remainingDaysLabel(record);
+  for(const group of groups){
+    const recordsInGroup = group.records;
+    const first = group.first;
 
-    const card = document.createElement("article");
-    card.className = done
-      ? "card"
-      : `card alert-${alert.css}`;
+    const groupCard = document.createElement("article");
+    groupCard.className = "group-card";
 
-    card.innerHTML = `
-      <div class="card-top">
+    const assignments = recordsInGroup.map(record=>{
+      const done = isDone(record);
+      const alert = alertInfo(record);
+      const remaining = remainingDaysLabel(record);
 
+      return `
+        <div
+          class="assignment-card ${done ? "" : `alert-${alert.css}`}"
+          data-record-id="${Number(record.id)}"
+        >
+          <div class="assignment-head">
+            <div>
+              <div class="assignment-contributor">
+                👤 ${escapeHtml(contributorLabel(record) || "Contributeur non renseigné")}
+              </div>
+              <div class="assignment-type">
+                ${escapeHtml(contributorType(record) || "Contributeur")}
+              </div>
+            </div>
+
+            ${
+              done
+                ? `<span class="badge done">✓ Fait</span>`
+                : `<span class="deadline-badge deadline-${alert.css}">
+                     ${escapeHtml(alert.label)}
+                   </span>`
+            }
+          </div>
+
+          <div class="assignment-fields">
+            <div class="assignment-field">
+              <strong>Échéance</strong>
+              ${escapeHtml(formatDate(record.Echeance))}
+              ${
+                !done && remaining
+                  ? `<br>${escapeHtml(remaining)}`
+                  : ""
+              }
+            </div>
+
+            <div class="assignment-field">
+              <strong>Priorité</strong>
+              ${escapeHtml(record.Priorite || "—")}
+            </div>
+
+            <div class="assignment-field">
+              <strong>Statut</strong>
+              ${escapeHtml(record.Statut || "—")}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    groupCard.innerHTML = `
+      <div class="group-head">
         <div>
           <div class="number">
             ${escapeHtml(
-              record.Numero
-                ? `N° ${record.Numero}`
-                : `Contribution ${record.id}`
+              first.Numero
+                ? `N° ${first.Numero}`
+                : `Contribution ${first.id}`
             )}
           </div>
 
           <div class="title">
-            ${escapeHtml(record.Titre || "Sans titre")}
+            ${escapeHtml(first.Titre || "Sans titre")}
           </div>
         </div>
 
-        ${
-          done
-            ? `<span class="badge done">✓ Fait</span>`
-            : ""
-        }
-
-      </div>
-
-      <div class="deadline-box ${done ? "deadline-neutral" : `deadline-${alert.css}`}">
-        <div class="deadline-main">
-          <span class="deadline-date">
-            📅 Échéance : ${escapeHtml(formatDate(record.Echeance))}
-          </span>
-
-          ${
-            !done && remaining
-              ? `<span class="deadline-days">• ${escapeHtml(remaining)}</span>`
-              : ""
-          }
+        <div class="group-badge">
+          ${recordsInGroup.length}
+          ${recordsInGroup.length > 1 ? "affectations" : "affectation"}
         </div>
-
-        ${
-          done
-            ? ""
-            : `<span class="deadline-badge deadline-${alert.css}">
-                 ${escapeHtml(alert.label)}
-               </span>`
-        }
       </div>
 
-      <div class="meta">
+      <div class="group-meta">
         <span>
-          <strong>Contributeur :</strong>
-          ${escapeHtml(record._ContributeurLabel || "—")}
+          <strong>Bureau demandeur :</strong>
+          ${escapeHtml(first._BureauLabel || "—")}
         </span>
 
         <span>
-          <strong>Priorité :</strong>
-          ${escapeHtml(record.Priorite || "—")}
+          <strong>Demandeur :</strong>
+          ${escapeHtml(first.Demandeur || "—")}
         </span>
+      </div>
+
+      <div class="assignment-list">
+        ${assignments}
       </div>
     `;
 
-    card.addEventListener("click",()=>{
-      openDetail(record.id);
+    groupCard.querySelectorAll("[data-record-id]").forEach(card=>{
+      card.addEventListener("click",()=>{
+        openDetail(Number(card.dataset.recordId));
+      });
     });
 
-    list.appendChild(card);
+    list.appendChild(groupCard);
   }
 }
 
@@ -1380,7 +1656,7 @@ function openDetail(recordId){
   setDetail("detailTitle",record.Titre);
   setDetail("detailDescription",record.Description);
   setDetail("detailDemandeur",record.Demandeur);
-  setDetail("detailContributeur",record._ContributeurLabel);
+  setDetail("detailContributeur",contributorLabel(record));
   setDetail("detailBureau",record._BureauLabel);
   setDetail("detailPriorite",record.Priorite);
   setDetail("detailStatut",record.Statut);
@@ -1468,7 +1744,7 @@ document.querySelectorAll(".tab").forEach(button=>{
 $("search").addEventListener("input",renderList);
 $("priorityFilter").addEventListener("change",renderList);
 $("alertFilter").addEventListener("change",renderList);
-$("departmentFilter").addEventListener("change",renderList);
+$("contributorFilter").addEventListener("change",renderList);
 $("backBtn").addEventListener("click",closeDetail);
 
 init();
