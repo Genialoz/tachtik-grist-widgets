@@ -427,6 +427,31 @@
 
 <div class="wrap">
 
+  <!-- =========================================================
+       NAVIGATION — RETOUR À L'ACCUEIL SELON LE RÔLE
+       ========================================================= -->
+  <nav style="margin:0 0 14px 0;">
+    <a
+      id="homeLink"
+      href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH"
+      target="_top"
+      style="
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        padding:9px 13px;
+        border:1px solid #d7e2ea;
+        border-radius:10px;
+        background:#ffffff;
+        color:#244a68;
+        text-decoration:none;
+        font-size:13px;
+        font-weight:800;
+        box-shadow:0 3px 10px rgba(25,55,80,.06);
+      "
+    >← Retour à l'accueil</a>
+  </nav>
+
   <!-- =====================================
        ENTÊTE
        ===================================== -->
@@ -1032,7 +1057,7 @@
 /* =========================================
    SYNTHÈSES — V9
 
-   Évolutions V9 :
+   Évolutions V10 :
    - renommage du libellé « Email de contact » en
      « Email de contact à afficher » pour éviter toute confusion
      avec l'adresse de destination du message.
@@ -1200,6 +1225,31 @@ function isBureauContributor(){
     state.role === "Bureau contributeur"
   );
 
+}
+
+
+function updateHomeLink(){
+  const link = document.getElementById("homeLink");
+  if(!link){ return; }
+
+  const role = String(state.role || "").trim().toLowerCase();
+
+  if(role === "administrateur"){
+    link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/32";
+    return;
+  }
+
+  if(role === "bureau contributeur"){
+    link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/33?style=singlePage";
+    return;
+  }
+
+  if(role === "lecteur"){
+    link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/34?style=singlePage";
+    return;
+  }
+
+  link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH";
 }
 
 
@@ -3762,6 +3812,8 @@ async function load(){
       state.user?.Role
       ||
       "";
+
+    updateHomeLink();
 
 
     /*
