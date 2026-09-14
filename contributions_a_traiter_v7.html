@@ -2293,7 +2293,7 @@
   <script>
 
     /* =========================================================
-       CONTRIBUTIONS À TRAITER — V7
+       CONTRIBUTIONS À TRAITER — V8
 
        Évolutions V5 :
        - verrouillage optimiste via CONTRIBUTIONS.Version_modification ;
@@ -3097,11 +3097,6 @@
       return date ? date.getTime() : fallback;
     }
 
-    function attributionTime(record, fallback) {
-      const date = dateValue(record.Date_attribution);
-      return date ? date.getTime() : fallback;
-    }
-
     function sortRecords(records) {
       const sortMode = $("sort-filter")
         ? $("sort-filter").value
@@ -3139,24 +3134,10 @@
         }
 
         if (sortMode === "recent") {
-          const timeA = attributionTime(a, Number.NEGATIVE_INFINITY);
-          const timeB = attributionTime(b, Number.NEGATIVE_INFINITY);
-
-          if (timeA !== timeB) {
-            return timeB - timeA;
-          }
-
           return Number(b.id || 0) - Number(a.id || 0);
         }
 
         if (sortMode === "oldest") {
-          const timeA = attributionTime(a, Number.POSITIVE_INFINITY);
-          const timeB = attributionTime(b, Number.POSITIVE_INFINITY);
-
-          if (timeA !== timeB) {
-            return timeA - timeB;
-          }
-
           return Number(a.id || 0) - Number(b.id || 0);
         }
 
