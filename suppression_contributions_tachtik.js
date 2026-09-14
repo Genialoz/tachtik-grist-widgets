@@ -716,31 +716,3 @@
   );
 
 })();
-'''
-
-out = Path("/mnt/data/suppression_contributions_tachtik_v3.js")
-out.write_text(code, encoding="utf-8")
-
-checks = {
-    "Rôles actuels": (
-        'currentRole === "administrateur"' in code
-        and 'currentRole === "bureau contributeur"' in code
-        and "gestionnaire e1" not in code.lower()
-        and "bureau saisie" not in code.lower()
-        and "bureau import" not in code.lower()
-    ),
-    "Version_modification": "Version_modification" in code,
-    "Relecture fraîche": 'fetchTable(\n        "CONTRIBUTIONS"' in code,
-    "Blocage conflit": "VERSION_CONFLICT" in code,
-    "RemoveRecord conservé": '"RemoveRecord"' in code,
-    "ACL inchangées": "La sécurité définitive reste assurée par les ACL Grist." in code,
-    "Bouton Supprimer": "🗑️ Supprimer" in code,
-}
-
-print(f"Fichier créé : {out}")
-print(f"Taille : {out.stat().st_size} octets")
-for k, v in checks.items():
-    print(f"{k}: {'OK' if v else 'ERREUR'}")
-
-if not all(checks.values()):
-    raise RuntimeError("Un contrôle final a échoué.")
