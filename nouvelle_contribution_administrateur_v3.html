@@ -160,7 +160,7 @@
 </div>
 
 <!-- =========================================================
-     NOUVELLE CONTRIBUTION — ADMINISTRATEUR — V5
+     NOUVELLE CONTRIBUTION — ADMINISTRATEUR — V6
 
      Nouveautés V5 :
      - parcours intuitif par affectation :
@@ -637,6 +637,13 @@ function assignmentValues(assignment,commonValues,groupId){
     Commentaire:text(assignment.commentaire).trim(),
     Type_contributeur:assignment.type,
     Groupe_contribution:groupId,
+
+    /*
+      V6 — verrouillage optimiste :
+      toute nouvelle affectation commence à la version 1.
+    */
+    Version_modification:1,
+
     Contributeur:null,
     Contributeur_sous_direction:null,
     Contributeur_service:null
