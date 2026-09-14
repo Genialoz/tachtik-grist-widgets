@@ -458,9 +458,11 @@
 </div>
 
 <!-- =========================================================
-     IMPORT CONTRIBUTIONS — BUREAU CONTRIBUTEUR — V4
+     IMPORT CONTRIBUTIONS — BUREAU CONTRIBUTEUR — V5
 
-     V4 :
+     V5 :
+     - correction de la détection Création / Mise à jour lors de réimports
+       successifs sans rechargement de la page ;
      - cibles Département / Sous-direction / Service ;
      - Contributeur_affiche / Type_contributeur ;
      - regroupement facultatif via la colonne Excel "Groupe" ;
@@ -472,7 +474,7 @@
 <script>
 /* =============================================================
    IMPORT CONTRIBUTIONS / BUREAU CONTRIBUTEUR
-   Version 4
+   Version 5
 
    Objectif :
    - lire un fichier Excel ;
@@ -484,6 +486,9 @@
    - permettre de regrouper plusieurs nouvelles affectations d'une même demande
      grâce à la colonne Excel facultative "Groupe" ;
    - importer toutes les actions en une seule opération Grist ;
+   - recharger les contributions existantes avant chaque analyse afin qu'une
+     réimportation dans la même session détecte immédiatement les créations
+     effectuées lors de l'import précédent ;
    - empêcher tout import partiel en cas d'erreur de validation.
 
    Règle de rapprochement sans ID technique :
@@ -645,6 +650,22 @@ function sameContributorTarget(record,level,targetId){
     && Number(contributorTargetId(record)) === Number(targetId)
   );
 }
+
+
+async function refreshExistingContributions(){
+  const contributionsTable =
+    await grist.docApi.fetchTable("CONTRIBUTIONS");
+
+  existingContributions =
+    tableToRows(contributionsTable)
+      .filter(
+        row =>
+          Number(row.Bureau_origine)
+          ===
+          Number(currentUserBureauId)
+      );
+}
+
 
 function findExistingContribution({title,level,targetId,demandeur}){
   const candidates = existingContributions.filter(record =>
@@ -1327,6 +1348,14 @@ async function analyzeFile(){
   button.textContent = "Analyse…";
 
   try{
+    /*
+      V5 — IMPORTANT :
+      on recharge CONTRIBUTIONS avant chaque analyse.
+      Ainsi, une contribution créée lors d'un import précédent dans la même
+      session est immédiatement reconnue comme existante lors d'une réimportation.
+    */
+    await refreshExistingContributions();
+
     const workbook = await readExcelFile(file);
     const sheet = getImportSheet(workbook);
     const rows = sheetToObjects(sheet);
@@ -1421,6 +1450,14 @@ async function importRows(){
       "importSuccess",
       `✓ Import terminé : ${createCount} création(s) et ${updateCount} mise(s) à jour.`
     );
+
+    /*
+      V5 :
+      on actualise aussi le cache local immédiatement après l'import.
+      Une seconde analyse dans la même session pourra donc détecter
+      les contributions qui viennent d'être créées.
+    */
+    await refreshExistingContributions();
 
     /*
       On garde l'aperçu visible après réussite pour que l'utilisateur
