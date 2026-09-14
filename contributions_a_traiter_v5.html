@@ -1569,6 +1569,43 @@
 
           </select>
 
+          <!-- V6 : tri manuel visible -->
+          <select
+            id="sort-filter"
+            class="select"
+            aria-label="Trier les contributions"
+          >
+
+            <option value="due-asc">
+              Trier par : échéance la plus proche
+            </option>
+
+            <option value="due-desc">
+              Échéance la plus éloignée
+            </option>
+
+            <option value="priority">
+              Priorité
+            </option>
+
+            <option value="recent">
+              Plus récentes
+            </option>
+
+            <option value="oldest">
+              Plus anciennes
+            </option>
+
+            <option value="contributor">
+              Contributeur A → Z
+            </option>
+
+            <option value="bureau">
+              Bureau demandeur A → Z
+            </option>
+
+          </select>
+
         </div>
 
         <div class="quick-filters">
@@ -2255,7 +2292,7 @@
   <script>
 
     /* =========================================================
-       CONTRIBUTIONS À TRAITER — V5 / CACHE v15
+       CONTRIBUTIONS À TRAITER — V6
 
        Évolutions V5 :
        - verrouillage optimiste via CONTRIBUTIONS.Version_modification ;
@@ -2264,6 +2301,13 @@
        - blocage si un autre utilisateur a modifié la contribution entre-temps ;
        - incrément de Version_modification lors des modifications effectuées ici ;
        - protection également des changements de statut et enregistrements d'envoi/relance.
+
+       Évolution V6 :
+       - ajout d'un sélecteur de tri manuel visible ;
+       - conservation du tri actuel « échéance la plus proche » par défaut ;
+       - nouveaux tris : échéance décroissante, priorité, plus récentes,
+         plus anciennes, contributeur A → Z et bureau demandeur A → Z ;
+       - aucun changement de droits, de périmètre ou de logique d'écriture.
 
        Évolutions conservées :
        - prise en charge de Contributeur_affiche ;
@@ -2986,13 +3030,134 @@
       return 3;
     }
 
-    function sortRecords(records) {
-      return [...records].sort((a, b) => {
-        const dateA = dateValue(a.Echeance);
-        const dateB = dateValue(b.Echeance);
+    /* =========================
+       V6 — TRI MANUEL
 
-        const timeA = dateA ? dateA.getTime() : Number.POSITIVE_INFINITY;
-        const timeB = dateB ? dateB.getTime() : Number.POSITIVE_INFINITY;
+       Le tri par défaut reste identique à l'ancienne version :
+       échéance la plus proche, puis priorité, puis numéro.
+       ========================= */
+
+    function compareNumberLabels(a, b) {
+      return text(a.Numero).localeCompare(
+        text(b.Numero),
+        "fr",
+        { numeric: true }
+      );
+    }
+
+    function dueTime(record, fallback) {
+      const date = dateValue(record.Echeance);
+      return date ? date.getTime() : fallback;
+    }
+
+    function attributionTime(record, fallback) {
+      const date = dateValue(record.Date_attribution);
+      return date ? date.getTime() : fallback;
+    }
+
+    function sortRecords(records) {
+      const sortMode = $("sort-filter")
+        ? $("sort-filter").value
+        : "due-asc";
+
+      return [...records].sort((a, b) => {
+
+        if (sortMode === "due-desc") {
+          const timeA = dueTime(a, Number.NEGATIVE_INFINITY);
+          const timeB = dueTime(b, Number.NEGATIVE_INFINITY);
+
+          if (timeA !== timeB) {
+            return timeB - timeA;
+          }
+
+          return compareNumberLabels(a, b);
+        }
+
+        if (sortMode === "priority") {
+          const priorityDifference =
+            priorityRank(a.Priorite) - priorityRank(b.Priorite);
+
+          if (priorityDifference !== 0) {
+            return priorityDifference;
+          }
+
+          const timeA = dueTime(a, Number.POSITIVE_INFINITY);
+          const timeB = dueTime(b, Number.POSITIVE_INFINITY);
+
+          if (timeA !== timeB) {
+            return timeA - timeB;
+          }
+
+          return compareNumberLabels(a, b);
+        }
+
+        if (sortMode === "recent") {
+          const timeA = attributionTime(a, Number.NEGATIVE_INFINITY);
+          const timeB = attributionTime(b, Number.NEGATIVE_INFINITY);
+
+          if (timeA !== timeB) {
+            return timeB - timeA;
+          }
+
+          return Number(b.id || 0) - Number(a.id || 0);
+        }
+
+        if (sortMode === "oldest") {
+          const timeA = attributionTime(a, Number.POSITIVE_INFINITY);
+          const timeB = attributionTime(b, Number.POSITIVE_INFINITY);
+
+          if (timeA !== timeB) {
+            return timeA - timeB;
+          }
+
+          return Number(a.id || 0) - Number(b.id || 0);
+        }
+
+        if (sortMode === "contributor") {
+          const labelDifference = contributorLabel(a).localeCompare(
+            contributorLabel(b),
+            "fr",
+            { sensitivity: "base", numeric: true }
+          );
+
+          if (labelDifference !== 0) {
+            return labelDifference;
+          }
+
+          const timeA = dueTime(a, Number.POSITIVE_INFINITY);
+          const timeB = dueTime(b, Number.POSITIVE_INFINITY);
+
+          if (timeA !== timeB) {
+            return timeA - timeB;
+          }
+
+          return compareNumberLabels(a, b);
+        }
+
+        if (sortMode === "bureau") {
+          const bureauDifference = text(a.Bureau_origine).localeCompare(
+            text(b.Bureau_origine),
+            "fr",
+            { sensitivity: "base", numeric: true }
+          );
+
+          if (bureauDifference !== 0) {
+            return bureauDifference;
+          }
+
+          const timeA = dueTime(a, Number.POSITIVE_INFINITY);
+          const timeB = dueTime(b, Number.POSITIVE_INFINITY);
+
+          if (timeA !== timeB) {
+            return timeA - timeB;
+          }
+
+          return compareNumberLabels(a, b);
+        }
+
+        /* Par défaut : échéance la plus proche */
+        const timeA = dueTime(a, Number.POSITIVE_INFINITY);
+        const timeB = dueTime(b, Number.POSITIVE_INFINITY);
 
         if (timeA !== timeB) {
           return timeA - timeB;
@@ -3005,11 +3170,7 @@
           return priorityDifference;
         }
 
-        return text(a.Numero).localeCompare(
-          text(b.Numero),
-          "fr",
-          { numeric: true }
-        );
+        return compareNumberLabels(a, b);
       });
     }
 
@@ -4355,6 +4516,7 @@
       $("contributor-filter").addEventListener("change", renderList);
       $("origin-filter").addEventListener("change", renderList);
       $("creator-filter").addEventListener("change", renderList);
+      $("sort-filter").addEventListener("change", renderList);
 
       document
         .querySelectorAll(".filter-btn")
