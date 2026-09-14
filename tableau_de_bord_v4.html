@@ -1,327 +1,531 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Import de contributions</title>
+  <title>Tableau de bord</title>
 
-  <!-- SDK Grist -->
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
-
-  <!-- SheetJS pour lire les fichiers Excel -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <style>
     :root{
-      --bg:#f6f7fb;
-      --card:#ffffff;
-      --text:#1d2939;
-      --muted:#667085;
-      --line:#e4e7ec;
-      --primary:#4f46e5;
-      --primary-hover:#4338ca;
-      --soft:#eef2ff;
-      --success:#067647;
-      --success-bg:#ecfdf3;
-      --warning:#b54708;
-      --warning-bg:#fffaeb;
-      --danger:#b42318;
-      --danger-bg:#fef3f2;
-      --shadow:0 10px 30px rgba(16,24,40,.08);
+      --page:#f5f8fb;
+      --surface:#ffffff;
+      --ink:#17324a;
+      --muted:#6f8190;
+      --line:#dfe8ef;
+
+      --blue:#2f6fdd;
+      --blue-soft:#eef4ff;
+
+      --green:#2e9465;
+      --green-soft:#edf9f2;
+
+      --red:#d94a59;
+      --red-soft:#fff1f3;
+
+      --orange:#df8f18;
+      --orange-soft:#fff6e8;
+
+      --yellow:#c99b24;
+      --yellow-soft:#fff9e7;
+
+      --violet:#7857d6;
+      --violet-soft:#f3efff;
+
+      --shadow:0 10px 28px rgba(21,50,75,.08);
     }
 
     *{box-sizing:border-box}
 
-    body{
+    html,body{
       margin:0;
-      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      background:var(--bg);
-      color:var(--text);
+      min-height:100%;
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+      background:var(--page);
+      color:var(--ink);
+    }
+
+    body{
+      padding:20px;
     }
 
     .app{
-      max-width:1180px;
+      width:min(1320px,100%);
       margin:0 auto;
-      padding:24px;
     }
 
+    /* =========================================================
+       EN-TÊTE
+       ========================================================= */
+
     .hero{
-      background:linear-gradient(135deg,#312e81,#6366f1);
-      color:#fff;
-      border-radius:20px;
-      padding:24px 26px;
-      box-shadow:var(--shadow);
-      margin-bottom:20px;
+      position:relative;
+      overflow:hidden;
+      padding:26px 28px;
+      color:white;
+      border-radius:24px;
+      background:
+        linear-gradient(
+          135deg,
+          #173d66 0%,
+          #245f9a 62%,
+          #2f6fdd 100%
+        );
+      box-shadow:0 16px 40px rgba(23,61,102,.18);
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      width:270px;
+      height:270px;
+      right:-85px;
+      top:-125px;
+      border-radius:50%;
+      background:rgba(255,255,255,.08);
+    }
+
+    .hero-content{
+      position:relative;
+      z-index:1;
     }
 
     .hero h1{
-      margin:0 0 8px;
-      font-size:28px;
+      margin:0;
+      font-size:clamp(28px,4vw,40px);
+      line-height:1.12;
     }
 
     .hero p{
-      margin:0;
-      opacity:.92;
-      line-height:1.5;
+      margin:9px 0 0;
+      max-width:780px;
+      color:rgba(255,255,255,.80);
+      font-size:13px;
+      line-height:1.55;
     }
 
     .profile{
       display:inline-flex;
-      margin-top:14px;
-      padding:7px 10px;
+      margin-top:15px;
+      padding:7px 11px;
       border-radius:999px;
-      background:rgba(255,255,255,.16);
-      font-size:13px;
-      font-weight:700;
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.18);
+      font-size:11px;
+      font-weight:800;
+    }
+
+    .scope-note{
+      margin-top:14px;
+      padding:12px 14px;
+      border-radius:14px;
+      background:#eef4ff;
+      border:1px solid #d1def3;
+      color:#315985;
+      font-size:12px;
+      line-height:1.5;
+    }
+
+    /* =========================================================
+       KPI
+       ========================================================= */
+
+    .section{
+      margin-top:20px;
+    }
+
+    .section-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:12px;
+      margin-bottom:10px;
+    }
+
+    .section-title{
+      margin:0;
+      font-size:18px;
+      font-weight:900;
+    }
+
+    .section-subtitle{
+      margin:4px 0 0;
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.45;
+    }
+
+    .kpi-grid{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:12px;
+    }
+
+    .kpi{
+      position:relative;
+      min-height:116px;
+      overflow:hidden;
+      padding:16px 17px;
+      border-radius:18px;
+      background:var(--surface);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+    }
+
+    .kpi::before{
+      content:"";
+      position:absolute;
+      left:0;
+      top:0;
+      bottom:0;
+      width:5px;
+      background:var(--accent);
+    }
+
+    .kpi-top{
+      display:flex;
+      align-items:center;
+      gap:9px;
+      color:#476074;
+      font-size:12px;
+      font-weight:850;
+    }
+
+    .kpi-icon{
+      width:34px;
+      height:34px;
+      display:grid;
+      place-items:center;
+      border-radius:10px;
+      background:var(--soft);
+      font-size:17px;
+    }
+
+    .kpi-value{
+      margin-top:11px;
+      color:var(--accent);
+      font-size:30px;
+      font-weight:950;
+    }
+
+    .kpi.blue{--accent:var(--blue);--soft:var(--blue-soft)}
+    .kpi.green{--accent:var(--green);--soft:var(--green-soft)}
+    .kpi.red{--accent:var(--red);--soft:var(--red-soft)}
+    .kpi.orange{--accent:var(--orange);--soft:var(--orange-soft)}
+    .kpi.yellow{--accent:var(--yellow);--soft:var(--yellow-soft)}
+    .kpi.violet{--accent:var(--violet);--soft:var(--violet-soft)}
+
+
+    /* =========================================================
+       ONGLETS DU TABLEAU DE BORD — V2
+       ========================================================= */
+
+    .dashboard-tabs-wrap{
+      margin-top:20px;
+      padding:10px;
+      border-radius:18px;
+      background:var(--surface);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+    }
+
+    .dashboard-tabs{
+      display:flex;
+      gap:8px;
+      overflow-x:auto;
+      scrollbar-width:thin;
+      padding-bottom:2px;
+    }
+
+    .dashboard-tab{
+      flex:0 0 auto;
+      border:1px solid #d8e3ec;
+      background:#fff;
+      color:#476074;
+      border-radius:999px;
+      padding:10px 14px;
+      font:inherit;
+      font-size:11px;
+      font-weight:900;
+      cursor:pointer;
+      white-space:nowrap;
+      transition:
+        background .15s ease,
+        border-color .15s ease,
+        color .15s ease,
+        transform .15s ease;
+    }
+
+    .dashboard-tab:hover{
+      transform:translateY(-1px);
+      border-color:#b7cbe0;
+      background:#f8fbfe;
+    }
+
+    .dashboard-tab.active{
+      color:#fff;
+      background:var(--blue);
+      border-color:var(--blue);
+      box-shadow:0 6px 16px rgba(47,111,221,.18);
+    }
+
+    .tab-panel{
+      display:none;
+    }
+
+    .tab-panel.active{
+      display:block;
+    }
+
+    /* =========================================================
+       PANELS / BARRES DE RÉPARTITION
+       ========================================================= */
+
+    .two-columns{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:16px;
     }
 
     .panel{
-      background:var(--card);
+      padding:18px;
+      border-radius:19px;
+      background:var(--surface);
       border:1px solid var(--line);
-      border-radius:18px;
       box-shadow:var(--shadow);
-      padding:22px;
-      margin-bottom:18px;
     }
 
-    .panel h2{
-      margin:0 0 6px;
-      font-size:20px;
-    }
-
-    .panel p{
+    .panel-title{
       margin:0;
+      font-size:15px;
+      font-weight:900;
+    }
+
+    .panel-subtitle{
+      margin:4px 0 0;
       color:var(--muted);
-      line-height:1.5;
+      font-size:10px;
+      line-height:1.45;
     }
 
-    .upload-row{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      flex-wrap:wrap;
-      margin-top:18px;
-    }
-
-    .file-box{
-      flex:1;
-      min-width:280px;
-      border:1px dashed #98a2b3;
-      border-radius:14px;
-      padding:16px;
-      background:#fafafa;
-    }
-
-    input[type="file"]{
-      width:100%;
-      font:inherit;
-    }
-
-    button{
-      border:0;
-      border-radius:12px;
-      padding:11px 16px;
-      font:inherit;
-      font-weight:800;
-      cursor:pointer;
-    }
-
-    button:disabled{
-      opacity:.55;
-      cursor:not-allowed;
-    }
-
-    .btn-primary{
-      background:var(--primary);
-      color:#fff;
-    }
-
-    .btn-primary:hover:not(:disabled){
-      background:var(--primary-hover);
-    }
-
-    .btn-secondary{
-      background:#f2f4f7;
-      color:#344054;
-    }
-
-    .notice{
-      display:none;
-      margin-top:16px;
-      border-radius:14px;
-      padding:13px 15px;
-      line-height:1.5;
-    }
-
-    .notice.show{display:block}
-
-    .notice.success{
-      color:var(--success);
-      background:var(--success-bg);
-      border:1px solid #abefc6;
-    }
-
-    .notice.warning{
-      color:var(--warning);
-      background:var(--warning-bg);
-      border:1px solid #fedf89;
-    }
-
-    .notice.danger{
-      color:var(--danger);
-      background:var(--danger-bg);
-      border:1px solid #fecdca;
-    }
-
-    .stats{
+    .bars{
       display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(135px,1fr));
       gap:12px;
-      margin-top:18px;
-    }
-
-    .stat{
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:14px;
-      background:#fff;
-    }
-
-    .stat .label{
-      font-size:12px;
-      color:var(--muted);
-      font-weight:800;
-      text-transform:uppercase;
-      letter-spacing:.03em;
-    }
-
-    .stat .value{
-      margin-top:5px;
-      font-size:26px;
-      font-weight:900;
-    }
-
-    .table-wrap{
-      overflow:auto;
-      border:1px solid var(--line);
-      border-radius:14px;
       margin-top:16px;
-      max-height:560px;
-      background:#fff;
     }
 
-    table{
-      width:100%;
-      border-collapse:collapse;
-      min-width:1100px;
+    .bar-row{
+      display:grid;
+      grid-template-columns:minmax(120px,1.2fr) minmax(140px,2fr) auto;
+      gap:10px;
+      align-items:center;
     }
 
-    th,td{
-      padding:10px 11px;
-      border-bottom:1px solid var(--line);
-      text-align:left;
-      vertical-align:top;
-      font-size:13px;
+    .bar-label{
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      color:#425b70;
+      font-size:11px;
+      font-weight:800;
     }
 
-    th{
-      position:sticky;
-      top:0;
-      z-index:1;
-      background:#f9fafb;
-      color:#344054;
+    .bar-track{
+      height:10px;
+      overflow:hidden;
+      border-radius:999px;
+      background:#edf2f6;
+    }
+
+    .bar-fill{
+      height:100%;
+      border-radius:999px;
+      background:linear-gradient(90deg,#2f6fdd,#6d8fe8);
+    }
+
+    .bar-value{
+      min-width:28px;
+      text-align:right;
+      color:#425b70;
+      font-size:11px;
       font-weight:900;
     }
 
-    tr.invalid{
-      background:#fff6f5;
-    }
-
-    tr.valid{
-      background:#fbfffc;
-    }
-
-    .status-badge{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding:5px 8px;
-      border-radius:999px;
-      font-weight:800;
-      white-space:nowrap;
-    }
-
-    .status-badge.ok{
-      color:var(--success);
-      background:var(--success-bg);
-    }
-
-    .status-badge.ko{
-      color:var(--danger);
-      background:var(--danger-bg);
-    }
-
-    .status-badge.skip{
-      color:#475467;
-      background:#f2f4f7;
-    }
-
-    .status-badge.info{
-      color:#3730a3;
-      background:var(--soft);
-    }
-
-    .errors{
-      margin-top:4px;
-      color:var(--danger);
-      font-size:12px;
-      line-height:1.4;
-    }
-
-    .actions{
-      display:flex;
-      justify-content:flex-end;
-      gap:10px;
-      margin-top:18px;
-    }
-
-    .hidden{display:none !important}
-
-    .loading{
-      padding:30px;
+    .empty{
+      padding:22px;
       text-align:center;
       color:var(--muted);
+      border:1px dashed #cedbe5;
+      border-radius:14px;
+      background:#fbfdff;
+      font-size:11px;
     }
 
-    .technical-note{
-      margin-top:12px;
-      padding:12px 14px;
-      border-radius:12px;
-      background:var(--soft);
-      color:#3730a3;
+    /* =========================================================
+       À SURVEILLER
+       ========================================================= */
+
+    .watch-list{
+      display:grid;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .watch-item{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:14px;
+      padding:14px 15px;
+      border-radius:15px;
+      border:1px solid var(--line);
+      background:#fff;
+    }
+
+    .watch-item.red{border-left:5px solid var(--red)}
+    .watch-item.orange{border-left:5px solid var(--orange)}
+    .watch-item.yellow{border-left:5px solid var(--yellow)}
+    .watch-item.violet{border-left:5px solid var(--violet)}
+
+    .watch-number{
+      color:var(--blue);
+      font-size:10px;
+      font-weight:850;
+    }
+
+    .watch-title{
+      margin-top:3px;
       font-size:13px;
-      line-height:1.5;
+      font-weight:900;
+      line-height:1.35;
     }
 
-    @media(max-width:800px){
-      .app{padding:14px}
-      .stats{grid-template-columns:1fr 1fr}
-      .actions{flex-direction:column-reverse}
-      .actions button{width:100%}
+    .watch-meta{
+      margin-top:7px;
+      color:var(--muted);
+      font-size:10px;
+      line-height:1.45;
+    }
+
+    .watch-side{
+      min-width:150px;
+      text-align:right;
+    }
+
+    .watch-badge{
+      display:inline-flex;
+      padding:5px 8px;
+      border-radius:999px;
+      font-size:9px;
+      font-weight:900;
+    }
+
+    .watch-badge.red{
+      color:#b13a47;
+      background:var(--red-soft);
+    }
+
+    .watch-badge.orange{
+      color:#9a620d;
+      background:var(--orange-soft);
+    }
+
+    .watch-badge.yellow{
+      color:#816717;
+      background:var(--yellow-soft);
+    }
+
+    .watch-badge.violet{
+      color:#6444bc;
+      background:var(--violet-soft);
+    }
+
+    .watch-date{
+      margin-top:7px;
+      color:#536b7e;
+      font-size:10px;
+      font-weight:800;
+    }
+
+    /* =========================================================
+       ÉTATS
+       ========================================================= */
+
+    .loading,
+    .error{
+      margin-top:18px;
+      padding:24px;
+      text-align:center;
+      border-radius:16px;
+    }
+
+    .loading{
+      color:var(--muted);
+    }
+
+    .error{
+      display:none;
+      color:#9c2f3c;
+      background:var(--red-soft);
+      border:1px solid #f0c2c8;
+    }
+
+    .hidden{
+      display:none!important;
+    }
+
+    @media(max-width:1000px){
+      .kpi-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+
+      .two-columns{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media(max-width:650px){
+      body{padding:12px}
+      .hero{padding:22px}
+      .kpi-grid{grid-template-columns:1fr}
+      .bar-row{
+        grid-template-columns:1fr auto;
+      }
+      .bar-track{
+        grid-column:1 / -1;
+      }
+      .watch-item{
+        grid-template-columns:1fr;
+      }
+      .watch-side{
+        min-width:0;
+        text-align:left;
+      }
     }
   </style>
 </head>
 
 <body>
-<div class="app">
+  <main class="app">
 
   <!-- =========================================================
-       NAVIGATION — RETOUR À L'ACCUEIL
+       NAVIGATION — RETOUR À L'ACCUEIL SELON LE RÔLE
        ========================================================= -->
   <nav style="margin:0 0 14px 0;">
     <a
-      href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/33?style=singlePage"
+      id="homeLink"
+      href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH"
       target="_top"
       style="
         display:inline-flex;
@@ -340,1391 +544,1189 @@
     >← Retour à l'accueil</a>
   </nav>
 
-  <!-- =========================================================
-       ENTÊTE
-       ========================================================= -->
-  <section class="hero">
-    <h1>📥 Importer des contributions</h1>
-    <p>
-      Importez plusieurs contributions depuis un fichier Excel.
-      Toutes les lignes sont contrôlées avant de lancer l'import.
-    </p>
-    <div id="profileInfo" class="profile">Identification du profil…</div>
-  </section>
-
-  <div id="loadingBox" class="loading">
-    Chargement du widget…
-  </div>
-
-  <div id="accessDenied" class="notice danger">
-    <strong>Accès refusé.</strong><br>
-    Cette page est réservée aux utilisateurs ayant le rôle
-    <strong>Bureau contributeur</strong>.
-  </div>
-
-  <main id="mainContent" class="hidden">
-
     <!-- =========================================================
-         SÉLECTION DU FICHIER
+         EN-TÊTE
          ========================================================= -->
-    <section class="panel">
-      <h2>1. Sélectionner le fichier Excel</h2>
-      <p>
-        Le fichier doit contenir une feuille nommée <strong>Import</strong>
-        et les colonnes prévues par le modèle d'import.
-      </p>
-
-      <div class="technical-note">
-        Colonnes attendues :
-        <strong>Titre, Description, Demandeur, Niveau_contributeur, Contributeur,
-        Echeance, Priorite, Statut, Commentaire, Groupe</strong>.
-        <br>
-        <strong>Niveau_contributeur</strong> doit contenir :
-        <strong>Département</strong>, <strong>Sous-direction</strong> ou <strong>Service</strong>.
-        Pour <strong>Contributeur</strong>, utilisez le code correspondant au niveau choisi.
-        <br>
-        <strong>Groupe</strong> est facultatif : répétez la même valeur sur plusieurs lignes
-        pour créer plusieurs affectations rattachées à une même demande.
-        <br>
-        Les contributions existantes sont automatiquement détectées et mises à jour
-        lorsqu'une correspondance unique est trouvée pour le même bureau demandeur,
-        le même titre et le même contributeur.
-        <br>
-        Si plusieurs fiches existantes correspondent, la ligne est
-        <strong>ignorée comme doublon</strong> sans bloquer les autres lignes.
-        Si la ligne est déjà strictement identique, elle est marquée
-        <strong>Aucun changement</strong>.
+    <section class="hero">
+      <div class="hero-content">
+        <h1>📊 Tableau de bord</h1>
+        <p id="heroDescription">
+          Vue synthétique des contributions, des échéances et des points d’attention.
+        </p>
+        <div id="profileInfo" class="profile">👤 Identification du profil…</div>
       </div>
-
-      <div class="upload-row">
-        <div class="file-box">
-          <input
-            id="excelFile"
-            type="file"
-            accept=".xlsx,.xls"
-          >
-        </div>
-
-        <button id="analyzeBtn" type="button" class="btn-primary">
-          🔎 Analyser le fichier
-        </button>
-      </div>
-
-      <div id="fileError" class="notice danger"></div>
     </section>
 
-    <!-- =========================================================
-         APERÇU ET CONTRÔLES
-         ========================================================= -->
-    <section id="previewPanel" class="panel hidden">
-      <h2>2. Vérifier les lignes</h2>
-      <p>
-        Aucune contribution n'est créée tant qu'une erreur bloquante subsiste.
-      </p>
+    <section id="scopeNote" class="scope-note hidden"></section>
 
-      <div class="stats">
-        <div class="stat">
-          <div class="label">Lignes détectées</div>
-          <div id="statTotal" class="value">0</div>
+    <div id="loadingBox" class="loading">
+      Chargement du tableau de bord…
+    </div>
+
+    <div id="errorBox" class="error"></div>
+
+    <div id="dashboard" class="hidden">
+
+      <!-- =======================================================
+           V2 — NAVIGATION PAR ONGLETS
+           ======================================================= -->
+      <nav class="dashboard-tabs-wrap" aria-label="Navigation du tableau de bord">
+        <div id="dashboardTabs" class="dashboard-tabs">
+          <button class="dashboard-tab active" type="button" data-tab="overview">Vue d’ensemble</button>
+          <button class="dashboard-tab" type="button" data-tab="deadlines">Échéances</button>
+          <button id="reminderTab" class="dashboard-tab" type="button" data-tab="reminders">Relances</button>
+          <button class="dashboard-tab" type="button" data-tab="distribution">Répartition</button>
+          <button class="dashboard-tab" type="button" data-tab="watch">À surveiller</button>
+        </div>
+      </nav>
+
+      <!-- =======================================================
+           1. VUE D'ENSEMBLE
+           ======================================================= -->
+      <section class="section tab-panel active" data-panel="overview">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Vue d’ensemble</h2>
+            <p class="section-subtitle">
+              Situation générale des contributions dans votre périmètre.
+            </p>
+          </div>
         </div>
 
-        <div class="stat">
-          <div class="label">Lignes valides</div>
-          <div id="statValid" class="value">0</div>
+        <div class="kpi-grid">
+          <article class="kpi blue">
+            <div class="kpi-top">
+              <span class="kpi-icon">📚</span>
+              <span id="kpiTotalLabel">Total</span>
+            </div>
+            <div id="kpiTotal" class="kpi-value">0</div>
+          </article>
+
+          <article class="kpi blue">
+            <div class="kpi-top">
+              <span class="kpi-icon">📋</span>
+              À faire
+            </div>
+            <div id="kpiTodo" class="kpi-value">0</div>
+          </article>
+
+          <article class="kpi green">
+            <div class="kpi-top">
+              <span class="kpi-icon">✓</span>
+              Terminées
+            </div>
+            <div id="kpiDone" class="kpi-value">0</div>
+          </article>
+
+          <article class="kpi violet">
+            <div class="kpi-top">
+              <span class="kpi-icon">⚡</span>
+              Urgentes
+            </div>
+            <div id="kpiUrgent" class="kpi-value">0</div>
+          </article>
+        </div>
+      </section>
+
+      <!-- =======================================================
+           2. ÉCHÉANCES
+           ======================================================= -->
+      <section class="section tab-panel" data-panel="deadlines">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Échéances</h2>
+            <p class="section-subtitle">
+              Repérez immédiatement les contributions nécessitant une attention particulière.
+            </p>
+          </div>
         </div>
 
-        <div class="stat">
-          <div class="label">Lignes en erreur</div>
-          <div id="statInvalid" class="value">0</div>
+        <div class="kpi-grid">
+          <article class="kpi red">
+            <div class="kpi-top">
+              <span class="kpi-icon">⏰</span>
+              En retard
+            </div>
+            <div id="kpiLate" class="kpi-value">0</div>
+          </article>
+
+          <article class="kpi orange">
+            <div class="kpi-top">
+              <span class="kpi-icon">🟠</span>
+              Échéance proche
+            </div>
+            <div id="kpiClose" class="kpi-value">0</div>
+          </article>
+
+          <article class="kpi yellow">
+            <div class="kpi-top">
+              <span class="kpi-icon">🟡</span>
+              À surveiller
+            </div>
+            <div id="kpiWatch" class="kpi-value">0</div>
+          </article>
+
+          <article class="kpi blue" id="kpiNoDeadlineCard">
+            <div class="kpi-top">
+              <span class="kpi-icon">📅</span>
+              Sans échéance
+            </div>
+            <div id="kpiNoDeadline" class="kpi-value">0</div>
+          </article>
+        </div>
+      </section>
+
+      <!-- =======================================================
+           3. RELANCES
+           Masqué pour Lecteur
+           ======================================================= -->
+      <section id="reminderSection" class="section tab-panel" data-panel="reminders">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Relances</h2>
+            <p class="section-subtitle">
+              Suivi des contributions qui nécessitent une relance.
+            </p>
+          </div>
         </div>
 
-        <div class="stat">
-          <div class="label">Créations</div>
-          <div id="statCreate" class="value">0</div>
+        <div class="kpi-grid">
+          <article class="kpi orange">
+            <div class="kpi-top">
+              <span class="kpi-icon">🔔</span>
+              À relancer
+            </div>
+            <div id="kpiReminder" class="kpi-value">0</div>
+          </article>
+
+          <article class="kpi green">
+            <div class="kpi-top">
+              <span class="kpi-icon">📨</span>
+              Déjà relancées
+            </div>
+            <div id="kpiAlreadyReminded" class="kpi-value">0</div>
+          </article>
+        </div>
+      </section>
+
+      <!-- =======================================================
+           4. RÉPARTITIONS
+           ======================================================= -->
+      <section class="section tab-panel" data-panel="distribution">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Répartition</h2>
+            <p class="section-subtitle">
+              Analyse des contributions selon les principales dimensions de suivi.
+            </p>
+          </div>
         </div>
 
-        <div class="stat">
-          <div class="label">Mises à jour</div>
-          <div id="statUpdate" class="value">0</div>
+        <div class="two-columns">
+
+          <article id="bureauPanel" class="panel">
+            <h3 class="panel-title">Par bureau demandeur</h3>
+            <p class="panel-subtitle">
+              Nombre de contributions pilotées par chaque bureau.
+            </p>
+            <div id="bureauBars" class="bars"></div>
+          </article>
+
+          <article id="contributorPanel" class="panel">
+            <h3 class="panel-title">Par contributeur</h3>
+            <p class="panel-subtitle">
+              Répartition des contributions selon le contributeur destinataire.
+            </p>
+            <div id="contributorBars" class="bars"></div>
+          </article>
+
+          <article class="panel">
+            <h3 class="panel-title">Par priorité</h3>
+            <p class="panel-subtitle">
+              Importance déclarée des contributions.
+            </p>
+            <div id="priorityBars" class="bars"></div>
+          </article>
+
+          <article class="panel">
+            <h3 class="panel-title">Par statut</h3>
+            <p class="panel-subtitle">
+              Répartition entre contributions à faire et terminées.
+            </p>
+            <div id="statusBars" class="bars"></div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- =======================================================
+           5. À SURVEILLER
+           ======================================================= -->
+      <section class="section tab-panel" data-panel="watch">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">À surveiller</h2>
+            <p class="section-subtitle">
+              Contributions prioritaires : retards, urgences et échéances proches.
+            </p>
+          </div>
         </div>
 
-        <div class="stat">
-          <div class="label">Sans action</div>
-          <div id="statNoAction" class="value">0</div>
-        </div>
+        <article class="panel">
+          <div id="watchList" class="watch-list"></div>
+        </article>
+      </section>
 
-        <div class="stat">
-          <div class="label">Bureau demandeur</div>
-          <div id="statBureau" class="value" style="font-size:18px">—</div>
-        </div>
-      </div>
-
-      <div id="validationMessage" class="notice warning"></div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>État</th>
-              <th>Titre</th>
-              <th>Action</th>
-              <th>Demandeur</th>
-              <th>Niveau</th>
-              <th>Contributeur</th>
-              <th>Échéance</th>
-              <th>Priorité</th>
-              <th>Statut</th>
-              <th>Commentaire</th>
-              <th>Contrôles</th>
-            </tr>
-          </thead>
-          <tbody id="previewBody"></tbody>
-        </table>
-      </div>
-
-      <div class="actions">
-        <button id="clearBtn" type="button" class="btn-secondary">
-          Effacer l'aperçu
-        </button>
-
-        <button id="importBtn" type="button" class="btn-primary" disabled>
-          📥 Importer / mettre à jour
-        </button>
-      </div>
-
-      <div id="importSuccess" class="notice success"></div>
-      <div id="importError" class="notice danger"></div>
-    </section>
-
+    </div>
   </main>
 
-</div>
+  <script>
+    "use strict";
 
-<!-- =========================================================
-     IMPORT CONTRIBUTIONS — BUREAU CONTRIBUTEUR — V8
+    /* =========================================================
+       TABLEAU DE BORD — VERSION 4
 
-     V8 :
-     - intégration de CONTRIBUTIONS.Version_modification ;
-     - toute création issue de l'import commence à Version_modification = 1 ;
-     - toute mise à jour issue de l'import incrémente Version_modification ;
-     - correction de la détection "Aucun changement" après une mise à jour ;
-     - comparaison métier renforcée des références Grist et des dates ;
-     - les doublons ambigus ne bloquent plus tout l'import :
-       ils sont ignorés et signalés dans l'aperçu ;
-     - une ligne strictement identique à l'existant est marquée
-       "Aucun changement" et n'est pas réécrite ;
-     - correction de la détection Création / Mise à jour lors de réimports
-       successifs sans rechargement de la page ;
-     - cibles Département / Sous-direction / Service ;
-     - Contributeur_affiche / Type_contributeur ;
-     - regroupement facultatif via la colonne Excel "Groupe" ;
-     - détection automatique Création / Mise à jour ;
-     - mise à jour des contributions existantes sans ID technique requis ;
-     - conservation stricte de Bureau_origine pour le bureau courant.
-     ========================================================= -->
+       Évolutions V3 :
+       - prise en charge des contributeurs Département / Sous-direction / Service ;
+       - utilisation prioritaire de CONTRIBUTIONS.Contributeur_affiche ;
+       - conservation de Type_contributeur pour identifier le niveau ;
+       - remplacement des libellés visibles limités au département
+         par le terme générique « contributeur » ;
+       - conservation des rôles, périmètres, KPI et onglets existants.
 
-<script>
-/* =============================================================
-   IMPORT CONTRIBUTIONS / BUREAU CONTRIBUTEUR
-   Version 8
+       Évolutions V2 conservées :
+       - chaque grand bloc est affiché dans un onglet ;
+       - les onglets sont adaptés au rôle ;
+       - l'onglet Relances est masqué pour le Lecteur.
+       ========================================================= */
 
-   Objectif :
-   - lire un fichier Excel ;
-   - valider toutes les lignes avant import ;
-   - gérer les contributeurs de niveau Département / Sous-direction / Service ;
-   - détecter automatiquement si une ligne doit créer une contribution
-     ou mettre à jour une contribution existante ;
-   - ne jamais utiliser une ligne appartenant à un autre Bureau demandeur ;
-   - permettre de regrouper plusieurs nouvelles affectations d'une même demande
-     grâce à la colonne Excel facultative "Groupe" ;
-   - importer toutes les actions en une seule opération Grist ;
-   - recharger les contributions existantes avant chaque analyse afin qu'une
-     réimportation dans la même session détecte immédiatement les créations
-     effectuées lors de l'import précédent ;
-   - ignorer sans bloquer les doublons ambigus ;
-   - ne pas réécrire les lignes déjà strictement identiques ;
-   - empêcher tout import partiel uniquement en cas de véritable erreur
-     de validation (date, priorité, statut, contributeur, etc.).
+    const $ = id => document.getElementById(id);
 
-   Règle de rapprochement sans ID technique :
-   1. Bureau_origine = bureau courant ;
-   2. même Titre normalisé ;
-   3. même Type_contributeur ;
-   4. même cible (Département / Sous-direction / Service) ;
-   5. si plusieurs lignes correspondent, Demandeur est utilisé comme départage.
-   Si plusieurs contributions restent possibles, la ligne est ignorée comme doublon
-   afin d'éviter toute mise à jour de la mauvaise contribution, sans bloquer
-   les autres lignes du fichier.
+    let currentProfile = null;
+    let currentUser = null;
+    let currentRole = "";
+    let currentUserBureauId = null;
 
-   Limite volontaire :
-   modifier le Titre ou le Contributeur d'une contribution existante depuis Excel
-   ne peut pas être identifié de façon sûre sans identifiant stable ; la ligne sera
-   donc considérée comme une nouvelle contribution.
-   ============================================================= */
+    let allRecords = [];
+    let dashboardRecords = [];
 
-const $ = id => document.getElementById(id);
+    let departments = [];
+    let subdirections = [];
+    let services = [];
+    let bureaux = [];
 
-const EXPECTED_COLUMNS = [
-  "Titre",
-  "Description",
-  "Demandeur",
-  "Niveau_contributeur",
-  "Contributeur",
-  "Echeance",
-  "Priorite",
-  "Statut",
-  "Commentaire",
-  "Groupe"
-];
+    let departmentById = new Map();
+    let subdirectionById = new Map();
+    let serviceById = new Map();
+    let bureauById = new Map();
 
-const ALLOWED_PRIORITIES = new Set([
-  "Normale",
-  "Haute",
-  "Urgente"
-]);
+    /* =========================================================
+       OUTILS GÉNÉRAUX
+       ========================================================= */
 
-const ALLOWED_STATUSES = new Set([
-  "À faire",
-  "Fait"
-]);
+    function text(value){
+      return String(value == null ? "" : value);
+    }
 
-let currentProfile = null;
-let currentUser = null;
-let currentUserBureauId = null;
-let currentUserBureauLabel = "";
-let departments = [];
-let subDirections = [];
-let services = [];
+    function clean(value){
+      return text(value)
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g,"");
+    }
 
-let departmentByCode = new Map();
-let subDirectionByCode = new Map();
-let serviceByCode = new Map();
+    function escapeHtml(value){
+      return text(value)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;");
+    }
 
-let existingContributions = [];
-let analyzedRows = [];
-
-/* =============================================================
-   OUTILS GÉNÉRAUX
-   ============================================================= */
-
-function text(value){
-  return String(value == null ? "" : value);
-}
-
-function clean(value){
-  return text(value).trim().toLowerCase();
-}
-
-function normalizeCode(value){
-  return text(value).trim().toUpperCase();
-}
-
-function normalizeKey(value){
-  return text(value)
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g,"")
-    .replace(/\s+/g," ");
-}
-
-function normalizeContributorLevel(value){
-  const normalized = normalizeKey(value);
-
-  if(normalized === "departement"){
-    return "Département";
-  }
-
-  if(
-    normalized === "sous-direction"
-    || normalized === "sous direction"
-    || normalized === "sousdirection"
-  ){
-    return "Sous-direction";
-  }
-
-  if(normalized === "service"){
-    return "Service";
-  }
-
-  return "";
-}
-
-function generateGroupId(){
-  const now = new Date();
-
-  const stamp =
-    [
-      now.getFullYear(),
-      String(now.getMonth()+1).padStart(2,"0"),
-      String(now.getDate()).padStart(2,"0")
-    ].join("")
-    + "-"
-    + [
-      String(now.getHours()).padStart(2,"0"),
-      String(now.getMinutes()).padStart(2,"0"),
-      String(now.getSeconds()).padStart(2,"0")
-    ].join("");
-
-  const random = Math.random().toString(36).slice(2,8).toUpperCase();
-
-  return `GRP-${stamp}-${random}`;
-}
-
-function contributorTargetId(record){
-  const level = normalizeContributorLevel(
-    record.Type_contributeur
-    || (
-      record.Contributeur
-        ? "Département"
-        : record.Contributeur_sous_direction
-          ? "Sous-direction"
-          : record.Contributeur_service
-            ? "Service"
-            : ""
-    )
-  );
-
-  if(level === "Département"){
-    return Number(record.Contributeur) || null;
-  }
-
-  if(level === "Sous-direction"){
-    return Number(record.Contributeur_sous_direction) || null;
-  }
-
-  if(level === "Service"){
-    return Number(record.Contributeur_service) || null;
-  }
-
-  return null;
-}
-
-function sameContributorTarget(record,level,targetId){
-  return (
-    normalizeContributorLevel(record.Type_contributeur) === level
-    && Number(contributorTargetId(record)) === Number(targetId)
-  );
-}
-
-
-async function refreshExistingContributions(){
-  const contributionsTable =
-    await grist.docApi.fetchTable("CONTRIBUTIONS");
-
-  existingContributions =
-    tableToRows(contributionsTable)
-      .filter(
-        row =>
-          Number(row.Bureau_origine)
-          ===
-          Number(currentUserBureauId)
-      );
-}
-
-
-
-function gristRefId(value){
-  /*
-    Selon le contexte, une référence Grist peut être renvoyée :
-    - comme un nombre ;
-    - comme une chaîne numérique ;
-    - comme une valeur de type ["L", id].
-    On normalise tout vers un identifiant numérique.
-  */
-  if(value === null || value === undefined || value === ""){
-    return null;
-  }
-
-  if(Array.isArray(value)){
-    const last = value[value.length - 1];
-    const n = Number(last);
-    return Number.isFinite(n) ? n : null;
-  }
-
-  const n = Number(value);
-  return Number.isFinite(n) ? n : null;
-}
-
-function normalizeDateValue(value){
-  if(value === null || value === undefined || value === ""){
-    return null;
-  }
-
-  const n = Number(value);
-
-  if(Number.isFinite(n)){
-    /*
-      On compare à la journée près afin d'éviter un faux écart
-      lié à une représentation horaire différente.
-    */
-    return Math.floor(n / 86400);
-  }
-
-  return text(value).trim();
-}
-
-
-function contributionVersion(record){
-  /*
-    Les anciennes contributions peuvent avoir Version_modification vide.
-    Dans ce cas, elles sont considérées comme version 0.
-  */
-  const raw = record ? record.Version_modification : null;
-  const value = Number(raw);
-
-  return Number.isFinite(value) && value > 0
-    ? Math.trunc(value)
-    : 0;
-}
-
-function isSameBusinessValues(existing,values){
-  const existingLevel = normalizeContributorLevel(existing.Type_contributeur);
-
-  const sameTarget = (
-    existingLevel === normalizeContributorLevel(values.Type_contributeur)
-    && (
-      (existingLevel === "Département"
-        && gristRefId(existing.Contributeur) === gristRefId(values.Contributeur))
-      ||
-      (existingLevel === "Sous-direction"
-        && gristRefId(existing.Contributeur_sous_direction) === gristRefId(values.Contributeur_sous_direction))
-      ||
-      (existingLevel === "Service"
-        && gristRefId(existing.Contributeur_service) === gristRefId(values.Contributeur_service))
-    )
-  );
-
-  return (
-    normalizeKey(existing.Titre) === normalizeKey(values.Titre)
-    && text(existing.Description).trim() === text(values.Description).trim()
-    && normalizeKey(existing.Demandeur) === normalizeKey(values.Demandeur)
-    && sameTarget
-    && normalizeDateValue(existing.Echeance) === normalizeDateValue(values.Echeance)
-    && text(existing.Priorite).trim() === text(values.Priorite).trim()
-    && text(existing.Statut).trim() === text(values.Statut).trim()
-    && text(existing.Commentaire).trim() === text(values.Commentaire).trim()
-  );
-}
-
-
-function findExistingContribution({title,level,targetId,demandeur}){
-  const candidates = existingContributions.filter(record =>
-    Number(record.Bureau_origine) === Number(currentUserBureauId)
-    && normalizeKey(record.Titre) === normalizeKey(title)
-    && sameContributorTarget(record,level,targetId)
-  );
-
-  if(candidates.length === 0){
-    return {record:null, ambiguous:false};
-  }
-
-  if(candidates.length === 1){
-    return {record:candidates[0], ambiguous:false};
-  }
-
-  const byDemandeur = candidates.filter(record =>
-    normalizeKey(record.Demandeur) === normalizeKey(demandeur)
-  );
-
-  if(byDemandeur.length === 1){
-    return {record:byDemandeur[0], ambiguous:false};
-  }
-
-  return {record:null, ambiguous:true};
-}
-
-function escapeHtml(value){
-  return text(value)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;");
-}
-
-function tableToRows(table){
-  if(!table){
-    return [];
-  }
-
-  const ids = table.id || [];
-
-  return ids.map((id,index)=>{
-    const row = {id};
-
-    for(const column of Object.keys(table)){
-      if(column === "id"){
-        continue;
+    function tableToRows(table){
+      if(!table){
+        return [];
       }
 
-      row[column] = table[column][index];
+      const ids = table.id || [];
+
+      return ids.map((id,index)=>{
+        const row = {id};
+
+        for(const column of Object.keys(table)){
+          if(column === "id"){
+            continue;
+          }
+
+          row[column] = Array.isArray(table[column])
+            ? table[column][index]
+            : table[column];
+        }
+
+        return row;
+      });
     }
 
-    return row;
-  });
-}
-
-function isBureauContributor(){
-  return clean(currentProfile?.Role) === "bureau contributeur";
-}
-
-function isActiveUser(){
-  const value = currentUser?.Actif;
-
-  return !(
-    value === false
-    || value === 0
-    || clean(value) === "false"
-    || clean(value) === "non"
-  );
-}
-
-function showNotice(id,message){
-  const box = $(id);
-
-  if(!message){
-    box.textContent = "";
-    box.classList.remove("show");
-    return;
-  }
-
-  box.textContent = message;
-  box.classList.add("show");
-}
-
-/* =============================================================
-   IDENTIFICATION VIA SESSION_WIDGET
-   ============================================================= */
-
-async function identifyProfile(){
-  const before = tableToRows(
-    await grist.docApi.fetchTable("SESSION_WIDGET")
-  );
-
-  const previousIds = new Set(
-    before.map(row => Number(row.id))
-  );
-
-  await grist.docApi.applyUserActions([
-    ["AddRecord","SESSION_WIDGET",null,{}]
-  ]);
-
-  await new Promise(resolve => setTimeout(resolve,800));
-
-  const after = tableToRows(
-    await grist.docApi.fetchTable("SESSION_WIDGET")
-  );
-
-  const created = after
-    .filter(row => !previousIds.has(Number(row.id)))
-    .sort((a,b) => Number(b.id) - Number(a.id));
-
-  const profile = created[0] || null;
-
-  if(!profile){
-    throw new Error("Profil utilisateur non identifié.");
-  }
-
-  try{
-    await grist.docApi.applyUserActions([
-      ["BulkRemoveRecord","SESSION_WIDGET",[Number(profile.id)]]
-    ]);
-  }catch(cleanupError){
-    console.error("Nettoyage SESSION_WIDGET :",cleanupError);
-  }
-
-  return profile;
-}
-
-/* =============================================================
-   CHARGEMENT DU CONTEXTE
-   ============================================================= */
-
-async function loadContext(){
-  const [
-    usersTable,
-    departmentsTable,
-    subDirectionsTable,
-    servicesTable,
-    bureauxTable,
-    contributionsTable
-  ] = await Promise.all([
-    grist.docApi.fetchTable("UTILISATEURS"),
-    grist.docApi.fetchTable("DEPARTEMENTS"),
-    grist.docApi.fetchTable("SOUS_DIRECTIONS"),
-    grist.docApi.fetchTable("SERVICES"),
-    grist.docApi.fetchTable("BUREAUX_ORIGINE"),
-    grist.docApi.fetchTable("CONTRIBUTIONS")
-  ]);
-
-  const users = tableToRows(usersTable);
-  departments = tableToRows(departmentsTable);
-  subDirections = tableToRows(subDirectionsTable);
-  services = tableToRows(servicesTable);
-  const bureaux = tableToRows(bureauxTable);
-  existingContributions = tableToRows(contributionsTable);
-
-  currentProfile = await identifyProfile();
-
-  const profileEmail = text(currentProfile.Email).trim();
-
-  currentUser = users.find(
-    row => clean(row.Email) === clean(profileEmail)
-  ) || null;
-
-  if(!currentUser){
-    throw new Error(
-      "Votre profil n'a pas été retrouvé dans la table UTILISATEURS."
-    );
-  }
-
-  currentUserBureauId =
-    Number(currentUser.Bureau) || null;
-
-  const bureau = bureaux.find(
-    row => Number(row.id) === Number(currentUserBureauId)
-  );
-
-  currentUserBureauLabel =
-    bureau
-      ? text(bureau.Code || bureau.Nom || bureau.id)
-      : "";
-
-  $("profileInfo").textContent =
-    "👤 "
-    + (text(currentProfile.Role) || "Profil non défini")
-    + (currentUserBureauLabel
-        ? " — " + currentUserBureauLabel
-        : "");
-
-  if(!isBureauContributor()){
-    $("accessDenied").classList.add("show");
-    return false;
-  }
-
-  if(!isActiveUser()){
-    throw new Error("Votre compte est inactif.");
-  }
-
-  if(!currentUserBureauId){
-    throw new Error(
-      "Aucun bureau n'est associé à votre profil Bureau contributeur."
-    );
-  }
-
-  departmentByCode = new Map();
-  subDirectionByCode = new Map();
-  serviceByCode = new Map();
-
-  for(const row of departments){
-    const code = normalizeCode(row.Code);
-
-    if(code){
-      departmentByCode.set(code,row);
-    }
-  }
-
-  for(const row of subDirections){
-    const code = normalizeCode(row.Code);
-
-    if(code){
-      subDirectionByCode.set(code,row);
-    }
-  }
-
-  for(const row of services){
-    const code = normalizeCode(row.Code);
-
-    if(code){
-      serviceByCode.set(code,row);
-    }
-  }
-
-  existingContributions = existingContributions.filter(
-    row => Number(row.Bureau_origine) === Number(currentUserBureauId)
-  );
-
-  return true;
-}
-
-/* =============================================================
-   DATES EXCEL
-   ============================================================= */
-
-function excelDateToGrist(value){
-  if(
-    value === null
-    || value === undefined
-    || value === ""
-  ){
-    return null;
-  }
-
-  /*
-    SheetJS peut renvoyer :
-    - une Date JavaScript ;
-    - un numéro de série Excel ;
-    - une chaîne déjà formatée.
-  */
-
-  if(value instanceof Date && !Number.isNaN(value.getTime())){
-    return Date.UTC(
-      value.getFullYear(),
-      value.getMonth(),
-      value.getDate()
-    ) / 1000;
-  }
-
-  if(typeof value === "number" && Number.isFinite(value)){
-    const parsed = XLSX.SSF.parse_date_code(value);
-
-    if(!parsed){
-      throw new Error("Date Excel invalide.");
-    }
-
-    return Date.UTC(
-      parsed.y,
-      parsed.m - 1,
-      parsed.d
-    ) / 1000;
-  }
-
-  const raw = text(value).trim();
-
-  if(!raw){
-    return null;
-  }
-
-  let match = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-
-  if(match){
-    return Date.UTC(
-      Number(match[3]),
-      Number(match[2]) - 1,
-      Number(match[1])
-    ) / 1000;
-  }
-
-  match = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-
-  if(match){
-    return Date.UTC(
-      Number(match[1]),
-      Number(match[2]) - 1,
-      Number(match[3])
-    ) / 1000;
-  }
-
-  throw new Error(
-    "Date invalide. Utilisez une vraie date Excel ou le format JJ/MM/AAAA."
-  );
-}
-
-function formatPreviewDate(gristTimestamp){
-  if(gristTimestamp == null){
-    return "";
-  }
-
-  const date = new Date(Number(gristTimestamp) * 1000);
-
-  return new Intl.DateTimeFormat("fr-FR",{
-    day:"2-digit",
-    month:"2-digit",
-    year:"numeric"
-  }).format(date);
-}
-
-/* =============================================================
-   LECTURE DU FICHIER EXCEL
-   ============================================================= */
-
-async function readExcelFile(file){
-  const buffer = await file.arrayBuffer();
-
-  return XLSX.read(buffer,{
-    type:"array",
-    cellDates:true
-  });
-}
-
-function getImportSheet(workbook){
-  const sheetName = workbook.SheetNames.find(
-    name => clean(name) === "import"
-  );
-
-  if(!sheetName){
-    throw new Error(
-      'La feuille "Import" est absente du fichier Excel.'
-    );
-  }
-
-  return workbook.Sheets[sheetName];
-}
-
-function sheetToObjects(sheet){
-  /*
-    defval:"" conserve les colonnes vides.
-    raw:true permet de récupérer les dates Excel sans conversion texte hasardeuse.
-  */
-  return XLSX.utils.sheet_to_json(sheet,{
-    defval:"",
-    raw:true
-  });
-}
-
-function validateColumns(rows,sheet){
-  /*
-    Même avec zéro ligne de données, on doit vérifier les en-têtes.
-  */
-  const matrix = XLSX.utils.sheet_to_json(sheet,{
-    header:1,
-    defval:"",
-    raw:true
-  });
-
-  if(!matrix.length){
-    throw new Error("La feuille Import est vide.");
-  }
-
-  const headers = matrix[0].map(value => text(value).trim());
-
-  const missing = EXPECTED_COLUMNS.filter(
-    column => !headers.includes(column)
-  );
-
-  if(missing.length){
-    throw new Error(
-      "Colonnes manquantes : " + missing.join(", ")
-    );
-  }
-}
-
-/* =============================================================
-   VALIDATION DES LIGNES
-   ============================================================= */
-
-function rowIsCompletelyEmpty(row){
-  return EXPECTED_COLUMNS.every(
-    column => !text(row[column]).trim()
-  );
-}
-
-function validateRow(source,index,groupIds){
-  const errors = [];
-
-  const title = text(source.Titre).trim();
-  const description = text(source.Description).trim();
-  const demandeur = text(source.Demandeur).trim();
-  const level = normalizeContributorLevel(source.Niveau_contributeur);
-  const contributorCode = normalizeCode(source.Contributeur);
-  const priority = text(source.Priorite).trim() || "Normale";
-  const status = text(source.Statut).trim() || "À faire";
-  const comment = text(source.Commentaire).trim();
-  const excelGroup = text(source.Groupe).trim();
-
-  if(!title){
-    errors.push("Titre obligatoire.");
-  }
-
-  if(!level){
-    errors.push(
-      'Niveau_contributeur invalide. Utilisez "Département", "Sous-direction" ou "Service".'
-    );
-  }
-
-  let contributor = null;
-
-  if(!contributorCode){
-    errors.push("Contributeur obligatoire.");
-  }else if(level === "Département"){
-    contributor = departmentByCode.get(contributorCode) || null;
-
-    if(!contributor){
-      errors.push(
-        `Contributeur "${contributorCode}" introuvable dans DEPARTEMENTS.`
-      );
-    }
-  }else if(level === "Sous-direction"){
-    contributor = subDirectionByCode.get(contributorCode) || null;
-
-    if(!contributor){
-      errors.push(
-        `Contributeur "${contributorCode}" introuvable dans SOUS_DIRECTIONS.`
-      );
-    }
-  }else if(level === "Service"){
-    contributor = serviceByCode.get(contributorCode) || null;
-
-    if(!contributor){
-      errors.push(
-        `Contributeur "${contributorCode}" introuvable dans SERVICES.`
-      );
-    }
-  }
-
-  if(!ALLOWED_PRIORITIES.has(priority)){
-    errors.push(
-      `Priorité invalide : "${priority}".`
-    );
-  }
-
-  if(!ALLOWED_STATUSES.has(status)){
-    errors.push(
-      `Statut invalide : "${status}".`
-    );
-  }
-
-  let dueDate = null;
-
-  try{
-    dueDate = excelDateToGrist(source.Echeance);
-  }catch(error){
-    errors.push(error.message);
-  }
-
-  const targetId = contributor ? Number(contributor.id) : null;
-
-  const match = (
-    title && level && targetId
-      ? findExistingContribution({
-          title,
-          level,
-          targetId,
-          demandeur
-        })
-      : {record:null, ambiguous:false}
-  );
-
-  const isAmbiguousDuplicate = Boolean(match.ambiguous);
-  const isUpdateCandidate = Boolean(match.record);
-  const existing = match.record || null;
-
-  const values = {
-    Titre:title,
-    Description:description,
-    Demandeur:demandeur,
-    Type_contributeur:level || null,
-    Contributeur:null,
-    Contributeur_sous_direction:null,
-    Contributeur_service:null,
-    Echeance:dueDate,
-    Priorite:priority,
-    Statut:status,
-    Commentaire:comment
-  };
-
-  if(level === "Département" && contributor){
-    values.Contributeur = Number(contributor.id);
-  }
-
-  if(level === "Sous-direction" && contributor){
-    values.Contributeur_sous_direction = Number(contributor.id);
-  }
-
-  if(level === "Service" && contributor){
-    values.Contributeur_service = Number(contributor.id);
-  }
-
-  if(!isUpdateCandidate && !isAmbiguousDuplicate){
-    values.Bureau_origine = Number(currentUserBureauId);
-    values.Cree_par = text(currentUser.Email).trim();
-    values.Source = "Import";
-
-    let groupId = "";
-
-    if(excelGroup){
-      const normalizedGroup = normalizeKey(excelGroup);
-
-      if(!groupIds.has(normalizedGroup)){
-        groupIds.set(normalizedGroup,generateGroupId());
+    function isCensoredValue(value){
+      if(Array.isArray(value)){
+        return value.length > 0
+          && String(value[0]).trim().toUpperCase() === "C";
       }
 
-      groupId = groupIds.get(normalizedGroup);
-    }else{
-      groupId = generateGroupId();
+      if(value && typeof value === "object"){
+        const marker =
+          value.type
+          || value.kind
+          || value._type
+          || value.code
+          || "";
+
+        if(String(marker).trim().toUpperCase() === "CENSORED"){
+          return true;
+        }
+      }
+
+      const normalized = clean(value);
+
+      return normalized === "censored"
+        || normalized === "[censored]";
     }
 
-    values.Groupe_contribution = groupId;
-  }
-
-  let action = "create";
-  let actionMessage = "Nouvelle contribution";
-
-  if(isAmbiguousDuplicate){
-    action = "skip_duplicate";
-    actionMessage = "Doublon ignoré : plusieurs fiches existantes correspondent.";
-  }
-  else if(isUpdateCandidate){
-    if(isSameBusinessValues(existing,values)){
-      action = "no_change";
-      actionMessage = "Aucun changement : la contribution est déjà à jour.";
-    }else{
-      action = "update";
-      actionMessage = "Contribution existante à mettre à jour.";
-    }
-  }
-
-  return {
-    excelRow:index + 2,
-    source,
-    contributorCode,
-    contributorLevel:level,
-    dueDate,
-    excelGroup,
-    errors,
-    valid:errors.length === 0,
-    action,
-    actionMessage,
-    existingRecordId:isUpdateCandidate ? Number(existing.id) : null,
-    values
-  };
-}
-
-/* =============================================================
-   APERÇU
-   ============================================================= */
-
-function renderPreview(){
-  const body = $("previewBody");
-  body.innerHTML = "";
-
-  const total = analyzedRows.length;
-  const valid = analyzedRows.filter(row => row.valid).length;
-  const invalid = total - valid;
-  const createCount = analyzedRows.filter(row => row.valid && row.action === "create").length;
-  const updateCount = analyzedRows.filter(row => row.valid && row.action === "update").length;
-  const duplicateCount = analyzedRows.filter(row => row.valid && row.action === "skip_duplicate").length;
-  const noChangeCount = analyzedRows.filter(row => row.valid && row.action === "no_change").length;
-  const noActionCount = duplicateCount + noChangeCount;
-
-  $("statTotal").textContent = total;
-  $("statValid").textContent = valid;
-  $("statInvalid").textContent = invalid;
-  $("statCreate").textContent = createCount;
-  $("statUpdate").textContent = updateCount;
-  $("statNoAction").textContent = noActionCount;
-  $("statBureau").textContent = currentUserBureauLabel || "—";
-
-  for(const row of analyzedRows){
-    const tr = document.createElement("tr");
-    tr.className = row.valid ? "valid" : "invalid";
-
-    tr.innerHTML = `
-      <td>${row.excelRow}</td>
-      <td>
-        <span class="status-badge ${row.valid ? "ok" : "ko"}">
-          ${row.valid ? "✓ Valide" : "⚠ Erreur"}
-        </span>
-      </td>
-      <td>${escapeHtml(row.values.Titre)}</td>
-      <td>
-        ${
-          row.action === "update"
-            ? '<span class="status-badge ok">↻ Mise à jour</span>'
-            : row.action === "skip_duplicate"
-              ? '<span class="status-badge skip">⏭ Doublon ignoré</span>'
-              : row.action === "no_change"
-                ? '<span class="status-badge info">✓ Aucun changement</span>'
-                : '<span class="status-badge info">＋ Création</span>'
+    function isCensoredRecord(record){
+      return Object.entries(record).some(([key,value])=>{
+        if(key === "id"){
+          return false;
         }
-        ${
-          row.actionMessage
-            ? `<div style="margin-top:5px;font-size:11px;color:#667085">${escapeHtml(row.actionMessage)}</div>`
-            : ""
-        }
-      </td>
-      <td>${escapeHtml(row.values.Demandeur)}</td>
-      <td>${escapeHtml(row.contributorLevel)}</td>
-      <td>${escapeHtml(row.contributorCode)}</td>
-      <td>${escapeHtml(formatPreviewDate(row.dueDate))}</td>
-      <td>${escapeHtml(row.values.Priorite)}</td>
-      <td>${escapeHtml(row.values.Statut)}</td>
-      <td>${escapeHtml(row.values.Commentaire)}</td>
-      <td>
-        ${
-          row.valid
-            ? '<span style="color:#067647;font-weight:800">Aucune erreur</span>'
-            : `<div class="errors">${row.errors.map(
-                error => "• " + escapeHtml(error)
-              ).join("<br>")}</div>`
-        }
-      </td>
-    `;
 
-    body.appendChild(tr);
-  }
-
-  $("previewPanel").classList.remove("hidden");
-
-  if(total === 0){
-    showNotice(
-      "validationMessage",
-      "Aucune ligne de contribution n'a été trouvée dans la feuille Import."
-    );
-    $("importBtn").disabled = true;
-    return;
-  }
-
-  if(invalid > 0){
-    showNotice(
-      "validationMessage",
-      `${invalid} ligne(s) contiennent des erreurs. Corrigez le fichier Excel puis relancez l'analyse. Aucune ligne ne sera importée.`
-    );
-    $("importBtn").disabled = true;
-  }else{
-    const executableCount = createCount + updateCount;
-
-    showNotice(
-      "validationMessage",
-      `Toutes les lignes sont valides. ${createCount} création(s), ${updateCount} mise(s) à jour, ${duplicateCount} doublon(s) ignoré(s) et ${noChangeCount} ligne(s) sans changement.`
-    );
-
-    $("importBtn").disabled = executableCount === 0;
-  }
-}
-
-function clearPreview(){
-  analyzedRows = [];
-
-  $("excelFile").value = "";
-  $("previewBody").innerHTML = "";
-  $("previewPanel").classList.add("hidden");
-
-  showNotice("fileError","");
-  showNotice("validationMessage","");
-  showNotice("importSuccess","");
-  showNotice("importError","");
-}
-
-/* =============================================================
-   ANALYSE DU FICHIER
-   ============================================================= */
-
-async function analyzeFile(){
-  showNotice("fileError","");
-  showNotice("importSuccess","");
-  showNotice("importError","");
-
-  const file = $("excelFile").files[0];
-
-  if(!file){
-    showNotice(
-      "fileError",
-      "Sélectionnez d'abord un fichier Excel."
-    );
-    return;
-  }
-
-  const button = $("analyzeBtn");
-  button.disabled = true;
-  button.textContent = "Analyse…";
-
-  try{
-    /*
-      V7 — IMPORTANT :
-      on recharge CONTRIBUTIONS avant chaque analyse.
-      Ainsi, une contribution créée lors d'un import précédent dans la même
-      session est immédiatement reconnue comme existante lors d'une réimportation.
-    */
-    await refreshExistingContributions();
-
-    const workbook = await readExcelFile(file);
-    const sheet = getImportSheet(workbook);
-    const rows = sheetToObjects(sheet);
-
-    validateColumns(rows,sheet);
-
-    const nonEmpty = rows.filter(
-      row => !rowIsCompletelyEmpty(row)
-    );
-
-    const groupIds = new Map();
-
-    analyzedRows = nonEmpty.map(
-      (row,index) => validateRow(row,index,groupIds)
-    );
-
-    renderPreview();
-
-  }catch(error){
-    console.error(error);
-
-    analyzedRows = [];
-    $("previewPanel").classList.add("hidden");
-
-    showNotice(
-      "fileError",
-      error.message || "Impossible de lire le fichier Excel."
-    );
-  }finally{
-    button.disabled = false;
-    button.textContent = "🔎 Analyser le fichier";
-  }
-}
-
-/* =============================================================
-   IMPORT GRIST
-   ============================================================= */
-
-async function importRows(){
-  showNotice("importSuccess","");
-  showNotice("importError","");
-
-  if(!analyzedRows.length){
-    showNotice(
-      "importError",
-      "Aucune ligne n'est prête à être importée."
-    );
-    return;
-  }
-
-  if(analyzedRows.some(row => !row.valid)){
-    showNotice(
-      "importError",
-      "L'import est bloqué tant qu'une ligne contient une erreur."
-    );
-    return;
-  }
-
-  const button = $("importBtn");
-  button.disabled = true;
-  button.textContent = "Import en cours…";
-
-  try{
-    /*
-      Une seule opération Grist :
-      si le serveur refuse une action, on évite de laisser un import partiel.
-    */
-    const executableRows = analyzedRows.filter(
-      row =>
-        row.action === "create"
-        || row.action === "update"
-    );
-
-    if(!executableRows.length){
-      showNotice(
-        "importSuccess",
-        "✓ Aucune action à effectuer : les lignes sont déjà à jour ou ont été ignorées comme doublons."
-      );
-      button.disabled = true;
-      return;
+        return isCensoredValue(value);
+      });
     }
 
-    /*
-      V8 — cohérence avec le verrouillage optimiste :
-      - création => Version_modification = 1 ;
-      - mise à jour => version existante + 1.
-      Ainsi, une modification effectuée par import est détectable par les
-      autres widgets qui auraient la contribution ouverte en modification.
-    */
-    const actions = executableRows.map(row => {
-      if(row.action === "update"){
-        const existing = existingContributions.find(
-          record => Number(record.id) === Number(row.existingRecordId)
+    function dateValue(value){
+      if(!value){
+        return null;
+      }
+
+      if(typeof value === "number"){
+        return new Date(value * 1000);
+      }
+
+      const date = new Date(value);
+
+      return Number.isNaN(date.getTime())
+        ? null
+        : date;
+    }
+
+    function formatDate(value){
+      const date = dateValue(value);
+
+      if(!date){
+        return "—";
+      }
+
+      return new Intl.DateTimeFormat("fr-FR").format(date);
+    }
+
+    function isAdministrator(){
+      return currentRole === "administrateur";
+    }
+
+    function isBureauContributor(){
+      return currentRole === "bureau contributeur";
+    }
+
+    function isReader(){
+      return currentRole === "lecteur";
+    }
+
+    function updateHomeLink(){
+      const link = document.getElementById("homeLink");
+      if(!link){ return; }
+    
+      if(currentRole === "administrateur"){
+        link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/32";
+        return;
+      }
+    
+      if(currentRole === "bureau contributeur"){
+        link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/33?style=singlePage";
+        return;
+      }
+    
+      if(currentRole === "lecteur"){
+        link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/34?style=singlePage";
+        return;
+      }
+    
+      link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH";
+    }
+    function isDone(record){
+      return clean(record.Statut) === "fait";
+    }
+
+    function isTodo(record){
+      return !isDone(record);
+    }
+
+    function isUrgent(record){
+      return clean(record.Priorite) === "urgente";
+    }
+
+    function isLate(record){
+      return clean(record.Alerte).includes("retard");
+    }
+
+    function isClose(record){
+      const value = clean(record.Alerte);
+
+      return value.includes("echeance proche")
+        || value.includes("proche");
+    }
+
+    function isWatch(record){
+      return clean(record.Alerte).includes("surveiller");
+    }
+
+    function needsReminder(record){
+      return clean(record.Rappel_a_faire).includes("relancer");
+    }
+
+    function hasReminderHistory(record){
+      return Boolean(record.Dernier_rappel);
+    }
+
+    /* =========================================================
+       IDENTIFICATION DU PROFIL
+
+       Administrateur / Bureau contributeur :
+       identification via SESSION_WIDGET.
+
+       Lecteur :
+       SESSION_WIDGET peut être inaccessible.
+       Dans ce cas, le widget reste en lecture et s'appuie
+       uniquement sur les lignes rendues visibles par les ACL Grist.
+       ========================================================= */
+
+    async function identifyProfile(){
+      try{
+        const before = tableToRows(
+          await grist.docApi.fetchTable("SESSION_WIDGET")
         );
 
-        return [
-          "UpdateRecord",
-          "CONTRIBUTIONS",
-          Number(row.existingRecordId),
-          {
-            ...row.values,
-            Version_modification: contributionVersion(existing) + 1
+        const previousIds = new Set(
+          before.map(row => Number(row.id))
+        );
+
+        await grist.docApi.applyUserActions([
+          ["AddRecord","SESSION_WIDGET",null,{}]
+        ]);
+
+        await new Promise(resolve => setTimeout(resolve,700));
+
+        const after = tableToRows(
+          await grist.docApi.fetchTable("SESSION_WIDGET")
+        );
+
+        const created = after
+          .filter(row => !previousIds.has(Number(row.id)))
+          .sort((a,b)=>Number(b.id)-Number(a.id));
+
+        const profile = created[0] || null;
+
+        if(profile){
+          try{
+            await grist.docApi.applyUserActions([
+              ["BulkRemoveRecord","SESSION_WIDGET",[Number(profile.id)]]
+            ]);
+          }catch(cleanupError){
+            console.warn("Nettoyage SESSION_WIDGET impossible :",cleanupError);
           }
-        ];
-      }
-
-      return [
-        "AddRecord",
-        "CONTRIBUTIONS",
-        null,
-        {
-          ...row.values,
-          Version_modification: 1
         }
-      ];
-    });
 
-    await grist.docApi.applyUserActions(actions);
+        return profile;
 
-    const createCount = analyzedRows.filter(row => row.action === "create").length;
-    const updateCount = analyzedRows.filter(row => row.action === "update").length;
-    const duplicateCount = analyzedRows.filter(row => row.action === "skip_duplicate").length;
-    const noChangeCount = analyzedRows.filter(row => row.action === "no_change").length;
+      }catch(error){
+        console.warn(
+          "SESSION_WIDGET indisponible : mode consultation ACL.",
+          error
+        );
 
-    showNotice(
-      "importSuccess",
-      `✓ Import terminé : ${createCount} création(s), ${updateCount} mise(s) à jour, ${duplicateCount} doublon(s) ignoré(s) et ${noChangeCount} ligne(s) sans changement.`
-    );
-
-    /*
-      V7 :
-      on actualise aussi le cache local immédiatement après l'import.
-      Une seconde analyse dans la même session pourra donc détecter
-      les contributions qui viennent d'être créées.
-    */
-    await refreshExistingContributions();
-
-    /*
-      On garde l'aperçu visible après réussite pour que l'utilisateur
-      puisse constater ce qui vient d'être importé.
-    */
-    $("importBtn").disabled = true;
-    $("excelFile").value = "";
-
-  }catch(error){
-    console.error(error);
-
-    showNotice(
-      "importError",
-      "Impossible d'importer les contributions. Aucune ligne ne doit être considérée comme importée tant que cette erreur n'est pas résolue."
-    );
-
-    button.disabled = false;
-  }finally{
-    button.textContent = "📥 Importer / mettre à jour";
-  }
-}
-
-/* =============================================================
-   INITIALISATION
-   ============================================================= */
-
-async function init(){
-  try{
-    grist.ready({
-      requiredAccess:"full"
-    });
-
-    const allowed = await loadContext();
-
-    $("loadingBox").classList.add("hidden");
-
-    if(!allowed){
-      return;
+        return null;
+      }
     }
 
-    $("mainContent").classList.remove("hidden");
+    async function loadUserContext(){
+      currentProfile = await identifyProfile();
 
-  }catch(error){
-    console.error(error);
+      if(!currentProfile){
+        currentRole = "lecteur";
+        currentUser = null;
+        currentUserBureauId = null;
+        updateHomeLink();
 
-    $("loadingBox").classList.add("hidden");
+        $("profileInfo").textContent = "👤 Lecteur";
+        return;
+      }
 
-    $("accessDenied").innerHTML =
-      "<strong>Impossible d'ouvrir le widget.</strong><br>"
-      + escapeHtml(error.message || error);
+      currentRole = clean(currentProfile.Role);
+      updateHomeLink();
 
-    $("accessDenied").classList.add("show");
-  }
-}
+      try{
+        const users = tableToRows(
+          await grist.docApi.fetchTable("UTILISATEURS")
+        ).filter(row => !isCensoredRecord(row));
 
-$("analyzeBtn").addEventListener("click",analyzeFile);
-$("clearBtn").addEventListener("click",clearPreview);
-$("importBtn").addEventListener("click",importRows);
+        const email = clean(currentProfile.Email);
 
-init();
-</script>
+        currentUser = users.find(
+          row => clean(row.Email) === email
+        ) || null;
+
+        currentUserBureauId = currentUser
+          ? Number(currentUser.Bureau) || null
+          : null;
+
+      }catch(error){
+        console.warn("UTILISATEURS indisponible :",error);
+
+        currentUser = null;
+        currentUserBureauId = null;
+      }
+
+      $("profileInfo").textContent =
+        "👤 " + (
+          text(currentProfile.Role).trim()
+          || "Consultation"
+        );
+    }
+
+    /* =========================================================
+       CHARGEMENT DES DONNÉES
+       ========================================================= */
+
+    async function safeFetch(tableId){
+      try{
+        return await grist.docApi.fetchTable(tableId);
+      }catch(error){
+        console.warn(`Table ${tableId} indisponible :`,error);
+        return null;
+      }
+    }
+
+    async function loadData(){
+      const [
+        contributionTable,
+        departmentTable,
+        subdirectionTable,
+        serviceTable,
+        bureauTable
+      ] = await Promise.all([
+        grist.docApi.fetchTable("CONTRIBUTIONS"),
+        safeFetch("DEPARTEMENTS"),
+        safeFetch("SOUS_DIRECTIONS"),
+        safeFetch("SERVICES"),
+        safeFetch("BUREAUX_ORIGINE")
+      ]);
+
+      departments = tableToRows(departmentTable)
+        .filter(row => !isCensoredRecord(row));
+
+      subdirections = tableToRows(subdirectionTable)
+        .filter(row => !isCensoredRecord(row));
+
+      services = tableToRows(serviceTable)
+        .filter(row => !isCensoredRecord(row));
+
+      bureaux = tableToRows(bureauTable)
+        .filter(row => !isCensoredRecord(row));
+
+      departmentById = new Map(
+        departments.map(row => [Number(row.id),row])
+      );
+
+      subdirectionById = new Map(
+        subdirections.map(row => [Number(row.id),row])
+      );
+
+      serviceById = new Map(
+        services.map(row => [Number(row.id),row])
+      );
+
+      bureauById = new Map(
+        bureaux.map(row => [Number(row.id),row])
+      );
+
+      allRecords = tableToRows(contributionTable)
+        .filter(row => !isCensoredRecord(row))
+        .map(row=>{
+          const departmentId = Number(row.Contributeur) || null;
+          const subdirectionId = Number(row.Contributeur_sous_direction) || null;
+          const serviceId = Number(row.Contributeur_service) || null;
+          const bureauId = Number(row.Bureau_origine) || null;
+
+          const dep = departmentById.get(departmentId);
+          const subdir = subdirectionById.get(subdirectionId);
+          const service = serviceById.get(serviceId);
+          const bureau = bureauById.get(bureauId);
+
+          const contributorDisplay =
+            text(row.Contributeur_affiche).trim();
+
+          const contributorType =
+            text(row.Type_contributeur).trim();
+
+          let contributorFallback = "";
+
+          if(dep){
+            contributorFallback =
+              text(dep.Code).trim()
+              + (
+                  text(dep.Nom).trim()
+                    ? " — " + text(dep.Nom).trim()
+                    : ""
+                );
+          }
+          else if(subdir){
+            contributorFallback =
+              text(subdir.Code).trim()
+              + (
+                  text(subdir.Nom).trim()
+                    ? " — " + text(subdir.Nom).trim()
+                    : ""
+                );
+          }
+          else if(service){
+            contributorFallback =
+              text(service.Code).trim()
+              + (
+                  text(service.Nom).trim()
+                    ? " — " + text(service.Nom).trim()
+                    : ""
+                );
+          }
+          else{
+            contributorFallback =
+              text(
+                row.Contributeur
+                || row.Contributeur_sous_direction
+                || row.Contributeur_service
+              ).trim();
+          }
+
+          return {
+            ...row,
+
+            _ContributeurId:
+              departmentId
+              || subdirectionId
+              || serviceId
+              || null,
+
+            _ContributeurType:
+              contributorType,
+
+            _BureauId:
+              bureauId,
+
+            _ContributeurLabel:
+              contributorDisplay
+              || contributorFallback
+              || "—",
+
+            _BureauLabel:
+              bureau
+                ? (
+                    text(bureau.Code).trim()
+                    + (
+                        text(bureau.Nom).trim()
+                          ? " — " + text(bureau.Nom).trim()
+                          : ""
+                      )
+                  )
+                : text(row.Bureau_origine).trim()
+          };
+        });
+    }
+
+    /* =========================================================
+       PÉRIMÈTRE SELON LE RÔLE
+
+       Administrateur :
+       toutes les contributions accessibles.
+
+       Bureau contributeur :
+       uniquement les contributions pilotées par son bureau
+       (CONTRIBUTIONS.Bureau_origine = UTILISATEURS.Bureau).
+
+       Lecteur :
+       uniquement les lignes déjà autorisées par les ACL Grist.
+       ========================================================= */
+
+    function buildDashboardScope(){
+      if(isAdministrator()){
+        dashboardRecords = [...allRecords];
+        return;
+      }
+
+      if(isBureauContributor()){
+        if(!currentUserBureauId){
+          dashboardRecords = [];
+          return;
+        }
+
+        dashboardRecords = allRecords.filter(record =>
+          record._BureauId
+          && Number(record._BureauId) === Number(currentUserBureauId)
+        );
+
+        return;
+      }
+
+      dashboardRecords = [...allRecords];
+    }
+
+
+    /* =========================================================
+       V2 — NAVIGATION PAR ONGLETS
+       ========================================================= */
+
+    let activeDashboardTab = "overview";
+
+    function showDashboardTab(tabName){
+      const allowedButtons = [
+        ...document.querySelectorAll(".dashboard-tab:not(.hidden)")
+      ];
+
+      const requestedButton = allowedButtons.find(
+        button => button.dataset.tab === tabName
+      );
+
+      const finalTab = requestedButton
+        ? tabName
+        : (allowedButtons[0]?.dataset.tab || "overview");
+
+      activeDashboardTab = finalTab;
+
+      document
+        .querySelectorAll(".dashboard-tab")
+        .forEach(button=>{
+          button.classList.toggle(
+            "active",
+            button.dataset.tab === finalTab
+          );
+        });
+
+      document
+        .querySelectorAll(".tab-panel")
+        .forEach(panel=>{
+          panel.classList.toggle(
+            "active",
+            panel.dataset.panel === finalTab
+          );
+        });
+    }
+
+    function bindDashboardTabs(){
+      document
+        .querySelectorAll(".dashboard-tab")
+        .forEach(button=>{
+          button.addEventListener("click",()=>{
+            showDashboardTab(button.dataset.tab);
+          });
+        });
+    }
+
+    /* =========================================================
+       PERSONNALISATION VISUELLE SELON LE RÔLE
+       ========================================================= */
+
+    function applyRoleLayout(){
+      const note = $("scopeNote");
+
+      if(isAdministrator()){
+        $("heroDescription").textContent =
+          "Pilotez l’ensemble des contributions, leurs échéances, priorités et points d’attention.";
+
+        note.textContent =
+          "Vue Administrateur : l’ensemble des contributions accessibles dans le document est pris en compte.";
+
+        note.classList.remove("hidden");
+
+        $("bureauPanel").classList.remove("hidden");
+        $("contributorPanel").classList.remove("hidden");
+        $("reminderSection").classList.remove("hidden");
+        $("reminderTab").classList.remove("hidden");
+        $("kpiNoDeadlineCard").classList.remove("hidden");
+
+        showDashboardTab(activeDashboardTab);
+        return;
+      }
+
+      if(isBureauContributor()){
+        $("heroDescription").textContent =
+          "Suivez les contributions pilotées par votre bureau, leurs échéances et les relances à effectuer.";
+
+        note.textContent =
+          "Vue Bureau contributeur : seuls les indicateurs des contributions pilotées par votre bureau sont affichés.";
+
+        note.classList.remove("hidden");
+
+        $("bureauPanel").classList.add("hidden");
+        $("contributorPanel").classList.remove("hidden");
+        $("reminderSection").classList.remove("hidden");
+        $("reminderTab").classList.remove("hidden");
+        $("kpiNoDeadlineCard").classList.add("hidden");
+
+        showDashboardTab(activeDashboardTab);
+        return;
+      }
+
+      $("heroDescription").textContent =
+        "Consultez une synthèse des contributions accessibles dans votre périmètre de lecture.";
+
+      note.textContent =
+        "Vue Lecteur : les indicateurs portent uniquement sur les contributions que les ACL Grist vous autorisent à consulter.";
+
+      note.classList.remove("hidden");
+
+      $("bureauPanel").classList.add("hidden");
+      $("contributorPanel").classList.add("hidden");
+      $("reminderSection").classList.add("hidden");
+      $("reminderTab").classList.add("hidden");
+      $("kpiNoDeadlineCard").classList.add("hidden");
+
+      showDashboardTab(activeDashboardTab);
+    }
+
+    /* =========================================================
+       KPI
+       ========================================================= */
+
+    function renderKpis(){
+      const records = dashboardRecords;
+
+      $("kpiTotal").textContent = records.length;
+      $("kpiTodo").textContent = records.filter(isTodo).length;
+      $("kpiDone").textContent = records.filter(isDone).length;
+      $("kpiUrgent").textContent = records.filter(isUrgent).length;
+
+      $("kpiLate").textContent =
+        records.filter(record => isTodo(record) && isLate(record)).length;
+
+      $("kpiClose").textContent =
+        records.filter(record => isTodo(record) && isClose(record)).length;
+
+      $("kpiWatch").textContent =
+        records.filter(record => isTodo(record) && isWatch(record)).length;
+
+      $("kpiNoDeadline").textContent =
+        records.filter(record => isTodo(record) && !record.Echeance).length;
+
+      $("kpiReminder").textContent =
+        records.filter(record => isTodo(record) && needsReminder(record)).length;
+
+      $("kpiAlreadyReminded").textContent =
+        records.filter(hasReminderHistory).length;
+    }
+
+    /* =========================================================
+       RÉPARTITIONS
+       V3 : le contributeur peut être un Département,
+       une Sous-direction ou un Service.
+       ========================================================= */
+
+    function countBy(records,getLabel){
+      const counts = new Map();
+
+      for(const record of records){
+        const label = text(getLabel(record)).trim() || "Non renseigné";
+
+        counts.set(
+          label,
+          (counts.get(label) || 0) + 1
+        );
+      }
+
+      return [...counts.entries()]
+        .map(([label,count])=>({label,count}))
+        .sort((a,b)=>{
+          if(b.count !== a.count){
+            return b.count - a.count;
+          }
+
+          return a.label.localeCompare(
+            b.label,
+            "fr",
+            {numeric:true}
+          );
+        });
+    }
+
+    function renderBars(containerId,items,maxItems=10){
+      const container = $(containerId);
+      container.innerHTML = "";
+
+      if(!items.length){
+        container.innerHTML =
+          '<div class="empty">Aucune donnée disponible.</div>';
+
+        return;
+      }
+
+      const visibleItems = items.slice(0,maxItems);
+      const max = Math.max(...visibleItems.map(item => item.count),1);
+
+      container.innerHTML = visibleItems
+        .map(item=>{
+          const width = Math.max(
+            5,
+            Math.round((item.count / max) * 100)
+          );
+
+          return `
+            <div class="bar-row">
+              <div class="bar-label" title="${escapeHtml(item.label)}">
+                ${escapeHtml(item.label)}
+              </div>
+
+              <div class="bar-track">
+                <div
+                  class="bar-fill"
+                  style="width:${width}%"
+                ></div>
+              </div>
+
+              <div class="bar-value">
+                ${item.count}
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    function renderDistributions(){
+      renderBars(
+        "bureauBars",
+        countBy(
+          dashboardRecords,
+          record => record._BureauLabel
+        ),
+        12
+      );
+
+      renderBars(
+        "contributorBars",
+        countBy(
+          dashboardRecords,
+          record => record._ContributeurLabel
+        ),
+        12
+      );
+
+      renderBars(
+        "priorityBars",
+        countBy(
+          dashboardRecords,
+          record => record.Priorite
+        ),
+        10
+      );
+
+      renderBars(
+        "statusBars",
+        countBy(
+          dashboardRecords,
+          record => isDone(record) ? "Fait" : "À faire"
+        ),
+        10
+      );
+    }
+
+    /* =========================================================
+       À SURVEILLER
+       Ordre :
+       1. En retard
+       2. Urgente
+       3. Échéance proche
+       4. À surveiller
+       ========================================================= */
+
+    function riskInfo(record){
+      if(isLate(record)){
+        return {
+          rank:0,
+          css:"red",
+          label:text(record.Alerte).trim() || "En retard"
+        };
+      }
+
+      if(isUrgent(record)){
+        return {
+          rank:1,
+          css:"violet",
+          label:"Priorité urgente"
+        };
+      }
+
+      if(isClose(record)){
+        return {
+          rank:2,
+          css:"orange",
+          label:text(record.Alerte).trim() || "Échéance proche"
+        };
+      }
+
+      if(isWatch(record)){
+        return {
+          rank:3,
+          css:"yellow",
+          label:text(record.Alerte).trim() || "À surveiller"
+        };
+      }
+
+      return null;
+    }
+
+    function renderWatchList(){
+      const records = dashboardRecords
+        .filter(isTodo)
+        .map(record=>({
+          record,
+          risk:riskInfo(record)
+        }))
+        .filter(item => Boolean(item.risk))
+        .sort((a,b)=>{
+          if(a.risk.rank !== b.risk.rank){
+            return a.risk.rank - b.risk.rank;
+          }
+
+          const da =
+            dateValue(a.record.Echeance)?.getTime()
+            || Number.POSITIVE_INFINITY;
+
+          const db =
+            dateValue(b.record.Echeance)?.getTime()
+            || Number.POSITIVE_INFINITY;
+
+          return da - db;
+        })
+        .slice(0,10);
+
+      const container = $("watchList");
+
+      if(!records.length){
+        container.innerHTML =
+          '<div class="empty">Aucune contribution prioritaire à signaler actuellement.</div>';
+
+        return;
+      }
+
+      container.innerHTML = records
+        .map(({record,risk})=>`
+          <article class="watch-item ${risk.css}">
+
+            <div>
+              <div class="watch-number">
+                ${escapeHtml(
+                  record.Numero
+                    ? `N° ${record.Numero}`
+                    : `Contribution ${record.id}`
+                )}
+              </div>
+
+              <div class="watch-title">
+                ${escapeHtml(record.Titre || "Sans titre")}
+              </div>
+
+              <div class="watch-meta">
+                ${
+                  isAdministrator()
+                    ? `Bureau demandeur : ${escapeHtml(record._BureauLabel || "—")} · `
+                    : ""
+                }
+                Contributeur :
+                ${escapeHtml(record._ContributeurLabel || "—")}
+              </div>
+            </div>
+
+            <div class="watch-side">
+              <span class="watch-badge ${risk.css}">
+                ${escapeHtml(risk.label)}
+              </span>
+
+              <div class="watch-date">
+                Échéance : ${escapeHtml(formatDate(record.Echeance))}
+              </div>
+            </div>
+
+          </article>
+        `)
+        .join("");
+    }
+
+    /* =========================================================
+       RENDU GLOBAL
+       ========================================================= */
+
+    function renderDashboard(){
+      applyRoleLayout();
+      renderKpis();
+      renderDistributions();
+      renderWatchList();
+    }
+
+    /* =========================================================
+       INITIALISATION
+       ========================================================= */
+
+    async function init(){
+      try{
+        /*
+          Accès complet demandé pour permettre l'identification
+          via SESSION_WIDGET des profils Administrateur et
+          Bureau contributeur.
+
+          Le widget lui-même ne modifie aucune contribution.
+          Pour le Lecteur, si SESSION_WIDGET est inaccessible,
+          le widget bascule automatiquement en consultation ACL.
+        */
+        grist.ready({
+          requiredAccess:"full"
+        });
+
+        bindDashboardTabs();
+
+        await loadUserContext();
+        await loadData();
+
+        buildDashboardScope();
+        renderDashboard();
+
+        $("loadingBox").classList.add("hidden");
+        $("dashboard").classList.remove("hidden");
+
+        grist.onRecords(async ()=>{
+          await loadData();
+          buildDashboardScope();
+          renderDashboard();
+        });
+
+      }catch(error){
+        console.error(error);
+
+        $("loadingBox").classList.add("hidden");
+
+        $("errorBox").textContent =
+          "Impossible de charger le tableau de bord. Vérifiez les droits du widget et l’accès aux tables nécessaires.";
+
+        $("errorBox").style.display = "block";
+      }
+    }
+
+    init();
+  </script>
 </body>
 </html>
