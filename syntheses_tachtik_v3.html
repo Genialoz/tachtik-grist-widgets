@@ -654,12 +654,12 @@
 
         <label class="select-wrap">
 
-          Département
+          Contributeur
 
-          <select id="filterDepartment">
+          <select id="filterContributor">
 
             <option value="">
-              Tous les départements
+              Tous les contributeurs
             </option>
 
           </select>
@@ -964,15 +964,17 @@
 
 
 /* =========================================
-   SYNTHÈSES — V5
+   SYNTHÈSES — V6
 
-   Ajout :
-   - préparation de l'envoi automatique ;
-   - Synthese_active ;
-   - Frequence_synthese ;
-   - Jour_synthese ;
-   - Heure_synthese ;
-   - Destinataires_synthese enregistré avec la planification.
+   Évolutions V6 :
+   - prise en charge de Contributeur_affiche ;
+   - prise en charge des cibles Département / Sous-direction / Service ;
+   - filtre générique "Contributeur" ;
+   - conservation des affectations individuelles dans les synthèses :
+     chaque échéance, relance et priorité reste propre à l'affectation ;
+   - prise en charge de Groupe_contribution sans fusionner les échéances
+     ni les statuts de plusieurs affectations ;
+   - conservation complète de la préparation de l'envoi automatique.
 
    Règle mensuelle validée :
    "Mensuelle + Jour" = premier Jour du mois.
@@ -1009,6 +1011,12 @@ let state = {
   params:null,
 
   bureaux:[],
+
+  departements:[],
+
+  sousDirections:[],
+
+  services:[],
 
   contributions:[],
 
@@ -1511,6 +1519,68 @@ async function resolveCurrentUser(){
 
 
 /* =========================================
+   V6 — CONTRIBUTEUR / GROUPE
+   ========================================= */
+
+function contributorLabel(r){
+
+  return String(
+    r?.Contributeur_affiche
+    ??
+    r?.Contributeur_code
+    ??
+    r?.Contributeur_label
+    ??
+    r?.Contributeur
+    ??
+    ""
+  ).trim();
+
+}
+
+
+function contributorType(r){
+
+  const explicit =
+    String(
+      r?.Type_contributeur
+      ??
+      ""
+    ).trim();
+
+  if(explicit){
+    return explicit;
+  }
+
+  if(Number(r?.Contributeur)){
+    return "Département";
+  }
+
+  if(Number(r?.Contributeur_sous_direction)){
+    return "Sous-direction";
+  }
+
+  if(Number(r?.Contributeur_service)){
+    return "Service";
+  }
+
+  return "";
+
+}
+
+
+function groupContributionLabel(r){
+
+  return String(
+    r?.Groupe_contribution
+    ??
+    ""
+  ).trim();
+
+}
+
+
+/* =========================================
    AFFICHAGE D'UNE CONTRIBUTION
    ========================================= */
 
@@ -1529,13 +1599,15 @@ function contributionLine(r){
 
 
   const contributor =
-    r.Contributeur_code
-    ||
-    r.Contributeur_label
-    ||
-    r.Contributeur
-    ||
-    "";
+    contributorLabel(r);
+
+
+  const contributorLevel =
+    contributorType(r);
+
+
+  const group =
+    groupContributionLabel(r);
 
 
   const due =
@@ -1554,9 +1626,18 @@ function contributionLine(r){
   if(contributor){
 
     parts.push(
-      String(
-        contributor
-      )
+      contributorLevel
+        ? `${contributor} (${contributorLevel})`
+        : String(contributor)
+    );
+
+  }
+
+
+  if(group){
+
+    parts.push(
+      `groupe ${group}`
     );
 
   }
@@ -1757,7 +1838,7 @@ function fillFilterSelect(
 
 /* =========================================
    NOUVEAU v62
-   BUREAU D'ORIGINE
+   BUREAU DEMANDEUR
    ========================================= */
 
 function bureauLabelFromId(id){
@@ -1979,11 +2060,11 @@ function populateSynthFilters(){
   populateBureauFilter();
 
 
-  const departments =
+  const contributors =
     uniqueSortedValues(
       todo.map(
         r =>
-          r.Contributeur_code
+          contributorLabel(r)
       )
     );
 
@@ -1997,9 +2078,9 @@ function populateSynthFilters(){
     );
 
 fillFilterSelect(
-    "filterDepartment",
-    departments,
-    "Tous les départements"
+    "filterContributor",
+    contributors,
+    "Tous les contributeurs"
   );
 
 
@@ -2024,8 +2105,8 @@ function getFilteredContributions(){
       .value;
 
 
-  const department =
-    $("filterDepartment")
+  const contributor =
+    $("filterContributor")
       .value;
 
 
@@ -2077,19 +2158,19 @@ const type =
   }
 
 
-  /* Département */
+  /* Contributeur */
 
-  if(department){
+  if(contributor){
 
     rows =
       rows.filter(
         r =>
           normalizeText(
-            r.Contributeur_code
+            contributorLabel(r)
           )
           ===
           normalizeText(
-            department
+            contributor
           )
       );
 
@@ -3327,7 +3408,9 @@ async function load(){
       bureaux,
       params,
       contribs,
-      depts
+      depts,
+      subDirs,
+      services
     ] =
       await Promise.all([
 
@@ -3349,6 +3432,14 @@ async function load(){
 
         safeFetch(
           "DEPARTEMENTS"
+        ),
+
+        safeFetch(
+          "SOUS_DIRECTIONS"
+        ),
+
+        safeFetch(
+          "SERVICES"
         )
 
       ]);
@@ -3356,6 +3447,18 @@ async function load(){
 
     state.bureaux =
       bureaux;
+
+
+    state.departements =
+      depts;
+
+
+    state.sousDirections =
+      subDirs;
+
+
+    state.services =
+      services;
 
 
     const email =
@@ -3417,26 +3520,46 @@ async function load(){
 
 
     /*
-      Référentiel départements.
+      Référentiels contributeurs :
+      Département / Sous-direction / Service.
     */
 
     const deptMap =
       new Map(
-
         depts.map(
           d => [
-
             Number(d.id),
-
             d.Code
-            ||
-            d.Nom
-            ||
-            ""
-
+            || d.Nom
+            || ""
           ]
         )
+      );
 
+
+    const subDirMap =
+      new Map(
+        subDirs.map(
+          s => [
+            Number(s.id),
+            s.Code
+            || s.Nom
+            || ""
+          ]
+        )
+      );
+
+
+    const serviceMap =
+      new Map(
+        services.map(
+          s => [
+            Number(s.id),
+            s.Code
+            || s.Nom
+            || ""
+          ]
+        )
       );
 
 
@@ -3446,20 +3569,60 @@ async function load(){
 
     state.contributions =
       contribs.map(
-        r => ({
+        r => {
 
-          ...r,
-
-          Contributeur_code:
+          const departmentLabel =
             deptMap.get(
               Number(
                 r.Contributeur
               )
             )
             ||
-            ""
+            "";
 
-        })
+          const subDirectionLabel =
+            subDirMap.get(
+              Number(
+                r.Contributeur_sous_direction
+              )
+            )
+            ||
+            "";
+
+          const serviceLabel =
+            serviceMap.get(
+              Number(
+                r.Contributeur_service
+              )
+            )
+            ||
+            "";
+
+          const fallbackContributor =
+            departmentLabel
+            ||
+            subDirectionLabel
+            ||
+            serviceLabel
+            ||
+            "";
+
+          return {
+
+            ...r,
+
+            Contributeur_code:
+              String(
+                r.Contributeur_affiche
+                ||
+                fallbackContributor
+                ||
+                ""
+              ).trim()
+
+          };
+
+        }
       );
 
 
@@ -3753,7 +3916,7 @@ function resetFilters(){
       "";
 
 
-  $("filterDepartment")
+  $("filterContributor")
     .value =
       "";
 
@@ -3867,7 +4030,7 @@ $("filterBureau")
   );
 
 
-$("filterDepartment")
+$("filterContributor")
   .addEventListener(
     "change",
     refreshGeneratedMessage
