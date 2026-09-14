@@ -2255,9 +2255,17 @@
   <script>
 
     /* =========================================================
-       CONTRIBUTIONS À TRAITER — V4
+       CONTRIBUTIONS À TRAITER — V5 / CACHE v15
 
-       Évolutions V4 :
+       Évolutions V5 :
+       - verrouillage optimiste via CONTRIBUTIONS.Version_modification ;
+       - mémorisation de la version au moment d'ouvrir le formulaire de modification ;
+       - relecture de la contribution juste avant l'enregistrement ;
+       - blocage si un autre utilisateur a modifié la contribution entre-temps ;
+       - incrément de Version_modification lors des modifications effectuées ici ;
+       - protection également des changements de statut et enregistrements d'envoi/relance.
+
+       Évolutions conservées :
        - prise en charge de Contributeur_affiche ;
        - contributeur = Département, Sous-direction ou Service ;
        - regroupement visuel des affectations partageant Groupe_contribution ;
@@ -2285,6 +2293,14 @@
     let currentUserBureauId = null;
     let selectedRecordId = null;
     let toastTimer = null;
+
+    /* =========================
+       V5 — VERROUILLAGE OPTIMISTE
+       La version mémorisée ici est celle de la contribution au moment où
+       l'utilisateur ouvre le formulaire de modification.
+       ========================= */
+    let editOpenedRecordId = null;
+    let editOpenedVersion = null;
 
     let pendingMailRecordId = null;
     let pendingMailData = null;
@@ -2456,6 +2472,60 @@
         console.warn(`Table ${tableId} non accessible`, error);
         return null;
       }
+    }
+
+
+    /* =========================
+       V5 — OUTILS DE CONCURRENCE
+       Une valeur vide est traitée comme version 0 pour les anciennes lignes.
+       ========================= */
+
+    function contributionVersion(record) {
+      const raw = record ? record.Version_modification : null;
+      const value = Number(raw);
+
+      return Number.isFinite(value) && value > 0
+        ? Math.trunc(value)
+        : 0;
+    }
+
+    async function fetchFreshContribution(recordId) {
+      const table = await grist.docApi.fetchTable("CONTRIBUTIONS");
+      const rows = tableToRows(table);
+
+      return rows.find(
+        row => Number(row.id) === Number(recordId)
+      ) || null;
+    }
+
+    async function ensureContributionUnchanged(recordId, expectedVersion) {
+      const fresh = await fetchFreshContribution(recordId);
+
+      if (!fresh) {
+        throw new Error(
+          "Cette contribution n'existe plus dans Grist. Rechargez la liste avant de poursuivre."
+        );
+      }
+
+      const currentVersion = contributionVersion(fresh);
+      const expected = Number(expectedVersion) || 0;
+
+      if (currentVersion !== expected) {
+        const error = new Error(
+          "Cette contribution a été modifiée par un autre utilisateur depuis son ouverture. "
+          + "Vos modifications n'ont pas été enregistrées. Rechargez la contribution avant de poursuivre."
+        );
+
+        error.code = "VERSION_CONFLICT";
+        error.freshRecord = fresh;
+        throw error;
+      }
+
+      return fresh;
+    }
+
+    function nextContributionVersion(record) {
+      return contributionVersion(record) + 1;
     }
 
     /* =========================
@@ -3501,6 +3571,13 @@
       try {
         button.disabled = true;
 
+        const expectedVersion = contributionVersion(record);
+        const fresh = await ensureContributionUnchanged(
+          Number(record.id),
+          expectedVersion
+        );
+        const nextVersion = nextContributionVersion(fresh);
+
         const actions = [
           [
             "AddRecord",
@@ -3525,7 +3602,8 @@
             Number(record.id),
             {
               Mail_initial_envoye: true,
-              Date_mail_initial: Date.now() / 1000
+              Date_mail_initial: Date.now() / 1000,
+              Version_modification: nextVersion
             }
           ]);
         }
@@ -3535,7 +3613,8 @@
             "CONTRIBUTIONS",
             Number(record.id),
             {
-              Dernier_rappel: todayGristDate()
+              Dernier_rappel: todayGristDate(),
+              Version_modification: nextVersion
             }
           ]);
         }
@@ -3557,11 +3636,18 @@
       }
       catch (error) {
         console.error(error);
-        showToast(
-          type === "initial"
-            ? "Impossible d'enregistrer l'envoi. Vérifiez les droits sur RELANCES, Mail_initial_envoye et Date_mail_initial."
-            : "Impossible d'enregistrer la relance. Vérifiez les droits sur RELANCES et Dernier_rappel."
-        );
+
+        if (error && error.code === "VERSION_CONFLICT") {
+          showToast(error.message);
+          await loadContributions();
+        }
+        else {
+          showToast(
+            type === "initial"
+              ? "Impossible d'enregistrer l'envoi. Vérifiez les droits sur RELANCES, Mail_initial_envoye et Date_mail_initial."
+              : "Impossible d'enregistrer la relance. Vérifiez les droits sur RELANCES et Dernier_rappel."
+          );
+        }
       }
       finally {
         button.disabled = false;
@@ -4005,17 +4091,26 @@
         return;
       }
 
+      const expectedVersion = contributionVersion(record);
       const newStatus = isTodo(record) ? "Fait" : "À faire";
 
       try {
         $("status-action-btn").disabled = true;
+
+        const fresh = await ensureContributionUnchanged(
+          Number(record.id),
+          expectedVersion
+        );
 
         await grist.docApi.applyUserActions([
           [
             "UpdateRecord",
             "CONTRIBUTIONS",
             Number(record.id),
-            { Statut: newStatus }
+            {
+              Statut: newStatus,
+              Version_modification: nextContributionVersion(fresh)
+            }
           ]
         ]);
 
@@ -4030,7 +4125,14 @@
       }
       catch (error) {
         console.error(error);
-        showToast("Impossible de modifier le statut.");
+
+        if (error && error.code === "VERSION_CONFLICT") {
+          showToast(error.message);
+          await loadContributions();
+        }
+        else {
+          showToast(error.message || "Impossible de modifier le statut.");
+        }
       }
       finally {
         $("status-action-btn").disabled = false;
@@ -4047,6 +4149,14 @@
       if (!record || !canEditRecord(record)) {
         return;
       }
+
+      /*
+        V5 — capture de la version affichée au moment où le formulaire s'ouvre.
+        Même si grist.onRecords recharge ensuite allRecords, cette valeur reste
+        inchangée jusqu'à l'enregistrement ou l'annulation.
+      */
+      editOpenedRecordId = Number(record.id);
+      editOpenedVersion = contributionVersion(record);
 
       const type = contributorType(record) || "Département";
       $("edit-type-contributeur").value = type;
@@ -4072,9 +4182,14 @@
       $("edit-btn").style.display = "none";
     }
 
-    function exitEditMode() {
+    function exitEditMode(clearLock = true) {
       $("detail-content").style.display = "block";
       $("edit-form").style.display = "none";
+
+      if (clearLock) {
+        editOpenedRecordId = null;
+        editOpenedVersion = null;
+      }
 
       const selected = getSelectedRecord();
       if (selected && canEditRecord(selected)) {
@@ -4104,6 +4219,17 @@
         return;
       }
 
+      if (
+        Number(editOpenedRecordId) !== Number(record.id)
+        || editOpenedVersion === null
+      ) {
+        showToast(
+          "La version de cette contribution n'a pas pu être vérifiée. "
+          + "Fermez puis rouvrez le formulaire de modification."
+        );
+        return;
+      }
+
       const values = {
         Titre: title,
         Description: $("edit-description").value.trim(),
@@ -4130,6 +4256,18 @@
       try {
         $("save-edit-btn").disabled = true;
 
+        /*
+          V5 — relecture juste avant l'écriture.
+          On compare avec la version mémorisée à l'ouverture du formulaire,
+          et non avec allRecords qui peut avoir été rafraîchi entre-temps.
+        */
+        const fresh = await ensureContributionUnchanged(
+          Number(record.id),
+          editOpenedVersion
+        );
+
+        values.Version_modification = nextContributionVersion(fresh);
+
         await grist.docApi.applyUserActions([
           [
             "UpdateRecord",
@@ -4140,14 +4278,32 @@
         ]);
 
         showToast("✓ Contribution mise à jour");
-        exitEditMode();
+
+        editOpenedRecordId = null;
+        editOpenedVersion = null;
+        exitEditMode(false);
 
         await new Promise(resolve => setTimeout(resolve, 500));
         await loadContributions();
       }
       catch (error) {
         console.error(error);
-        showToast("Impossible d'enregistrer les modifications.");
+
+        if (error && error.code === "VERSION_CONFLICT") {
+          showToast(error.message);
+
+          /*
+            On conserve les saisies dans le formulaire pour que l'utilisateur
+            puisse les consulter/copier, mais on recharge les données Grist en
+            arrière-plan. L'enregistrement reste impossible tant que le formulaire
+            n'est pas fermé puis rouvert.
+          */
+          editOpenedVersion = null;
+          await loadContributions();
+        }
+        else {
+          showToast(error.message || "Impossible d'enregistrer les modifications.");
+        }
       }
       finally {
         $("save-edit-btn").disabled = false;
