@@ -321,6 +321,31 @@
 <div class="app">
 
   <!-- =========================================================
+       NAVIGATION — RETOUR À L'ACCUEIL SELON LE RÔLE
+       ========================================================= -->
+  <nav style="margin:0 0 14px 0;">
+    <a
+      id="homeLink"
+      href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH"
+      target="_top"
+      style="
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        padding:9px 13px;
+        border:1px solid #d7e2ea;
+        border-radius:10px;
+        background:#ffffff;
+        color:#244a68;
+        text-decoration:none;
+        font-size:13px;
+        font-weight:800;
+        box-shadow:0 3px 10px rgba(25,55,80,.06);
+      "
+    >← Retour à l'accueil</a>
+  </nav>
+
+  <!-- =========================================================
        ENTÊTE
        ========================================================= -->
   <section class="hero">
@@ -362,6 +387,16 @@
 
         <select id="originFilter">
           <option value="">Tous les bureaux demandeurs</option>
+        </select>
+
+        <select id="sortFilter">
+          <option value="finished-desc">Plus récemment terminées</option>
+          <option value="finished-asc">Plus anciennement terminées</option>
+          <option value="due-asc">Échéance la plus proche</option>
+          <option value="due-desc">Échéance la plus éloignée</option>
+          <option value="priority">Priorité</option>
+          <option value="contributor">Contributeur A → Z</option>
+          <option value="bureau">Bureau demandeur A → Z</option>
         </select>
 
       </div>
@@ -469,7 +504,7 @@
 
 
 <!-- =============================================================
-     CONTRIBUTIONS TERMINÉES — V7
+     CONTRIBUTIONS TERMINÉES — V8
 
      V7 :
      - prise en charge des contributeurs Département / Sous-direction / Service ;
@@ -667,6 +702,27 @@ function isBureauContributor(){
   return currentRole === "bureau contributeur";
 }
 
+function updateHomeLink(){
+  const link = document.getElementById("homeLink");
+  if(!link){ return; }
+
+  if(currentRole === "administrateur"){
+    link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/32";
+    return;
+  }
+
+  if(currentRole === "bureau contributeur"){
+    link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/33?style=singlePage";
+    return;
+  }
+
+  if(currentRole === "lecteur"){
+    link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/34?style=singlePage";
+    return;
+  }
+
+  link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH";
+}
 /* =============================================================
    IDENTIFICATION UTILISATEUR
    ============================================================= */
@@ -730,11 +786,13 @@ async function loadUserContext(){
     currentRole = "lecteur";
     currentUser = null;
     currentUserBureauId = null;
+    updateHomeLink();
     $("profileInfo").textContent = "👤 Consultation";
     return;
   }
 
   currentRole = clean(currentProfile.Role);
+  updateHomeLink();
 
   try{
     const users = tableToRows(
@@ -1026,17 +1084,67 @@ function filteredRecords(){
       return true;
     })
     .sort((a,b)=>{
-      const da =
+      const mode = $("sortFilter") ? $("sortFilter").value : "finished-desc";
+
+      const finishedA =
         dateValue(a.Date_finalisation)?.getTime()
         || dateValue(a.Echeance)?.getTime()
         || 0;
 
-      const db =
+      const finishedB =
         dateValue(b.Date_finalisation)?.getTime()
         || dateValue(b.Echeance)?.getTime()
         || 0;
 
-      return db - da;
+      const dueA = dateValue(a.Echeance)?.getTime();
+      const dueB = dateValue(b.Echeance)?.getTime();
+
+      if(mode === "finished-asc"){
+        return finishedA - finishedB;
+      }
+
+      if(mode === "due-asc"){
+        return (dueA ?? Number.POSITIVE_INFINITY) - (dueB ?? Number.POSITIVE_INFINITY);
+      }
+
+      if(mode === "due-desc"){
+        return (dueB ?? Number.NEGATIVE_INFINITY) - (dueA ?? Number.NEGATIVE_INFINITY);
+      }
+
+      if(mode === "priority"){
+        const rank = value => {
+          const p = clean(value);
+          if(p === "urgente") return 0;
+          if(p === "haute") return 1;
+          if(p === "normale") return 2;
+          return 3;
+        };
+        const diff = rank(a.Priorite) - rank(b.Priorite);
+        if(diff !== 0) return diff;
+        return finishedB - finishedA;
+      }
+
+      if(mode === "contributor"){
+        const diff = text(a._ContributeurLabel).localeCompare(
+          text(b._ContributeurLabel),
+          "fr",
+          {sensitivity:"base",numeric:true}
+        );
+        if(diff !== 0) return diff;
+        return finishedB - finishedA;
+      }
+
+      if(mode === "bureau"){
+        const diff = text(a._BureauLabel).localeCompare(
+          text(b._BureauLabel),
+          "fr",
+          {sensitivity:"base",numeric:true}
+        );
+        if(diff !== 0) return diff;
+        return finishedB - finishedA;
+      }
+
+      return finishedB - finishedA;
     });
 }
 
@@ -1351,6 +1459,7 @@ $("search").addEventListener("input",renderList);
 $("priorityFilter").addEventListener("change",renderList);
 $("contributorFilter").addEventListener("change",renderList);
 $("originFilter").addEventListener("change",renderList);
+$("sortFilter").addEventListener("change",renderList);
 
 $("backBtn").addEventListener("click",closeDetail);
 $("restoreBtn").addEventListener("click",restoreContribution);
