@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Tâchtik — Import de contributions</title>
+  <title>Import de contributions</title>
 
   <!-- SDK Grist -->
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
@@ -176,7 +176,7 @@
 
     .stats{
       display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
+      grid-template-columns:repeat(5,minmax(0,1fr));
       gap:12px;
       margin-top:18px;
     }
@@ -313,7 +313,7 @@
     <h1>📥 Importer des contributions</h1>
     <p>
       Importez plusieurs contributions depuis un fichier Excel.
-      Tâchtik contrôle toutes les lignes avant de lancer l'import.
+      Toutes les lignes sont contrôlées avant de lancer l'import.
     </p>
     <div id="profileInfo" class="profile">Identification du profil…</div>
   </section>
@@ -337,16 +337,24 @@
       <h2>1. Sélectionner le fichier Excel</h2>
       <p>
         Le fichier doit contenir une feuille nommée <strong>Import</strong>
-        et les 8 colonnes prévues par le modèle Tâchtik.
+        et les colonnes prévues par le modèle d'import.
       </p>
 
       <div class="technical-note">
         Colonnes attendues :
-        <strong>Titre, Description, Demandeur, Contributeur, Echeance,
-        Priorite, Statut, Commentaire</strong>.
+        <strong>Titre, Description, Demandeur, Niveau_contributeur, Contributeur,
+        Echeance, Priorite, Statut, Commentaire, Groupe</strong>.
         <br>
-        Pour <strong>Contributeur</strong>, utilisez le code du département
-        (ex. <strong>B1-1</strong>).
+        <strong>Niveau_contributeur</strong> doit contenir :
+        <strong>Département</strong>, <strong>Sous-direction</strong> ou <strong>Service</strong>.
+        Pour <strong>Contributeur</strong>, utilisez le code correspondant au niveau choisi.
+        <br>
+        <strong>Groupe</strong> est facultatif : répétez la même valeur sur plusieurs lignes
+        pour créer plusieurs affectations rattachées à une même demande.
+        <br>
+        Les contributions existantes sont automatiquement détectées et mises à jour
+        lorsqu'une correspondance unique est trouvée pour le même bureau demandeur,
+        le même titre et le même contributeur.
       </div>
 
       <div class="upload-row">
@@ -392,7 +400,17 @@
         </div>
 
         <div class="stat">
-          <div class="label">Bureau d'origine</div>
+          <div class="label">Créations</div>
+          <div id="statCreate" class="value">0</div>
+        </div>
+
+        <div class="stat">
+          <div class="label">Mises à jour</div>
+          <div id="statUpdate" class="value">0</div>
+        </div>
+
+        <div class="stat">
+          <div class="label">Bureau demandeur</div>
           <div id="statBureau" class="value" style="font-size:18px">—</div>
         </div>
       </div>
@@ -406,7 +424,9 @@
               <th>#</th>
               <th>État</th>
               <th>Titre</th>
+              <th>Action</th>
               <th>Demandeur</th>
+              <th>Niveau</th>
               <th>Contributeur</th>
               <th>Échéance</th>
               <th>Priorité</th>
@@ -425,7 +445,7 @@
         </button>
 
         <button id="importBtn" type="button" class="btn-primary" disabled>
-          📥 Importer les contributions
+          📥 Importer / mettre à jour
         </button>
       </div>
 
@@ -438,23 +458,47 @@
 </div>
 
 <!-- =========================================================
-     IMPORT CONTRIBUTIONS — BUREAU CONTRIBUTEUR — V3
-     Ajout : CONTRIBUTIONS.Source = "Import" pour toutes les lignes importées.
-     Aucun envoi automatique n'est déclenché dans cette version.
+     IMPORT CONTRIBUTIONS — BUREAU CONTRIBUTEUR — V4
+
+     V4 :
+     - cibles Département / Sous-direction / Service ;
+     - Contributeur_affiche / Type_contributeur ;
+     - regroupement facultatif via la colonne Excel "Groupe" ;
+     - détection automatique Création / Mise à jour ;
+     - mise à jour des contributions existantes sans ID technique requis ;
+     - conservation stricte de Bureau_origine pour le bureau courant.
      ========================================================= -->
 
 <script>
 /* =============================================================
-   TÂCHTIK — IMPORT CONTRIBUTIONS / BUREAU CONTRIBUTEUR
-   Version 1
+   IMPORT CONTRIBUTIONS / BUREAU CONTRIBUTEUR
+   Version 4
 
    Objectif :
    - lire un fichier Excel ;
    - valider toutes les lignes avant import ;
-   - résoudre Contributeur via DEPARTEMENTS.Code ;
-   - ajouter automatiquement Bureau_origine et Cree_par ;
-   - importer toutes les lignes en une seule opération Grist ;
+   - gérer les contributeurs de niveau Département / Sous-direction / Service ;
+   - détecter automatiquement si une ligne doit créer une contribution
+     ou mettre à jour une contribution existante ;
+   - ne jamais utiliser une ligne appartenant à un autre Bureau demandeur ;
+   - permettre de regrouper plusieurs nouvelles affectations d'une même demande
+     grâce à la colonne Excel facultative "Groupe" ;
+   - importer toutes les actions en une seule opération Grist ;
    - empêcher tout import partiel en cas d'erreur de validation.
+
+   Règle de rapprochement sans ID technique :
+   1. Bureau_origine = bureau courant ;
+   2. même Titre normalisé ;
+   3. même Type_contributeur ;
+   4. même cible (Département / Sous-direction / Service) ;
+   5. si plusieurs lignes correspondent, Demandeur est utilisé comme départage.
+   Si plusieurs contributions restent possibles, la ligne est bloquée pour éviter
+   toute mise à jour de la mauvaise contribution.
+
+   Limite volontaire :
+   modifier le Titre ou le Contributeur d'une contribution existante depuis Excel
+   ne peut pas être identifié de façon sûre sans identifiant stable ; la ligne sera
+   donc considérée comme une nouvelle contribution.
    ============================================================= */
 
 const $ = id => document.getElementById(id);
@@ -463,11 +507,13 @@ const EXPECTED_COLUMNS = [
   "Titre",
   "Description",
   "Demandeur",
+  "Niveau_contributeur",
   "Contributeur",
   "Echeance",
   "Priorite",
   "Statut",
-  "Commentaire"
+  "Commentaire",
+  "Groupe"
 ];
 
 const ALLOWED_PRIORITIES = new Set([
@@ -486,7 +532,14 @@ let currentUser = null;
 let currentUserBureauId = null;
 let currentUserBureauLabel = "";
 let departments = [];
+let subDirections = [];
+let services = [];
+
 let departmentByCode = new Map();
+let subDirectionByCode = new Map();
+let serviceByCode = new Map();
+
+let existingContributions = [];
 let analyzedRows = [];
 
 /* =============================================================
@@ -503,6 +556,120 @@ function clean(value){
 
 function normalizeCode(value){
   return text(value).trim().toUpperCase();
+}
+
+function normalizeKey(value){
+  return text(value)
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .replace(/\s+/g," ");
+}
+
+function normalizeContributorLevel(value){
+  const normalized = normalizeKey(value);
+
+  if(normalized === "departement"){
+    return "Département";
+  }
+
+  if(
+    normalized === "sous-direction"
+    || normalized === "sous direction"
+    || normalized === "sousdirection"
+  ){
+    return "Sous-direction";
+  }
+
+  if(normalized === "service"){
+    return "Service";
+  }
+
+  return "";
+}
+
+function generateGroupId(){
+  const now = new Date();
+
+  const stamp =
+    [
+      now.getFullYear(),
+      String(now.getMonth()+1).padStart(2,"0"),
+      String(now.getDate()).padStart(2,"0")
+    ].join("")
+    + "-"
+    + [
+      String(now.getHours()).padStart(2,"0"),
+      String(now.getMinutes()).padStart(2,"0"),
+      String(now.getSeconds()).padStart(2,"0")
+    ].join("");
+
+  const random = Math.random().toString(36).slice(2,8).toUpperCase();
+
+  return `GRP-${stamp}-${random}`;
+}
+
+function contributorTargetId(record){
+  const level = normalizeContributorLevel(
+    record.Type_contributeur
+    || (
+      record.Contributeur
+        ? "Département"
+        : record.Contributeur_sous_direction
+          ? "Sous-direction"
+          : record.Contributeur_service
+            ? "Service"
+            : ""
+    )
+  );
+
+  if(level === "Département"){
+    return Number(record.Contributeur) || null;
+  }
+
+  if(level === "Sous-direction"){
+    return Number(record.Contributeur_sous_direction) || null;
+  }
+
+  if(level === "Service"){
+    return Number(record.Contributeur_service) || null;
+  }
+
+  return null;
+}
+
+function sameContributorTarget(record,level,targetId){
+  return (
+    normalizeContributorLevel(record.Type_contributeur) === level
+    && Number(contributorTargetId(record)) === Number(targetId)
+  );
+}
+
+function findExistingContribution({title,level,targetId,demandeur}){
+  const candidates = existingContributions.filter(record =>
+    Number(record.Bureau_origine) === Number(currentUserBureauId)
+    && normalizeKey(record.Titre) === normalizeKey(title)
+    && sameContributorTarget(record,level,targetId)
+  );
+
+  if(candidates.length === 0){
+    return {record:null, ambiguous:false};
+  }
+
+  if(candidates.length === 1){
+    return {record:candidates[0], ambiguous:false};
+  }
+
+  const byDemandeur = candidates.filter(record =>
+    normalizeKey(record.Demandeur) === normalizeKey(demandeur)
+  );
+
+  if(byDemandeur.length === 1){
+    return {record:byDemandeur[0], ambiguous:false};
+  }
+
+  return {record:null, ambiguous:true};
 }
 
 function escapeHtml(value){
@@ -593,7 +760,7 @@ async function identifyProfile(){
   const profile = created[0] || null;
 
   if(!profile){
-    throw new Error("Profil Tâchtik non identifié.");
+    throw new Error("Profil utilisateur non identifié.");
   }
 
   try{
@@ -615,16 +782,25 @@ async function loadContext(){
   const [
     usersTable,
     departmentsTable,
-    bureauxTable
+    subDirectionsTable,
+    servicesTable,
+    bureauxTable,
+    contributionsTable
   ] = await Promise.all([
     grist.docApi.fetchTable("UTILISATEURS"),
     grist.docApi.fetchTable("DEPARTEMENTS"),
-    grist.docApi.fetchTable("BUREAUX_ORIGINE")
+    grist.docApi.fetchTable("SOUS_DIRECTIONS"),
+    grist.docApi.fetchTable("SERVICES"),
+    grist.docApi.fetchTable("BUREAUX_ORIGINE"),
+    grist.docApi.fetchTable("CONTRIBUTIONS")
   ]);
 
   const users = tableToRows(usersTable);
   departments = tableToRows(departmentsTable);
+  subDirections = tableToRows(subDirectionsTable);
+  services = tableToRows(servicesTable);
   const bureaux = tableToRows(bureauxTable);
+  existingContributions = tableToRows(contributionsTable);
 
   currentProfile = await identifyProfile();
 
@@ -665,7 +841,7 @@ async function loadContext(){
   }
 
   if(!isActiveUser()){
-    throw new Error("Votre compte Tâchtik est inactif.");
+    throw new Error("Votre compte est inactif.");
   }
 
   if(!currentUserBureauId){
@@ -675,6 +851,8 @@ async function loadContext(){
   }
 
   departmentByCode = new Map();
+  subDirectionByCode = new Map();
+  serviceByCode = new Map();
 
   for(const row of departments){
     const code = normalizeCode(row.Code);
@@ -683,6 +861,26 @@ async function loadContext(){
       departmentByCode.set(code,row);
     }
   }
+
+  for(const row of subDirections){
+    const code = normalizeCode(row.Code);
+
+    if(code){
+      subDirectionByCode.set(code,row);
+    }
+  }
+
+  for(const row of services){
+    const code = normalizeCode(row.Code);
+
+    if(code){
+      serviceByCode.set(code,row);
+    }
+  }
+
+  existingContributions = existingContributions.filter(
+    row => Number(row.Bureau_origine) === Number(currentUserBureauId)
+  );
 
   return true;
 }
@@ -849,31 +1047,55 @@ function rowIsCompletelyEmpty(row){
   );
 }
 
-function validateRow(source,index){
+function validateRow(source,index,groupIds){
   const errors = [];
 
   const title = text(source.Titre).trim();
   const description = text(source.Description).trim();
   const demandeur = text(source.Demandeur).trim();
+  const level = normalizeContributorLevel(source.Niveau_contributeur);
   const contributorCode = normalizeCode(source.Contributeur);
   const priority = text(source.Priorite).trim() || "Normale";
   const status = text(source.Statut).trim() || "À faire";
   const comment = text(source.Commentaire).trim();
+  const excelGroup = text(source.Groupe).trim();
 
   if(!title){
     errors.push("Titre obligatoire.");
+  }
+
+  if(!level){
+    errors.push(
+      'Niveau_contributeur invalide. Utilisez "Département", "Sous-direction" ou "Service".'
+    );
   }
 
   let contributor = null;
 
   if(!contributorCode){
     errors.push("Contributeur obligatoire.");
-  }else{
+  }else if(level === "Département"){
     contributor = departmentByCode.get(contributorCode) || null;
 
     if(!contributor){
       errors.push(
         `Contributeur "${contributorCode}" introuvable dans DEPARTEMENTS.`
+      );
+    }
+  }else if(level === "Sous-direction"){
+    contributor = subDirectionByCode.get(contributorCode) || null;
+
+    if(!contributor){
+      errors.push(
+        `Contributeur "${contributorCode}" introuvable dans SOUS_DIRECTIONS.`
+      );
+    }
+  }else if(level === "Service"){
+    contributor = serviceByCode.get(contributorCode) || null;
+
+    if(!contributor){
+      errors.push(
+        `Contributeur "${contributorCode}" introuvable dans SERVICES.`
       );
     }
   }
@@ -898,38 +1120,87 @@ function validateRow(source,index){
     errors.push(error.message);
   }
 
+  const targetId = contributor ? Number(contributor.id) : null;
+
+  const match = (
+    title && level && targetId
+      ? findExistingContribution({
+          title,
+          level,
+          targetId,
+          demandeur
+        })
+      : {record:null, ambiguous:false}
+  );
+
+  if(match.ambiguous){
+    errors.push(
+      "Mise à jour ambiguë : plusieurs contributions existantes correspondent au même bureau demandeur, titre et contributeur. Aucune mise à jour automatique n'est effectuée."
+    );
+  }
+
+  const isUpdate = Boolean(match.record);
+  const existing = match.record || null;
+
   const values = {
     Titre:title,
     Description:description,
     Demandeur:demandeur,
-    Contributeur:contributor ? Number(contributor.id) : null,
+    Type_contributeur:level || null,
+    Contributeur:null,
+    Contributeur_sous_direction:null,
+    Contributeur_service:null,
     Echeance:dueDate,
     Priorite:priority,
     Statut:status,
-    Commentaire:comment,
-
-    /*
-      Champs de sécurité / propriété renseignés automatiquement.
-    */
-    Bureau_origine:Number(currentUserBureauId),
-    Cree_par:text(currentUser.Email).trim(),
-
-    /*
-      V3 — TRAÇABILITÉ DES IMPORTS
-      Permet de distinguer une contribution importée d'une contribution
-      créée manuellement. Ce champ sera utilisé plus tard pour appliquer
-      le paramètre PARAMETRES_BUREAUX.Envoi_import_actif.
-    */
-    Source:"Import"
+    Commentaire:comment
   };
+
+  if(level === "Département" && contributor){
+    values.Contributeur = Number(contributor.id);
+  }
+
+  if(level === "Sous-direction" && contributor){
+    values.Contributeur_sous_direction = Number(contributor.id);
+  }
+
+  if(level === "Service" && contributor){
+    values.Contributeur_service = Number(contributor.id);
+  }
+
+  if(!isUpdate){
+    values.Bureau_origine = Number(currentUserBureauId);
+    values.Cree_par = text(currentUser.Email).trim();
+    values.Source = "Import";
+
+    let groupId = "";
+
+    if(excelGroup){
+      const normalizedGroup = normalizeKey(excelGroup);
+
+      if(!groupIds.has(normalizedGroup)){
+        groupIds.set(normalizedGroup,generateGroupId());
+      }
+
+      groupId = groupIds.get(normalizedGroup);
+    }else{
+      groupId = generateGroupId();
+    }
+
+    values.Groupe_contribution = groupId;
+  }
 
   return {
     excelRow:index + 2,
     source,
     contributorCode,
+    contributorLevel:level,
     dueDate,
+    excelGroup,
     errors,
     valid:errors.length === 0,
+    action:isUpdate ? "update" : "create",
+    existingRecordId:isUpdate ? Number(existing.id) : null,
     values
   };
 }
@@ -945,10 +1216,14 @@ function renderPreview(){
   const total = analyzedRows.length;
   const valid = analyzedRows.filter(row => row.valid).length;
   const invalid = total - valid;
+  const createCount = analyzedRows.filter(row => row.valid && row.action === "create").length;
+  const updateCount = analyzedRows.filter(row => row.valid && row.action === "update").length;
 
   $("statTotal").textContent = total;
   $("statValid").textContent = valid;
   $("statInvalid").textContent = invalid;
+  $("statCreate").textContent = createCount;
+  $("statUpdate").textContent = updateCount;
   $("statBureau").textContent = currentUserBureauLabel || "—";
 
   for(const row of analyzedRows){
@@ -963,7 +1238,13 @@ function renderPreview(){
         </span>
       </td>
       <td>${escapeHtml(row.values.Titre)}</td>
+      <td>
+        <span class="status-badge ${row.action === "update" ? "ok" : ""}">
+          ${row.action === "update" ? "↻ Mise à jour" : "＋ Création"}
+        </span>
+      </td>
       <td>${escapeHtml(row.values.Demandeur)}</td>
+      <td>${escapeHtml(row.contributorLevel)}</td>
       <td>${escapeHtml(row.contributorCode)}</td>
       <td>${escapeHtml(formatPreviewDate(row.dueDate))}</td>
       <td>${escapeHtml(row.values.Priorite)}</td>
@@ -1003,7 +1284,7 @@ function renderPreview(){
   }else{
     showNotice(
       "validationMessage",
-      `Toutes les lignes sont valides. ${valid} contribution(s) peuvent être importées.`
+      `Toutes les lignes sont valides. ${createCount} création(s) et ${updateCount} mise(s) à jour sont prêtes.`
     );
     $("importBtn").disabled = false;
   }
@@ -1056,8 +1337,10 @@ async function analyzeFile(){
       row => !rowIsCompletelyEmpty(row)
     );
 
+    const groupIds = new Map();
+
     analyzedRows = nonEmpty.map(
-      (row,index) => validateRow(row,index)
+      (row,index) => validateRow(row,index,groupIds)
     );
 
     renderPreview();
@@ -1111,20 +1394,32 @@ async function importRows(){
       Une seule opération Grist :
       si le serveur refuse une action, on évite de laisser un import partiel.
     */
-    const actions = analyzedRows.map(row => [
-      "AddRecord",
-      "CONTRIBUTIONS",
-      null,
-      row.values
-    ]);
+    const actions = analyzedRows.map(row => {
+      if(row.action === "update"){
+        return [
+          "UpdateRecord",
+          "CONTRIBUTIONS",
+          Number(row.existingRecordId),
+          row.values
+        ];
+      }
+
+      return [
+        "AddRecord",
+        "CONTRIBUTIONS",
+        null,
+        row.values
+      ];
+    });
 
     await grist.docApi.applyUserActions(actions);
 
-    const count = analyzedRows.length;
+    const createCount = analyzedRows.filter(row => row.action === "create").length;
+    const updateCount = analyzedRows.filter(row => row.action === "update").length;
 
     showNotice(
       "importSuccess",
-      `✓ ${count} contribution(s) importée(s) avec succès.`
+      `✓ Import terminé : ${createCount} création(s) et ${updateCount} mise(s) à jour.`
     );
 
     /*
@@ -1144,7 +1439,7 @@ async function importRows(){
 
     button.disabled = false;
   }finally{
-    button.textContent = "📥 Importer les contributions";
+    button.textContent = "📥 Importer / mettre à jour";
   }
 }
 
