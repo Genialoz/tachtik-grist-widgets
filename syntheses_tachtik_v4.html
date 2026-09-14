@@ -964,9 +964,16 @@
 
 
 /* =========================================
-   SYNTHÈSES — V6
+   SYNTHÈSES — V7
 
-   Évolutions V6 :
+   Évolutions V7 :
+   - affichage simplifié des contributions dans les synthèses ;
+   - présentation sous forme de tableau texte avec les colonnes :
+     Titre | Contributeur | Échéance | Jours restants ;
+   - conservation des filtres, des KPI, des modèles de message
+     et de la planification existante.
+
+   Évolutions V6 conservées :
    - prise en charge de Contributeur_affiche ;
    - prise en charge des cibles Département / Sous-direction / Service ;
    - filtre générique "Contributeur" ;
@@ -1581,84 +1588,56 @@ function groupContributionLabel(r){
 
 
 /* =========================================
-   AFFICHAGE D'UNE CONTRIBUTION
+   V7 — AFFICHAGE D'UNE CONTRIBUTION
+   Une ligne = Titre | Contributeur | Échéance | Jours restants
    ========================================= */
 
 function contributionLine(r){
 
-  const num =
-    r.Numero
-    ||
-    "";
-
-
   const title =
-    r.Titre
-    ||
-    "(Sans titre)";
+    String(
+      r?.Titre
+      ??
+      "(Sans titre)"
+    )
+    .trim();
 
 
   const contributor =
-    contributorLabel(r);
-
-
-  const contributorLevel =
-    contributorType(r);
-
-
-  const group =
-    groupContributionLabel(r);
+    contributorLabel(r)
+    ||
+    "—";
 
 
   const due =
     formatDate(
-      r.Echeance
+      r?.Echeance
+    )
+    ||
+    "—";
+
+
+  const rawDays =
+    Number(
+      r?.Jours_restants
     );
 
 
-  const parts =
-    [
-      num,
-      title
-    ];
+  const days =
+    Number.isFinite(rawDays)
+      ? String(rawDays)
+      : "—";
 
 
-  if(contributor){
-
-    parts.push(
-      contributorLevel
-        ? `${contributor} (${contributorLevel})`
-        : String(contributor)
-    );
-
-  }
-
-
-  if(group){
-
-    parts.push(
-      `groupe ${group}`
-    );
-
-  }
-
-
-  if(due){
-
-    parts.push(
-      "échéance "
-      +
-      due
-    );
-
-  }
-
-
-  return parts
-    .filter(Boolean)
-    .join(
-      " – "
-    );
+  return [
+    title,
+    contributor,
+    due,
+    days
+  ]
+  .join(
+    " | "
+  );
 
 }
 
@@ -2586,25 +2565,42 @@ function buildDefaultBody(data){
 
 
 /* =========================================
-   BLOCS DE DÉTAIL
+   V7 — BLOCS DE DÉTAIL
+   Tableau texte compact pour rester lisible dans un mail.
    ========================================= */
 
 function detailBlock(list){
 
-  return list.length
+  if(
+    !list.length
+  ){
+    return "Aucune";
+  }
 
-    ? list
-        .map(
-          r =>
-            "• "
-            +
-            contributionLine(r)
-        )
-        .join(
-          "\n"
-        )
 
-    : "Aucune";
+  const header =
+    "Titre | Contributeur | Échéance | Jours restants";
+
+
+  const separator =
+    "------------------------------------------------------------";
+
+
+  const rows =
+    list.map(
+      r =>
+        contributionLine(r)
+    );
+
+
+  return [
+    header,
+    separator,
+    ...rows
+  ]
+  .join(
+    "\n"
+  );
 
 }
 
