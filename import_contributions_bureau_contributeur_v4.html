@@ -176,7 +176,7 @@
 
     .stats{
       display:grid;
-      grid-template-columns:repeat(5,minmax(0,1fr));
+      grid-template-columns:repeat(auto-fit,minmax(135px,1fr));
       gap:12px;
       margin-top:18px;
     }
@@ -260,6 +260,16 @@
     .status-badge.ko{
       color:var(--danger);
       background:var(--danger-bg);
+    }
+
+    .status-badge.skip{
+      color:#475467;
+      background:#f2f4f7;
+    }
+
+    .status-badge.info{
+      color:#3730a3;
+      background:var(--soft);
     }
 
     .errors{
@@ -355,6 +365,11 @@
         Les contributions existantes sont automatiquement détectées et mises à jour
         lorsqu'une correspondance unique est trouvée pour le même bureau demandeur,
         le même titre et le même contributeur.
+        <br>
+        Si plusieurs fiches existantes correspondent, la ligne est
+        <strong>ignorée comme doublon</strong> sans bloquer les autres lignes.
+        Si la ligne est déjà strictement identique, elle est marquée
+        <strong>Aucun changement</strong>.
       </div>
 
       <div class="upload-row">
@@ -410,6 +425,11 @@
         </div>
 
         <div class="stat">
+          <div class="label">Sans action</div>
+          <div id="statNoAction" class="value">0</div>
+        </div>
+
+        <div class="stat">
           <div class="label">Bureau demandeur</div>
           <div id="statBureau" class="value" style="font-size:18px">—</div>
         </div>
@@ -458,9 +478,13 @@
 </div>
 
 <!-- =========================================================
-     IMPORT CONTRIBUTIONS — BUREAU CONTRIBUTEUR — V5
+     IMPORT CONTRIBUTIONS — BUREAU CONTRIBUTEUR — V6
 
-     V5 :
+     V6 :
+     - les doublons ambigus ne bloquent plus tout l'import :
+       ils sont ignorés et signalés dans l'aperçu ;
+     - une ligne strictement identique à l'existant est marquée
+       "Aucun changement" et n'est pas réécrite ;
      - correction de la détection Création / Mise à jour lors de réimports
        successifs sans rechargement de la page ;
      - cibles Département / Sous-direction / Service ;
@@ -474,7 +498,7 @@
 <script>
 /* =============================================================
    IMPORT CONTRIBUTIONS / BUREAU CONTRIBUTEUR
-   Version 5
+   Version 6
 
    Objectif :
    - lire un fichier Excel ;
@@ -489,7 +513,10 @@
    - recharger les contributions existantes avant chaque analyse afin qu'une
      réimportation dans la même session détecte immédiatement les créations
      effectuées lors de l'import précédent ;
-   - empêcher tout import partiel en cas d'erreur de validation.
+   - ignorer sans bloquer les doublons ambigus ;
+   - ne pas réécrire les lignes déjà strictement identiques ;
+   - empêcher tout import partiel uniquement en cas de véritable erreur
+     de validation (date, priorité, statut, contributeur, etc.).
 
    Règle de rapprochement sans ID technique :
    1. Bureau_origine = bureau courant ;
@@ -664,6 +691,40 @@ async function refreshExistingContributions(){
           ===
           Number(currentUserBureauId)
       );
+}
+
+
+
+function sameNullableNumber(a,b){
+  const na = (
+    a === null
+    || a === undefined
+    || a === ""
+  ) ? null : Number(a);
+
+  const nb = (
+    b === null
+    || b === undefined
+    || b === ""
+  ) ? null : Number(b);
+
+  return na === nb;
+}
+
+function isSameBusinessValues(existing,values){
+  return (
+    normalizeKey(existing.Titre) === normalizeKey(values.Titre)
+    && text(existing.Description).trim() === text(values.Description).trim()
+    && normalizeKey(existing.Demandeur) === normalizeKey(values.Demandeur)
+    && normalizeContributorLevel(existing.Type_contributeur) === normalizeContributorLevel(values.Type_contributeur)
+    && sameNullableNumber(existing.Contributeur,values.Contributeur)
+    && sameNullableNumber(existing.Contributeur_sous_direction,values.Contributeur_sous_direction)
+    && sameNullableNumber(existing.Contributeur_service,values.Contributeur_service)
+    && sameNullableNumber(existing.Echeance,values.Echeance)
+    && text(existing.Priorite).trim() === text(values.Priorite).trim()
+    && text(existing.Statut).trim() === text(values.Statut).trim()
+    && text(existing.Commentaire).trim() === text(values.Commentaire).trim()
+  );
 }
 
 
@@ -1154,13 +1215,8 @@ function validateRow(source,index,groupIds){
       : {record:null, ambiguous:false}
   );
 
-  if(match.ambiguous){
-    errors.push(
-      "Mise à jour ambiguë : plusieurs contributions existantes correspondent au même bureau demandeur, titre et contributeur. Aucune mise à jour automatique n'est effectuée."
-    );
-  }
-
-  const isUpdate = Boolean(match.record);
+  const isAmbiguousDuplicate = Boolean(match.ambiguous);
+  const isUpdateCandidate = Boolean(match.record);
   const existing = match.record || null;
 
   const values = {
@@ -1189,7 +1245,7 @@ function validateRow(source,index,groupIds){
     values.Contributeur_service = Number(contributor.id);
   }
 
-  if(!isUpdate){
+  if(!isUpdateCandidate && !isAmbiguousDuplicate){
     values.Bureau_origine = Number(currentUserBureauId);
     values.Cree_par = text(currentUser.Email).trim();
     values.Source = "Import";
@@ -1211,6 +1267,23 @@ function validateRow(source,index,groupIds){
     values.Groupe_contribution = groupId;
   }
 
+  let action = "create";
+  let actionMessage = "Nouvelle contribution";
+
+  if(isAmbiguousDuplicate){
+    action = "skip_duplicate";
+    actionMessage = "Doublon ignoré : plusieurs fiches existantes correspondent.";
+  }
+  else if(isUpdateCandidate){
+    if(isSameBusinessValues(existing,values)){
+      action = "no_change";
+      actionMessage = "Aucun changement : la contribution est déjà à jour.";
+    }else{
+      action = "update";
+      actionMessage = "Contribution existante à mettre à jour.";
+    }
+  }
+
   return {
     excelRow:index + 2,
     source,
@@ -1220,8 +1293,9 @@ function validateRow(source,index,groupIds){
     excelGroup,
     errors,
     valid:errors.length === 0,
-    action:isUpdate ? "update" : "create",
-    existingRecordId:isUpdate ? Number(existing.id) : null,
+    action,
+    actionMessage,
+    existingRecordId:isUpdateCandidate ? Number(existing.id) : null,
     values
   };
 }
@@ -1239,12 +1313,16 @@ function renderPreview(){
   const invalid = total - valid;
   const createCount = analyzedRows.filter(row => row.valid && row.action === "create").length;
   const updateCount = analyzedRows.filter(row => row.valid && row.action === "update").length;
+  const duplicateCount = analyzedRows.filter(row => row.valid && row.action === "skip_duplicate").length;
+  const noChangeCount = analyzedRows.filter(row => row.valid && row.action === "no_change").length;
+  const noActionCount = duplicateCount + noChangeCount;
 
   $("statTotal").textContent = total;
   $("statValid").textContent = valid;
   $("statInvalid").textContent = invalid;
   $("statCreate").textContent = createCount;
   $("statUpdate").textContent = updateCount;
+  $("statNoAction").textContent = noActionCount;
   $("statBureau").textContent = currentUserBureauLabel || "—";
 
   for(const row of analyzedRows){
@@ -1260,9 +1338,20 @@ function renderPreview(){
       </td>
       <td>${escapeHtml(row.values.Titre)}</td>
       <td>
-        <span class="status-badge ${row.action === "update" ? "ok" : ""}">
-          ${row.action === "update" ? "↻ Mise à jour" : "＋ Création"}
-        </span>
+        ${
+          row.action === "update"
+            ? '<span class="status-badge ok">↻ Mise à jour</span>'
+            : row.action === "skip_duplicate"
+              ? '<span class="status-badge skip">⏭ Doublon ignoré</span>'
+              : row.action === "no_change"
+                ? '<span class="status-badge info">✓ Aucun changement</span>'
+                : '<span class="status-badge info">＋ Création</span>'
+        }
+        ${
+          row.actionMessage
+            ? `<div style="margin-top:5px;font-size:11px;color:#667085">${escapeHtml(row.actionMessage)}</div>`
+            : ""
+        }
       </td>
       <td>${escapeHtml(row.values.Demandeur)}</td>
       <td>${escapeHtml(row.contributorLevel)}</td>
@@ -1303,11 +1392,14 @@ function renderPreview(){
     );
     $("importBtn").disabled = true;
   }else{
+    const executableCount = createCount + updateCount;
+
     showNotice(
       "validationMessage",
-      `Toutes les lignes sont valides. ${createCount} création(s) et ${updateCount} mise(s) à jour sont prêtes.`
+      `Toutes les lignes sont valides. ${createCount} création(s), ${updateCount} mise(s) à jour, ${duplicateCount} doublon(s) ignoré(s) et ${noChangeCount} ligne(s) sans changement.`
     );
-    $("importBtn").disabled = false;
+
+    $("importBtn").disabled = executableCount === 0;
   }
 }
 
@@ -1423,7 +1515,22 @@ async function importRows(){
       Une seule opération Grist :
       si le serveur refuse une action, on évite de laisser un import partiel.
     */
-    const actions = analyzedRows.map(row => {
+    const executableRows = analyzedRows.filter(
+      row =>
+        row.action === "create"
+        || row.action === "update"
+    );
+
+    if(!executableRows.length){
+      showNotice(
+        "importSuccess",
+        "✓ Aucune action à effectuer : les lignes sont déjà à jour ou ont été ignorées comme doublons."
+      );
+      button.disabled = true;
+      return;
+    }
+
+    const actions = executableRows.map(row => {
       if(row.action === "update"){
         return [
           "UpdateRecord",
@@ -1445,10 +1552,12 @@ async function importRows(){
 
     const createCount = analyzedRows.filter(row => row.action === "create").length;
     const updateCount = analyzedRows.filter(row => row.action === "update").length;
+    const duplicateCount = analyzedRows.filter(row => row.action === "skip_duplicate").length;
+    const noChangeCount = analyzedRows.filter(row => row.action === "no_change").length;
 
     showNotice(
       "importSuccess",
-      `✓ Import terminé : ${createCount} création(s) et ${updateCount} mise(s) à jour.`
+      `✓ Import terminé : ${createCount} création(s), ${updateCount} mise(s) à jour, ${duplicateCount} doublon(s) ignoré(s) et ${noChangeCount} ligne(s) sans changement.`
     );
 
     /*
