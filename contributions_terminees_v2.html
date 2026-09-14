@@ -356,8 +356,8 @@
           <option value="Urgente">Urgente</option>
         </select>
 
-        <select id="departmentFilter">
-          <option value="">Tous les départements</option>
+        <select id="contributorFilter">
+          <option value="">Tous les contributeurs</option>
         </select>
 
         <select id="originFilter">
@@ -469,7 +469,14 @@
 
 
 <!-- =============================================================
-     CONTRIBUTIONS TERMINÉES — V6
+     CONTRIBUTIONS TERMINÉES — V7
+
+     V7 :
+     - prise en charge des contributeurs Département / Sous-direction / Service ;
+     - utilisation prioritaire de CONTRIBUTIONS.Contributeur_affiche ;
+     - filtre générique « Contributeur » ;
+     - conservation des droits de réouverture et du verrouillage optimiste V6.
+
      V6 :
      - sécurisation de l'action « Remettre en À faire » ;
      - contrôle de CONTRIBUTIONS.Version_modification juste avant l'écriture ;
@@ -480,7 +487,7 @@
 <script>
 /* =============================================================
    CONTRIBUTIONS TERMINÉES
-   Version 3
+   Version 4
 
    Règles :
    - Administrateur : voit toutes les lignes accessibles et peut réouvrir.
@@ -495,6 +502,8 @@
    - V3 : la réouverture ne modifie plus Date_finalisation ;
           elle met uniquement Statut = "À faire", comme dans
           contributions_a_traiter.html.
+   - V4 : affichage et filtre du contributeur compatibles avec les niveaux
+          Département / Sous-direction / Service, via Contributeur_affiche.
    ============================================================= */
 
 const $ = id => document.getElementById(id);
@@ -506,9 +515,13 @@ let currentUserBureauId = null;
 
 let allRecords = [];
 let departments = [];
+let subDirections = [];
+let services = [];
 let bureaux = [];
 
 let departmentById = new Map();
+let subDirectionById = new Map();
+let serviceById = new Map();
 let bureauById = new Map();
 
 let selectedRecordId = null;
@@ -767,6 +780,11 @@ async function loadData(){
   allRecords = tableToRows(contributionsTable)
     .filter(row => clean(row.Statut) === "fait");
 
+  /*
+    V7 — Référentiels de contributeurs :
+    le contributeur peut désormais être un Département,
+    une Sous-direction ou un Service.
+  */
   try{
     departments = tableToRows(
       await grist.docApi.fetchTable("DEPARTEMENTS")
@@ -774,6 +792,24 @@ async function loadData(){
   }catch(error){
     console.warn("DEPARTEMENTS indisponible :",error);
     departments = [];
+  }
+
+  try{
+    subDirections = tableToRows(
+      await grist.docApi.fetchTable("SOUS_DIRECTIONS")
+    );
+  }catch(error){
+    console.warn("SOUS_DIRECTIONS indisponible :",error);
+    subDirections = [];
+  }
+
+  try{
+    services = tableToRows(
+      await grist.docApi.fetchTable("SERVICES")
+    );
+  }catch(error){
+    console.warn("SERVICES indisponible :",error);
+    services = [];
   }
 
   try{
@@ -789,31 +825,88 @@ async function loadData(){
     departments.map(row => [Number(row.id),row])
   );
 
+  subDirectionById = new Map(
+    subDirections.map(row => [Number(row.id),row])
+  );
+
+  serviceById = new Map(
+    services.map(row => [Number(row.id),row])
+  );
+
   bureauById = new Map(
     bureaux.map(row => [Number(row.id),row])
   );
 
   allRecords = allRecords.map(row => {
     const depId = Number(row.Contributeur) || null;
+    const subDirectionId =
+      Number(row.Contributeur_sous_direction) || null;
+    const serviceId =
+      Number(row.Contributeur_service) || null;
     const bureauId = Number(row.Bureau_origine) || null;
 
     const dep = departmentById.get(depId);
+    const subDirection = subDirectionById.get(subDirectionId);
+    const service = serviceById.get(serviceId);
     const bureau = bureauById.get(bureauId);
+
+    const departmentLabel = dep
+      ? (
+          text(dep.Code).trim()
+          + (text(dep.Nom).trim()
+              ? " — " + text(dep.Nom).trim()
+              : "")
+        )
+      : "";
+
+    const subDirectionLabel = subDirection
+      ? (
+          text(subDirection.Code).trim()
+          + (text(subDirection.Nom).trim()
+              ? " — " + text(subDirection.Nom).trim()
+              : "")
+        )
+      : "";
+
+    const serviceLabel = service
+      ? (
+          text(service.Code).trim()
+          + (text(service.Nom).trim()
+              ? " — " + text(service.Nom).trim()
+              : "")
+        )
+      : "";
+
+    /*
+      Contributeur_affiche est prioritaire.
+      Le fallback permet de conserver un affichage correct si une ancienne
+      ligne ne possède pas encore cette valeur calculée.
+    */
+    const contributorLabel =
+      text(row.Contributeur_affiche).trim()
+      || departmentLabel
+      || subDirectionLabel
+      || serviceLabel
+      || text(
+           row.Contributeur
+           || row.Contributeur_sous_direction
+           || row.Contributeur_service
+         ).trim();
 
     return {
       ...row,
       _ContributeurId:depId,
+      _ContributeurSousDirectionId:subDirectionId,
+      _ContributeurServiceId:serviceId,
+      _ContributeurType:text(row.Type_contributeur).trim(),
       _BureauId:bureauId,
-      _ContributeurLabel:dep
-        ? (
-            text(dep.Code).trim()
-            + (text(dep.Nom).trim() ? " — " + text(dep.Nom).trim() : "")
-          )
-        : text(row.Contributeur),
+      _ContributeurLabel:contributorLabel,
       _BureauLabel:bureau
         ? (
             text(bureau.Code).trim()
-            + (text(bureau.Nom).trim() ? " — " + text(bureau.Nom).trim() : "")
+            + (text(bureau.Nom).trim()
+                ? " — " + text(bureau.Nom).trim()
+                : "")
           )
         : text(row.Bureau_origine)
     };
@@ -858,20 +951,20 @@ function canRestoreRecord(record){
    ============================================================= */
 
 function populateFilters(){
-  const depSelect = $("departmentFilter");
+  const contributorSelect = $("contributorFilter");
   const originSelect = $("originFilter");
 
-  const deps = [...new Set(
+  const contributors = [...new Set(
     allRecords
       .map(row => row._ContributeurLabel)
       .filter(Boolean)
   )].sort((a,b)=>a.localeCompare(b,"fr",{numeric:true}));
 
-  for(const label of deps){
+  for(const label of contributors){
     const option = document.createElement("option");
     option.value = label;
     option.textContent = label;
-    depSelect.appendChild(option);
+    contributorSelect.appendChild(option);
   }
 
   const origins = [...new Set(
@@ -891,7 +984,7 @@ function populateFilters(){
 function filteredRecords(){
   const query = clean($("search").value);
   const priority = $("priorityFilter").value;
-  const department = $("departmentFilter").value;
+  const contributor = $("contributorFilter").value;
   const origin = $("originFilter").value;
 
   return allRecords
@@ -901,8 +994,8 @@ function filteredRecords(){
       }
 
       if(
-        department
-        && record._ContributeurLabel !== department
+        contributor
+        && record._ContributeurLabel !== contributor
       ){
         return false;
       }
@@ -1256,7 +1349,7 @@ async function init(){
 
 $("search").addEventListener("input",renderList);
 $("priorityFilter").addEventListener("change",renderList);
-$("departmentFilter").addEventListener("change",renderList);
+$("contributorFilter").addEventListener("change",renderList);
 $("originFilter").addEventListener("change",renderList);
 
 $("backBtn").addEventListener("click",closeDetail);
