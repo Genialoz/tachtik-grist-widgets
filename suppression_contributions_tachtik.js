@@ -2,21 +2,47 @@
   "use strict";
 
   /* =========================================================
-     SUPPRESSION SÉCURISÉE DES CONTRIBUTIONS — V3
+     SUPPRESSION SÉCURISÉE DES CONTRIBUTIONS — V4
 
      Droits conservés :
      - Administrateur : toutes les contributions ;
      - Bureau contributeur : uniquement les contributions de son Bureau_origine ;
      - Lecteur : aucune suppression.
 
-     V3 :
-     - contrôle de CONTRIBUTIONS.Version_modification juste avant suppression ;
-     - blocage si la contribution a été modifiée depuis la fiche affichée ;
-     - aucune modification des ACL Grist ;
-     - aucune modification des règles de droits existantes.
+     V4 :
+     - mémorise la version EXACTE au moment où la fiche détail est ouverte ;
+     - ne remplace pas cette version si Grist recharge allRecords ensuite ;
+     - relit CONTRIBUTIONS juste avant la suppression ;
+     - bloque la suppression si Version_modification a changé ;
+     - conserve les ACL et les droits existants.
 
      La sécurité définitive reste assurée par les ACL Grist.
      ========================================================= */
+
+
+  /* =========================================================
+     VERSION MÉMORISÉE À L'OUVERTURE DE LA FICHE
+     ========================================================= */
+
+  let deleteOpenedRecordId = null;
+  let deleteOpenedVersion = null;
+
+
+  function clearDeleteOpenedVersion() {
+    deleteOpenedRecordId = null;
+    deleteOpenedVersion = null;
+  }
+
+
+  function captureDeleteOpenedVersion(record) {
+    if (!record) {
+      clearDeleteOpenedVersion();
+      return;
+    }
+
+    deleteOpenedRecordId = Number(record.id);
+    deleteOpenedVersion = deleteContributionVersion(record);
+  }
 
 
   /* =========================================================
@@ -24,7 +50,6 @@
      ========================================================= */
 
   function deleteContributionVersion(record) {
-
     const raw =
       record
         ? record.Version_modification
@@ -47,16 +72,13 @@
 
 
   async function fetchFreshContributionForDelete(recordId) {
-
     const table =
       await grist.docApi.fetchTable(
         "CONTRIBUTIONS"
       );
 
-
     const rows =
       tableToRows(table);
-
 
     return (
       rows.find(
@@ -70,9 +92,31 @@
   }
 
 
-  async function ensureContributionUnchangedBeforeDelete(
-    record
-  ) {
+  async function ensureContributionUnchangedBeforeDelete(record) {
+    /*
+     * IMPORTANT V4 :
+     * on n'utilise PAS la version actuellement présente dans allRecords,
+     * car Grist peut avoir rafraîchi cette ligne après une modification
+     * effectuée dans un autre onglet.
+     *
+     * On compare avec la version figée à l'ouverture de la fiche.
+     */
+    if (
+      Number(deleteOpenedRecordId) !== Number(record.id)
+      || deleteOpenedVersion === null
+    ) {
+      const error =
+        new Error(
+          "La version de cette contribution n'a pas pu être vérifiée. "
+          + "Fermez puis rouvrez la fiche avant de la supprimer."
+        );
+
+      error.code =
+        "VERSION_CONFLICT";
+
+      throw error;
+    }
+
 
     const fresh =
       await fetchFreshContributionForDelete(
@@ -81,7 +125,6 @@
 
 
     if (!fresh) {
-
       const error =
         new Error(
           "Cette contribution n'existe plus dans Grist. Rechargez la liste avant de poursuivre."
@@ -94,12 +137,6 @@
     }
 
 
-    const expectedVersion =
-      deleteContributionVersion(
-        record
-      );
-
-
     const currentVersion =
       deleteContributionVersion(
         fresh
@@ -109,13 +146,12 @@
     if (
       currentVersion
       !==
-      expectedVersion
+      Number(deleteOpenedVersion)
     ) {
-
       const error =
         new Error(
-          "Cette contribution a été modifiée par un autre utilisateur. "
-          + "La suppression n'a pas été effectuée. Rechargez la contribution avant de poursuivre."
+          "Cette contribution a été modifiée par un autre utilisateur depuis son ouverture. "
+          + "La suppression n'a pas été effectuée. Fermez puis rouvrez la contribution avant de poursuivre."
         );
 
       error.code =
@@ -134,7 +170,6 @@
      ========================================================= */
 
   function canDeleteTachtik(record) {
-
     if (!record) {
       return false;
     }
@@ -157,7 +192,6 @@
     if (
       currentRole === "bureau contributeur"
     ) {
-
       return Boolean(
         currentUserBureauId
         && record._BureauId
@@ -178,25 +212,17 @@
      ========================================================= */
 
   function ensureDeleteButton() {
-
     let button =
       document.getElementById(
         "delete-btn"
       );
 
 
-    /*
-     * Le bouton existe déjà.
-     */
     if (button) {
       return button;
     }
 
 
-    /*
-     * On se sert du bouton Modifier
-     * comme point d'insertion.
-     */
     const editButton =
       document.getElementById(
         "edit-btn"
@@ -219,16 +245,13 @@
 
 
     if (!actions) {
-
       actions =
         document.createElement(
           "div"
         );
 
-
       actions.id =
         "detail-heading-actions";
-
 
       actions.style.display =
         "flex";
@@ -246,20 +269,12 @@
         "9px";
 
 
-      /*
-       * On place le conteneur
-       * à l'endroit où se trouvait Modifier.
-       */
       editButton.parentNode.insertBefore(
         actions,
         editButton
       );
 
 
-      /*
-       * On remet Modifier
-       * dans ce nouveau conteneur.
-       */
       actions.appendChild(
         editButton
       );
@@ -284,18 +299,9 @@
     button.textContent =
       "🗑️ Supprimer";
 
-
-    /*
-     * Caché tant qu'on ne connaît pas
-     * les droits de l'utilisateur.
-     */
     button.style.display =
       "none";
 
-
-    /*
-     * Style du bouton.
-     */
     button.style.padding =
       "10px 14px";
 
@@ -321,15 +327,10 @@
       "pointer";
 
 
-    /*
-     * Survol.
-     */
     button.addEventListener(
       "mouseenter",
       () => {
-
         if (!button.disabled) {
-
           button.style.background =
             "#ffe5e9";
         }
@@ -340,9 +341,7 @@
     button.addEventListener(
       "mouseleave",
       () => {
-
         if (!button.disabled) {
-
           button.style.background =
             "#fff1f3";
         }
@@ -350,9 +349,6 @@
     );
 
 
-    /*
-     * Suppression.
-     */
     button.addEventListener(
       "click",
       deleteCurrentContribution
@@ -371,7 +367,6 @@
     editButton.addEventListener(
       "click",
       () => {
-
         button.style.display =
           "none";
       }
@@ -389,14 +384,11 @@
 
 
     if (cancelButton) {
-
       cancelButton.addEventListener(
         "click",
         () => {
-
           setTimeout(
             () => {
-
               updateDeleteButton(
                 getSelectedRecord()
               );
@@ -418,14 +410,11 @@
 
 
     if (saveButton) {
-
       saveButton.addEventListener(
         "click",
         () => {
-
           setTimeout(
             () => {
-
               updateDeleteButton(
                 getSelectedRecord()
               );
@@ -446,7 +435,6 @@
      ========================================================= */
 
   function updateDeleteButton(record) {
-
     const button =
       ensureDeleteButton();
 
@@ -456,11 +444,6 @@
     }
 
 
-    /*
-     * Le bouton apparaît uniquement si
-     * le profil possède réellement
-     * le droit de supprimer cette ligne.
-     */
     button.style.display =
       canDeleteTachtik(record)
         ? "inline-flex"
@@ -473,22 +456,14 @@
      ========================================================= */
 
   async function deleteCurrentContribution() {
-
     const record =
       getSelectedRecord();
 
 
-    /*
-     * Double contrôle côté interface.
-     *
-     * Les ACL Grist feront de toute façon
-     * le contrôle définitif côté données.
-     */
     if (
       !record
       || !canDeleteTachtik(record)
     ) {
-
       showToast(
         "Vous n'êtes pas autorisé à supprimer cette contribution."
       );
@@ -518,9 +493,6 @@
         .join(" — ");
 
 
-    /*
-     * Confirmation obligatoire.
-     */
     const confirmed =
       window.confirm(
         `Supprimer définitivement la contribution ${libelle || "sélectionnée"} ?\n\nCette action est irréversible.`
@@ -537,13 +509,7 @@
 
 
     try {
-
-      /*
-       * Blocage du bouton
-       * pendant l'opération.
-       */
       if (button) {
-
         button.disabled =
           true;
 
@@ -559,11 +525,8 @@
 
 
       /*
-       * V3 — VERROUILLAGE OPTIMISTE
-       *
-       * On relit CONTRIBUTIONS juste avant la suppression.
-       * Si Version_modification a changé depuis la fiche affichée,
-       * la suppression est bloquée.
+       * V4 — verrouillage optimiste :
+       * comparaison avec la version mémorisée à l'ouverture de la fiche.
        */
       await ensureContributionUnchangedBeforeDelete(
         record
@@ -571,9 +534,8 @@
 
 
       /*
-       * Suppression dans la table CONTRIBUTIONS.
-       *
-       * Les ACL Grist contrôlent réellement l'autorisation.
+       * Suppression définitive.
+       * Les ACL Grist restent le contrôle final côté données.
        */
       await grist.docApi.applyUserActions([
         [
@@ -584,9 +546,9 @@
       ]);
 
 
-      /*
-       * Retour automatique à la liste.
-       */
+      clearDeleteOpenedVersion();
+
+
       closeDetail();
 
 
@@ -595,10 +557,6 @@
       );
 
 
-      /*
-       * Petite temporisation pour laisser
-       * Grist actualiser ses données.
-       */
       await new Promise(
         resolve =>
           setTimeout(
@@ -608,17 +566,10 @@
       );
 
 
-      /*
-       * Recharge :
-       * - liste ;
-       * - KPI ;
-       * - filtres.
-       */
       await loadContributions();
 
     }
     catch (error) {
-
       console.error(
         error
       );
@@ -628,16 +579,9 @@
         error
         && error.code === "VERSION_CONFLICT"
       ) {
-
         showToast(
           error.message
         );
-
-
-        /*
-         * On recharge la fiche avec les données les plus récentes.
-         */
-        await loadContributions();
 
         return;
       }
@@ -649,13 +593,7 @@
 
     }
     finally {
-
-      /*
-       * Remise en état du bouton
-       * si nécessaire.
-       */
       if (button) {
-
         button.disabled =
           false;
 
@@ -676,23 +614,65 @@
 
 
   /* =========================================================
-     INTÉGRATION AVEC LA FICHE DÉTAIL
+     INTÉGRATION AVEC L'OUVERTURE / FERMETURE DE LA FICHE
      ========================================================= */
 
   /*
-   * On conserve intégralement la fonction
-   * renderDetail existante.
-   *
-   * On ajoute simplement notre contrôle
-   * après son exécution.
+   * V4 — on capture ici la version AVANT d'ouvrir la fiche.
+   * Cette valeur reste figée même si grist.onRecords recharge allRecords.
    */
+  const originalOpenDetail =
+    openDetail;
+
+
+  openDetail =
+    function(recordId) {
+      const record =
+        getPilotRecords().find(
+          row =>
+            Number(row.id)
+            ===
+            Number(recordId)
+        );
+
+
+      captureDeleteOpenedVersion(
+        record
+      );
+
+
+      return originalOpenDetail(
+        recordId
+      );
+    };
+
+
+  /*
+   * On efface la version mémorisée quand l'utilisateur
+   * quitte la fiche détail.
+   */
+  const originalCloseDetail =
+    closeDetail;
+
+
+  closeDetail =
+    function() {
+      clearDeleteOpenedVersion();
+
+      return originalCloseDetail();
+    };
+
+
+  /* =========================================================
+     INTÉGRATION AVEC LE RENDU DE LA FICHE
+     ========================================================= */
+
   const originalRenderDetail =
     renderDetail;
 
 
   renderDetail =
     function(record) {
-
       originalRenderDetail(
         record
       );
