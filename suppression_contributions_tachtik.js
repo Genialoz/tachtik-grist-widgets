@@ -1,17 +1,134 @@
-(() => {
+from pathlib import Path
+
+code = r'''(() => {
   "use strict";
 
   /* =========================================================
-     TÂCHTIK
-     Suppression sécurisée des contributions
+     SUPPRESSION SÉCURISÉE DES CONTRIBUTIONS — V3
 
-     Droits :
-     - Administrateur : toutes les contributions
-     - Bureau contributeur : uniquement les contributions de son Bureau_origine
-     - Lecteur : aucune suppression
+     Droits conservés :
+     - Administrateur : toutes les contributions ;
+     - Bureau contributeur : uniquement les contributions de son Bureau_origine ;
+     - Lecteur : aucune suppression.
+
+     V3 :
+     - contrôle de CONTRIBUTIONS.Version_modification juste avant suppression ;
+     - blocage si la contribution a été modifiée depuis la fiche affichée ;
+     - aucune modification des ACL Grist ;
+     - aucune modification des règles de droits existantes.
 
      La sécurité définitive reste assurée par les ACL Grist.
      ========================================================= */
+
+
+  /* =========================================================
+     OUTILS DE VERSION
+     ========================================================= */
+
+  function deleteContributionVersion(record) {
+
+    const raw =
+      record
+        ? record.Version_modification
+        : null;
+
+    const value =
+      Number(raw);
+
+    /*
+     * Les anciennes lignes dont Version_modification est vide
+     * sont considérées comme version 0.
+     */
+    return (
+      Number.isFinite(value)
+      && value > 0
+    )
+      ? Math.trunc(value)
+      : 0;
+  }
+
+
+  async function fetchFreshContributionForDelete(recordId) {
+
+    const table =
+      await grist.docApi.fetchTable(
+        "CONTRIBUTIONS"
+      );
+
+
+    const rows =
+      tableToRows(table);
+
+
+    return (
+      rows.find(
+        row =>
+          Number(row.id)
+          ===
+          Number(recordId)
+      )
+      || null
+    );
+  }
+
+
+  async function ensureContributionUnchangedBeforeDelete(
+    record
+  ) {
+
+    const fresh =
+      await fetchFreshContributionForDelete(
+        Number(record.id)
+      );
+
+
+    if (!fresh) {
+
+      const error =
+        new Error(
+          "Cette contribution n'existe plus dans Grist. Rechargez la liste avant de poursuivre."
+        );
+
+      error.code =
+        "VERSION_CONFLICT";
+
+      throw error;
+    }
+
+
+    const expectedVersion =
+      deleteContributionVersion(
+        record
+      );
+
+
+    const currentVersion =
+      deleteContributionVersion(
+        fresh
+      );
+
+
+    if (
+      currentVersion
+      !==
+      expectedVersion
+    ) {
+
+      const error =
+        new Error(
+          "Cette contribution a été modifiée par un autre utilisateur. "
+          + "La suppression n'a pas été effectuée. Rechargez la contribution avant de poursuivre."
+        );
+
+      error.code =
+        "VERSION_CONFLICT";
+
+      throw error;
+    }
+
+
+    return fresh;
+  }
 
 
   /* =========================================================
@@ -23,6 +140,7 @@
     if (!record) {
       return false;
     }
+
 
     /*
      * Administrateur : suppression globale.
@@ -51,7 +169,7 @@
 
 
     /*
-     * Lecteur ou tout autre rôle
+     * Lecteur ou tout autre rôle.
      */
     return false;
   }
@@ -64,11 +182,13 @@
   function ensureDeleteButton() {
 
     let button =
-      document.getElementById("delete-btn");
+      document.getElementById(
+        "delete-btn"
+      );
 
 
     /*
-     * Le bouton existe déjà
+     * Le bouton existe déjà.
      */
     if (button) {
       return button;
@@ -80,7 +200,9 @@
      * comme point d'insertion.
      */
     const editButton =
-      document.getElementById("edit-btn");
+      document.getElementById(
+        "edit-btn"
+      );
 
 
     if (!editButton) {
@@ -90,7 +212,7 @@
 
     /*
      * Conteneur commun :
-     * Modifier + Supprimer
+     * Modifier + Supprimer.
      */
     let actions =
       document.getElementById(
@@ -101,7 +223,10 @@
     if (!actions) {
 
       actions =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
+
 
       actions.id =
         "detail-heading-actions";
@@ -144,10 +269,12 @@
 
 
     /*
-     * Création du bouton Supprimer
+     * Création du bouton Supprimer.
      */
     button =
-      document.createElement("button");
+      document.createElement(
+        "button"
+      );
 
 
     button.id =
@@ -169,7 +296,7 @@
 
 
     /*
-     * Style Tâchtik
+     * Style du bouton.
      */
     button.style.padding =
       "10px 14px";
@@ -197,17 +324,17 @@
 
 
     /*
-     * Survol
+     * Survol.
      */
     button.addEventListener(
       "mouseenter",
       () => {
 
         if (!button.disabled) {
+
           button.style.background =
             "#ffe5e9";
         }
-
       }
     );
 
@@ -217,16 +344,16 @@
       () => {
 
         if (!button.disabled) {
+
           button.style.background =
             "#fff1f3";
         }
-
       }
     );
 
 
     /*
-     * Suppression
+     * Suppression.
      */
     button.addEventListener(
       "click",
@@ -249,7 +376,6 @@
 
         button.style.display =
           "none";
-
       }
     );
 
@@ -276,11 +402,9 @@
               updateDeleteButton(
                 getSelectedRecord()
               );
-
             },
             0
           );
-
         }
       );
     }
@@ -307,11 +431,9 @@
               updateDeleteButton(
                 getSelectedRecord()
               );
-
             },
             0
           );
-
         }
       );
     }
@@ -378,11 +500,15 @@
 
 
     const numero =
-      text(record.Numero).trim();
+      text(
+        record.Numero
+      ).trim();
 
 
     const titre =
-      text(record.Titre).trim();
+      text(
+        record.Titre
+      ).trim();
 
 
     const libelle =
@@ -435,11 +561,21 @@
 
 
       /*
-       * Suppression dans la table
-       * CONTRIBUTIONS.
+       * V3 — VERROUILLAGE OPTIMISTE
        *
-       * C'est ici que les ACL Grist
-       * contrôlent réellement l'autorisation.
+       * On relit CONTRIBUTIONS juste avant la suppression.
+       * Si Version_modification a changé depuis la fiche affichée,
+       * la suppression est bloquée.
+       */
+      await ensureContributionUnchangedBeforeDelete(
+        record
+      );
+
+
+      /*
+       * Suppression dans la table CONTRIBUTIONS.
+       *
+       * Les ACL Grist contrôlent réellement l'autorisation.
        */
       await grist.docApi.applyUserActions([
         [
@@ -467,22 +603,46 @@
        */
       await new Promise(
         resolve =>
-          setTimeout(resolve, 500)
+          setTimeout(
+            resolve,
+            500
+          )
       );
 
 
       /*
        * Recharge :
-       * - liste
-       * - KPI
-       * - filtres
+       * - liste ;
+       * - KPI ;
+       * - filtres.
        */
       await loadContributions();
 
     }
     catch (error) {
 
-      console.error(error);
+      console.error(
+        error
+      );
+
+
+      if (
+        error
+        && error.code === "VERSION_CONFLICT"
+      ) {
+
+        showToast(
+          error.message
+        );
+
+
+        /*
+         * On recharge la fiche avec les données les plus récentes.
+         */
+        await loadContributions();
+
+        return;
+      }
 
 
       showToast(
@@ -518,7 +678,7 @@
 
 
   /* =========================================================
-     INTÉGRATION AVEC LA FICHE DÉTAIL TÂCHTIK
+     INTÉGRATION AVEC LA FICHE DÉTAIL
      ========================================================= */
 
   /*
@@ -558,3 +718,31 @@
   );
 
 })();
+'''
+
+out = Path("/mnt/data/suppression_contributions_tachtik_v3.js")
+out.write_text(code, encoding="utf-8")
+
+checks = {
+    "Rôles actuels": (
+        'currentRole === "administrateur"' in code
+        and 'currentRole === "bureau contributeur"' in code
+        and "gestionnaire e1" not in code.lower()
+        and "bureau saisie" not in code.lower()
+        and "bureau import" not in code.lower()
+    ),
+    "Version_modification": "Version_modification" in code,
+    "Relecture fraîche": 'fetchTable(\n        "CONTRIBUTIONS"' in code,
+    "Blocage conflit": "VERSION_CONFLICT" in code,
+    "RemoveRecord conservé": '"RemoveRecord"' in code,
+    "ACL inchangées": "La sécurité définitive reste assurée par les ACL Grist." in code,
+    "Bouton Supprimer": "🗑️ Supprimer" in code,
+}
+
+print(f"Fichier créé : {out}")
+print(f"Taille : {out.stat().st_size} octets")
+for k, v in checks.items():
+    print(f"{k}: {'OK' if v else 'ERREUR'}")
+
+if not all(checks.values()):
+    raise RuntimeError("Un contrôle final a échoué.")
