@@ -246,7 +246,7 @@
     table{
       width:100%;
       border-collapse:collapse;
-      min-width:1100px;
+      min-width:1380px;
     }
 
     th,td{
@@ -487,6 +487,8 @@
               <th>Échéance</th>
               <th>Priorité</th>
               <th>Statut</th>
+              <th>Destinataire(s)</th>
+              <th>Copie(s)</th>
               <th>Commentaire</th>
               <th>Contrôles</th>
             </tr>
@@ -514,7 +516,13 @@
 </div>
 
 <!-- =========================================================
-     IMPORT CONTRIBUTIONS — ADMINISTRATEUR — V6
+     IMPORT CONTRIBUTIONS — ADMINISTRATEUR — V7
+
+     V7 :
+     - ajout facultatif des colonnes Excel Destinataires_mail et Copies_mail ;
+     - ces valeurs sont enregistrées dans CONTRIBUTIONS ;
+     - si les colonnes sont absentes lors d'une mise à jour, les adresses existantes sont conservées ;
+     - les anciens fichiers d'import restent compatibles.
 
      V6 :
      - intégration de CONTRIBUTIONS.Version_modification ;
@@ -535,7 +543,7 @@
 <script>
 /* =============================================================
    IMPORT CONTRIBUTIONS / ADMINISTRATEUR
-   Version 6
+   Version 7
 
    Objectif :
    - réserver le widget au rôle Administrateur ;
@@ -571,6 +579,9 @@ const EXPECTED_COLUMNS = [
   "Commentaire",
   "Groupe"
 ];
+
+let importHasDestinatairesMail = false;
+let importHasCopiesMail = false;
 
 const ALLOWED_PRIORITIES = new Set([
   "Normale",
@@ -783,6 +794,8 @@ function isSameBusinessValues(existing,values){
     && text(existing.Priorite).trim() === text(values.Priorite).trim()
     && text(existing.Statut).trim() === text(values.Statut).trim()
     && text(existing.Commentaire).trim() === text(values.Commentaire).trim()
+    && text(existing.Destinataires_mail).trim() === text(values.Destinataires_mail).trim()
+    && text(existing.Copies_mail).trim() === text(values.Copies_mail).trim()
   );
 }
 
@@ -1177,6 +1190,9 @@ function validateColumns(sheet){
     value => text(value).trim()
   );
 
+  importHasDestinatairesMail = headers.includes("Destinataires_mail");
+  importHasCopiesMail = headers.includes("Copies_mail");
+
   const missing = EXPECTED_COLUMNS.filter(
     column => !headers.includes(column)
   );
@@ -1299,7 +1315,13 @@ function validateRow(source,index,groupIds){
     Echeance:dueDate,
     Priorite:priority,
     Statut:status,
-    Commentaire:comment
+    Commentaire:comment,
+    Destinataires_mail:importHasDestinatairesMail
+      ? text(source.Destinataires_mail).trim()
+      : text(existing?.Destinataires_mail).trim(),
+    Copies_mail:importHasCopiesMail
+      ? text(source.Copies_mail).trim()
+      : text(existing?.Copies_mail).trim()
   };
 
   if(level === "Département" && contributor){
@@ -1426,6 +1448,8 @@ function renderPreview(){
       <td>${escapeHtml(formatPreviewDate(row.dueDate))}</td>
       <td>${escapeHtml(row.values.Priorite)}</td>
       <td>${escapeHtml(row.values.Statut)}</td>
+      <td>${escapeHtml(row.values.Destinataires_mail)}</td>
+      <td>${escapeHtml(row.values.Copies_mail)}</td>
       <td>${escapeHtml(row.values.Commentaire)}</td>
       <td>
         ${
