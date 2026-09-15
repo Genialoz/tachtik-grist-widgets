@@ -424,6 +424,11 @@
           <input id="excelFile" type="file" accept=".xlsx,.xls">
         </div>
 
+
+        <button id="downloadTemplateBtn" type="button" class="btn-secondary">
+          ⬇️ Télécharger le modèle Excel
+        </button>
+
         <button id="analyzeBtn" type="button" class="btn-primary">
           🔎 Analyser le fichier
         </button>
@@ -523,7 +528,13 @@
 </div>
 
 <!-- =========================================================
-     IMPORT CONTRIBUTIONS — ADMINISTRATEUR — V8
+     IMPORT CONTRIBUTIONS — ADMINISTRATEUR — V9
+
+     V9 :
+     - ajout d'un bouton « Télécharger le modèle Excel » ;
+     - génération locale d'un fichier Modele_import_contributions.xlsx ;
+     - feuille Import avec les 12 colonnes utilisables ;
+     - feuille Aide avec les valeurs attendues et les consignes.
 
      V8 :
      - affichage explicite dans l'interface des colonnes courriel facultatives ;
@@ -554,7 +565,7 @@
 <script>
 /* =============================================================
    IMPORT CONTRIBUTIONS / ADMINISTRATEUR
-   Version 8
+   Version 9
 
    Objectif :
    - réserver le widget au rôle Administrateur ;
@@ -1156,6 +1167,101 @@ function formatPreviewDate(gristTimestamp){
    LECTURE EXCEL
    ============================================================= */
 
+
+function downloadExcelTemplate(){
+  /*
+    MODÈLE EXCEL D'IMPORT
+    ---------------------
+    Le fichier est généré directement dans le navigateur.
+    Aucun fichier modèle séparé n'a besoin d'être hébergé.
+
+    Feuille "Import" :
+    - contient toutes les colonnes utilisables ;
+    - Destinataires_mail et Copies_mail sont facultatives à l'import,
+      mais présentes dans le modèle pour faciliter leur utilisation.
+
+    Feuille "Aide" :
+    - rappelle les valeurs attendues pour les champs contrôlés.
+  */
+
+  const importHeaders = [
+    "Titre",
+    "Description",
+    "Demandeur",
+    "Niveau_contributeur",
+    "Contributeur",
+    "Echeance",
+    "Priorite",
+    "Statut",
+    "Commentaire",
+    "Groupe",
+    "Destinataires_mail",
+    "Copies_mail"
+  ];
+
+  const importSheet = XLSX.utils.aoa_to_sheet([
+    importHeaders
+  ]);
+
+  const helpRows = [
+    ["Champ", "Consigne"],
+    ["Titre", "Obligatoire."],
+    ["Description", "Facultatif."],
+    ["Demandeur", "Facultatif."],
+    ["Niveau_contributeur", 'Valeurs autorisées : Département, Sous-direction ou Service.'],
+    ["Contributeur", "Code du département, de la sous-direction ou du service correspondant."],
+    ["Echeance", "Date Excel ou format JJ/MM/AAAA."],
+    ["Priorite", "Valeurs autorisées : Normale, Haute ou Urgente."],
+    ["Statut", "Valeurs autorisées : À faire ou Fait."],
+    ["Commentaire", "Facultatif."],
+    ["Groupe", "Facultatif. Répétez la même valeur pour rattacher plusieurs affectations à une même demande."],
+    ["Destinataires_mail", "Facultatif. Une ou plusieurs adresses. Séparez plusieurs adresses par un point-virgule (;)."],
+    ["Copies_mail", "Facultatif. Une ou plusieurs adresses en copie. Séparez plusieurs adresses par un point-virgule (;)."]
+  ];
+
+  const helpSheet = XLSX.utils.aoa_to_sheet(helpRows);
+
+  importSheet["!cols"] = [
+    {wch:28},
+    {wch:42},
+    {wch:22},
+    {wch:22},
+    {wch:20},
+    {wch:14},
+    {wch:14},
+    {wch:14},
+    {wch:34},
+    {wch:18},
+    {wch:38},
+    {wch:38}
+  ];
+
+  helpSheet["!cols"] = [
+    {wch:24},
+    {wch:90}
+  ];
+
+  const workbook = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    importSheet,
+    "Import"
+  );
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    helpSheet,
+    "Aide"
+  );
+
+  XLSX.writeFile(
+    workbook,
+    "Modele_import_contributions.xlsx"
+  );
+}
+
+
 async function readExcelFile(file){
   const buffer = await file.arrayBuffer();
 
@@ -1756,6 +1862,7 @@ async function init(){
   }
 }
 
+$("downloadTemplateBtn").addEventListener("click", downloadExcelTemplate);
 $("analyzeBtn").addEventListener("click",analyzeFile);
 $("clearBtn").addEventListener("click",clearPreview);
 $("importBtn").addEventListener("click",importRows);
