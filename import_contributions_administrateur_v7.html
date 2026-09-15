@@ -405,7 +405,14 @@
         <strong>Département</strong>, <strong>Sous-direction</strong> ou <strong>Service</strong>.
         Pour <strong>Contributeur</strong>, utilisez le code correspondant au niveau choisi.<br>
         <strong>Groupe</strong> est facultatif : répétez la même valeur sur plusieurs lignes
-        pour créer plusieurs affectations rattachées à une même demande.<br>
+        pour créer plusieurs affectations rattachées à une même demande.<br><br>
+        <strong>Courriels — colonnes facultatives :</strong>
+        ajoutez <strong>Destinataires_mail</strong> pour les adresses principales et
+        <strong>Copies_mail</strong> pour les adresses en copie.<br>
+        Vous pouvez saisir plusieurs adresses dans une même cellule en les séparant par un
+        <strong>point-virgule (;)</strong>.<br>
+        Si ces colonnes sont absentes du fichier, l'import reste compatible et les adresses
+        déjà enregistrées sur une contribution existante sont conservées.<br><br>
         Les contributions existantes du bureau demandeur sélectionné sont automatiquement
         détectées et mises à jour lorsqu'une correspondance unique est trouvée.
         Les doublons ambigus sont ignorés sans bloquer le reste du fichier.
@@ -516,7 +523,11 @@
 </div>
 
 <!-- =========================================================
-     IMPORT CONTRIBUTIONS — ADMINISTRATEUR — V7
+     IMPORT CONTRIBUTIONS — ADMINISTRATEUR — V8
+
+     V8 :
+     - affichage explicite dans l'interface des colonnes courriel facultatives ;
+     - indication du séparateur point-virgule pour plusieurs adresses.
 
      V7 :
      - ajout facultatif des colonnes Excel Destinataires_mail et Copies_mail ;
@@ -543,7 +554,7 @@
 <script>
 /* =============================================================
    IMPORT CONTRIBUTIONS / ADMINISTRATEUR
-   Version 7
+   Version 8
 
    Objectif :
    - réserver le widget au rôle Administrateur ;
