@@ -2195,6 +2195,42 @@
 
               <label
                 class="form-label"
+                for="edit-destinataires-mail"
+              >
+                Destinataire(s) du courriel
+              </label>
+
+              <input
+                id="edit-destinataires-mail"
+                class="form-control"
+                type="text"
+                placeholder="prenom.nom@education.gouv.fr"
+              >
+
+            </div>
+
+            <div class="form-group full">
+
+              <label
+                class="form-label"
+                for="edit-copies-mail"
+              >
+                Copie(s)
+              </label>
+
+              <input
+                id="edit-copies-mail"
+                class="form-control"
+                type="text"
+                placeholder="adresse1@education.gouv.fr; adresse2@education.gouv.fr"
+              >
+
+            </div>
+
+            <div class="form-group full">
+
+              <label
+                class="form-label"
                 for="edit-commentaire"
               >
                 Commentaire
@@ -2293,7 +2329,7 @@
   <script>
 
     /* =========================================================
-       CONTRIBUTIONS À TRAITER — V9
+       CONTRIBUTIONS À TRAITER — V10
 
        Évolutions V5 :
        - verrouillage optimiste via CONTRIBUTIONS.Version_modification ;
@@ -2311,6 +2347,11 @@
        - correction de l'ouverture dans la messagerie ;
        - suppression des "+" affichés à la place des espaces
          dans l'objet et le corps des courriels d'envoi et de relance ;
+
+       Évolution V10 :
+       - Destinataires_mail et Copies_mail deviennent prioritaires pour les envois et relances ;
+       - CONTACTS_DEPARTEMENTS reste utilisé en secours pour une cible Département ;
+       - les adresses sont modifiables depuis la fiche de contribution ;
        - Bureau contributeur et Lecteur renvoyés en mode singlePage ;
        - aucun changement de droits ou de logique métier.
 
@@ -3341,6 +3382,27 @@
       }
     }
 
+    function prefillEditMailContacts() {
+      const type = $("edit-type-contributeur").value;
+      const contributorId = Number($("edit-contributeur").value) || null;
+
+      if (type !== "Département" || !contributorId) {
+        $("edit-destinataires-mail").value = "";
+        $("edit-copies-mail").value = "";
+        return;
+      }
+
+      const pseudoRecord = {
+        _ContributeurId: contributorId,
+        Destinataires_mail: "",
+        Copies_mail: ""
+      };
+
+      const contacts = getActiveContacts(pseudoRecord);
+      $("edit-destinataires-mail").value = contacts.to.join("; ");
+      $("edit-copies-mail").value = contacts.cc.join("; ");
+    }
+
     /* =========================
        BADGES
        ========================= */
@@ -3420,14 +3482,52 @@
       ) || null;
     }
 
+    function splitMailAddresses(value) {
+      return [...new Set(
+        text(value)
+          .split(/[;,\n]+/)
+          .map(item => item.trim())
+          .filter(Boolean)
+      )];
+    }
+
     function getActiveContacts(record) {
-      if (!record || !record._ContributeurId) {
+      if (!record) {
         return { to: [], cc: [] };
+      }
+
+      /*
+        V10 — PRIORITÉ AUX ADRESSES PORTÉES PAR LA CONTRIBUTION
+        -------------------------------------------------------
+        - Destinataires_mail / Copies_mail sont prioritaires ;
+        - si Destinataires_mail est vide et que la cible est un
+          Département, CONTACTS_DEPARTEMENTS reste le secours.
+      */
+      const storedTo = splitMailAddresses(record.Destinataires_mail);
+      const storedCc = splitMailAddresses(record.Copies_mail);
+
+      if (storedTo.length) {
+        return {
+          to: storedTo,
+          cc: storedCc
+        };
+      }
+
+      if (!record._ContributeurId) {
+        return {
+          to: [],
+          cc: storedCc
+        };
       }
 
       const matching = contactRows.filter(row =>
         Number(row.Departement) === Number(record._ContributeurId)
-        && Boolean(row.Actif)
+        && !(
+          row.Actif === false
+          || row.Actif === 0
+          || clean(row.Actif) === "false"
+          || clean(row.Actif) === "non"
+        )
         && clean(row.Email)
       );
 
@@ -3441,7 +3541,9 @@
 
       return {
         to: [...new Set(to)],
-        cc: [...new Set(cc)]
+        cc: storedCc.length
+          ? storedCc
+          : [...new Set(cc)]
       };
     }
 
@@ -3519,9 +3621,8 @@
 
       if (contacts.to.length === 0) {
         throw new Error(
-          record._ContributeurId
-            ? `Aucun destinataire principal actif n'est défini pour le contributeur ${contributorLabel(record)}.`
-            : `Aucun destinataire automatique n'est actuellement configuré pour le contributeur ${contributorLabel(record)}. Les contacts automatiques sont pour le moment paramétrés au niveau Département.`
+          `Aucun destinataire n'est renseigné pour le contributeur ${contributorLabel(record)}. `
+          + `Renseignez Destinataires_mail sur la contribution ou configurez un contact actif pour ce département.`
         );
       }
 
@@ -3574,9 +3675,8 @@
 
       if (contacts.to.length === 0) {
         throw new Error(
-          record._ContributeurId
-            ? `Aucun destinataire principal actif n'est défini pour le contributeur ${contributorLabel(record)}.`
-            : `Aucun destinataire automatique n'est actuellement configuré pour le contributeur ${contributorLabel(record)}. Les contacts automatiques sont pour le moment paramétrés au niveau Département.`
+          `Aucun destinataire n'est renseigné pour le contributeur ${contributorLabel(record)}. `
+          + `Renseignez Destinataires_mail sur la contribution ou configurez un contact actif pour ce département.`
         );
       }
 
@@ -4396,6 +4496,8 @@
       $("edit-demandeur").value = text(record.Demandeur);
       $("edit-echeance").value = dateToInput(record.Echeance);
       $("edit-priorite").value = text(record.Priorite) || "Normale";
+      $("edit-destinataires-mail").value = text(record.Destinataires_mail);
+      $("edit-copies-mail").value = text(record.Copies_mail);
       $("edit-commentaire").value = text(record.Commentaire);
 
       $("detail-content").style.display = "none";
@@ -4461,6 +4563,8 @@
         Contributeur_service: null,
         Echeance: inputToGristDate($("edit-echeance").value),
         Priorite: $("edit-priorite").value,
+        Destinataires_mail: $("edit-destinataires-mail").value.trim(),
+        Copies_mail: $("edit-copies-mail").value.trim(),
         Commentaire: $("edit-commentaire").value.trim()
       };
 
@@ -4633,7 +4737,10 @@
 
       $("edit-type-contributeur").addEventListener("change", () => {
         populateContributorEditSelect($("edit-type-contributeur").value);
+        prefillEditMailContacts();
       });
+
+      $("edit-contributeur").addEventListener("change", prefillEditMailContacts);
 
       $("mail-preview-close").addEventListener("click", closeMailPreview);
       $("mail-preview-copy").addEventListener("click", copyPreparedMail);
