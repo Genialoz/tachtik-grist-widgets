@@ -385,7 +385,17 @@
         <br>
         <strong>Groupe</strong> est facultatif : répétez la même valeur sur plusieurs lignes
         pour créer plusieurs affectations rattachées à une même demande.
+        <br><br>
+        <strong>Courriels — colonnes facultatives :</strong>
+        ajoutez <strong>Destinataires_mail</strong> pour les adresses principales et
+        <strong>Copies_mail</strong> pour les adresses en copie.
         <br>
+        Vous pouvez saisir plusieurs adresses dans une même cellule en les séparant par un
+        <strong>point-virgule (;)</strong>.
+        <br>
+        Si ces colonnes sont absentes du fichier, l'import reste compatible et les adresses
+        déjà enregistrées sur une contribution existante sont conservées.
+        <br><br>
         Les contributions existantes sont automatiquement détectées et mises à jour
         lorsqu'une correspondance unique est trouvée pour le même bureau demandeur,
         le même titre et le même contributeur.
@@ -504,7 +514,11 @@
 </div>
 
 <!-- =========================================================
-     IMPORT CONTRIBUTIONS — BUREAU CONTRIBUTEUR — V10
+     IMPORT CONTRIBUTIONS — BUREAU CONTRIBUTEUR — V11
+
+     V11 :
+     - affichage explicite dans l'interface des colonnes courriel facultatives ;
+     - indication du séparateur point-virgule pour plusieurs adresses.
 
      V10 :
      - ajout facultatif des colonnes Excel Destinataires_mail et Copies_mail ;
@@ -535,7 +549,7 @@
 <script>
 /* =============================================================
    IMPORT CONTRIBUTIONS / BUREAU CONTRIBUTEUR
-   Version 10
+   Version 11
 
    Objectif :
    - lire un fichier Excel ;
