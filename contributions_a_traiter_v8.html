@@ -2293,7 +2293,7 @@
   <script>
 
     /* =========================================================
-       CONTRIBUTIONS À TRAITER — V8
+       CONTRIBUTIONS À TRAITER — V9
 
        Évolutions V5 :
        - verrouillage optimiste via CONTRIBUTIONS.Version_modification ;
@@ -2306,6 +2306,11 @@
        Évolution V7 :
        - remplacement du lien « Retour » par « Retour à l'accueil » ;
        - redirection automatique vers l'accueil correspondant au rôle ;
+
+       Évolution V9 :
+       - correction de l'ouverture dans la messagerie ;
+       - suppression des "+" affichés à la place des espaces
+         dans l'objet et le corps des courriels d'envoi et de relance ;
        - Bureau contributeur et Lecteur renvoyés en mode singlePage ;
        - aucun changement de droits ou de logique métier.
 
@@ -3611,17 +3616,44 @@
     }
 
     function launchMailto(mail) {
+      /*
+        V9 — CORRECTION MAILTO
+        URLSearchParams transforme les espaces en "+".
+        Certains clients de messagerie affichent alors réellement
+        ces "+" dans l'objet ou le corps du message.
+
+        On construit donc explicitement la requête mailto avec
+        encodeURIComponent(), qui encode les espaces en "%20".
+      */
+
       const to = mail.to.join(",");
-      const query = new URLSearchParams();
+      const params = [];
 
       if (mail.cc.length) {
-        query.set("cc", mail.cc.join(","));
+        params.push(
+          "cc=" + encodeURIComponent(
+            mail.cc.join(",")
+          )
+        );
       }
 
-      query.set("subject", mail.subject);
-      query.set("body", mail.body);
+      params.push(
+        "subject=" + encodeURIComponent(
+          mail.subject
+        )
+      );
 
-      const mailto = `mailto:${encodeURIComponent(to)}?${query.toString()}`;
+      params.push(
+        "body=" + encodeURIComponent(
+          mail.body
+        )
+      );
+
+      const mailto =
+        "mailto:"
+        + encodeURIComponent(to)
+        + "?"
+        + params.join("&");
 
       const link = document.createElement("a");
       link.href = mailto;
