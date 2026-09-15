@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Import contributions Administrateur</title>
+  <title>Import de contributions</title>
 
   <!-- SDK Grist -->
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
 
-  <!-- SheetJS -->
+  <!-- SheetJS pour lire les fichiers Excel -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <style>
@@ -96,48 +96,26 @@
       line-height:1.5;
     }
 
-    .field{
-      display:flex;
-      flex-direction:column;
-      gap:7px;
-      margin-top:16px;
-    }
-
-    label{
-      font-size:13px;
-      font-weight:800;
-      color:#344054;
-    }
-
-    select,
-    input[type="file"]{
-      width:100%;
-      border:1px solid #d0d5dd;
-      border-radius:12px;
-      padding:11px 12px;
-      font:inherit;
-      color:var(--text);
-      background:#fff;
-      outline:none;
-    }
-
-    select:focus,
-    input[type="file"]:focus{
-      border-color:#818cf8;
-      box-shadow:0 0 0 3px rgba(99,102,241,.12);
-    }
-
     .upload-row{
       display:flex;
       gap:12px;
-      align-items:end;
+      align-items:center;
       flex-wrap:wrap;
       margin-top:18px;
     }
 
-    .upload-row .grow{
+    .file-box{
       flex:1;
       min-width:280px;
+      border:1px dashed #98a2b3;
+      border-radius:14px;
+      padding:16px;
+      background:#fafafa;
+    }
+
+    input[type="file"]{
+      width:100%;
+      font:inherit;
     }
 
     button{
@@ -166,16 +144,6 @@
     .btn-secondary{
       background:#f2f4f7;
       color:#344054;
-    }
-
-    .technical-note{
-      margin-top:12px;
-      padding:12px 14px;
-      border-radius:12px;
-      background:var(--soft);
-      color:#3730a3;
-      font-size:13px;
-      line-height:1.5;
     }
 
     .notice{
@@ -266,8 +234,13 @@
       font-weight:900;
     }
 
-    tr.invalid{background:#fff6f5}
-    tr.valid{background:#fbfffc}
+    tr.invalid{
+      background:#fff6f5;
+    }
+
+    tr.valid{
+      background:#fbfffc;
+    }
 
     .status-badge{
       display:inline-flex;
@@ -321,6 +294,16 @@
       color:var(--muted);
     }
 
+    .technical-note{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:12px;
+      background:var(--soft);
+      color:#3730a3;
+      font-size:13px;
+      line-height:1.5;
+    }
+
     @media(max-width:800px){
       .app{padding:14px}
       .stats{grid-template-columns:1fr 1fr}
@@ -338,7 +321,7 @@
        ========================================================= -->
   <nav style="margin:0 0 14px 0;">
     <a
-      href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/32"
+      href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/33?style=singlePage"
       target="_top"
       style="
         display:inline-flex;
@@ -363,8 +346,8 @@
   <section class="hero">
     <h1>📥 Importer des contributions</h1>
     <p>
-      Importez plusieurs contributions en choisissant un bureau
-      demandeur pour l'ensemble du fichier.
+      Importez plusieurs contributions depuis un fichier Excel.
+      Toutes les lignes sont contrôlées avant de lancer l'import.
     </p>
     <div id="profileInfo" class="profile">Identification du profil…</div>
   </section>
@@ -376,52 +359,60 @@
   <div id="accessDenied" class="notice danger">
     <strong>Accès refusé.</strong><br>
     Cette page est réservée aux utilisateurs ayant le rôle
-    <strong>Administrateur</strong>.
+    <strong>Bureau contributeur</strong>.
   </div>
 
   <main id="mainContent" class="hidden">
 
     <!-- =========================================================
-         PARAMÈTRES D'IMPORT
+         SÉLECTION DU FICHIER
          ========================================================= -->
     <section class="panel">
-      <h2>1. Choisir le bureau et le fichier Excel</h2>
+      <h2>1. Sélectionner le fichier Excel</h2>
       <p>
-        Le bureau sélectionné sera appliqué à toutes les contributions du fichier.
+        Le fichier doit contenir une feuille nommée <strong>Import</strong>
+        et les colonnes prévues par le modèle d'import.
       </p>
 
-      <div class="field">
-        <label for="bureauOrigine">Bureau demandeur *</label>
-        <select id="bureauOrigine">
-          <option value="">— Sélectionner un bureau —</option>
-        </select>
-      </div>
-
       <div class="technical-note">
-        Le fichier doit contenir une feuille <strong>Import</strong> avec les colonnes :
+        Colonnes attendues :
         <strong>Titre, Description, Demandeur, Niveau_contributeur, Contributeur,
-        Echeance, Priorite, Statut, Commentaire, Groupe</strong>.<br>
+        Echeance, Priorite, Statut, Commentaire, Groupe</strong>.
+        <br>
         <strong>Niveau_contributeur</strong> doit contenir :
         <strong>Département</strong>, <strong>Sous-direction</strong> ou <strong>Service</strong>.
-        Pour <strong>Contributeur</strong>, utilisez le code correspondant au niveau choisi.<br>
+        Pour <strong>Contributeur</strong>, utilisez le code correspondant au niveau choisi.
+        <br>
         <strong>Groupe</strong> est facultatif : répétez la même valeur sur plusieurs lignes
-        pour créer plusieurs affectations rattachées à une même demande.<br><br>
+        pour créer plusieurs affectations rattachées à une même demande.
+        <br><br>
         <strong>Courriels — colonnes facultatives :</strong>
         ajoutez <strong>Destinataires_mail</strong> pour les adresses principales et
-        <strong>Copies_mail</strong> pour les adresses en copie.<br>
+        <strong>Copies_mail</strong> pour les adresses en copie.
+        <br>
         Vous pouvez saisir plusieurs adresses dans une même cellule en les séparant par un
-        <strong>point-virgule (;)</strong>.<br>
+        <strong>point-virgule (;)</strong>.
+        <br>
         Si ces colonnes sont absentes du fichier, l'import reste compatible et les adresses
-        déjà enregistrées sur une contribution existante sont conservées.<br><br>
-        Les contributions existantes du bureau demandeur sélectionné sont automatiquement
-        détectées et mises à jour lorsqu'une correspondance unique est trouvée.
-        Les doublons ambigus sont ignorés sans bloquer le reste du fichier.
+        déjà enregistrées sur une contribution existante sont conservées.
+        <br><br>
+        Les contributions existantes sont automatiquement détectées et mises à jour
+        lorsqu'une correspondance unique est trouvée pour le même bureau demandeur,
+        le même titre et le même contributeur.
+        <br>
+        Si plusieurs fiches existantes correspondent, la ligne est
+        <strong>ignorée comme doublon</strong> sans bloquer les autres lignes.
+        Si la ligne est déjà strictement identique, elle est marquée
+        <strong>Aucun changement</strong>.
       </div>
 
       <div class="upload-row">
-        <div class="grow">
-          <label for="excelFile">Fichier Excel</label>
-          <input id="excelFile" type="file" accept=".xlsx,.xls">
+        <div class="file-box">
+          <input
+            id="excelFile"
+            type="file"
+            accept=".xlsx,.xls"
+          >
         </div>
 
 
@@ -438,7 +429,7 @@
     </section>
 
     <!-- =========================================================
-         APERÇU
+         APERÇU ET CONTRÔLES
          ========================================================= -->
     <section id="previewPanel" class="panel hidden">
       <h2>2. Vérifier les lignes</h2>
@@ -528,63 +519,81 @@
 </div>
 
 <!-- =========================================================
-     IMPORT CONTRIBUTIONS — ADMINISTRATEUR — V9
+     IMPORT CONTRIBUTIONS — BUREAU CONTRIBUTEUR — V12
 
-     V9 :
+     V12 :
      - ajout d'un bouton « Télécharger le modèle Excel » ;
      - génération locale d'un fichier Modele_import_contributions.xlsx ;
      - feuille Import avec les 12 colonnes utilisables ;
      - feuille Aide avec les valeurs attendues et les consignes.
 
-     V8 :
+     V11 :
      - affichage explicite dans l'interface des colonnes courriel facultatives ;
      - indication du séparateur point-virgule pour plusieurs adresses.
 
-     V7 :
+     V10 :
      - ajout facultatif des colonnes Excel Destinataires_mail et Copies_mail ;
      - ces valeurs sont enregistrées dans CONTRIBUTIONS ;
      - si les colonnes sont absentes lors d'une mise à jour, les adresses existantes sont conservées ;
      - les anciens fichiers d'import restent compatibles.
 
-     V6 :
+     V8 :
      - intégration de CONTRIBUTIONS.Version_modification ;
      - toute création issue de l'import commence à Version_modification = 1 ;
      - toute mise à jour issue de l'import incrémente Version_modification ;
      - correction de la détection "Aucun changement" après une mise à jour ;
-     - comparaison métier renforcée des champs importés, notamment les références
-       Grist et les dates ;
+     - comparaison métier renforcée des références Grist et des dates ;
+     - les doublons ambigus ne bloquent plus tout l'import :
+       ils sont ignorés et signalés dans l'aperçu ;
+     - une ligne strictement identique à l'existant est marquée
+       "Aucun changement" et n'est pas réécrite ;
+     - correction de la détection Création / Mise à jour lors de réimports
+       successifs sans rechargement de la page ;
      - cibles Département / Sous-direction / Service ;
-     - Type_contributeur et Groupe_contribution ;
-     - création + mise à jour des contributions existantes ;
-     - doublons ambigus ignorés sans blocage ;
-     - lignes déjà à jour classées "Aucun changement" ;
-     - Bureau demandeur choisi une fois pour l'ensemble du fichier ;
-     - aucun envoi automatique n'est déclenché.
+     - Contributeur_affiche / Type_contributeur ;
+     - regroupement facultatif via la colonne Excel "Groupe" ;
+     - détection automatique Création / Mise à jour ;
+     - mise à jour des contributions existantes sans ID technique requis ;
+     - conservation stricte de Bureau_origine pour le bureau courant.
      ========================================================= -->
 
 <script>
 /* =============================================================
-   IMPORT CONTRIBUTIONS / ADMINISTRATEUR
-   Version 9
+   IMPORT CONTRIBUTIONS / BUREAU CONTRIBUTEUR
+   Version 12
 
    Objectif :
-   - réserver le widget au rôle Administrateur ;
-   - choisir Bureau_origine une fois pour tout le fichier ;
+   - lire un fichier Excel ;
+   - valider toutes les lignes avant import ;
    - gérer les contributeurs de niveau Département / Sous-direction / Service ;
-   - détecter automatiquement Création / Mise à jour ;
-   - ignorer sans blocage les doublons ambigus ;
+   - détecter automatiquement si une ligne doit créer une contribution
+     ou mettre à jour une contribution existante ;
+   - ne jamais utiliser une ligne appartenant à un autre Bureau demandeur ;
+   - permettre de regrouper plusieurs nouvelles affectations d'une même demande
+     grâce à la colonne Excel facultative "Groupe" ;
+   - importer toutes les actions en une seule opération Grist ;
+   - recharger les contributions existantes avant chaque analyse afin qu'une
+     réimportation dans la même session détecte immédiatement les créations
+     effectuées lors de l'import précédent ;
+   - ignorer sans bloquer les doublons ambigus ;
    - ne pas réécrire les lignes déjà strictement identiques ;
-   - générer Groupe_contribution pour les nouvelles contributions ;
-   - importer toutes les actions dans CONTRIBUTIONS.
+   - empêcher tout import partiel uniquement en cas de véritable erreur
+     de validation (date, priorité, statut, contributeur, etc.).
 
-   Rapprochement d'une contribution existante :
-   1. Bureau_origine = bureau demandeur sélectionné ;
+   Règle de rapprochement sans ID technique :
+   1. Bureau_origine = bureau courant ;
    2. même Titre normalisé ;
    3. même Type_contributeur ;
-   4. même cible ;
-   5. si nécessaire, Demandeur sert de départage.
+   4. même cible (Département / Sous-direction / Service) ;
+   5. si plusieurs lignes correspondent, Demandeur est utilisé comme départage.
+   Si plusieurs contributions restent possibles, la ligne est ignorée comme doublon
+   afin d'éviter toute mise à jour de la mauvaise contribution, sans bloquer
+   les autres lignes du fichier.
 
-   Si plusieurs lignes existantes restent possibles, aucune n'est modifiée.
+   Limite volontaire :
+   modifier le Titre ou le Contributeur d'une contribution existante depuis Excel
+   ne peut pas être identifié de façon sûre sans identifiant stable ; la ligne sera
+   donc considérée comme une nouvelle contribution.
    ============================================================= */
 
 const $ = id => document.getElementById(id);
@@ -618,7 +627,8 @@ const ALLOWED_STATUSES = new Set([
 
 let currentProfile = null;
 let currentUser = null;
-let bureaux = [];
+let currentUserBureauId = null;
+let currentUserBureauLabel = "";
 let departments = [];
 let subDirections = [];
 let services = [];
@@ -629,11 +639,9 @@ let serviceByCode = new Map();
 
 let existingContributions = [];
 let analyzedRows = [];
-let selectedBureauId = null;
-let selectedBureauLabel = "";
 
 /* =============================================================
-   OUTILS
+   OUTILS GÉNÉRAUX
    ============================================================= */
 
 function text(value){
@@ -736,6 +744,23 @@ function sameContributorTarget(record,level,targetId){
   );
 }
 
+
+async function refreshExistingContributions(){
+  const contributionsTable =
+    await grist.docApi.fetchTable("CONTRIBUTIONS");
+
+  existingContributions =
+    tableToRows(contributionsTable)
+      .filter(
+        row =>
+          Number(row.Bureau_origine)
+          ===
+          Number(currentUserBureauId)
+      );
+}
+
+
+
 function gristRefId(value){
   /*
     Selon le contexte, une référence Grist peut être renvoyée :
@@ -767,8 +792,8 @@ function normalizeDateValue(value){
 
   if(Number.isFinite(n)){
     /*
-      On compare à la journée près pour éviter un faux écart lié
-      à une représentation horaire différente.
+      On compare à la journée près afin d'éviter un faux écart
+      lié à une représentation horaire différente.
     */
     return Math.floor(n / 86400);
   }
@@ -821,17 +846,10 @@ function isSameBusinessValues(existing,values){
   );
 }
 
-async function refreshExistingContributions(){
-  const contributionsTable =
-    await grist.docApi.fetchTable("CONTRIBUTIONS");
-
-  existingContributions =
-    tableToRows(contributionsTable);
-}
 
 function findExistingContribution({title,level,targetId,demandeur}){
   const candidates = existingContributions.filter(record =>
-    Number(record.Bureau_origine) === Number(selectedBureauId)
+    Number(record.Bureau_origine) === Number(currentUserBureauId)
     && normalizeKey(record.Titre) === normalizeKey(title)
     && sameContributorTarget(record,level,targetId)
   );
@@ -885,21 +903,8 @@ function tableToRows(table){
   });
 }
 
-function showNotice(id,message){
-  const box = $(id);
-
-  if(!message){
-    box.textContent = "";
-    box.classList.remove("show");
-    return;
-  }
-
-  box.textContent = message;
-  box.classList.add("show");
-}
-
-function isAdministrator(){
-  return clean(currentProfile?.Role) === "administrateur";
+function isBureauContributor(){
+  return clean(currentProfile?.Role) === "bureau contributeur";
 }
 
 function isActiveUser(){
@@ -911,6 +916,19 @@ function isActiveUser(){
     || clean(value) === "false"
     || clean(value) === "non"
   );
+}
+
+function showNotice(id,message){
+  const box = $(id);
+
+  if(!message){
+    box.textContent = "";
+    box.classList.remove("show");
+    return;
+  }
+
+  box.textContent = message;
+  box.classList.add("show");
 }
 
 /* =============================================================
@@ -958,31 +976,31 @@ async function identifyProfile(){
 }
 
 /* =============================================================
-   CONTEXTE
+   CHARGEMENT DU CONTEXTE
    ============================================================= */
 
 async function loadContext(){
   const [
     usersTable,
-    bureauxTable,
     departmentsTable,
     subDirectionsTable,
     servicesTable,
+    bureauxTable,
     contributionsTable
   ] = await Promise.all([
     grist.docApi.fetchTable("UTILISATEURS"),
-    grist.docApi.fetchTable("BUREAUX_ORIGINE"),
     grist.docApi.fetchTable("DEPARTEMENTS"),
     grist.docApi.fetchTable("SOUS_DIRECTIONS"),
     grist.docApi.fetchTable("SERVICES"),
+    grist.docApi.fetchTable("BUREAUX_ORIGINE"),
     grist.docApi.fetchTable("CONTRIBUTIONS")
   ]);
 
   const users = tableToRows(usersTable);
-  bureaux = tableToRows(bureauxTable);
   departments = tableToRows(departmentsTable);
   subDirections = tableToRows(subDirectionsTable);
   services = tableToRows(servicesTable);
+  const bureaux = tableToRows(bureauxTable);
   existingContributions = tableToRows(contributionsTable);
 
   currentProfile = await identifyProfile();
@@ -999,16 +1017,38 @@ async function loadContext(){
     );
   }
 
-  $("profileInfo").textContent =
-    "👤 " + (text(currentProfile.Role) || "Profil non défini");
+  currentUserBureauId =
+    Number(currentUser.Bureau) || null;
 
-  if(!isAdministrator()){
+  const bureau = bureaux.find(
+    row => Number(row.id) === Number(currentUserBureauId)
+  );
+
+  currentUserBureauLabel =
+    bureau
+      ? text(bureau.Code || bureau.Nom || bureau.id)
+      : "";
+
+  $("profileInfo").textContent =
+    "👤 "
+    + (text(currentProfile.Role) || "Profil non défini")
+    + (currentUserBureauLabel
+        ? " — " + currentUserBureauLabel
+        : "");
+
+  if(!isBureauContributor()){
     $("accessDenied").classList.add("show");
     return false;
   }
 
   if(!isActiveUser()){
     throw new Error("Votre compte est inactif.");
+  }
+
+  if(!currentUserBureauId){
+    throw new Error(
+      "Aucun bureau n'est associé à votre profil Bureau contributeur."
+    );
   }
 
   departmentByCode = new Map();
@@ -1039,48 +1079,11 @@ async function loadContext(){
     }
   }
 
+  existingContributions = existingContributions.filter(
+    row => Number(row.Bureau_origine) === Number(currentUserBureauId)
+  );
+
   return true;
-}
-
-/* =============================================================
-   BUREAUX
-   ============================================================= */
-
-function populateBureaux(){
-  const select = $("bureauOrigine");
-
-  const sorted = [...bureaux].sort((a,b)=>{
-    const aLabel = text(a.Code || a.Nom || a.id);
-    const bLabel = text(b.Code || b.Nom || b.id);
-    return aLabel.localeCompare(bLabel,"fr",{numeric:true});
-  });
-
-  for(const row of sorted){
-    const option = document.createElement("option");
-    option.value = Number(row.id);
-
-    const code = text(row.Code).trim();
-    const nom = text(row.Nom).trim();
-
-    option.textContent =
-      code && nom
-        ? `${code} — ${nom}`
-        : (code || nom || `Bureau ${row.id}`);
-
-    select.appendChild(option);
-  }
-}
-
-function getSelectedBureau(){
-  const id = Number($("bureauOrigine").value) || null;
-
-  if(!id){
-    return null;
-  }
-
-  return bureaux.find(
-    row => Number(row.id) === Number(id)
-  ) || null;
 }
 
 /* =============================================================
@@ -1095,6 +1098,13 @@ function excelDateToGrist(value){
   ){
     return null;
   }
+
+  /*
+    SheetJS peut renvoyer :
+    - une Date JavaScript ;
+    - un numéro de série Excel ;
+    - une chaîne déjà formatée.
+  */
 
   if(value instanceof Date && !Number.isNaN(value.getTime())){
     return Date.UTC(
@@ -1164,7 +1174,7 @@ function formatPreviewDate(gristTimestamp){
 }
 
 /* =============================================================
-   LECTURE EXCEL
+   LECTURE DU FICHIER EXCEL
    ============================================================= */
 
 
@@ -1286,13 +1296,20 @@ function getImportSheet(workbook){
 }
 
 function sheetToObjects(sheet){
+  /*
+    defval:"" conserve les colonnes vides.
+    raw:true permet de récupérer les dates Excel sans conversion texte hasardeuse.
+  */
   return XLSX.utils.sheet_to_json(sheet,{
     defval:"",
     raw:true
   });
 }
 
-function validateColumns(sheet){
+function validateColumns(rows,sheet){
+  /*
+    Même avec zéro ligne de données, on doit vérifier les en-têtes.
+  */
   const matrix = XLSX.utils.sheet_to_json(sheet,{
     header:1,
     defval:"",
@@ -1303,9 +1320,7 @@ function validateColumns(sheet){
     throw new Error("La feuille Import est vide.");
   }
 
-  const headers = matrix[0].map(
-    value => text(value).trim()
-  );
+  const headers = matrix[0].map(value => text(value).trim());
 
   importHasDestinatairesMail = headers.includes("Destinataires_mail");
   importHasCopiesMail = headers.includes("Copies_mail");
@@ -1454,7 +1469,7 @@ function validateRow(source,index,groupIds){
   }
 
   if(!isUpdateCandidate && !isAmbiguousDuplicate){
-    values.Bureau_origine = Number(selectedBureauId);
+    values.Bureau_origine = Number(currentUserBureauId);
     values.Cree_par = text(currentUser.Email).trim();
     values.Source = "Import";
 
@@ -1494,9 +1509,11 @@ function validateRow(source,index,groupIds){
 
   return {
     excelRow:index + 2,
+    source,
     contributorCode,
     contributorLevel:level,
     dueDate,
+    excelGroup,
     errors,
     valid:errors.length === 0,
     action,
@@ -1529,7 +1546,7 @@ function renderPreview(){
   $("statCreate").textContent = createCount;
   $("statUpdate").textContent = updateCount;
   $("statNoAction").textContent = noActionCount;
-  $("statBureau").textContent = selectedBureauLabel || "—";
+  $("statBureau").textContent = currentUserBureauLabel || "—";
 
   for(const row of analyzedRows){
     const tr = document.createElement("tr");
@@ -1613,11 +1630,8 @@ function renderPreview(){
 
 function clearPreview(){
   analyzedRows = [];
-  selectedBureauId = null;
-  selectedBureauLabel = "";
 
   $("excelFile").value = "";
-  $("bureauOrigine").value = "";
   $("previewBody").innerHTML = "";
   $("previewPanel").classList.add("hidden");
 
@@ -1628,7 +1642,7 @@ function clearPreview(){
 }
 
 /* =============================================================
-   ANALYSE
+   ANALYSE DU FICHIER
    ============================================================= */
 
 async function analyzeFile(){
@@ -1636,35 +1650,15 @@ async function analyzeFile(){
   showNotice("importSuccess","");
   showNotice("importError","");
 
-  const bureau = getSelectedBureau();
-
-  if(!bureau){
-    showNotice(
-      "fileError",
-      "Sélectionnez d'abord le Bureau demandeur."
-    );
-    return;
-  }
-
   const file = $("excelFile").files[0];
 
   if(!file){
     showNotice(
       "fileError",
-      "Sélectionnez ensuite un fichier Excel."
+      "Sélectionnez d'abord un fichier Excel."
     );
     return;
   }
-
-  selectedBureauId = Number(bureau.id);
-
-  const code = text(bureau.Code).trim();
-  const nom = text(bureau.Nom).trim();
-
-  selectedBureauLabel =
-    code && nom
-      ? `${code} — ${nom}`
-      : (code || nom || `Bureau ${bureau.id}`);
 
   const button = $("analyzeBtn");
   button.disabled = true;
@@ -1672,18 +1666,18 @@ async function analyzeFile(){
 
   try{
     /*
-      V4 :
-      on recharge CONTRIBUTIONS avant chaque analyse pour détecter
-      immédiatement les créations ou mises à jour effectuées précédemment.
+      V7 — IMPORTANT :
+      on recharge CONTRIBUTIONS avant chaque analyse.
+      Ainsi, une contribution créée lors d'un import précédent dans la même
+      session est immédiatement reconnue comme existante lors d'une réimportation.
     */
     await refreshExistingContributions();
 
     const workbook = await readExcelFile(file);
     const sheet = getImportSheet(workbook);
-
-    validateColumns(sheet);
-
     const rows = sheetToObjects(sheet);
+
+    validateColumns(rows,sheet);
 
     const nonEmpty = rows.filter(
       row => !rowIsCompletelyEmpty(row)
@@ -1714,7 +1708,7 @@ async function analyzeFile(){
 }
 
 /* =============================================================
-   IMPORT
+   IMPORT GRIST
    ============================================================= */
 
 async function importRows(){
@@ -1743,8 +1737,8 @@ async function importRows(){
 
   try{
     /*
-      Une seule opération Grist pour limiter le risque
-      d'import partiel.
+      Une seule opération Grist :
+      si le serveur refuse une action, on évite de laisser un import partiel.
     */
     const executableRows = analyzedRows.filter(
       row =>
@@ -1762,7 +1756,7 @@ async function importRows(){
     }
 
     /*
-      V6 — cohérence avec le verrouillage optimiste :
+      V8 — cohérence avec le verrouillage optimiste :
       - création => Version_modification = 1 ;
       - mise à jour => version existante + 1.
       Ainsi, une modification effectuée par import est détectable par les
@@ -1805,11 +1799,21 @@ async function importRows(){
 
     showNotice(
       "importSuccess",
-      `✓ Import terminé pour ${selectedBureauLabel} : ${createCount} création(s), ${updateCount} mise(s) à jour, ${duplicateCount} doublon(s) ignoré(s) et ${noChangeCount} ligne(s) sans changement.`
+      `✓ Import terminé : ${createCount} création(s), ${updateCount} mise(s) à jour, ${duplicateCount} doublon(s) ignoré(s) et ${noChangeCount} ligne(s) sans changement.`
     );
 
+    /*
+      V7 :
+      on actualise aussi le cache local immédiatement après l'import.
+      Une seconde analyse dans la même session pourra donc détecter
+      les contributions qui viennent d'être créées.
+    */
     await refreshExistingContributions();
 
+    /*
+      On garde l'aperçu visible après réussite pour que l'utilisateur
+      puisse constater ce qui vient d'être importé.
+    */
     $("importBtn").disabled = true;
     $("excelFile").value = "";
 
@@ -1818,7 +1822,7 @@ async function importRows(){
 
     showNotice(
       "importError",
-      "Impossible d'importer les contributions. Vérifiez les droits Grist et les données avant de réessayer."
+      "Impossible d'importer les contributions. Aucune ligne ne doit être considérée comme importée tant que cette erreur n'est pas résolue."
     );
 
     button.disabled = false;
@@ -1844,8 +1848,6 @@ async function init(){
     if(!allowed){
       return;
     }
-
-    populateBureaux();
 
     $("mainContent").classList.remove("hidden");
 
