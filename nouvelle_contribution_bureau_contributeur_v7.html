@@ -152,6 +152,16 @@
                   </select>
                 </div>
                 <div class="field full">
+                  <label for="assignmentDestinataires">Destinataire(s) du courriel</label>
+                  <input id="assignmentDestinataires" type="text" autocomplete="off" placeholder="prenom.nom@education.gouv.fr">
+                  <div class="help">Prérempli automatiquement pour un département lorsqu’un contact actif existe. Vous pouvez modifier la valeur. Séparez plusieurs adresses par un point-virgule.</div>
+                </div>
+                <div class="field full">
+                  <label for="assignmentCopies">Copie(s)</label>
+                  <input id="assignmentCopies" type="text" autocomplete="off" placeholder="adresse1@education.gouv.fr; adresse2@education.gouv.fr">
+                  <div class="help">Facultatif. Les adresses saisies ici seront utilisées en Cc pour cette affectation.</div>
+                </div>
+                <div class="field full">
                   <label for="assignmentCommentaire">Commentaire</label>
                   <textarea id="assignmentCommentaire"></textarea>
                 </div>
@@ -176,7 +186,7 @@
 </div>
 
 <!-- =========================================================
-     NOUVELLE CONTRIBUTION — BUREAU CONTRIBUTEUR — V7
+     NOUVELLE CONTRIBUTION — BUREAU CONTRIBUTEUR — V8
 
      Nouveautés V6 :
      - parcours intuitif par affectation :
@@ -197,6 +207,8 @@
      - Type_contributeur et champs de cible dédiés ;
      - conservation de Source = "Manuelle".
 
+     V8 : ajout des destinataires et copies par affectation, avec préremplissage depuis CONTACTS_DEPARTEMENTS pour les départements.
+
      Aucun envoi automatique n'est déclenché dans cette version.
      ========================================================= -->
 
@@ -210,6 +222,7 @@ let currentUserBureauId = null;
 let departments = [];
 let subDirections = [];
 let services = [];
+let contactRows = [];
 
 /*
   selectedTargets contient les choix explicites de l'utilisateur.
@@ -221,6 +234,56 @@ let selectedTargets = [];
 
 function text(value){ return String(value == null ? "" : value); }
 function clean(value){ return text(value).trim().toLowerCase(); }
+
+function activeContact(row){
+  const value = row?.Actif;
+  return !(
+    value === false
+    || value === 0
+    || clean(value) === "false"
+    || clean(value) === "non"
+  );
+}
+
+function contactsForDepartment(departmentId){
+  const matching = contactRows.filter(row =>
+    Number(row.Departement) === Number(departmentId)
+    && activeContact(row)
+    && clean(row.Email)
+  );
+
+  const to = [...new Set(
+    matching
+      .filter(row => clean(row.Type_contact) === "destinataire principal")
+      .map(row => text(row.Email).trim())
+  )];
+
+  const cc = [...new Set(
+    matching
+      .filter(row => clean(row.Type_contact) === "copie")
+      .map(row => text(row.Email).trim())
+  )];
+
+  return {
+    to: to.join("; "),
+    cc: cc.join("; ")
+  };
+}
+
+function prefillMailForCurrentTarget(){
+  const type = $("targetType").value;
+  const id = Number($("targetValue").value) || null;
+
+  if(type === "Département" && id){
+    const contacts = contactsForDepartment(id);
+    $("assignmentDestinataires").value = contacts.to;
+    $("assignmentCopies").value = contacts.cc;
+    return;
+  }
+
+  $("assignmentDestinataires").value = "";
+  $("assignmentCopies").value = "";
+}
 
 function tableToRows(table){
   if(!table){ return []; }
@@ -309,17 +372,19 @@ async function identifyProfile(){
    CHARGEMENT DU PROFIL ET DES RÉFÉRENTIELS
    ============================================================= */
 async function loadContext(){
-  const [userTable,departmentTable,subDirectionTable,serviceTable] = await Promise.all([
+  const [userTable,departmentTable,subDirectionTable,serviceTable,contactTable] = await Promise.all([
     grist.docApi.fetchTable("UTILISATEURS"),
     grist.docApi.fetchTable("DEPARTEMENTS"),
     grist.docApi.fetchTable("SOUS_DIRECTIONS"),
-    grist.docApi.fetchTable("SERVICES")
+    grist.docApi.fetchTable("SERVICES"),
+    grist.docApi.fetchTable("CONTACTS_DEPARTEMENTS")
   ]);
 
   const users = tableToRows(userTable);
   departments = tableToRows(departmentTable);
   subDirections = tableToRows(subDirectionTable);
   services = tableToRows(serviceTable);
+  contactRows = tableToRows(contactTable);
 
   currentProfile = await identifyProfile();
   const profileEmail = text(currentProfile.Email).trim();
@@ -381,6 +446,8 @@ function populateTargetValues(){
   const showDeploy = type === "Sous-direction" || type === "Service";
   $("deployBox").classList.toggle("hidden",!showDeploy);
   $("deployToDepartments").checked = false;
+  $("assignmentDestinataires").value = "";
+  $("assignmentCopies").value = "";
 }
 
 function explicitTargetKey(target){
@@ -424,6 +491,8 @@ function addTarget(){
     deploy,
     echeance:$("assignmentEcheance").value || "",
     priorite:$("assignmentPriorite").value || "Normale",
+    destinataires:$("assignmentDestinataires").value.trim(),
+    copies:$("assignmentCopies").value.trim(),
     commentaire:$("assignmentCommentaire").value.trim()
   };
 
@@ -444,6 +513,8 @@ function addTarget(){
   $("deployToDepartments").checked = false;
   $("assignmentEcheance").value = "";
   $("assignmentPriorite").value = "Normale";
+  $("assignmentDestinataires").value = "";
+  $("assignmentCopies").value = "";
   $("assignmentCommentaire").value = "";
 
   renderSelectedTargets();
@@ -481,6 +552,8 @@ function buildFinalAssignments(){
     const settings = {
       echeance:target.echeance || "",
       priorite:target.priorite || "Normale",
+      destinataires:text(target.destinataires).trim(),
+      copies:text(target.copies).trim(),
       commentaire:text(target.commentaire).trim()
     };
 
@@ -502,7 +575,9 @@ function buildFinalAssignments(){
             type:"Département",
             id:Number(department.id),
             sourceLabel:rowLabel(department),
-            ...settings
+            ...settings,
+            destinataires:settings.destinataires || contactsForDepartment(department.id).to,
+            copies:settings.copies || contactsForDepartment(department.id).cc
           });
         }
       }else{
@@ -524,7 +599,9 @@ function buildFinalAssignments(){
             type:"Département",
             id:Number(department.id),
             sourceLabel:rowLabel(department),
-            ...settings
+            ...settings,
+            destinataires:settings.destinataires || contactsForDepartment(department.id).to,
+            copies:settings.copies || contactsForDepartment(department.id).cc
           });
         }
       }else{
@@ -584,7 +661,9 @@ function renderSelectedTargets(){
             <div class="added-assignment-meta">
               ${escapeHtml(deployText)}<br>
               Échéance : <strong>${escapeHtml(dueText)}</strong> ·
-              Priorité : <strong>${escapeHtml(target.priorite || "Normale")}</strong>
+              Priorité : <strong>${escapeHtml(target.priorite || "Normale")}</strong><br>
+              À : <strong>${escapeHtml(target.destinataires || "Non renseigné")}</strong>
+              ${target.copies ? `<br>Cc : <strong>${escapeHtml(target.copies)}</strong>` : ""}
             </div>
             ${commentHtml}
           </div>
@@ -632,6 +711,8 @@ function assignmentValues(assignment,commonValues,groupId){
     Echeance:inputToGristDate(assignment.echeance),
     Priorite:assignment.priorite || "Normale",
     Commentaire:text(assignment.commentaire).trim(),
+    Destinataires_mail:text(assignment.destinataires).trim(),
+    Copies_mail:text(assignment.copies).trim(),
     Type_contributeur:assignment.type,
     Groupe_contribution:groupId,
 
@@ -663,6 +744,8 @@ function resetForm(){
   $("targetType").value = "Département";
   $("assignmentEcheance").value = "";
   $("assignmentPriorite").value = "Normale";
+  $("assignmentDestinataires").value = "";
+  $("assignmentCopies").value = "";
   $("assignmentCommentaire").value = "";
   selectedTargets = [];
   populateTargetValues();
@@ -778,6 +861,7 @@ async function init(){
 }
 
 $("targetType").addEventListener("change",populateTargetValues);
+$("targetValue").addEventListener("change",prefillMailForCurrentTarget);
 $("addTargetBtn").addEventListener("click",addTarget);
 $("contributionForm").addEventListener("submit",createContribution);
 $("resetBtn").addEventListener("click",resetForm);
