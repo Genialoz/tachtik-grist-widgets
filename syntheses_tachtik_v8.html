@@ -896,6 +896,7 @@
             id="scheduleTime"
             type="text"
             inputmode="numeric"
+            value="09:00"
             placeholder="09:00"
           >
         </div>
@@ -1056,6 +1057,12 @@
 
 /* =========================================
    SYNTHÈSES — V9
+
+   Évolutions V11 :
+   - 09:00 est maintenant une vraie valeur par défaut pour l'heure ;
+   - l'heure devient obligatoire lorsque Synthese_active est cochée ;
+   - correction du risque d'enregistrer une heure vide en confondant
+     le placeholder visuel avec une valeur réellement saisie.
 
    Évolutions V10 :
    - renommage du libellé « Email de contact » en
@@ -3274,7 +3281,7 @@ function renderSchedule(){
       state.params
         ?.Heure_synthese
       ||
-      "";
+      "09:00";
 
 
   $("scheduleStatus")
@@ -3390,6 +3397,24 @@ async function saveSchedule(){
 
     status.textContent =
       "Jour invalide.";
+
+    status.classList.add(
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if(
+    $("scheduleActive").checked
+    &&
+    !time
+  ){
+
+    status.textContent =
+      "L'heure est obligatoire lorsque la synthèse automatique est activée.";
 
     status.classList.add(
       "error"
