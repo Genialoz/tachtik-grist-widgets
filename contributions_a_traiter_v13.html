@@ -383,6 +383,160 @@
     }
 
     /* =========================
+       V14 — SÉLECTION / SUPPRESSION MULTIPLE
+       ========================= */
+
+    function bulkDeleteVisibleRecords() {
+      const filtered = getFilteredRecords();
+      const visibleGroupKeys = new Set(filtered.map(groupKey));
+
+      return getPilotRecords().filter(record =>
+        visibleGroupKeys.has(groupKey(record))
+        && canEditRecord(record)
+      );
+    }
+
+    function pruneBulkDeleteSelection() {
+      const visibleIds = new Set(
+        bulkDeleteVisibleRecords().map(record => Number(record.id))
+      );
+
+      selectedBulkDeleteIds = new Set(
+        [...selectedBulkDeleteIds].filter(id => visibleIds.has(Number(id)))
+      );
+    }
+
+    function updateBulkDeleteControls() {
+      const bar = $("bulk-delete-bar");
+      if (!bar) return;
+
+      const allowed = isAdministrator() || isBureauContributor();
+      bar.hidden = !allowed;
+      if (!allowed) return;
+
+      const visible = bulkDeleteVisibleRecords();
+      const selectedCount = selectedBulkDeleteIds.size;
+
+      $("bulk-delete-count").textContent =
+        `${selectedCount} contribution${selectedCount > 1 ? "s" : ""} sélectionnée${selectedCount > 1 ? "s" : ""}`;
+
+      $("bulk-select-all-btn").disabled = visible.length === 0;
+      $("bulk-clear-btn").disabled = selectedCount === 0;
+      $("bulk-delete-btn").disabled = selectedCount === 0;
+    }
+
+    function selectAllVisibleForBulkDelete() {
+      selectedBulkDeleteIds = new Set(
+        bulkDeleteVisibleRecords().map(record => Number(record.id))
+      );
+      renderList();
+    }
+
+    function clearBulkDeleteSelection() {
+      selectedBulkDeleteIds.clear();
+      renderList();
+    }
+
+    function canDeleteFreshContribution(record) {
+      if (!record) return false;
+      if (isAdministrator()) return true;
+
+      return Boolean(
+        isBureauContributor()
+        && currentUserBureauId
+        && Number(record.Bureau_origine) === Number(currentUserBureauId)
+      );
+    }
+
+    async function deleteSelectedContributions() {
+      pruneBulkDeleteSelection();
+
+      const visibleById = new Map(
+        bulkDeleteVisibleRecords().map(record => [Number(record.id), record])
+      );
+
+      const selected = [...selectedBulkDeleteIds]
+        .map(id => visibleById.get(Number(id)))
+        .filter(Boolean);
+
+      if (!selected.length) {
+        showToast("Aucune contribution sélectionnée.");
+        renderList();
+        return;
+      }
+
+      const count = selected.length;
+      const confirmed = window.confirm(
+        `Supprimer définitivement ${count} contribution${count > 1 ? "s" : ""} sélectionnée${count > 1 ? "s" : ""} ?\n\n`
+        + "Cette action est irréversible. Les relances associées seront également supprimées."
+      );
+
+      if (!confirmed) return;
+
+      const button = $("bulk-delete-btn");
+      button.disabled = true;
+      button.textContent = "Suppression…";
+
+      try {
+        const freshTable = await grist.docApi.fetchTable("CONTRIBUTIONS");
+        const freshRows = tableToRows(freshTable);
+        const freshById = new Map(freshRows.map(row => [Number(row.id), row]));
+
+        for (const record of selected) {
+          const fresh = freshById.get(Number(record.id));
+          if (!fresh) {
+            throw new Error("Une contribution sélectionnée n'existe plus. Rechargez la page avant de recommencer.");
+          }
+          if (!canDeleteFreshContribution(fresh)) {
+            throw new Error("Votre périmètre ne permet plus de supprimer l'une des contributions sélectionnées.");
+          }
+          if (contributionVersion(fresh) !== contributionVersion(record)) {
+            const error = new Error(
+              "Au moins une contribution sélectionnée a été modifiée par un autre utilisateur. Aucune suppression n'a été effectuée."
+            );
+            error.code = "VERSION_CONFLICT";
+            throw error;
+          }
+        }
+
+        const ids = selected.map(record => Number(record.id));
+        const idSet = new Set(ids);
+        const relanceTable = await grist.docApi.fetchTable("RELANCES");
+        const relances = tableToRows(relanceTable);
+        const relanceIds = relances
+          .filter(row => idSet.has(Number(row.Contribution)))
+          .map(row => Number(row.id))
+          .filter(Number.isFinite);
+
+        const actions = [];
+        if (relanceIds.length) {
+          actions.push(["BulkRemoveRecord", "RELANCES", relanceIds]);
+        }
+        actions.push(["BulkRemoveRecord", "CONTRIBUTIONS", ids]);
+
+        await grist.docApi.applyUserActions(actions);
+
+        selectedBulkDeleteIds.clear();
+        selectedRecordId = null;
+        showToast(
+          `✓ ${count} contribution${count > 1 ? "s" : ""} supprimée${count > 1 ? "s" : ""} définitivement.`
+        );
+
+        await new Promise(resolve => setTimeout(resolve, 400));
+        await loadContributions();
+      }
+      catch (error) {
+        console.error(error);
+        showToast(error.message || "Impossible de supprimer les contributions sélectionnées.");
+        await loadContributions();
+      }
+      finally {
+        button.disabled = false;
+        button.textContent = "Supprimer définitivement";
+      }
+    }
+
+    /* =========================
        LISTE
        ========================= */
 
@@ -1358,6 +1512,53 @@
         grid-column: auto;
       }
     }
+  
+
+    /* =========================
+       SÉLECTION / SUPPRESSION MULTIPLE
+       ========================= */
+    .bulk-delete-bar{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:9px;
+      margin:14px 0 4px;
+      padding:12px 14px;
+      border:1px solid #f0b8b8;
+      border-radius:14px;
+      background:#fff7f7;
+    }
+    .bulk-delete-count{
+      margin-right:auto;
+      font-size:12px;
+      font-weight:850;
+      color:#8f2f2f;
+    }
+    .bulk-delete-btn{
+      border:1px solid #e1e7ec;
+      background:#fff;
+      color:#344054;
+    }
+    .bulk-delete-danger{
+      border:1px solid #d92d20;
+      background:#d92d20;
+      color:#fff;
+    }
+    .bulk-delete-danger:hover:not(:disabled){background:#b42318}
+    .bulk-select-item{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 8px;
+      border-radius:9px;
+      background:#fff7f7;
+      color:#8f2f2f;
+      font-size:10px;
+      font-weight:850;
+      cursor:pointer;
+    }
+    .bulk-select-item input{width:auto;margin:0;accent-color:#d92d20}
+
   </style>
 </head>
 
@@ -1672,7 +1873,18 @@
 
       </section>
 
-      <div class="results-head">
+      <!-- =========================
+         V14 — SÉLECTION / SUPPRESSION MULTIPLE
+         La sélection porte uniquement sur les résultats actuellement affichés.
+         ========================= -->
+    <div id="bulk-delete-bar" class="bulk-delete-bar" hidden>
+      <span id="bulk-delete-count" class="bulk-delete-count">0 contribution sélectionnée</span>
+      <button id="bulk-select-all-btn" class="bulk-delete-btn" type="button">Tout sélectionner</button>
+      <button id="bulk-clear-btn" class="bulk-delete-btn" type="button">Tout désélectionner</button>
+      <button id="bulk-delete-btn" class="bulk-delete-danger" type="button" disabled>Supprimer définitivement</button>
+    </div>
+
+    <div class="results-head">
 
         <div class="results-title">
           Contributions pilotées
@@ -2329,7 +2541,7 @@
   <script>
 
     /* =========================================================
-       CONTRIBUTIONS À TRAITER — V13
+       CONTRIBUTIONS À TRAITER — V14
 
        Évolutions V5 :
        - verrouillage optimiste via CONTRIBUTIONS.Version_modification ;
@@ -2399,6 +2611,7 @@
     let currentUserEmail = "";
     let currentUserBureauId = null;
     let selectedRecordId = null;
+    let selectedBulkDeleteIds = new Set();
     let toastTimer = null;
 
     /* =========================
@@ -4162,6 +4375,9 @@
       const filteredRecords = getFilteredRecords();
       const pilotRecords = getPilotRecords();
 
+      pruneBulkDeleteSelection();
+      updateBulkDeleteControls();
+
       const orderedKeys = [];
       const seenKeys = new Set();
 
@@ -4243,6 +4459,17 @@
             </div>
 
             <div class="assignment-actions">
+              ${canEditRecord(record) ? `
+                <label class="bulk-select-item" title="Sélectionner pour suppression définitive">
+                  <input
+                    class="bulk-delete-checkbox"
+                    type="checkbox"
+                    data-bulk-delete-id="${Number(record.id)}"
+                    ${selectedBulkDeleteIds.has(Number(record.id)) ? "checked" : ""}
+                  >
+                  Sélectionner
+                </label>
+              ` : ""}
               <button class="detail-btn" data-detail-id="${Number(record.id)}" type="button">👁 Détail</button>
               ${reminderButton(record)}
             </div>
@@ -4288,6 +4515,16 @@
           </article>
         `;
       }).join("");
+
+      document.querySelectorAll(".bulk-delete-checkbox").forEach(checkbox => {
+        checkbox.addEventListener("click", event => event.stopPropagation());
+        checkbox.addEventListener("change", () => {
+          const id = Number(checkbox.dataset.bulkDeleteId);
+          if (checkbox.checked) selectedBulkDeleteIds.add(id);
+          else selectedBulkDeleteIds.delete(id);
+          updateBulkDeleteControls();
+        });
+      });
 
       document.querySelectorAll(".detail-btn").forEach(button => {
         button.addEventListener("click", () => {
@@ -4735,6 +4972,10 @@
             renderList();
           });
         });
+
+      $("bulk-select-all-btn").addEventListener("click", selectAllVisibleForBulkDelete);
+      $("bulk-clear-btn").addEventListener("click", clearBulkDeleteSelection);
+      $("bulk-delete-btn").addEventListener("click", deleteSelectedContributions);
 
       $("back-list-btn").addEventListener("click", closeDetail);
       $("status-action-btn").addEventListener("click", toggleStatus);
