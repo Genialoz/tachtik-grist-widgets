@@ -455,13 +455,14 @@
     </section>
 
     <!-- =======================================================
-         V7 — SÉLECTION / SUPPRESSION MULTIPLE
+         V8 — SÉLECTION / ARCHIVAGE / SUPPRESSION MULTIPLE
          La sélection porte uniquement sur les résultats actuellement affichés.
          ======================================================= -->
     <div id="bulkDeleteBar" class="bulk-delete-bar">
       <span id="bulkDeleteCount" class="bulk-delete-count">0 contribution sélectionnée</span>
       <button id="bulkSelectAllBtn" class="bulk-delete-btn" type="button">Tout sélectionner</button>
       <button id="bulkClearBtn" class="bulk-delete-btn" type="button">Tout désélectionner</button>
+      <button id="bulkArchiveSelectionBtn" class="btn-archive" type="button" disabled>🗄️ Archiver la sélection</button>
       <button id="bulkDeleteBtn" class="bulk-delete-danger" type="button" disabled>Supprimer définitivement</button>
     </div>
 
@@ -602,6 +603,19 @@
    ============================================================= */
 
 "use strict";
+
+/* =============================================================
+   CONTRIBUTIONS TERMINÉES — V8
+
+   V8 :
+   - ajoute « Archiver la sélection » à la sélection multiple ;
+   - l'archivage porte uniquement sur les résultats actuellement affichés
+     et sélectionnés ;
+   - conserve l'archivage annuel, la suppression multiple,
+     le rétablissement individuel et l'archivage individuel ;
+   - conserve le contrôle de Version_modification et les droits existants.
+   ============================================================= */
+
 
 const $ = id => document.getElementById(id);
 
@@ -1456,7 +1470,7 @@ function filteredRecords(){
 }
 
 /* =============================================================
-   V7 — SÉLECTION / SUPPRESSION MULTIPLE
+   V8 — SÉLECTION / ARCHIVAGE / SUPPRESSION MULTIPLE
    ============================================================= */
 
 function bulkDeleteVisibleRecords(){
@@ -1487,6 +1501,7 @@ function updateBulkDeleteControls(){
     `${count} contribution${count > 1 ? "s" : ""} sélectionnée${count > 1 ? "s" : ""}`;
   $("bulkSelectAllBtn").disabled = visible.length === 0;
   $("bulkClearBtn").disabled = count === 0;
+  $("bulkArchiveSelectionBtn").disabled = count === 0;
   $("bulkDeleteBtn").disabled = count === 0;
 }
 
@@ -1511,6 +1526,131 @@ function canDeleteFreshContribution(record){
     && currentUserBureauId
     && Number(record.Bureau_origine) === Number(currentUserBureauId)
   );
+}
+
+async function archiveSelectedContributions(){
+  pruneBulkDeleteSelection();
+
+  const visibleById = new Map(
+    bulkDeleteVisibleRecords().map(record => [Number(record.id),record])
+  );
+
+  const selected = [...selectedBulkDeleteIds]
+    .map(id => visibleById.get(Number(id)))
+    .filter(Boolean);
+
+  if(!selected.length){
+    window.alert("Aucune contribution sélectionnée.");
+    renderList();
+    return;
+  }
+
+  const count = selected.length;
+
+  const confirmed = window.confirm(
+    `Archiver ${count} contribution${count > 1 ? "s" : ""} sélectionnée${count > 1 ? "s" : ""} ?\n\n`
+    + "Elles seront retirées des pages opérationnelles mais resteront conservées dans Grist et pourront être désarchivées depuis la page « Archives »."
+  );
+
+  if(!confirmed){
+    return;
+  }
+
+  const button = $("bulkArchiveSelectionBtn");
+  button.disabled = true;
+  button.textContent = "Archivage…";
+
+  try{
+    const freshTable = await grist.docApi.fetchTable("CONTRIBUTIONS");
+    const freshRows = tableToRows(freshTable);
+    const freshById = new Map(
+      freshRows.map(row => [Number(row.id),row])
+    );
+
+    const archiveBy = text(
+      currentProfile && currentProfile.Email
+        ? currentProfile.Email
+        : currentUser && currentUser.Email
+          ? currentUser.Email
+          : ""
+    ).trim();
+
+    const archiveDate = Date.now() / 1000;
+    const actions = [];
+
+    for(const record of selected){
+      const fresh = freshById.get(Number(record.id));
+
+      if(!fresh){
+        throw new Error(
+          "Une contribution sélectionnée n'existe plus. Rechargez la page avant de recommencer."
+        );
+      }
+
+      if(!canArchiveRecord({
+        ...record,
+        Statut:fresh.Statut,
+        Archivee:fresh.Archivee,
+        _BureauId:Number(fresh.Bureau_origine) || record._BureauId
+      })){
+        throw new Error(
+          "Votre périmètre ne permet plus d'archiver l'une des contributions sélectionnées."
+        );
+      }
+
+      if(contributionVersion(fresh) !== contributionVersion(record)){
+        const error = new Error(
+          "Au moins une contribution sélectionnée a été modifiée par un autre utilisateur. Aucun archivage n'a été effectué."
+        );
+        error.code = "VERSION_CONFLICT";
+        throw error;
+      }
+
+      actions.push([
+        "UpdateRecord",
+        "CONTRIBUTIONS",
+        Number(record.id),
+        {
+          Archivee:true,
+          Date_archivage:archiveDate,
+          Archive_par:archiveBy,
+          Version_modification:nextContributionVersion(fresh)
+        }
+      ]);
+    }
+
+    await grist.docApi.applyUserActions(actions);
+
+    selectedBulkDeleteIds.clear();
+    selectedRecordId = null;
+
+    await new Promise(resolve => setTimeout(resolve,400));
+    await loadData();
+    populateFilters();
+    populateBulkArchiveYears();
+    renderList();
+
+    window.alert(
+      `✓ ${count} contribution${count > 1 ? "s" : ""} archivée${count > 1 ? "s" : ""}.`
+    );
+
+  }catch(error){
+    console.error(error);
+
+    window.alert(
+      error.message
+      || "Impossible d'archiver les contributions sélectionnées."
+    );
+
+    await loadData();
+    populateFilters();
+    populateBulkArchiveYears();
+    renderList();
+
+  }finally{
+    button.disabled = false;
+    button.textContent = "🗄️ Archiver la sélection";
+  }
 }
 
 async function deleteSelectedContributions(){
@@ -1997,6 +2137,7 @@ $("bulkArchiveBtn").addEventListener("click",archiveFinishedYear);
 
 $("bulkSelectAllBtn").addEventListener("click",selectAllVisibleForBulkDelete);
 $("bulkClearBtn").addEventListener("click",clearBulkDeleteSelection);
+$("bulkArchiveSelectionBtn").addEventListener("click",archiveSelectedContributions);
 $("bulkDeleteBtn").addEventListener("click",deleteSelectedContributions);
 
 $("backBtn").addEventListener("click",closeDetail);
