@@ -314,6 +314,53 @@
       .bulk-archive-box{grid-template-columns:1fr}
       .bulk-archive-controls{grid-template-columns:1fr}
     }
+  
+
+    /* =========================
+       SÉLECTION / SUPPRESSION MULTIPLE
+       ========================= */
+    .bulk-delete-bar{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:9px;
+      margin:14px 0 4px;
+      padding:12px 14px;
+      border:1px solid #f0b8b8;
+      border-radius:14px;
+      background:#fff7f7;
+    }
+    .bulk-delete-count{
+      margin-right:auto;
+      font-size:12px;
+      font-weight:850;
+      color:#8f2f2f;
+    }
+    .bulk-delete-btn{
+      border:1px solid #e1e7ec;
+      background:#fff;
+      color:#344054;
+    }
+    .bulk-delete-danger{
+      border:1px solid #d92d20;
+      background:#d92d20;
+      color:#fff;
+    }
+    .bulk-delete-danger:hover:not(:disabled){background:#b42318}
+    .bulk-select-item{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 8px;
+      border-radius:9px;
+      background:#fff7f7;
+      color:#8f2f2f;
+      font-size:10px;
+      font-weight:850;
+      cursor:pointer;
+    }
+    .bulk-select-item input{width:auto;margin:0;accent-color:#d92d20}
+
   </style>
 </head>
 
@@ -406,6 +453,17 @@
         <div id="bulkArchiveNotice" class="notice"></div>
       </div>
     </section>
+
+    <!-- =======================================================
+         V7 — SÉLECTION / SUPPRESSION MULTIPLE
+         La sélection porte uniquement sur les résultats actuellement affichés.
+         ======================================================= -->
+    <div id="bulkDeleteBar" class="bulk-delete-bar">
+      <span id="bulkDeleteCount" class="bulk-delete-count">0 contribution sélectionnée</span>
+      <button id="bulkSelectAllBtn" class="bulk-delete-btn" type="button">Tout sélectionner</button>
+      <button id="bulkClearBtn" class="bulk-delete-btn" type="button">Tout désélectionner</button>
+      <button id="bulkDeleteBtn" class="bulk-delete-danger" type="button" disabled>Supprimer définitivement</button>
+    </div>
 
     <div class="results-head">
       <div class="results-title">Historique</div>
@@ -508,7 +566,15 @@
 
 <script>
 /* =============================================================
-   CONTRIBUTIONS TERMINÉES — V6
+   CONTRIBUTIONS TERMINÉES — V7
+
+   V7 :
+   - ajoute la sélection multiple et la suppression définitive ;
+   - « Tout sélectionner » cible uniquement les résultats affichés ;
+   - toute contribution masquée par un nouveau filtre est retirée de la sélection ;
+   - supprime d'abord les RELANCES associées, puis les CONTRIBUTIONS ;
+   - Administrateur : périmètre global ; Bureau contributeur : son Bureau_origine uniquement ;
+   - Lecteur : aucune suppression.
 
    V6 :
    - ajoute un archivage en masse par année de Date_finalisation ;
@@ -556,6 +622,7 @@ let serviceById = new Map();
 let bureauById = new Map();
 
 let selectedRecordId = null;
+let selectedBulkDeleteIds = new Set();
 
 /* =============================================================
    OUTILS
@@ -1389,6 +1456,153 @@ function filteredRecords(){
 }
 
 /* =============================================================
+   V7 — SÉLECTION / SUPPRESSION MULTIPLE
+   ============================================================= */
+
+function bulkDeleteVisibleRecords(){
+  return filteredRecords().filter(record => canManageRecord(record));
+}
+
+function pruneBulkDeleteSelection(){
+  const visibleIds = new Set(
+    bulkDeleteVisibleRecords().map(record => Number(record.id))
+  );
+  selectedBulkDeleteIds = new Set(
+    [...selectedBulkDeleteIds].filter(id => visibleIds.has(Number(id)))
+  );
+}
+
+function updateBulkDeleteControls(){
+  const bar = $("bulkDeleteBar");
+  if(!bar) return;
+
+  const allowed = isAdministrator() || isBureauContributor();
+  bar.classList.toggle("hidden", !allowed);
+  if(!allowed) return;
+
+  const visible = bulkDeleteVisibleRecords();
+  const count = selectedBulkDeleteIds.size;
+
+  $("bulkDeleteCount").textContent =
+    `${count} contribution${count > 1 ? "s" : ""} sélectionnée${count > 1 ? "s" : ""}`;
+  $("bulkSelectAllBtn").disabled = visible.length === 0;
+  $("bulkClearBtn").disabled = count === 0;
+  $("bulkDeleteBtn").disabled = count === 0;
+}
+
+function selectAllVisibleForBulkDelete(){
+  selectedBulkDeleteIds = new Set(
+    bulkDeleteVisibleRecords().map(record => Number(record.id))
+  );
+  renderList();
+}
+
+function clearBulkDeleteSelection(){
+  selectedBulkDeleteIds.clear();
+  renderList();
+}
+
+function canDeleteFreshContribution(record){
+  if(!record) return false;
+  if(isAdministrator()) return true;
+
+  return Boolean(
+    isBureauContributor()
+    && currentUserBureauId
+    && Number(record.Bureau_origine) === Number(currentUserBureauId)
+  );
+}
+
+async function deleteSelectedContributions(){
+  pruneBulkDeleteSelection();
+
+  const visibleById = new Map(
+    bulkDeleteVisibleRecords().map(record => [Number(record.id),record])
+  );
+  const selected = [...selectedBulkDeleteIds]
+    .map(id => visibleById.get(Number(id)))
+    .filter(Boolean);
+
+  if(!selected.length){
+    window.alert("Aucune contribution sélectionnée.");
+    renderList();
+    return;
+  }
+
+  const count = selected.length;
+  const confirmed = window.confirm(
+    `Supprimer définitivement ${count} contribution${count > 1 ? "s" : ""} sélectionnée${count > 1 ? "s" : ""} ?\n\n`
+    + "Cette action est irréversible. Les relances associées seront également supprimées."
+  );
+  if(!confirmed) return;
+
+  const button = $("bulkDeleteBtn");
+  button.disabled = true;
+  button.textContent = "Suppression…";
+
+  try{
+    const freshTable = await grist.docApi.fetchTable("CONTRIBUTIONS");
+    const freshRows = tableToRows(freshTable);
+    const freshById = new Map(freshRows.map(row => [Number(row.id),row]));
+
+    for(const record of selected){
+      const fresh = freshById.get(Number(record.id));
+      if(!fresh){
+        throw new Error("Une contribution sélectionnée n'existe plus. Rechargez la page avant de recommencer.");
+      }
+      if(!canDeleteFreshContribution(fresh)){
+        throw new Error("Votre périmètre ne permet plus de supprimer l'une des contributions sélectionnées.");
+      }
+      if(contributionVersion(fresh) !== contributionVersion(record)){
+        const error = new Error(
+          "Au moins une contribution sélectionnée a été modifiée par un autre utilisateur. Aucune suppression n'a été effectuée."
+        );
+        error.code = "VERSION_CONFLICT";
+        throw error;
+      }
+    }
+
+    const ids = selected.map(record => Number(record.id));
+    const idSet = new Set(ids);
+    const relanceTable = await grist.docApi.fetchTable("RELANCES");
+    const relances = tableToRows(relanceTable);
+    const relanceIds = relances
+      .filter(row => idSet.has(Number(row.Contribution)))
+      .map(row => Number(row.id))
+      .filter(Number.isFinite);
+
+    const actions = [];
+    if(relanceIds.length){
+      actions.push(["BulkRemoveRecord", "RELANCES", relanceIds]);
+    }
+    actions.push(["BulkRemoveRecord", "CONTRIBUTIONS", ids]);
+
+    await grist.docApi.applyUserActions(actions);
+
+    selectedBulkDeleteIds.clear();
+    selectedRecordId = null;
+    await new Promise(resolve => setTimeout(resolve,400));
+    await loadData();
+    populateFilters();
+    populateBulkArchiveYears();
+    renderList();
+    window.alert(`✓ ${count} contribution${count > 1 ? "s" : ""} supprimée${count > 1 ? "s" : ""} définitivement.`);
+  }
+  catch(error){
+    console.error(error);
+    window.alert(error.message || "Impossible de supprimer les contributions sélectionnées.");
+    await loadData();
+    populateFilters();
+    populateBulkArchiveYears();
+    renderList();
+  }
+  finally{
+    button.disabled = false;
+    button.textContent = "Supprimer définitivement";
+  }
+}
+
+/* =============================================================
    LISTE
    ============================================================= */
 
@@ -1397,6 +1611,8 @@ function renderList(){
   list.innerHTML = "";
 
   const records = filteredRecords();
+  pruneBulkDeleteSelection();
+  updateBulkDeleteControls();
 
   $("resultsCount").textContent =
     `${records.length} contribution${records.length > 1 ? "s" : ""}`;
@@ -1416,7 +1632,19 @@ function renderList(){
 
     card.innerHTML = `
       <div class="card-top">
-        <div>
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          ${canManageRecord(record) ? `
+            <label class="bulk-select-item" title="Sélectionner pour suppression définitive">
+              <input
+                class="bulk-delete-checkbox"
+                type="checkbox"
+                data-bulk-delete-id="${Number(record.id)}"
+                ${selectedBulkDeleteIds.has(Number(record.id)) ? "checked" : ""}
+              >
+              Sélectionner
+            </label>
+          ` : ""}
+          <div>
           <div class="number">
             ${escapeHtml(
               record.Numero
@@ -1427,6 +1655,7 @@ function renderList(){
 
           <div class="title">
             ${escapeHtml(record.Titre || "Sans titre")}
+          </div>
           </div>
         </div>
 
@@ -1440,6 +1669,17 @@ function renderList(){
         <span><strong>Finalisée :</strong> ${escapeHtml(formatDate(record.Date_finalisation))}</span>
       </div>
     `;
+
+    const checkbox = card.querySelector(".bulk-delete-checkbox");
+    if(checkbox){
+      checkbox.addEventListener("click",event=>event.stopPropagation());
+      checkbox.addEventListener("change",()=>{
+        const id = Number(checkbox.dataset.bulkDeleteId);
+        if(checkbox.checked) selectedBulkDeleteIds.add(id);
+        else selectedBulkDeleteIds.delete(id);
+        updateBulkDeleteControls();
+      });
+    }
 
     card.addEventListener("click",()=>{
       openDetail(record.id);
@@ -1754,6 +1994,10 @@ $("bulkArchiveYear").addEventListener("change",()=>{
   updateBulkArchivePreview();
 });
 $("bulkArchiveBtn").addEventListener("click",archiveFinishedYear);
+
+$("bulkSelectAllBtn").addEventListener("click",selectAllVisibleForBulkDelete);
+$("bulkClearBtn").addEventListener("click",clearBulkDeleteSelection);
+$("bulkDeleteBtn").addEventListener("click",deleteSelectedContributions);
 
 $("backBtn").addEventListener("click",closeDetail);
 $("restoreBtn").addEventListener("click",restoreContribution);
