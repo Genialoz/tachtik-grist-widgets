@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contributions terminées</title>
 
-  <!-- SDK Grist -->
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
 
   <style>
@@ -22,6 +21,9 @@
       --success-bg:#ecfdf3;
       --danger:#b42318;
       --danger-bg:#fef3f2;
+      --archive:#8a5a00;
+      --archive-bg:#fff7e6;
+      --archive-line:#f0c36a;
       --shadow:0 10px 30px rgba(16,24,40,.08);
     }
 
@@ -49,16 +51,8 @@
       margin-bottom:20px;
     }
 
-    .hero h1{
-      margin:0 0 8px;
-      font-size:28px;
-    }
-
-    .hero p{
-      margin:0;
-      opacity:.92;
-      line-height:1.5;
-    }
+    .hero h1{margin:0 0 8px;font-size:28px}
+    .hero p{margin:0;opacity:.92;line-height:1.5}
 
     .profile{
       display:inline-flex;
@@ -81,11 +75,11 @@
 
     .toolbar{
       display:grid;
-      grid-template-columns:2fr 1fr 1fr 1fr;
+      grid-template-columns:2fr 1fr 1fr 1fr 1fr;
       gap:12px;
     }
 
-    input, select{
+    input,select{
       width:100%;
       border:1px solid #d0d5dd;
       border-radius:12px;
@@ -109,21 +103,9 @@
       margin:8px 2px 12px;
     }
 
-    .results-title{
-      font-size:18px;
-      font-weight:900;
-    }
-
-    .results-count{
-      color:var(--muted);
-      font-size:13px;
-      font-weight:800;
-    }
-
-    .list{
-      display:grid;
-      gap:12px;
-    }
+    .results-title{font-size:18px;font-weight:900}
+    .results-count{color:var(--muted);font-size:13px;font-weight:800}
+    .list{display:grid;gap:12px}
 
     .card{
       background:#fff;
@@ -146,18 +128,8 @@
       align-items:flex-start;
     }
 
-    .title{
-      font-weight:900;
-      font-size:17px;
-      line-height:1.35;
-    }
-
-    .number{
-      color:var(--muted);
-      font-size:12px;
-      font-weight:800;
-      margin-bottom:4px;
-    }
+    .title{font-weight:900;font-size:17px;line-height:1.35}
+    .number{color:var(--muted);font-size:12px;font-weight:800;margin-bottom:4px}
 
     .badge{
       display:inline-flex;
@@ -180,9 +152,7 @@
       font-size:13px;
     }
 
-    .meta strong{
-      color:#344054;
-    }
+    .meta strong{color:#344054}
 
     .empty{
       background:#fff;
@@ -212,24 +182,18 @@
       cursor:pointer;
     }
 
-    button:disabled{
-      opacity:.55;
-      cursor:not-allowed;
+    button:disabled{opacity:.55;cursor:not-allowed}
+    .btn-secondary{background:#f2f4f7;color:#344054}
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-primary:hover:not(:disabled){background:var(--primary-hover)}
+
+    .btn-archive{
+      background:var(--archive-bg);
+      color:var(--archive);
+      border:1px solid var(--archive-line);
     }
 
-    .btn-secondary{
-      background:#f2f4f7;
-      color:#344054;
-    }
-
-    .btn-primary{
-      background:var(--primary);
-      color:#fff;
-    }
-
-    .btn-primary:hover:not(:disabled){
-      background:var(--primary-hover);
-    }
+    .btn-archive:hover:not(:disabled){background:#ffefc7}
 
     .detail-grid{
       display:grid;
@@ -255,10 +219,7 @@
       margin-bottom:5px;
     }
 
-    .detail-value{
-      white-space:pre-wrap;
-      line-height:1.5;
-    }
+    .detail-value{white-space:pre-wrap;line-height:1.5}
 
     .action-box{
       margin-top:16px;
@@ -270,6 +231,11 @@
       justify-content:space-between;
       gap:14px;
       align-items:center;
+    }
+
+    .action-box.archive{
+      border-color:var(--archive-line);
+      background:var(--archive-bg);
     }
 
     .action-box p{
@@ -288,24 +254,9 @@
     }
 
     .notice.show{display:block}
-
-    .notice.success{
-      background:var(--success-bg);
-      color:var(--success);
-      border:1px solid #abefc6;
-    }
-
-    .notice.danger{
-      background:var(--danger-bg);
-      color:var(--danger);
-      border:1px solid #fecdca;
-    }
-
-    .loading{
-      padding:34px;
-      text-align:center;
-      color:var(--muted);
-    }
+    .notice.success{background:var(--success-bg);color:var(--success);border:1px solid #abefc6}
+    .notice.danger{background:var(--danger-bg);color:var(--danger);border:1px solid #fecdca}
+    .loading{padding:34px;text-align:center;color:var(--muted)}
 
     @media(max-width:850px){
       .app{padding:14px}
@@ -321,27 +272,14 @@
 <div class="app">
 
   <!-- =========================================================
-       NAVIGATION — RETOUR À L'ACCUEIL SELON LE RÔLE
+       NAVIGATION
        ========================================================= -->
   <nav style="margin:0 0 14px 0;">
     <a
       id="homeLink"
       href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH"
       target="_top"
-      style="
-        display:inline-flex;
-        align-items:center;
-        gap:6px;
-        padding:9px 13px;
-        border:1px solid #d7e2ea;
-        border-radius:10px;
-        background:#ffffff;
-        color:#244a68;
-        text-decoration:none;
-        font-size:13px;
-        font-weight:800;
-        box-shadow:0 3px 10px rgba(25,55,80,.06);
-      "
+      style="display:inline-flex;align-items:center;gap:6px;padding:9px 13px;border:1px solid #d7e2ea;border-radius:10px;background:#fff;color:#244a68;text-decoration:none;font-size:13px;font-weight:800;box-shadow:0 3px 10px rgba(25,55,80,.06);"
     >← Retour à l'accueil</a>
   </nav>
 
@@ -351,28 +289,21 @@
   <section class="hero">
     <h1>✅ Contributions terminées</h1>
     <p>
-      Consultez l’historique des contributions finalisées accessibles selon vos droits.
+      Consultez les contributions finalisées accessibles selon vos droits,
+      réouvrez-les si nécessaire ou archivez-les lorsqu'elles n'ont plus à rester dans l'historique courant.
     </p>
     <div id="profileInfo" class="profile">Profil en cours d’identification…</div>
   </section>
 
-  <div id="loadingBox" class="loading">
-    Chargement des contributions terminées…
-  </div>
+  <div id="loadingBox" class="loading">Chargement des contributions terminées…</div>
 
   <!-- =========================================================
        VUE LISTE
        ========================================================= -->
   <main id="listView" class="hidden">
-
     <section class="panel">
       <div class="toolbar">
-
-        <input
-          id="search"
-          type="search"
-          placeholder="🔎 Rechercher un titre, numéro, demandeur..."
-        >
+        <input id="search" type="search" placeholder="🔎 Rechercher un titre, numéro, demandeur...">
 
         <select id="priorityFilter">
           <option value="">Toutes les priorités</option>
@@ -398,7 +329,6 @@
           <option value="contributor">Contributeur A → Z</option>
           <option value="bureau">Bureau demandeur A → Z</option>
         </select>
-
       </div>
     </section>
 
@@ -408,24 +338,19 @@
     </div>
 
     <section id="contributionList" class="list"></section>
-
   </main>
 
   <!-- =========================================================
        VUE DÉTAIL
        ========================================================= -->
   <main id="detailView" class="hidden">
-
     <div class="detail-toolbar">
-      <button id="backBtn" type="button" class="btn-secondary">
-        ← Retour à la liste
-      </button>
+      <button id="backBtn" type="button" class="btn-secondary">← Retour à la liste</button>
       <span id="detailNumber" class="number"></span>
     </div>
 
     <section class="panel">
       <div class="detail-grid">
-
         <div class="detail-item full">
           <div class="detail-label">Titre</div>
           <div id="detailTitle" class="detail-value"></div>
@@ -470,14 +395,10 @@
           <div class="detail-label">Commentaire</div>
           <div id="detailCommentaire" class="detail-value"></div>
         </div>
-
       </div>
 
       <!-- =====================================================
-           OPTION B :
-           Administrateur ou Bureau contributeur autorisé
-           peut remettre sa contribution en "À faire".
-           Lecteur = consultation uniquement.
+           RÉOUVERTURE
            ===================================================== -->
       <div id="restoreBox" class="action-box hidden">
         <div>
@@ -487,59 +408,50 @@
             Elle réapparaîtra dans « Contributions à traiter ».
           </p>
         </div>
+        <button id="restoreBtn" type="button" class="btn-primary">Remettre en « À faire »</button>
+      </div>
 
-        <button id="restoreBtn" type="button" class="btn-primary">
-          Remettre en « À faire »
-        </button>
+      <!-- =====================================================
+           V5 — ARCHIVAGE INDIVIDUEL
+           ===================================================== -->
+      <div id="archiveBox" class="action-box archive hidden">
+        <div>
+          <strong>🗄️ Archiver cette contribution</strong>
+          <p>
+            La contribution restera dans la table CONTRIBUTIONS mais disparaîtra des pages opérationnelles.
+            Elle pourra être restaurée ultérieurement depuis la future page « Archives ».
+          </p>
+        </div>
+        <button id="archiveBtn" type="button" class="btn-archive">🗄️ Archiver</button>
       </div>
 
       <div id="successBox" class="notice success"></div>
       <div id="errorBox" class="notice danger"></div>
-
     </section>
-
   </main>
-
 </div>
-
-
-<!-- =============================================================
-     CONTRIBUTIONS TERMINÉES — V8
-
-     V7 :
-     - prise en charge des contributeurs Département / Sous-direction / Service ;
-     - utilisation prioritaire de CONTRIBUTIONS.Contributeur_affiche ;
-     - filtre générique « Contributeur » ;
-     - conservation des droits de réouverture et du verrouillage optimiste V6.
-
-     V6 :
-     - sécurisation de l'action « Remettre en À faire » ;
-     - contrôle de CONTRIBUTIONS.Version_modification juste avant l'écriture ;
-     - incrément de Version_modification après une réouverture réussie ;
-     - Date_finalisation reste volontairement inchangée.
-     ============================================================= -->
 
 <script>
 /* =============================================================
-   CONTRIBUTIONS TERMINÉES
-   Version 4
+   CONTRIBUTIONS TERMINÉES — V5
 
-   Règles :
-   - Administrateur : voit toutes les lignes accessibles et peut réouvrir.
-   - Bureau contributeur : voit les lignes autorisées par les ACL Grist
-     et peut réouvrir toute contribution appartenant à son Bureau_origine.
-   - Lecteur : consultation uniquement.
-   - Les ACL Grist restent la protection de sécurité principale.
+   V5 :
+   - masque les contributions déjà archivées ;
+   - ajoute l'archivage individuel des contributions terminées ;
+   - renseigne Archivee, Date_archivage et Archive_par ;
+   - conserve le verrouillage optimiste via Version_modification ;
+   - conserve les droits existants : Administrateur global,
+     Bureau contributeur limité à son Bureau_origine, Lecteur en lecture seule ;
+   - corrige le rafraîchissement des filtres en utilisant contributorFilter.
 
-   MODIFICATIONS :
-   - V2 : suppression du contrôle Cree_par pour le Bureau contributeur ;
-          les droits d'action reposent sur Bureau_origine == UTILISATEURS.Bureau.
-   - V3 : la réouverture ne modifie plus Date_finalisation ;
-          elle met uniquement Statut = "À faire", comme dans
-          contributions_a_traiter.html.
-   - V4 : affichage et filtre du contributeur compatibles avec les niveaux
-          Département / Sous-direction / Service, via Contributeur_affiche.
+   V4 conservée :
+   - contributeurs Département / Sous-direction / Service ;
+   - utilisation prioritaire de Contributeur_affiche ;
+   - filtre générique « Contributeur » ;
+   - réouverture sécurisée avec Version_modification.
    ============================================================= */
+
+"use strict";
 
 const $ = id => document.getElementById(id);
 
@@ -603,11 +515,45 @@ function tableToRows(table){
   });
 }
 
-/* =============================================================
-   V6 — VERROUILLAGE OPTIMISTE
-   Les anciennes contributions dont Version_modification est vide
-   sont considérées comme étant en version 0.
-   ============================================================= */
+function isCensoredValue(value){
+  if(Array.isArray(value)){
+    return value.length > 0
+      && String(value[0]).trim().toUpperCase() === "C";
+  }
+
+  if(value && typeof value === "object"){
+    const marker = value.type || value.kind || value._type || value.code || "";
+    if(String(marker).trim().toUpperCase() === "CENSORED"){
+      return true;
+    }
+  }
+
+  const normalized = clean(value);
+  return normalized === "censored" || normalized === "[censored]";
+}
+
+function isCensoredRecord(record){
+  return Object.entries(record).some(([key,value]) => {
+    if(key === "id"){
+      return false;
+    }
+    return isCensoredValue(value);
+  });
+}
+
+function isArchivedContribution(record){
+  if(!record){
+    return false;
+  }
+
+  const value = record.Archivee;
+
+  return value === true
+    || value === 1
+    || clean(value) === "true"
+    || clean(value) === "oui"
+    || clean(value) === "1";
+}
 
 function contributionVersion(record){
   const raw = record ? record.Version_modification : null;
@@ -644,7 +590,7 @@ async function ensureContributionUnchanged(recordId,expectedVersion){
   if(currentVersion !== expected){
     const error = new Error(
       "Cette contribution a été modifiée par un autre utilisateur. "
-      + "La réouverture n'a pas été enregistrée. Rechargez la contribution avant de poursuivre."
+      + "L'action n'a pas été enregistrée. Rechargez la contribution avant de poursuivre."
     );
     error.code = "VERSION_CONFLICT";
     throw error;
@@ -656,7 +602,6 @@ async function ensureContributionUnchanged(recordId,expectedVersion){
 function nextContributionVersion(record){
   return contributionVersion(record) + 1;
 }
-
 
 function showNotice(id,message){
   const box = $(id);
@@ -703,35 +648,36 @@ function isBureauContributor(){
 }
 
 function updateHomeLink(){
-  const link = document.getElementById("homeLink");
-  if(!link){ return; }
-
-  if(currentRole === "administrateur"){
-    link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/32";
+  const link = $("homeLink");
+  if(!link){
     return;
   }
 
-  if(currentRole === "bureau contributeur"){
-    link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/33?style=singlePage";
+  const base = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH";
+
+  if(isAdministrator()){
+    link.href = `${base}/p/32`;
+    return;
+  }
+
+  if(isBureauContributor()){
+    link.href = `${base}/p/33?style=singlePage`;
     return;
   }
 
   if(currentRole === "lecteur"){
-    link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/34?style=singlePage";
+    link.href = `${base}/p/34?style=singlePage`;
     return;
   }
 
-  link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH";
+  link.href = base;
 }
+
 /* =============================================================
    IDENTIFICATION UTILISATEUR
    ============================================================= */
 
 async function identifyProfile(){
-  /*
-    SESSION_WIDGET peut être indisponible pour un Lecteur.
-    Dans ce cas on bascule volontairement en consultation seule.
-  */
   try{
     const before = tableToRows(
       await grist.docApi.fetchTable("SESSION_WIDGET")
@@ -811,10 +757,6 @@ async function loadUserContext(){
         : null;
 
   }catch(error){
-    /*
-      Sécurité : si UTILISATEURS n'est pas lisible,
-      on ne donne aucun droit d'action.
-    */
     console.warn("UTILISATEURS indisponible :",error);
     currentUser = null;
     currentUserBureauId = null;
@@ -836,13 +778,12 @@ async function loadData(){
     await grist.docApi.fetchTable("CONTRIBUTIONS");
 
   allRecords = tableToRows(contributionsTable)
-    .filter(row => clean(row.Statut) === "fait");
+    .filter(row =>
+      !isCensoredRecord(row)
+      && clean(row.Statut) === "fait"
+      && !isArchivedContribution(row)
+    );
 
-  /*
-    V7 — Référentiels de contributeurs :
-    le contributeur peut désormais être un Département,
-    une Sous-direction ou un Service.
-  */
   try{
     departments = tableToRows(
       await grist.docApi.fetchTable("DEPARTEMENTS")
@@ -897,10 +838,8 @@ async function loadData(){
 
   allRecords = allRecords.map(row => {
     const depId = Number(row.Contributeur) || null;
-    const subDirectionId =
-      Number(row.Contributeur_sous_direction) || null;
-    const serviceId =
-      Number(row.Contributeur_service) || null;
+    const subDirectionId = Number(row.Contributeur_sous_direction) || null;
+    const serviceId = Number(row.Contributeur_service) || null;
     const bureauId = Number(row.Bureau_origine) || null;
 
     const dep = departmentById.get(depId);
@@ -909,37 +848,17 @@ async function loadData(){
     const bureau = bureauById.get(bureauId);
 
     const departmentLabel = dep
-      ? (
-          text(dep.Code).trim()
-          + (text(dep.Nom).trim()
-              ? " — " + text(dep.Nom).trim()
-              : "")
-        )
+      ? text(dep.Code).trim() + (text(dep.Nom).trim() ? " — " + text(dep.Nom).trim() : "")
       : "";
 
     const subDirectionLabel = subDirection
-      ? (
-          text(subDirection.Code).trim()
-          + (text(subDirection.Nom).trim()
-              ? " — " + text(subDirection.Nom).trim()
-              : "")
-        )
+      ? text(subDirection.Code).trim() + (text(subDirection.Nom).trim() ? " — " + text(subDirection.Nom).trim() : "")
       : "";
 
     const serviceLabel = service
-      ? (
-          text(service.Code).trim()
-          + (text(service.Nom).trim()
-              ? " — " + text(service.Nom).trim()
-              : "")
-        )
+      ? text(service.Code).trim() + (text(service.Nom).trim() ? " — " + text(service.Nom).trim() : "")
       : "";
 
-    /*
-      Contributeur_affiche est prioritaire.
-      Le fallback permet de conserver un affichage correct si une ancienne
-      ligne ne possède pas encore cette valeur calculée.
-    */
     const contributorLabel =
       text(row.Contributeur_affiche).trim()
       || departmentLabel
@@ -960,12 +879,7 @@ async function loadData(){
       _BureauId:bureauId,
       _ContributeurLabel:contributorLabel,
       _BureauLabel:bureau
-        ? (
-            text(bureau.Code).trim()
-            + (text(bureau.Nom).trim()
-                ? " — " + text(bureau.Nom).trim()
-                : "")
-          )
+        ? text(bureau.Code).trim() + (text(bureau.Nom).trim() ? " — " + text(bureau.Nom).trim() : "")
         : text(row.Bureau_origine)
     };
   });
@@ -975,7 +889,7 @@ async function loadData(){
    DROITS D'ACTION
    ============================================================= */
 
-function canRestoreRecord(record){
+function canManageRecord(record){
   if(!record){
     return false;
   }
@@ -985,23 +899,32 @@ function canRestoreRecord(record){
   }
 
   if(isBureauContributor()){
-    /*
-      RÈGLE MÉTIER :
-      le Bureau contributeur peut agir sur toute contribution
-      dont Bureau_origine correspond à son bureau, qu'elle ait
-      été créée manuellement ou importée pour ce bureau.
-
-      On ne contrôle donc PAS Cree_par ici.
-    */
-    const sameBureau =
+    return Boolean(
       currentUserBureauId
       && record._BureauId
-      && Number(record._BureauId) === Number(currentUserBureauId);
-
-    return Boolean(sameBureau);
+      && Number(record._BureauId) === Number(currentUserBureauId)
+    );
   }
 
   return false;
+}
+
+function canRestoreRecord(record){
+  return Boolean(
+    record
+    && clean(record.Statut) === "fait"
+    && !isArchivedContribution(record)
+    && canManageRecord(record)
+  );
+}
+
+function canArchiveRecord(record){
+  return Boolean(
+    record
+    && clean(record.Statut) === "fait"
+    && !isArchivedContribution(record)
+    && canManageRecord(record)
+  );
 }
 
 /* =============================================================
@@ -1011,6 +934,9 @@ function canRestoreRecord(record){
 function populateFilters(){
   const contributorSelect = $("contributorFilter");
   const originSelect = $("originFilter");
+
+  contributorSelect.innerHTML = '<option value="">Tous les contributeurs</option>';
+  originSelect.innerHTML = '<option value="">Tous les bureaux demandeurs</option>';
 
   const contributors = [...new Set(
     allRecords
@@ -1051,17 +977,11 @@ function filteredRecords(){
         return false;
       }
 
-      if(
-        contributor
-        && record._ContributeurLabel !== contributor
-      ){
+      if(contributor && record._ContributeurLabel !== contributor){
         return false;
       }
 
-      if(
-        origin
-        && record._BureauLabel !== origin
-      ){
+      if(origin && record._BureauLabel !== origin){
         return false;
       }
 
@@ -1086,16 +1006,8 @@ function filteredRecords(){
     .sort((a,b)=>{
       const mode = $("sortFilter") ? $("sortFilter").value : "finished-desc";
 
-      const finishedA =
-        dateValue(a.Date_finalisation)?.getTime()
-        || dateValue(a.Echeance)?.getTime()
-        || 0;
-
-      const finishedB =
-        dateValue(b.Date_finalisation)?.getTime()
-        || dateValue(b.Echeance)?.getTime()
-        || 0;
-
+      const finishedA = dateValue(a.Date_finalisation)?.getTime() || dateValue(a.Echeance)?.getTime() || 0;
+      const finishedB = dateValue(b.Date_finalisation)?.getTime() || dateValue(b.Echeance)?.getTime() || 0;
       const dueA = dateValue(a.Echeance)?.getTime();
       const dueB = dateValue(b.Echeance)?.getTime();
 
@@ -1119,8 +1031,12 @@ function filteredRecords(){
           if(p === "normale") return 2;
           return 3;
         };
+
         const diff = rank(a.Priorite) - rank(b.Priorite);
-        if(diff !== 0) return diff;
+        if(diff !== 0){
+          return diff;
+        }
+
         return finishedB - finishedA;
       }
 
@@ -1130,7 +1046,11 @@ function filteredRecords(){
           "fr",
           {sensitivity:"base",numeric:true}
         );
-        if(diff !== 0) return diff;
+
+        if(diff !== 0){
+          return diff;
+        }
+
         return finishedB - finishedA;
       }
 
@@ -1140,7 +1060,11 @@ function filteredRecords(){
           "fr",
           {sensitivity:"base",numeric:true}
         );
-        if(diff !== 0) return diff;
+
+        if(diff !== 0){
+          return diff;
+        }
+
         return finishedB - finishedA;
       }
 
@@ -1194,25 +1118,10 @@ function renderList(){
       </div>
 
       <div class="meta">
-        <span>
-          <strong>Contributeur :</strong>
-          ${escapeHtml(record._ContributeurLabel || "—")}
-        </span>
-
-        <span>
-          <strong>Bureau demandeur :</strong>
-          ${escapeHtml(record._BureauLabel || "—")}
-        </span>
-
-        <span>
-          <strong>Priorité :</strong>
-          ${escapeHtml(record.Priorite || "—")}
-        </span>
-
-        <span>
-          <strong>Finalisée :</strong>
-          ${escapeHtml(formatDate(record.Date_finalisation))}
-        </span>
+        <span><strong>Contributeur :</strong> ${escapeHtml(record._ContributeurLabel || "—")}</span>
+        <span><strong>Bureau demandeur :</strong> ${escapeHtml(record._BureauLabel || "—")}</span>
+        <span><strong>Priorité :</strong> ${escapeHtml(record.Priorite || "—")}</span>
+        <span><strong>Finalisée :</strong> ${escapeHtml(formatDate(record.Date_finalisation))}</span>
       </div>
     `;
 
@@ -1270,6 +1179,11 @@ function openDetail(recordId){
     !canRestoreRecord(record)
   );
 
+  $("archiveBox").classList.toggle(
+    "hidden",
+    !canArchiveRecord(record)
+  );
+
   $("listView").classList.add("hidden");
   $("detailView").classList.remove("hidden");
 }
@@ -1279,6 +1193,28 @@ function closeDetail(){
 
   $("detailView").classList.add("hidden");
   $("listView").classList.remove("hidden");
+
+  renderList();
+}
+
+function refreshAfterWrite(){
+  const currentPriority = $("priorityFilter").value;
+  const currentContributor = $("contributorFilter").value;
+  const currentOrigin = $("originFilter").value;
+
+  populateFilters();
+
+  if([...$("priorityFilter").options].some(option => option.value === currentPriority)){
+    $("priorityFilter").value = currentPriority;
+  }
+
+  if([...$("contributorFilter").options].some(option => option.value === currentContributor)){
+    $("contributorFilter").value = currentContributor;
+  }
+
+  if([...$("originFilter").options].some(option => option.value === currentOrigin)){
+    $("originFilter").value = currentOrigin;
+  }
 
   renderList();
 }
@@ -1314,10 +1250,6 @@ async function restoreContribution(){
   showNotice("errorBox","");
 
   try{
-    /*
-      V6 — on vérifie que la contribution n'a pas été modifiée
-      depuis son affichage avant de la remettre en « À faire ».
-    */
     const expectedVersion = contributionVersion(record);
     const fresh = await ensureContributionUnchanged(
       Number(record.id),
@@ -1330,11 +1262,6 @@ async function restoreContribution(){
         "CONTRIBUTIONS",
         Number(record.id),
         {
-          /*
-            IMPORTANT :
-            Date_finalisation reste volontairement inchangée.
-            On modifie uniquement le statut métier et la version technique.
-          */
           Statut:"À faire",
           Version_modification:nextContributionVersion(fresh)
         }
@@ -1347,36 +1274,20 @@ async function restoreContribution(){
     );
 
     await new Promise(resolve => setTimeout(resolve,500));
-
     await loadData();
 
-    /*
-      La contribution n'est désormais plus dans l'historique :
-      retour automatique à la liste.
-    */
     selectedRecordId = null;
     $("detailView").classList.add("hidden");
     $("listView").classList.remove("hidden");
-
-    populateFiltersAfterReload();
-    renderList();
+    refreshAfterWrite();
 
   }catch(error){
     console.error(error);
 
     if(error && error.code === "VERSION_CONFLICT"){
-      showNotice(
-        "errorBox",
-        error.message
-      );
-
+      showNotice("errorBox",error.message);
       await loadData();
-      populateFiltersAfterReload();
-
-      const refreshed = getSelectedRecord();
-      if(refreshed){
-        openDetail(refreshed.id);
-      }
+      refreshAfterWrite();
     }else{
       showNotice(
         "errorBox",
@@ -1389,34 +1300,100 @@ async function restoreContribution(){
   }
 }
 
-function populateFiltersAfterReload(){
-  const priority = $("priorityFilter").value;
-  const department = $("departmentFilter").value;
-  const origin = $("originFilter").value;
+/* =============================================================
+   V5 — ARCHIVAGE INDIVIDUEL
+   ============================================================= */
 
-  $("departmentFilter").innerHTML =
-    '<option value="">Tous les départements</option>';
+async function archiveContribution(){
+  const record = getSelectedRecord();
 
-  $("originFilter").innerHTML =
-    '<option value="">Tous les bureaux demandeurs</option>';
-
-  populateFilters();
-
-  if(
-    [...$("departmentFilter").options]
-      .some(option => option.value === department)
-  ){
-    $("departmentFilter").value = department;
+  if(!record || !canArchiveRecord(record)){
+    showNotice(
+      "errorBox",
+      "Vous n'êtes pas autorisé à archiver cette contribution."
+    );
+    return;
   }
 
-  if(
-    [...$("originFilter").options]
-      .some(option => option.value === origin)
-  ){
-    $("originFilter").value = origin;
+  const label = [
+    text(record.Numero).trim(),
+    text(record.Titre).trim()
+  ].filter(Boolean).join(" — ");
+
+  const confirmed = window.confirm(
+    `Archiver la contribution ${label || "sélectionnée"} ?\n\nElle sera retirée des pages opérationnelles mais restera conservée dans Grist.`
+  );
+
+  if(!confirmed){
+    return;
   }
 
-  $("priorityFilter").value = priority;
+  const button = $("archiveBtn");
+  button.disabled = true;
+  button.textContent = "Archivage…";
+
+  showNotice("successBox","");
+  showNotice("errorBox","");
+
+  try{
+    const expectedVersion = contributionVersion(record);
+    const fresh = await ensureContributionUnchanged(
+      Number(record.id),
+      expectedVersion
+    );
+
+    const archiveBy = text(
+      currentProfile && currentProfile.Email
+        ? currentProfile.Email
+        : currentUser && currentUser.Email
+          ? currentUser.Email
+          : ""
+    ).trim();
+
+    await grist.docApi.applyUserActions([
+      [
+        "UpdateRecord",
+        "CONTRIBUTIONS",
+        Number(record.id),
+        {
+          Archivee:true,
+          Date_archivage:Date.now() / 1000,
+          Archive_par:archiveBy,
+          Version_modification:nextContributionVersion(fresh)
+        }
+      ]
+    ]);
+
+    showNotice(
+      "successBox",
+      "🗄️ Contribution archivée."
+    );
+
+    await new Promise(resolve => setTimeout(resolve,500));
+    await loadData();
+
+    selectedRecordId = null;
+    $("detailView").classList.add("hidden");
+    $("listView").classList.remove("hidden");
+    refreshAfterWrite();
+
+  }catch(error){
+    console.error(error);
+
+    if(error && error.code === "VERSION_CONFLICT"){
+      showNotice("errorBox",error.message);
+      await loadData();
+      refreshAfterWrite();
+    }else{
+      showNotice(
+        "errorBox",
+        "Impossible d'archiver cette contribution. Vérifiez les droits Grist sur Archivee, Date_archivage et Archive_par."
+      );
+    }
+  }finally{
+    button.disabled = false;
+    button.textContent = "🗄️ Archiver";
+  }
 }
 
 /* =============================================================
@@ -1425,14 +1402,7 @@ function populateFiltersAfterReload(){
 
 async function init(){
   try{
-    /*
-      Accès complet demandé afin de permettre l'action
-      "Remettre en À faire" pour les profils autorisés.
-      Les ACL Grist restent prioritaires.
-    */
-    grist.ready({
-      requiredAccess:"full"
-    });
+    grist.ready({requiredAccess:"full"});
 
     await loadUserContext();
     await loadData();
@@ -1463,6 +1433,7 @@ $("sortFilter").addEventListener("change",renderList);
 
 $("backBtn").addEventListener("click",closeDetail);
 $("restoreBtn").addEventListener("click",restoreContribution);
+$("archiveBtn").addEventListener("click",archiveContribution);
 
 init();
 </script>
