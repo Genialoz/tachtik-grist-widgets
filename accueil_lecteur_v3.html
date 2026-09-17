@@ -261,6 +261,23 @@
               <span class="card-link">Ouvrir la page →</span>
             </div>
           </a>
+
+          <a
+            class="card"
+            href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/35?style=singlePage"
+            target="_top"
+          >
+            <div class="icon">🗄️</div>
+
+            <div class="card-content">
+              <h3 class="card-title">Archives</h3>
+              <p class="card-text">
+                Consultez les contributions archivées accessibles selon votre périmètre de lecture.
+              </p>
+              <span class="card-link">Ouvrir la page →</span>
+            </div>
+          </a>
+
         </div>
       </section>
 
@@ -271,13 +288,17 @@
     "use strict";
 
     /* =========================================================
-       ACCUEIL LECTEUR — V2
+       ACCUEIL LECTEUR — V4
 
-       Évolutions V2 :
+       Évolutions V4 :
+       - ajout d'un accès direct à la page « Archives » ;
+       - URL Archives en mode ?style=singlePage ;
+       - conservation du mode Lecture et des ACL existantes.
+
+       Évolutions précédentes conservées :
        - ajout d'un accès direct au Tableau de bord ;
        - texte d'introduction adapté à la consultation des
-         contributions et des indicateurs ;
-       - conservation du mode Lecture et des ACL existantes.
+         contributions et des indicateurs.
        ========================================================= */
 
     const $ = id => document.getElementById(id);
