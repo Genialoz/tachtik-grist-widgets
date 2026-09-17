@@ -247,6 +247,71 @@
     .notice.danger{background:var(--danger-bg);color:var(--danger);border:1px solid #fecdca}
     .loading{padding:34px;text-align:center;color:var(--muted)}
 
+    /* =========================================================
+       V2 — SÉLECTION MULTIPLE / ACTIONS SUR LES ARCHIVES
+       ========================================================= */
+    .bulk-actions-bar{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:10px;
+      margin:0 0 14px;
+      padding:12px 14px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fff;
+      box-shadow:0 4px 14px rgba(16,24,40,.04);
+    }
+
+    .bulk-actions-count{
+      margin-right:auto;
+      color:#475467;
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .bulk-action-btn{
+      background:#f2f4f7;
+      color:#344054;
+      border:1px solid #d0d5dd;
+    }
+
+    .bulk-unarchive-btn{
+      background:var(--primary);
+      color:#fff;
+    }
+
+    .bulk-delete-danger{
+      background:#fff;
+      color:var(--danger);
+      border:1px solid #fda29b;
+    }
+
+    .bulk-delete-danger:hover:not(:disabled){
+      background:var(--danger);
+      color:#fff;
+    }
+
+    .bulk-select-item{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:5px 8px;
+      border-radius:9px;
+      background:#f8fafc;
+      border:1px solid #e2e8f0;
+      font-size:11px;
+      font-weight:800;
+      color:#475467;
+      cursor:pointer;
+    }
+
+    .bulk-select-item input{
+      width:auto;
+      margin:0;
+      accent-color:var(--primary);
+    }
+
     @media(max-width:850px){
       .app{padding:14px}
       .toolbar{grid-template-columns:1fr}
@@ -320,6 +385,17 @@
     <div class="results-head">
       <div class="results-title">Contributions archivées</div>
       <div id="resultsCount" class="results-count">0 contribution</div>
+    </div>
+
+    <!-- =====================================================
+         V2 — ACTIONS MULTIPLES
+         ===================================================== -->
+    <div id="bulkActionsBar" class="bulk-actions-bar hidden">
+      <span id="bulkActionsCount" class="bulk-actions-count">0 contribution sélectionnée</span>
+      <button id="bulkSelectAllBtn" class="bulk-action-btn" type="button">Tout sélectionner</button>
+      <button id="bulkClearBtn" class="bulk-action-btn" type="button">Tout désélectionner</button>
+      <button id="bulkUnarchiveBtn" class="bulk-unarchive-btn" type="button" disabled>Désarchiver la sélection</button>
+      <button id="bulkDeleteBtn" class="bulk-delete-danger" type="button" disabled>Supprimer définitivement</button>
     </div>
 
     <section id="contributionList" class="list"></section>
@@ -421,13 +497,14 @@
 
 <script>
 /* =============================================================
-   ARCHIVES DES CONTRIBUTIONS — V1
+   ARCHIVES DES CONTRIBUTIONS — V2
 
    Objectif :
    - afficher uniquement CONTRIBUTIONS.Archivee = true ;
    - rechercher et filtrer les archives, notamment par année de Date_archivage ;
-   - permettre le désarchivage aux profils déjà autorisés à modifier la contribution ;
-   - ne jamais supprimer définitivement une contribution depuis cette page ;
+   - permettre le désarchivage individuel ou multiple aux profils autorisés ;
+   - permettre la suppression définitive multiple avec suppression des RELANCES associées ;
+   - sélectionner uniquement les résultats actuellement affichés ;
    - conserver le verrouillage optimiste via Version_modification.
 
    Droits d'action :
@@ -458,6 +535,7 @@ let serviceById = new Map();
 let bureauById = new Map();
 
 let selectedRecordId = null;
+let selectedBulkActionIds = new Set();
 
 /* =============================================================
    OUTILS GÉNÉRAUX
@@ -1034,6 +1112,272 @@ function filteredRecords(){
 }
 
 /* =============================================================
+   V2 — SÉLECTION MULTIPLE / DÉSARCHIVAGE / SUPPRESSION
+   ============================================================= */
+
+function bulkVisibleManageableRecords(){
+  return filteredRecords().filter(record => canUnarchiveRecord(record));
+}
+
+function pruneBulkSelection(){
+  const visibleIds = new Set(
+    bulkVisibleManageableRecords().map(record => Number(record.id))
+  );
+
+  selectedBulkActionIds = new Set(
+    [...selectedBulkActionIds].filter(id => visibleIds.has(Number(id)))
+  );
+}
+
+function updateBulkControls(){
+  const bar = $("bulkActionsBar");
+  if(!bar){
+    return;
+  }
+
+  const allowed = isAdministrator() || isBureauContributor();
+  bar.classList.toggle("hidden", !allowed);
+
+  if(!allowed){
+    return;
+  }
+
+  const visible = bulkVisibleManageableRecords();
+  const count = selectedBulkActionIds.size;
+
+  $("bulkActionsCount").textContent =
+    `${count} contribution${count > 1 ? "s" : ""} sélectionnée${count > 1 ? "s" : ""}`;
+
+  $("bulkSelectAllBtn").disabled = visible.length === 0;
+  $("bulkClearBtn").disabled = count === 0;
+  $("bulkUnarchiveBtn").disabled = count === 0;
+  $("bulkDeleteBtn").disabled = count === 0;
+}
+
+function selectAllVisible(){
+  selectedBulkActionIds = new Set(
+    bulkVisibleManageableRecords().map(record => Number(record.id))
+  );
+  renderList();
+}
+
+function clearBulkSelection(){
+  selectedBulkActionIds.clear();
+  renderList();
+}
+
+function canManageFreshArchivedRecord(record){
+  if(!record || !isArchivedContribution(record)){
+    return false;
+  }
+
+  if(isAdministrator()){
+    return true;
+  }
+
+  return Boolean(
+    isBureauContributor()
+    && currentUserBureauId
+    && Number(record.Bureau_origine) === Number(currentUserBureauId)
+  );
+}
+
+function selectedVisibleRecords(){
+  pruneBulkSelection();
+
+  const visibleById = new Map(
+    bulkVisibleManageableRecords().map(record => [Number(record.id),record])
+  );
+
+  return [...selectedBulkActionIds]
+    .map(id => visibleById.get(Number(id)))
+    .filter(Boolean);
+}
+
+async function validateFreshSelection(selected){
+  const freshTable = await grist.docApi.fetchTable("CONTRIBUTIONS");
+  const freshRows = tableToRows(freshTable);
+  const freshById = new Map(
+    freshRows.map(row => [Number(row.id),row])
+  );
+
+  const validated = [];
+
+  for(const record of selected){
+    const fresh = freshById.get(Number(record.id));
+
+    if(!fresh){
+      throw new Error(
+        "Une contribution sélectionnée n'existe plus. Rechargez la page avant de recommencer."
+      );
+    }
+
+    if(!canManageFreshArchivedRecord(fresh)){
+      throw new Error(
+        "Votre périmètre ne permet plus d'agir sur l'une des contributions sélectionnées."
+      );
+    }
+
+    if(contributionVersion(fresh) !== contributionVersion(record)){
+      const error = new Error(
+        "Au moins une contribution sélectionnée a été modifiée par un autre utilisateur. Aucune action n'a été effectuée."
+      );
+      error.code = "VERSION_CONFLICT";
+      throw error;
+    }
+
+    validated.push({record,fresh});
+  }
+
+  return validated;
+}
+
+async function bulkUnarchiveSelected(){
+  const selected = selectedVisibleRecords();
+
+  if(!selected.length){
+    window.alert("Aucune contribution sélectionnée.");
+    renderList();
+    return;
+  }
+
+  const count = selected.length;
+  const confirmed = window.confirm(
+    `Désarchiver ${count} contribution${count > 1 ? "s" : ""} sélectionnée${count > 1 ? "s" : ""} ?\n\n`
+    + "Les contributions au statut « Fait » réapparaîtront dans « Contributions terminées »."
+  );
+
+  if(!confirmed){
+    return;
+  }
+
+  const button = $("bulkUnarchiveBtn");
+  button.disabled = true;
+  button.textContent = "Désarchivage…";
+
+  try{
+    const validated = await validateFreshSelection(selected);
+
+    const actions = validated.map(({record,fresh}) => [
+      "UpdateRecord",
+      "CONTRIBUTIONS",
+      Number(record.id),
+      {
+        Archivee:false,
+        Date_archivage:null,
+        Archive_par:"",
+        Version_modification:nextContributionVersion(fresh)
+      }
+    ]);
+
+    await grist.docApi.applyUserActions(actions);
+
+    selectedBulkActionIds.clear();
+    selectedRecordId = null;
+
+    await new Promise(resolve => setTimeout(resolve,400));
+    await loadData();
+    populateFiltersAfterReload();
+    renderList();
+
+    window.alert(
+      `✓ ${count} contribution${count > 1 ? "s" : ""} désarchivée${count > 1 ? "s" : ""}.`
+    );
+
+  }catch(error){
+    console.error(error);
+    window.alert(
+      error.message
+      || "Impossible de désarchiver les contributions sélectionnées."
+    );
+
+    await loadData();
+    populateFiltersAfterReload();
+    renderList();
+
+  }finally{
+    button.disabled = false;
+    button.textContent = "Désarchiver la sélection";
+  }
+}
+
+async function bulkDeleteSelected(){
+  const selected = selectedVisibleRecords();
+
+  if(!selected.length){
+    window.alert("Aucune contribution sélectionnée.");
+    renderList();
+    return;
+  }
+
+  const count = selected.length;
+  const confirmed = window.confirm(
+    `Supprimer définitivement ${count} contribution${count > 1 ? "s" : ""} archivée${count > 1 ? "s" : ""} ?\n\n`
+    + "Cette action est irréversible. Les relances associées seront également supprimées."
+  );
+
+  if(!confirmed){
+    return;
+  }
+
+  const button = $("bulkDeleteBtn");
+  button.disabled = true;
+  button.textContent = "Suppression…";
+
+  try{
+    await validateFreshSelection(selected);
+
+    const ids = selected.map(record => Number(record.id));
+    const idSet = new Set(ids);
+
+    const relanceTable = await grist.docApi.fetchTable("RELANCES");
+    const relances = tableToRows(relanceTable);
+
+    const relanceIds = relances
+      .filter(row => idSet.has(Number(row.Contribution)))
+      .map(row => Number(row.id))
+      .filter(Number.isFinite);
+
+    const actions = [];
+
+    if(relanceIds.length){
+      actions.push(["BulkRemoveRecord","RELANCES",relanceIds]);
+    }
+
+    actions.push(["BulkRemoveRecord","CONTRIBUTIONS",ids]);
+
+    await grist.docApi.applyUserActions(actions);
+
+    selectedBulkActionIds.clear();
+    selectedRecordId = null;
+
+    await new Promise(resolve => setTimeout(resolve,400));
+    await loadData();
+    populateFiltersAfterReload();
+    renderList();
+
+    window.alert(
+      `✓ ${count} contribution${count > 1 ? "s" : ""} supprimée${count > 1 ? "s" : ""} définitivement.`
+    );
+
+  }catch(error){
+    console.error(error);
+    window.alert(
+      error.message
+      || "Impossible de supprimer les contributions sélectionnées."
+    );
+
+    await loadData();
+    populateFiltersAfterReload();
+    renderList();
+
+  }finally{
+    button.disabled = false;
+    button.textContent = "Supprimer définitivement";
+  }
+}
+
+/* =============================================================
    LISTE
    ============================================================= */
 
@@ -1042,6 +1386,9 @@ function renderList(){
   list.innerHTML = "";
 
   const records = filteredRecords();
+
+  pruneBulkSelection();
+  updateBulkControls();
 
   $("resultsCount").textContent =
     `${records.length} contribution${records.length > 1 ? "s" : ""}`;
@@ -1061,7 +1408,19 @@ function renderList(){
 
     card.innerHTML = `
       <div class="card-top">
-        <div>
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          ${canUnarchiveRecord(record) ? `
+            <label class="bulk-select-item" title="Sélectionner cette archive">
+              <input
+                class="bulk-action-checkbox"
+                type="checkbox"
+                data-bulk-action-id="${Number(record.id)}"
+                ${selectedBulkActionIds.has(Number(record.id)) ? "checked" : ""}
+              >
+              Sélectionner
+            </label>
+          ` : ""}
+          <div>
           <div class="number">
             ${escapeHtml(
               record.Numero
@@ -1070,6 +1429,7 @@ function renderList(){
             )}
           </div>
           <div class="title">${escapeHtml(record.Titre || "Sans titre")}</div>
+          </div>
         </div>
         <span class="badge">🗄️ Archivée</span>
       </div>
@@ -1081,6 +1441,22 @@ function renderList(){
         <span><strong>Archivée :</strong> ${escapeHtml(formatDate(record.Date_archivage,true))}</span>
       </div>
     `;
+
+    const checkbox = card.querySelector(".bulk-action-checkbox");
+    if(checkbox){
+      checkbox.addEventListener("click",event=>event.stopPropagation());
+      checkbox.addEventListener("change",()=>{
+        const id = Number(checkbox.dataset.bulkActionId);
+
+        if(checkbox.checked){
+          selectedBulkActionIds.add(id);
+        }else{
+          selectedBulkActionIds.delete(id);
+        }
+
+        updateBulkControls();
+      });
+    }
 
     card.addEventListener("click",()=>{
       openDetail(record.id);
@@ -1307,6 +1683,11 @@ $("sortFilter").addEventListener("change",renderList);
 
 $("backBtn").addEventListener("click",closeDetail);
 $("unarchiveBtn").addEventListener("click",unarchiveContribution);
+
+$("bulkSelectAllBtn").addEventListener("click",selectAllVisible);
+$("bulkClearBtn").addEventListener("click",clearBulkSelection);
+$("bulkUnarchiveBtn").addEventListener("click",bulkUnarchiveSelected);
+$("bulkDeleteBtn").addEventListener("click",bulkDeleteSelected);
 
 init();
 </script>
