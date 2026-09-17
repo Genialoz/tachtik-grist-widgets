@@ -195,6 +195,53 @@
 
     .btn-archive:hover:not(:disabled){background:#ffefc7}
 
+    /* =========================================================
+       V6 — ARCHIVAGE PAR ANNÉE (ADMINISTRATEUR)
+       ========================================================= */
+    .bulk-archive-box{
+      display:grid;
+      grid-template-columns:minmax(220px,1fr) auto;
+      gap:14px;
+      align-items:end;
+      margin-top:14px;
+      padding:14px;
+      border:1px solid var(--archive-line);
+      border-radius:14px;
+      background:var(--archive-bg);
+    }
+
+    .bulk-archive-title{
+      margin:0 0 5px;
+      font-size:14px;
+      font-weight:900;
+      color:var(--archive);
+    }
+
+    .bulk-archive-text{
+      margin:0 0 10px;
+      color:#6b5a35;
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    .bulk-archive-controls{
+      display:grid;
+      grid-template-columns:minmax(160px,220px) minmax(230px,1fr);
+      gap:10px;
+      align-items:center;
+    }
+
+    .bulk-archive-preview{
+      color:#6b5a35;
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .bulk-archive-box .notice{
+      grid-column:1 / -1;
+      margin-top:0;
+    }
+
     .detail-grid{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -264,6 +311,8 @@
       .detail-grid{grid-template-columns:1fr}
       .detail-item.full{grid-column:auto}
       .action-box{align-items:flex-start;flex-direction:column}
+      .bulk-archive-box{grid-template-columns:1fr}
+      .bulk-archive-controls{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -329,6 +378,32 @@
           <option value="contributor">Contributeur A → Z</option>
           <option value="bureau">Bureau demandeur A → Z</option>
         </select>
+      </div>
+    </section>
+
+    <!-- =======================================================
+         V6 — ARCHIVAGE PAR ANNÉE
+         Visible pour l'Administrateur et le Bureau contributeur.
+         Pour le Bureau contributeur, seules les contributions de son Bureau_origine sont concernées.
+         L'année correspond à Date_finalisation.
+         ======================================================= -->
+    <section id="bulkArchiveBox" class="panel hidden">
+      <div class="bulk-archive-box">
+        <div>
+          <h2 class="bulk-archive-title">🗄️ Archiver les contributions terminées d’une année</h2>
+          <p class="bulk-archive-text">
+            Sélectionnez une année de finalisation. Un aperçu indique le nombre de contributions concernées avant confirmation.
+            Les contributions restent conservées dans Grist et pourront être désarchivées depuis la page « Archives ».
+          </p>
+          <div class="bulk-archive-controls">
+            <select id="bulkArchiveYear">
+              <option value="">Choisir une année…</option>
+            </select>
+            <div id="bulkArchivePreview" class="bulk-archive-preview">Sélectionnez une année.</div>
+          </div>
+        </div>
+        <button id="bulkArchiveBtn" type="button" class="btn-archive" disabled>🗄️ Archiver l’année</button>
+        <div id="bulkArchiveNotice" class="notice"></div>
       </div>
     </section>
 
@@ -433,9 +508,18 @@
 
 <script>
 /* =============================================================
-   CONTRIBUTIONS TERMINÉES — V5
+   CONTRIBUTIONS TERMINÉES — V6
 
-   V5 :
+   V6 :
+   - ajoute un archivage en masse par année de Date_finalisation ;
+   - Administrateur : toutes les contributions terminées de l'année ;
+   - Bureau contributeur : uniquement les contributions de son Bureau_origine ;
+   - affiche un aperçu du nombre de contributions avant confirmation ;
+   - revérifie l'état et Version_modification de toutes les lignes avant écriture ;
+   - utilise BulkUpdateRecord sans supprimer les lignes de CONTRIBUTIONS ;
+   - conserve RELANCES sans modification.
+
+   V5 conservée :
    - masque les contributions déjà archivées ;
    - ajoute l'archivage individuel des contributions terminées ;
    - renseigne Archivee, Date_archivage et Archive_par ;
@@ -637,6 +721,11 @@ function formatDate(value){
   }
 
   return new Intl.DateTimeFormat("fr-FR").format(d);
+}
+
+function getFinalizationYear(record){
+  const d = dateValue(record ? record.Date_finalisation : null);
+  return d ? d.getFullYear() : null;
 }
 
 function isAdministrator(){
@@ -928,6 +1017,233 @@ function canArchiveRecord(record){
 }
 
 /* =============================================================
+   V6 — ARCHIVAGE EN MASSE PAR ANNÉE
+   Administrateur : périmètre global.
+   Bureau contributeur : limité à son Bureau_origine.
+   ============================================================= */
+
+function bulkArchiveCandidates(year){
+  const targetYear = Number(year);
+
+  if(!Number.isInteger(targetYear)){
+    return [];
+  }
+
+  return allRecords.filter(record =>
+    clean(record.Statut) === "fait"
+    && !isArchivedContribution(record)
+    && getFinalizationYear(record) === targetYear
+    && canManageRecord(record)
+  );
+}
+
+function populateBulkArchiveYears(){
+  const box = $("bulkArchiveBox");
+  const select = $("bulkArchiveYear");
+
+  if(!box || !select){
+    return;
+  }
+
+  if(!isAdministrator() && !isBureauContributor()){
+    box.classList.add("hidden");
+    return;
+  }
+
+  box.classList.remove("hidden");
+
+  const previousYear = select.value;
+  const years = [...new Set(
+    allRecords
+      .filter(record => canManageRecord(record))
+      .map(getFinalizationYear)
+      .filter(year => Number.isInteger(year))
+  )].sort((a,b) => b - a);
+
+  select.innerHTML = '<option value="">Choisir une année…</option>';
+
+  for(const year of years){
+    const option = document.createElement("option");
+    option.value = String(year);
+    option.textContent = String(year);
+    select.appendChild(option);
+  }
+
+  if(years.some(year => String(year) === previousYear)){
+    select.value = previousYear;
+  }
+
+  updateBulkArchivePreview();
+}
+
+function updateBulkArchivePreview(){
+  const select = $("bulkArchiveYear");
+  const preview = $("bulkArchivePreview");
+  const button = $("bulkArchiveBtn");
+
+  if(!select || !preview || !button){
+    return;
+  }
+
+  const year = Number(select.value);
+
+  if(!Number.isInteger(year)){
+    preview.textContent = "Sélectionnez une année.";
+    button.disabled = true;
+    return;
+  }
+
+  const count = bulkArchiveCandidates(year).length;
+  preview.textContent = `${count} contribution${count > 1 ? "s" : ""} terminée${count > 1 ? "s" : ""} sera${count > 1 ? "ont" : ""} archivée${count > 1 ? "s" : ""}.`;
+  button.disabled = count === 0;
+}
+
+async function archiveFinishedYear(){
+  if(!isAdministrator() && !isBureauContributor()){
+    showNotice(
+      "bulkArchiveNotice",
+      "Vous n'êtes pas autorisé à utiliser l'archivage par année."
+    );
+    $("bulkArchiveNotice").classList.add("danger");
+    return;
+  }
+
+  const year = Number($("bulkArchiveYear").value);
+  const candidates = bulkArchiveCandidates(year);
+
+  if(!Number.isInteger(year) || !candidates.length){
+    showNotice("bulkArchiveNotice","Aucune contribution à archiver pour cette année.");
+    $("bulkArchiveNotice").classList.add("danger");
+    return;
+  }
+
+  const count = candidates.length;
+  const scopeText = isBureauContributor()
+    ? " de votre bureau"
+    : "";
+
+  const confirmed = window.confirm(
+    `Archiver ${count} contribution${count > 1 ? "s" : ""} terminée${count > 1 ? "s" : ""}${scopeText} de l'année ${year} ?\n\n`
+    + "Elles disparaîtront de cette page mais resteront conservées dans Grist et pourront être désarchivées depuis « Archives »."
+  );
+
+  if(!confirmed){
+    return;
+  }
+
+  const button = $("bulkArchiveBtn");
+  button.disabled = true;
+  button.textContent = "Archivage…";
+
+  showNotice("bulkArchiveNotice","");
+  $("bulkArchiveNotice").classList.remove("danger","success");
+
+  try{
+    const freshRows = tableToRows(
+      await grist.docApi.fetchTable("CONTRIBUTIONS")
+    );
+    const freshById = new Map(
+      freshRows.map(row => [Number(row.id),row])
+    );
+
+    const freshCandidates = [];
+
+    for(const candidate of candidates){
+      const fresh = freshById.get(Number(candidate.id));
+
+      const unchanged = Boolean(
+        fresh
+        && contributionVersion(fresh) === contributionVersion(candidate)
+        && clean(fresh.Statut) === "fait"
+        && !isArchivedContribution(fresh)
+        && getFinalizationYear(fresh) === year
+        && (
+          isAdministrator()
+          || (
+            isBureauContributor()
+            && currentUserBureauId
+            && Number(fresh.Bureau_origine) === Number(currentUserBureauId)
+          )
+        )
+      );
+
+      if(!unchanged){
+        const error = new Error(
+          "Au moins une contribution a changé depuis le chargement de la page. "
+          + "Aucune contribution n'a été archivée. La liste va être actualisée."
+        );
+        error.code = "VERSION_CONFLICT";
+        throw error;
+      }
+
+      freshCandidates.push(fresh);
+    }
+
+    const archiveBy = text(
+      currentProfile && currentProfile.Email
+        ? currentProfile.Email
+        : currentUser && currentUser.Email
+          ? currentUser.Email
+          : ""
+    ).trim();
+
+    const archiveTimestamp = Date.now() / 1000;
+    const ids = freshCandidates.map(record => Number(record.id));
+
+    await grist.docApi.applyUserActions([
+      [
+        "BulkUpdateRecord",
+        "CONTRIBUTIONS",
+        ids,
+        {
+          Archivee:ids.map(() => true),
+          Date_archivage:ids.map(() => archiveTimestamp),
+          Archive_par:ids.map(() => archiveBy),
+          Version_modification:freshCandidates.map(nextContributionVersion)
+        }
+      ]
+    ]);
+
+    await new Promise(resolve => setTimeout(resolve,500));
+    await loadData();
+    populateFilters();
+    populateBulkArchiveYears();
+    renderList();
+
+    const notice = $("bulkArchiveNotice");
+    notice.classList.remove("danger");
+    notice.classList.add("success");
+    showNotice(
+      "bulkArchiveNotice",
+      `🗄️ ${count} contribution${count > 1 ? "s" : ""} de l'année ${year} archivée${count > 1 ? "s" : ""}.`
+    );
+
+  }catch(error){
+    console.error(error);
+
+    const notice = $("bulkArchiveNotice");
+    notice.classList.remove("success");
+    notice.classList.add("danger");
+
+    if(error && error.code === "VERSION_CONFLICT"){
+      showNotice("bulkArchiveNotice",error.message);
+      await loadData();
+      populateFilters();
+      populateBulkArchiveYears();
+      renderList();
+    }else{
+      showNotice(
+        "bulkArchiveNotice",
+        "Impossible d'archiver les contributions de cette année. Vérifiez les droits Grist sur Archivee, Date_archivage et Archive_par."
+      );
+    }
+  }finally{
+    button.textContent = "🗄️ Archiver l’année";
+    updateBulkArchivePreview();
+  }
+}
+
+/* =============================================================
    FILTRES
    ============================================================= */
 
@@ -1203,6 +1519,7 @@ function refreshAfterWrite(){
   const currentOrigin = $("originFilter").value;
 
   populateFilters();
+  populateBulkArchiveYears();
 
   if([...$("priorityFilter").options].some(option => option.value === currentPriority)){
     $("priorityFilter").value = currentPriority;
@@ -1408,6 +1725,7 @@ async function init(){
     await loadData();
 
     populateFilters();
+    populateBulkArchiveYears();
     renderList();
 
     $("loadingBox").classList.add("hidden");
@@ -1430,6 +1748,12 @@ $("priorityFilter").addEventListener("change",renderList);
 $("contributorFilter").addEventListener("change",renderList);
 $("originFilter").addEventListener("change",renderList);
 $("sortFilter").addEventListener("change",renderList);
+$("bulkArchiveYear").addEventListener("change",()=>{
+  showNotice("bulkArchiveNotice","");
+  $("bulkArchiveNotice").classList.remove("danger","success");
+  updateBulkArchivePreview();
+});
+$("bulkArchiveBtn").addEventListener("click",archiveFinishedYear);
 
 $("backBtn").addEventListener("click",closeDetail);
 $("restoreBtn").addEventListener("click",restoreContribution);
