@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Archives des contributions</title>
+
+  <!-- SDK Grist -->
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --text:#1d2939;
+      --muted:#667085;
+      --line:#e4e7ec;
+      --primary:#4f46e5;
+      --primary-hover:#4338ca;
+      --soft:#eef2ff;
+      --success:#067647;
+      --success-bg:#ecfdf3;
+      --danger:#b42318;
+      --danger-bg:#fef3f2;
+      --archive:#8a5a00;
+      --archive-bg:#fff7e6;
+      --archive-line:#f0c36a;
+      --shadow:0 10px 30px rgba(16,24,40,.08);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    .app{
+      max-width:1180px;
+      margin:0 auto;
+      padding:24px;
+    }
+
+    .hero{
+      background:linear-gradient(135deg,#5b3a00,#a56b00);
+      color:#fff;
+      border-radius:20px;
+      padding:24px 26px;
+      box-shadow:var(--shadow);
+      margin-bottom:20px;
+    }
+
+    .hero h1{margin:0 0 8px;font-size:28px}
+    .hero p{margin:0;opacity:.92;line-height:1.5}
+
+    .profile{
+      display:inline-flex;
+      margin-top:14px;
+      padding:7px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.16);
+      font-size:13px;
+      font-weight:700;
+    }
+
+    .panel{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      padding:18px;
+      margin-bottom:18px;
+    }
+
+    .toolbar{
+      display:grid;
+      grid-template-columns:2fr 1fr 1fr 1fr 1fr;
+      gap:12px;
+    }
+
+    input,select{
+      width:100%;
+      border:1px solid #d0d5dd;
+      border-radius:12px;
+      padding:11px 12px;
+      font:inherit;
+      background:#fff;
+      color:var(--text);
+      outline:none;
+    }
+
+    input:focus,select:focus{
+      border-color:#818cf8;
+      box-shadow:0 0 0 3px rgba(99,102,241,.12);
+    }
+
+    .results-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin:8px 2px 12px;
+    }
+
+    .results-title{font-size:18px;font-weight:900}
+    .results-count{color:var(--muted);font-size:13px;font-weight:800}
+    .list{display:grid;gap:12px}
+
+    .card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:16px;
+      box-shadow:0 6px 18px rgba(16,24,40,.05);
+      padding:16px;
+      cursor:pointer;
+    }
+
+    .card:hover{
+      border-color:#f0c36a;
+      box-shadow:0 10px 24px rgba(16,24,40,.08);
+    }
+
+    .card-top{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+    }
+
+    .title{font-weight:900;font-size:17px;line-height:1.35}
+    .number{color:var(--muted);font-size:12px;font-weight:800;margin-bottom:4px}
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      padding:5px 9px;
+      border-radius:999px;
+      background:var(--archive-bg);
+      color:var(--archive);
+      border:1px solid var(--archive-line);
+      font-size:12px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .meta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px 14px;
+      margin-top:12px;
+      color:#475467;
+      font-size:13px;
+    }
+
+    .meta strong{color:#344054}
+
+    .empty{
+      background:#fff;
+      border:1px dashed #cbd5e1;
+      border-radius:16px;
+      padding:34px;
+      text-align:center;
+      color:var(--muted);
+    }
+
+    .hidden{display:none!important}
+
+    .detail-toolbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    button{
+      border:0;
+      border-radius:12px;
+      padding:10px 14px;
+      font:inherit;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    button:disabled{opacity:.55;cursor:not-allowed}
+    .btn-secondary{background:#f2f4f7;color:#344054}
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-primary:hover:not(:disabled){background:var(--primary-hover)}
+
+    .detail-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+
+    .detail-item{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:13px;
+      background:#fff;
+    }
+
+    .detail-item.full{grid-column:1 / -1}
+
+    .detail-label{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.03em;
+      margin-bottom:5px;
+    }
+
+    .detail-value{white-space:pre-wrap;line-height:1.5}
+
+    .action-box{
+      margin-top:16px;
+      border:1px solid #c7d2fe;
+      background:var(--soft);
+      border-radius:14px;
+      padding:14px;
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      align-items:center;
+    }
+
+    .action-box p{
+      margin:3px 0 0;
+      color:#475467;
+      font-size:13px;
+      line-height:1.4;
+    }
+
+    .notice{
+      display:none;
+      margin-top:14px;
+      padding:12px 14px;
+      border-radius:12px;
+      line-height:1.45;
+    }
+
+    .notice.show{display:block}
+    .notice.success{background:var(--success-bg);color:var(--success);border:1px solid #abefc6}
+    .notice.danger{background:var(--danger-bg);color:var(--danger);border:1px solid #fecdca}
+    .loading{padding:34px;text-align:center;color:var(--muted)}
+
+    @media(max-width:850px){
+      .app{padding:14px}
+      .toolbar{grid-template-columns:1fr}
+      .detail-grid{grid-template-columns:1fr}
+      .detail-item.full{grid-column:auto}
+      .action-box{align-items:flex-start;flex-direction:column}
+    }
+  </style>
+</head>
+
+<body>
+<div class="app">
+
+  <!-- =========================================================
+       NAVIGATION — RETOUR À L'ACCUEIL SELON LE RÔLE
+       ========================================================= -->
+  <nav style="margin:0 0 14px 0;">
+    <a
+      id="homeLink"
+      href="https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH"
+      target="_top"
+      style="display:inline-flex;align-items:center;gap:6px;padding:9px 13px;border:1px solid #d7e2ea;border-radius:10px;background:#fff;color:#244a68;text-decoration:none;font-size:13px;font-weight:800;box-shadow:0 3px 10px rgba(25,55,80,.06);"
+    >← Retour à l'accueil</a>
+  </nav>
+
+  <!-- =========================================================
+       ENTÊTE
+       ========================================================= -->
+  <section class="hero">
+    <h1>🗄️ Archives</h1>
+    <p>
+      Consultez les contributions archivées accessibles selon vos droits.
+      Les profils autorisés peuvent les désarchiver pour les faire réapparaître dans les pages opérationnelles.
+    </p>
+    <div id="profileInfo" class="profile">Profil en cours d’identification…</div>
+  </section>
+
+  <div id="loadingBox" class="loading">Chargement des archives…</div>
+
+  <!-- =========================================================
+       VUE LISTE
+       ========================================================= -->
+  <main id="listView" class="hidden">
+    <section class="panel">
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="🔎 Rechercher un titre, numéro, demandeur...">
+
+        <select id="archiveYearFilter">
+          <option value="">Toutes les années</option>
+        </select>
+
+        <select id="contributorFilter">
+          <option value="">Tous les contributeurs</option>
+        </select>
+
+        <select id="originFilter">
+          <option value="">Tous les bureaux demandeurs</option>
+        </select>
+
+        <select id="sortFilter">
+          <option value="archive-desc">Plus récemment archivées</option>
+          <option value="archive-asc">Plus anciennement archivées</option>
+          <option value="finished-desc">Plus récemment terminées</option>
+          <option value="finished-asc">Plus anciennement terminées</option>
+          <option value="contributor">Contributeur A → Z</option>
+          <option value="bureau">Bureau demandeur A → Z</option>
+        </select>
+      </div>
+    </section>
+
+    <div class="results-head">
+      <div class="results-title">Contributions archivées</div>
+      <div id="resultsCount" class="results-count">0 contribution</div>
+    </div>
+
+    <section id="contributionList" class="list"></section>
+  </main>
+
+  <!-- =========================================================
+       VUE DÉTAIL
+       ========================================================= -->
+  <main id="detailView" class="hidden">
+    <div class="detail-toolbar">
+      <button id="backBtn" type="button" class="btn-secondary">← Retour à la liste</button>
+      <span id="detailNumber" class="number"></span>
+    </div>
+
+    <section class="panel">
+      <div class="detail-grid">
+        <div class="detail-item full">
+          <div class="detail-label">Titre</div>
+          <div id="detailTitle" class="detail-value"></div>
+        </div>
+
+        <div class="detail-item full">
+          <div class="detail-label">Description</div>
+          <div id="detailDescription" class="detail-value"></div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-label">Demandeur</div>
+          <div id="detailDemandeur" class="detail-value"></div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-label">Contributeur</div>
+          <div id="detailContributeur" class="detail-value"></div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-label">Bureau demandeur</div>
+          <div id="detailBureau" class="detail-value"></div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-label">Priorité</div>
+          <div id="detailPriorite" class="detail-value"></div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-label">Statut</div>
+          <div id="detailStatut" class="detail-value"></div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-label">Échéance</div>
+          <div id="detailEcheance" class="detail-value"></div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-label">Date de finalisation</div>
+          <div id="detailFinalisation" class="detail-value"></div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-label">Date d’archivage</div>
+          <div id="detailArchivage" class="detail-value"></div>
+        </div>
+
+        <div class="detail-item full">
+          <div class="detail-label">Archivé par</div>
+          <div id="detailArchivePar" class="detail-value"></div>
+        </div>
+
+        <div class="detail-item full">
+          <div class="detail-label">Commentaire</div>
+          <div id="detailCommentaire" class="detail-value"></div>
+        </div>
+      </div>
+
+      <!-- =====================================================
+           V1 — DÉSARCHIVAGE
+           Administrateur : autorisé sur toute contribution accessible.
+           Bureau contributeur : uniquement son Bureau_origine.
+           Lecteur : consultation uniquement.
+           ===================================================== -->
+      <div id="unarchiveBox" class="action-box hidden">
+        <div>
+          <strong>↩️ Désarchiver cette contribution</strong>
+          <p>
+            L’archive sera retirée. Une contribution au statut « Fait » réapparaîtra dans « Contributions terminées ».
+          </p>
+        </div>
+        <button id="unarchiveBtn" type="button" class="btn-primary">Désarchiver</button>
+      </div>
+
+      <div id="successBox" class="notice success"></div>
+      <div id="errorBox" class="notice danger"></div>
+    </section>
+  </main>
+</div>
+
+<script>
+/* =============================================================
+   ARCHIVES DES CONTRIBUTIONS — V1
+
+   Objectif :
+   - afficher uniquement CONTRIBUTIONS.Archivee = true ;
+   - rechercher et filtrer les archives, notamment par année de Date_archivage ;
+   - permettre le désarchivage aux profils déjà autorisés à modifier la contribution ;
+   - ne jamais supprimer définitivement une contribution depuis cette page ;
+   - conserver le verrouillage optimiste via Version_modification.
+
+   Droits d'action :
+   - Administrateur : désarchivage autorisé ;
+   - Bureau contributeur : désarchivage uniquement si Bureau_origine = son bureau ;
+   - Lecteur : consultation uniquement ;
+   - les ACL Grist restent la protection de sécurité principale.
+   ============================================================= */
+
+"use strict";
+
+const $ = id => document.getElementById(id);
+
+let currentProfile = null;
+let currentUser = null;
+let currentRole = "";
+let currentUserBureauId = null;
+
+let allRecords = [];
+let departments = [];
+let subDirections = [];
+let services = [];
+let bureaux = [];
+
+let departmentById = new Map();
+let subDirectionById = new Map();
+let serviceById = new Map();
+let bureauById = new Map();
+
+let selectedRecordId = null;
+
+/* =============================================================
+   OUTILS GÉNÉRAUX
+   ============================================================= */
+
+function text(value){
+  return String(value == null ? "" : value);
+}
+
+function clean(value){
+  return text(value).trim().toLowerCase();
+}
+
+function escapeHtml(value){
+  return text(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;");
+}
+
+function tableToRows(table){
+  if(!table){
+    return [];
+  }
+
+  const ids = table.id || [];
+
+  return ids.map((id,index)=>{
+    const row = {id};
+
+    for(const column of Object.keys(table)){
+      if(column === "id"){
+        continue;
+      }
+
+      row[column] = table[column][index];
+    }
+
+    return row;
+  });
+}
+
+function isArchivedContribution(record){
+  if(!record){
+    return false;
+  }
+
+  const value = record.Archivee;
+
+  return value === true
+    || value === 1
+    || clean(value) === "true"
+    || clean(value) === "oui"
+    || clean(value) === "1";
+}
+
+function dateValue(value){
+  if(!value){
+    return null;
+  }
+
+  if(typeof value === "number"){
+    return new Date(value * 1000);
+  }
+
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function formatDate(value,withTime=false){
+  const d = dateValue(value);
+
+  if(!d){
+    return "—";
+  }
+
+  const options = withTime
+    ? {dateStyle:"short",timeStyle:"short"}
+    : {dateStyle:"short"};
+
+  return new Intl.DateTimeFormat("fr-FR",options).format(d);
+}
+
+function archiveYear(record){
+  const d = dateValue(record ? record.Date_archivage : null);
+  return d ? String(d.getFullYear()) : "";
+}
+
+function isAdministrator(){
+  return currentRole === "administrateur";
+}
+
+function isBureauContributor(){
+  return currentRole === "bureau contributeur";
+}
+
+function updateHomeLink(){
+  const link = $("homeLink");
+  if(!link){
+    return;
+  }
+
+  if(currentRole === "administrateur"){
+    link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/32";
+    return;
+  }
+
+  if(currentRole === "bureau contributeur"){
+    link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/33?style=singlePage";
+    return;
+  }
+
+  if(currentRole === "lecteur"){
+    link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH/p/34?style=singlePage";
+    return;
+  }
+
+  link.href = "https://grist.numerique.gouv.fr/o/docs/gmdPjK398xvQ/Tachtik-Suivi-des-contributions-DGRH";
+}
+
+/* =============================================================
+   VERROUILLAGE OPTIMISTE
+   ============================================================= */
+
+function contributionVersion(record){
+  const raw = record ? record.Version_modification : null;
+  const value = Number(raw);
+
+  return Number.isFinite(value) && value > 0
+    ? Math.trunc(value)
+    : 0;
+}
+
+function nextContributionVersion(record){
+  return contributionVersion(record) + 1;
+}
+
+async function fetchFreshContribution(recordId){
+  const table = await grist.docApi.fetchTable("CONTRIBUTIONS");
+  const rows = tableToRows(table);
+
+  return rows.find(
+    row => Number(row.id) === Number(recordId)
+  ) || null;
+}
+
+async function ensureContributionUnchanged(recordId,expectedVersion){
+  const fresh = await fetchFreshContribution(recordId);
+
+  if(!fresh){
+    const error = new Error(
+      "Cette contribution n'existe plus dans Grist. Rechargez la liste avant de poursuivre."
+    );
+    error.code = "VERSION_CONFLICT";
+    throw error;
+  }
+
+  if(!isArchivedContribution(fresh)){
+    const error = new Error(
+      "Cette contribution n'est plus archivée. La liste va être actualisée."
+    );
+    error.code = "VERSION_CONFLICT";
+    throw error;
+  }
+
+  const currentVersion = contributionVersion(fresh);
+  const expected = Number(expectedVersion) || 0;
+
+  if(currentVersion !== expected){
+    const error = new Error(
+      "Cette contribution a été modifiée par un autre utilisateur. Le désarchivage n'a pas été enregistré. Rechargez la contribution avant de poursuivre."
+    );
+    error.code = "VERSION_CONFLICT";
+    throw error;
+  }
+
+  return fresh;
+}
+
+function showNotice(id,message){
+  const box = $(id);
+
+  if(!message){
+    box.textContent = "";
+    box.classList.remove("show");
+    return;
+  }
+
+  box.textContent = message;
+  box.classList.add("show");
+}
+
+/* =============================================================
+   IDENTIFICATION UTILISATEUR
+   ============================================================= */
+
+async function identifyProfile(){
+  try{
+    const before = tableToRows(
+      await grist.docApi.fetchTable("SESSION_WIDGET")
+    );
+
+    const previousIds = new Set(
+      before.map(row => Number(row.id))
+    );
+
+    await grist.docApi.applyUserActions([
+      ["AddRecord","SESSION_WIDGET",null,{}]
+    ]);
+
+    await new Promise(resolve => setTimeout(resolve,700));
+
+    const after = tableToRows(
+      await grist.docApi.fetchTable("SESSION_WIDGET")
+    );
+
+    const created = after
+      .filter(row => !previousIds.has(Number(row.id)))
+      .sort((a,b) => Number(b.id) - Number(a.id));
+
+    const profile = created[0] || null;
+
+    if(profile){
+      try{
+        await grist.docApi.applyUserActions([
+          ["BulkRemoveRecord","SESSION_WIDGET",[Number(profile.id)]]
+        ]);
+      }catch(cleanupError){
+        console.warn("Nettoyage SESSION_WIDGET impossible :",cleanupError);
+      }
+    }
+
+    return profile;
+
+  }catch(error){
+    console.warn(
+      "SESSION_WIDGET indisponible : widget maintenu en lecture seule.",
+      error
+    );
+
+    return null;
+  }
+}
+
+async function loadUserContext(){
+  currentProfile = await identifyProfile();
+
+  if(!currentProfile){
+    currentRole = "lecteur";
+    currentUser = null;
+    currentUserBureauId = null;
+    updateHomeLink();
+    $("profileInfo").textContent = "👤 Consultation";
+    return;
+  }
+
+  currentRole = clean(currentProfile.Role);
+  updateHomeLink();
+
+  try{
+    const users = tableToRows(
+      await grist.docApi.fetchTable("UTILISATEURS")
+    );
+
+    const email = clean(currentProfile.Email);
+
+    currentUser = users.find(
+      row => clean(row.Email) === email
+    ) || null;
+
+    currentUserBureauId =
+      currentUser && Number(currentUser.Bureau)
+        ? Number(currentUser.Bureau)
+        : null;
+
+  }catch(error){
+    console.warn("UTILISATEURS indisponible :",error);
+    currentUser = null;
+    currentUserBureauId = null;
+  }
+
+  $("profileInfo").textContent =
+    "👤 " + (
+      text(currentProfile.Role).trim()
+      || "Consultation"
+    );
+}
+
+/* =============================================================
+   CHARGEMENT DES DONNÉES
+   ============================================================= */
+
+async function loadData(){
+  const contributionsTable =
+    await grist.docApi.fetchTable("CONTRIBUTIONS");
+
+  allRecords = tableToRows(contributionsTable)
+    .filter(row => isArchivedContribution(row));
+
+  try{
+    departments = tableToRows(
+      await grist.docApi.fetchTable("DEPARTEMENTS")
+    );
+  }catch(error){
+    console.warn("DEPARTEMENTS indisponible :",error);
+    departments = [];
+  }
+
+  try{
+    subDirections = tableToRows(
+      await grist.docApi.fetchTable("SOUS_DIRECTIONS")
+    );
+  }catch(error){
+    console.warn("SOUS_DIRECTIONS indisponible :",error);
+    subDirections = [];
+  }
+
+  try{
+    services = tableToRows(
+      await grist.docApi.fetchTable("SERVICES")
+    );
+  }catch(error){
+    console.warn("SERVICES indisponible :",error);
+    services = [];
+  }
+
+  try{
+    bureaux = tableToRows(
+      await grist.docApi.fetchTable("BUREAUX_ORIGINE")
+    );
+  }catch(error){
+    console.warn("BUREAUX_ORIGINE indisponible :",error);
+    bureaux = [];
+  }
+
+  departmentById = new Map(
+    departments.map(row => [Number(row.id),row])
+  );
+
+  subDirectionById = new Map(
+    subDirections.map(row => [Number(row.id),row])
+  );
+
+  serviceById = new Map(
+    services.map(row => [Number(row.id),row])
+  );
+
+  bureauById = new Map(
+    bureaux.map(row => [Number(row.id),row])
+  );
+
+  allRecords = allRecords.map(row => {
+    const depId = Number(row.Contributeur) || null;
+    const subDirectionId = Number(row.Contributeur_sous_direction) || null;
+    const serviceId = Number(row.Contributeur_service) || null;
+    const bureauId = Number(row.Bureau_origine) || null;
+
+    const dep = departmentById.get(depId);
+    const subDirection = subDirectionById.get(subDirectionId);
+    const service = serviceById.get(serviceId);
+    const bureau = bureauById.get(bureauId);
+
+    const departmentLabel = dep
+      ? text(dep.Code).trim()
+        + (text(dep.Nom).trim() ? " — " + text(dep.Nom).trim() : "")
+      : "";
+
+    const subDirectionLabel = subDirection
+      ? text(subDirection.Code).trim()
+        + (text(subDirection.Nom).trim() ? " — " + text(subDirection.Nom).trim() : "")
+      : "";
+
+    const serviceLabel = service
+      ? text(service.Code).trim()
+        + (text(service.Nom).trim() ? " — " + text(service.Nom).trim() : "")
+      : "";
+
+    const contributorLabel =
+      text(row.Contributeur_affiche).trim()
+      || departmentLabel
+      || subDirectionLabel
+      || serviceLabel
+      || text(
+           row.Contributeur
+           || row.Contributeur_sous_direction
+           || row.Contributeur_service
+         ).trim();
+
+    return {
+      ...row,
+      _ContributeurId:depId,
+      _ContributeurSousDirectionId:subDirectionId,
+      _ContributeurServiceId:serviceId,
+      _ContributeurType:text(row.Type_contributeur).trim(),
+      _BureauId:bureauId,
+      _ContributeurLabel:contributorLabel,
+      _BureauLabel:bureau
+        ? text(bureau.Code).trim()
+          + (text(bureau.Nom).trim() ? " — " + text(bureau.Nom).trim() : "")
+        : text(row.Bureau_origine)
+    };
+  });
+}
+
+/* =============================================================
+   DROITS D'ACTION
+   ============================================================= */
+
+function canUnarchiveRecord(record){
+  if(!record || !isArchivedContribution(record)){
+    return false;
+  }
+
+  if(isAdministrator()){
+    return true;
+  }
+
+  if(isBureauContributor()){
+    const sameBureau =
+      currentUserBureauId
+      && record._BureauId
+      && Number(record._BureauId) === Number(currentUserBureauId);
+
+    return Boolean(sameBureau);
+  }
+
+  return false;
+}
+
+/* =============================================================
+   FILTRES
+   ============================================================= */
+
+function resetDynamicSelect(selectId,firstLabel){
+  const select = $(selectId);
+  select.innerHTML = "";
+
+  const option = document.createElement("option");
+  option.value = "";
+  option.textContent = firstLabel;
+  select.appendChild(option);
+}
+
+function populateFilters(){
+  resetDynamicSelect("archiveYearFilter","Toutes les années");
+  resetDynamicSelect("contributorFilter","Tous les contributeurs");
+  resetDynamicSelect("originFilter","Tous les bureaux demandeurs");
+
+  const years = [...new Set(
+    allRecords
+      .map(archiveYear)
+      .filter(Boolean)
+  )].sort((a,b)=>Number(b)-Number(a));
+
+  for(const year of years){
+    const option = document.createElement("option");
+    option.value = year;
+    option.textContent = year;
+    $("archiveYearFilter").appendChild(option);
+  }
+
+  const contributors = [...new Set(
+    allRecords
+      .map(row => row._ContributeurLabel)
+      .filter(Boolean)
+  )].sort((a,b)=>a.localeCompare(b,"fr",{numeric:true}));
+
+  for(const label of contributors){
+    const option = document.createElement("option");
+    option.value = label;
+    option.textContent = label;
+    $("contributorFilter").appendChild(option);
+  }
+
+  const origins = [...new Set(
+    allRecords
+      .map(row => row._BureauLabel)
+      .filter(Boolean)
+  )].sort((a,b)=>a.localeCompare(b,"fr",{numeric:true}));
+
+  for(const label of origins){
+    const option = document.createElement("option");
+    option.value = label;
+    option.textContent = label;
+    $("originFilter").appendChild(option);
+  }
+}
+
+function filteredRecords(){
+  const query = clean($("search").value);
+  const year = $("archiveYearFilter").value;
+  const contributor = $("contributorFilter").value;
+  const origin = $("originFilter").value;
+  const sortMode = $("sortFilter").value;
+
+  return allRecords
+    .filter(record => {
+      if(year && archiveYear(record) !== year){
+        return false;
+      }
+
+      if(contributor && record._ContributeurLabel !== contributor){
+        return false;
+      }
+
+      if(origin && record._BureauLabel !== origin){
+        return false;
+      }
+
+      if(query){
+        const haystack = clean([
+          record.Numero,
+          record.Titre,
+          record.Description,
+          record.Demandeur,
+          record._ContributeurLabel,
+          record._BureauLabel,
+          record.Priorite,
+          record.Statut,
+          record.Archive_par,
+          record.Commentaire
+        ].join(" "));
+
+        if(!haystack.includes(query)){
+          return false;
+        }
+      }
+
+      return true;
+    })
+    .sort((a,b)=>{
+      const archiveA = dateValue(a.Date_archivage)?.getTime() || 0;
+      const archiveB = dateValue(b.Date_archivage)?.getTime() || 0;
+      const finishedA = dateValue(a.Date_finalisation)?.getTime() || 0;
+      const finishedB = dateValue(b.Date_finalisation)?.getTime() || 0;
+
+      if(sortMode === "archive-asc"){
+        return archiveA - archiveB;
+      }
+
+      if(sortMode === "finished-desc"){
+        return finishedB - finishedA;
+      }
+
+      if(sortMode === "finished-asc"){
+        return finishedA - finishedB;
+      }
+
+      if(sortMode === "contributor"){
+        const diff = text(a._ContributeurLabel).localeCompare(
+          text(b._ContributeurLabel),
+          "fr",
+          {sensitivity:"base",numeric:true}
+        );
+        if(diff !== 0){
+          return diff;
+        }
+      }
+
+      if(sortMode === "bureau"){
+        const diff = text(a._BureauLabel).localeCompare(
+          text(b._BureauLabel),
+          "fr",
+          {sensitivity:"base",numeric:true}
+        );
+        if(diff !== 0){
+          return diff;
+        }
+      }
+
+      return archiveB - archiveA;
+    });
+}
+
+/* =============================================================
+   LISTE
+   ============================================================= */
+
+function renderList(){
+  const list = $("contributionList");
+  list.innerHTML = "";
+
+  const records = filteredRecords();
+
+  $("resultsCount").textContent =
+    `${records.length} contribution${records.length > 1 ? "s" : ""}`;
+
+  if(!records.length){
+    list.innerHTML = `
+      <div class="empty">
+        Aucune contribution archivée ne correspond aux critères.
+      </div>
+    `;
+    return;
+  }
+
+  for(const record of records){
+    const card = document.createElement("article");
+    card.className = "card";
+
+    card.innerHTML = `
+      <div class="card-top">
+        <div>
+          <div class="number">
+            ${escapeHtml(
+              record.Numero
+                ? `N° ${record.Numero}`
+                : `Contribution ${record.id}`
+            )}
+          </div>
+          <div class="title">${escapeHtml(record.Titre || "Sans titre")}</div>
+        </div>
+        <span class="badge">🗄️ Archivée</span>
+      </div>
+
+      <div class="meta">
+        <span><strong>Contributeur :</strong> ${escapeHtml(record._ContributeurLabel || "—")}</span>
+        <span><strong>Bureau demandeur :</strong> ${escapeHtml(record._BureauLabel || "—")}</span>
+        <span><strong>Statut :</strong> ${escapeHtml(record.Statut || "—")}</span>
+        <span><strong>Archivée :</strong> ${escapeHtml(formatDate(record.Date_archivage,true))}</span>
+      </div>
+    `;
+
+    card.addEventListener("click",()=>{
+      openDetail(record.id);
+    });
+
+    list.appendChild(card);
+  }
+}
+
+/* =============================================================
+   DÉTAIL
+   ============================================================= */
+
+function getSelectedRecord(){
+  return allRecords.find(
+    row => Number(row.id) === Number(selectedRecordId)
+  ) || null;
+}
+
+function setDetail(id,value){
+  $(id).textContent = text(value).trim() || "—";
+}
+
+function openDetail(recordId){
+  selectedRecordId = Number(recordId);
+
+  const record = getSelectedRecord();
+
+  if(!record){
+    return;
+  }
+
+  $("detailNumber").textContent =
+    record.Numero
+      ? `N° ${record.Numero}`
+      : `Contribution ${record.id}`;
+
+  setDetail("detailTitle",record.Titre);
+  setDetail("detailDescription",record.Description);
+  setDetail("detailDemandeur",record.Demandeur);
+  setDetail("detailContributeur",record._ContributeurLabel);
+  setDetail("detailBureau",record._BureauLabel);
+  setDetail("detailPriorite",record.Priorite);
+  setDetail("detailStatut",record.Statut);
+  setDetail("detailEcheance",formatDate(record.Echeance));
+  setDetail("detailFinalisation",formatDate(record.Date_finalisation));
+  setDetail("detailArchivage",formatDate(record.Date_archivage,true));
+  setDetail("detailArchivePar",record.Archive_par);
+  setDetail("detailCommentaire",record.Commentaire);
+
+  showNotice("successBox","");
+  showNotice("errorBox","");
+
+  $("unarchiveBox").classList.toggle(
+    "hidden",
+    !canUnarchiveRecord(record)
+  );
+
+  $("listView").classList.add("hidden");
+  $("detailView").classList.remove("hidden");
+}
+
+function closeDetail(){
+  selectedRecordId = null;
+  $("detailView").classList.add("hidden");
+  $("listView").classList.remove("hidden");
+  renderList();
+}
+
+/* =============================================================
+   DÉSARCHIVAGE
+   ============================================================= */
+
+async function unarchiveContribution(){
+  const record = getSelectedRecord();
+
+  if(!record || !canUnarchiveRecord(record)){
+    showNotice(
+      "errorBox",
+      "Vous n'êtes pas autorisé à désarchiver cette contribution."
+    );
+    return;
+  }
+
+  const confirmed = window.confirm(
+    "Désarchiver cette contribution ?"
+  );
+
+  if(!confirmed){
+    return;
+  }
+
+  const button = $("unarchiveBtn");
+  button.disabled = true;
+  button.textContent = "Désarchivage…";
+
+  showNotice("successBox","");
+  showNotice("errorBox","");
+
+  try{
+    const expectedVersion = contributionVersion(record);
+    const fresh = await ensureContributionUnchanged(
+      Number(record.id),
+      expectedVersion
+    );
+
+    if(!canUnarchiveRecord({...record,Archivee:fresh.Archivee})){
+      throw new Error("Vous n'êtes plus autorisé à désarchiver cette contribution.");
+    }
+
+    await grist.docApi.applyUserActions([
+      [
+        "UpdateRecord",
+        "CONTRIBUTIONS",
+        Number(record.id),
+        {
+          Archivee:false,
+          Date_archivage:null,
+          Archive_par:"",
+          Version_modification:nextContributionVersion(fresh)
+        }
+      ]
+    ]);
+
+    showNotice(
+      "successBox",
+      "✓ Contribution désarchivée."
+    );
+
+    await new Promise(resolve => setTimeout(resolve,400));
+    await loadData();
+
+    selectedRecordId = null;
+    $("detailView").classList.add("hidden");
+    $("listView").classList.remove("hidden");
+
+    populateFiltersAfterReload();
+    renderList();
+
+  }catch(error){
+    console.error(error);
+
+    if(error && error.code === "VERSION_CONFLICT"){
+      showNotice("errorBox",error.message);
+      await loadData();
+      populateFiltersAfterReload();
+
+      const refreshed = getSelectedRecord();
+      if(refreshed){
+        openDetail(refreshed.id);
+      }else{
+        selectedRecordId = null;
+        $("detailView").classList.add("hidden");
+        $("listView").classList.remove("hidden");
+        renderList();
+      }
+    }else{
+      showNotice(
+        "errorBox",
+        "Impossible de désarchiver cette contribution. Vérifiez vos droits Grist."
+      );
+    }
+  }finally{
+    button.disabled = false;
+    button.textContent = "Désarchiver";
+  }
+}
+
+function populateFiltersAfterReload(){
+  const year = $("archiveYearFilter").value;
+  const contributor = $("contributorFilter").value;
+  const origin = $("originFilter").value;
+
+  populateFilters();
+
+  if([...$("archiveYearFilter").options].some(option => option.value === year)){
+    $("archiveYearFilter").value = year;
+  }
+
+  if([...$("contributorFilter").options].some(option => option.value === contributor)){
+    $("contributorFilter").value = contributor;
+  }
+
+  if([...$("originFilter").options].some(option => option.value === origin)){
+    $("originFilter").value = origin;
+  }
+}
+
+/* =============================================================
+   INITIALISATION
+   ============================================================= */
+
+async function init(){
+  try{
+    grist.ready({
+      requiredAccess:"full"
+    });
+
+    await loadUserContext();
+    await loadData();
+
+    populateFilters();
+    renderList();
+
+    $("loadingBox").classList.add("hidden");
+    $("listView").classList.remove("hidden");
+
+  }catch(error){
+    console.error(error);
+    $("loadingBox").textContent =
+      "Impossible de charger les archives.";
+  }
+}
+
+/* =============================================================
+   ÉVÉNEMENTS
+   ============================================================= */
+
+$("search").addEventListener("input",renderList);
+$("archiveYearFilter").addEventListener("change",renderList);
+$("contributorFilter").addEventListener("change",renderList);
+$("originFilter").addEventListener("change",renderList);
+$("sortFilter").addEventListener("change",renderList);
+
+$("backBtn").addEventListener("click",closeDetail);
+$("unarchiveBtn").addEventListener("click",unarchiveContribution);
+
+init();
+</script>
+</body>
+</html>
