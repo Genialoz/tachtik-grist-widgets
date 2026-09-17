@@ -2329,7 +2329,7 @@
   <script>
 
     /* =========================================================
-       CONTRIBUTIONS À TRAITER — V10
+       CONTRIBUTIONS À TRAITER — V11
 
        Évolutions V5 :
        - verrouillage optimiste via CONTRIBUTIONS.Version_modification ;
@@ -2354,6 +2354,11 @@
        - les adresses sont modifiables depuis la fiche de contribution ;
        - Bureau contributeur et Lecteur renvoyés en mode singlePage ;
        - aucun changement de droits ou de logique métier.
+
+       Évolution V11 :
+       - les contributions dont Archivee = true sont exclues de cette page opérationnelle ;
+       - le filtrage est centralisé dans getPilotRecords afin de s'appliquer aux KPI, filtres, listes et détails ;
+       - aucun changement de droits, d'ACL ou de logique de suppression.
 
        Évolution V6 conservée :
        - ajout d'un sélecteur de tri manuel visible ;
@@ -2626,6 +2631,30 @@
     }
 
     /* =========================
+       V11 — CONTRIBUTIONS ARCHIVÉES
+
+       Les contributions archivées restent dans CONTRIBUTIONS, mais elles
+       ne doivent plus apparaître sur cette page opérationnelle.
+       On accepte les principales représentations possibles d'un booléen
+       renvoyé par Grist afin de garder le filtrage robuste.
+       ========================= */
+
+    function isArchivedContribution(record) {
+      if (!record) {
+        return false;
+      }
+
+      const value = record.Archivee;
+
+      return value === true
+        || value === 1
+        || clean(value) === "true"
+        || clean(value) === "oui"
+        || clean(value) === "1";
+    }
+
+
+    /* =========================
        DROITS SELON L'ARCHITECTURE ACTUELLE
        - Administrateur : actions sur toutes les contributions
        - Bureau contributeur : actions uniquement sur les contributions
@@ -2691,7 +2720,10 @@
 
     function getPilotRecords() {
       if (isAdministrator()) {
-        return allRecords.filter(record => !isCensoredRecord(record));
+        return allRecords.filter(record =>
+          !isCensoredRecord(record)
+          && !isArchivedContribution(record)
+        );
       }
 
       if (isBureauContributor()) {
@@ -2701,6 +2733,7 @@
 
         return allRecords.filter(record =>
           !isCensoredRecord(record)
+          && !isArchivedContribution(record)
           && record._BureauId
           && Number(record._BureauId) === Number(currentUserBureauId)
         );
