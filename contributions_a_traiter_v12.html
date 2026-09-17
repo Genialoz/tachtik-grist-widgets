@@ -681,27 +681,6 @@
       color: #275db7;
     }
 
-    /* =========================
-       V12 — ARCHIVAGE INDIVIDUEL
-       Le bouton n'est proposé que pour une contribution terminée
-       et lorsque l'utilisateur dispose déjà du droit de modification.
-       ========================= */
-    .archive-btn {
-      display: none;
-      padding: 10px 15px;
-      border-radius: 12px;
-      border: 1px solid #b6a1e8;
-      background: var(--violet-soft);
-      color: #6444bc;
-      font-size: 12px;
-      font-weight: 850;
-    }
-
-    .archive-btn:disabled {
-      opacity: .6;
-      cursor: wait;
-    }
-
     .detail-reminder-btn {
       display: none;
       padding: 10px 15px;
@@ -1761,14 +1740,6 @@
             type="button"
           ></button>
 
-          <button
-            id="archive-btn"
-            class="archive-btn"
-            type="button"
-          >
-            🗄️ Archiver
-          </button>
-
         </div>
 
       </section>
@@ -2358,7 +2329,7 @@
   <script>
 
     /* =========================================================
-       CONTRIBUTIONS À TRAITER — V12
+       CONTRIBUTIONS À TRAITER — V13
 
        Évolutions V5 :
        - verrouillage optimiste via CONTRIBUTIONS.Version_modification ;
@@ -2377,6 +2348,11 @@
        - suppression des "+" affichés à la place des espaces
          dans l'objet et le corps des courriels d'envoi et de relance ;
 
+       Évolution V13 :
+       - correction de la répartition métier : aucune action d'archivage sur cette page ;
+       - les contributions archivées restent exclues de la vue opérationnelle ;
+       - l'archivage est désormais réservé à la page « Contributions terminées ».
+
        Évolution V10 :
        - Destinataires_mail et Copies_mail deviennent prioritaires pour les envois et relances ;
        - CONTACTS_DEPARTEMENTS reste utilisé en secours pour une cible Département ;
@@ -2388,14 +2364,6 @@
        - les contributions dont Archivee = true sont exclues de cette page opérationnelle ;
        - le filtrage est centralisé dans getPilotRecords afin de s'appliquer aux KPI, filtres, listes et détails ;
        - aucun changement de droits, d'ACL ou de logique de suppression.
-
-       Évolution V12 :
-       - ajout de l'archivage individuel depuis la fiche détail ;
-       - bouton visible uniquement pour une contribution au statut « Fait » ;
-       - conservation des droits actuels : seuls les utilisateurs pouvant déjà modifier
-         la contribution peuvent l'archiver ;
-       - renseigne Archivee, Date_archivage et Archive_par ;
-       - conserve le verrouillage optimiste via Version_modification.
 
        Évolution V6 conservée :
        - ajout d'un sélecteur de tri manuel visible ;
@@ -3018,21 +2986,6 @@
     function isTodo(record) {
       const status = clean(record.Statut);
       return status === "à faire" || status === "a faire";
-    }
-
-    /* =========================
-       V12 — DROIT MÉTIER D'ARCHIVAGE
-       - contribution terminée uniquement ;
-       - même périmètre d'écriture que la modification existante ;
-       - une contribution déjà archivée n'est jamais proposée ici.
-       ========================= */
-    function canArchiveRecord(record) {
-      return Boolean(
-        record
-        && !isArchivedContribution(record)
-        && !isTodo(record)
-        && canEditRecord(record)
-      );
     }
 
     function isLate(record) {
@@ -4435,7 +4388,6 @@
 
       const status = $("detail-status");
       const statusButton = $("status-action-btn");
-      const archiveButton = $("archive-btn");
       const mailActionsPanel = $("mail-actions-panel");
       const initialButton = $("detail-initial-email-btn");
       const reminderEmailButton = $("detail-reminder-email-btn");
@@ -4483,8 +4435,6 @@
           : "none";
 
       $("edit-btn").style.display = canWriteRecord ? "inline-flex" : "none";
-
-      archiveButton.style.display = canArchiveRecord(record) ? "inline-flex" : "none";
 
       renderMailHistory(record);
     }
@@ -4545,79 +4495,6 @@
       }
       finally {
         $("status-action-btn").disabled = false;
-      }
-    }
-
-    /* =========================
-       V12 — ARCHIVAGE INDIVIDUEL
-       ========================= */
-
-    async function archiveCurrentContribution() {
-      const record = getSelectedRecord();
-
-      if (!record || !canArchiveRecord(record)) {
-        showToast("Cette contribution ne peut pas être archivée.");
-        return;
-      }
-
-      const label = [text(record.Numero).trim(), text(record.Titre).trim()]
-        .filter(Boolean)
-        .join(" — ");
-
-      const confirmed = window.confirm(
-        `Archiver la contribution ${label || "sélectionnée"} ?\n\nElle disparaîtra des pages opérationnelles mais restera conservée dans Grist.`
-      );
-
-      if (!confirmed) {
-        return;
-      }
-
-      const button = $("archive-btn");
-      const expectedVersion = contributionVersion(record);
-
-      try {
-        button.disabled = true;
-        button.textContent = "Archivage…";
-
-        const fresh = await ensureContributionUnchanged(
-          Number(record.id),
-          expectedVersion
-        );
-
-        await grist.docApi.applyUserActions([
-          [
-            "UpdateRecord",
-            "CONTRIBUTIONS",
-            Number(record.id),
-            {
-              Archivee: true,
-              Date_archivage: Date.now() / 1000,
-              Archive_par: currentUserEmail,
-              Version_modification: nextContributionVersion(fresh)
-            }
-          ]
-        ]);
-
-        closeDetail();
-        showToast("🗄️ Contribution archivée");
-
-        await new Promise(resolve => setTimeout(resolve, 500));
-        await loadContributions();
-      }
-      catch (error) {
-        console.error(error);
-
-        if (error && error.code === "VERSION_CONFLICT") {
-          showToast(error.message);
-          await loadContributions();
-        }
-        else {
-          showToast(error.message || "Impossible d'archiver la contribution.");
-        }
-      }
-      finally {
-        button.disabled = false;
-        button.textContent = "🗄️ Archiver";
       }
     }
 
@@ -4861,7 +4738,6 @@
 
       $("back-list-btn").addEventListener("click", closeDetail);
       $("status-action-btn").addEventListener("click", toggleStatus);
-      $("archive-btn").addEventListener("click", archiveCurrentContribution);
 
       $("detail-initial-email-btn").addEventListener("click", async () => {
         const record = getSelectedRecord();
