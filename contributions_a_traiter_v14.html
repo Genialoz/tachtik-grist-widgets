@@ -383,160 +383,6 @@
     }
 
     /* =========================
-       V14 — SÉLECTION / SUPPRESSION MULTIPLE
-       ========================= */
-
-    function bulkDeleteVisibleRecords() {
-      const filtered = getFilteredRecords();
-      const visibleGroupKeys = new Set(filtered.map(groupKey));
-
-      return getPilotRecords().filter(record =>
-        visibleGroupKeys.has(groupKey(record))
-        && canEditRecord(record)
-      );
-    }
-
-    function pruneBulkDeleteSelection() {
-      const visibleIds = new Set(
-        bulkDeleteVisibleRecords().map(record => Number(record.id))
-      );
-
-      selectedBulkDeleteIds = new Set(
-        [...selectedBulkDeleteIds].filter(id => visibleIds.has(Number(id)))
-      );
-    }
-
-    function updateBulkDeleteControls() {
-      const bar = $("bulk-delete-bar");
-      if (!bar) return;
-
-      const allowed = isAdministrator() || isBureauContributor();
-      bar.hidden = !allowed;
-      if (!allowed) return;
-
-      const visible = bulkDeleteVisibleRecords();
-      const selectedCount = selectedBulkDeleteIds.size;
-
-      $("bulk-delete-count").textContent =
-        `${selectedCount} contribution${selectedCount > 1 ? "s" : ""} sélectionnée${selectedCount > 1 ? "s" : ""}`;
-
-      $("bulk-select-all-btn").disabled = visible.length === 0;
-      $("bulk-clear-btn").disabled = selectedCount === 0;
-      $("bulk-delete-btn").disabled = selectedCount === 0;
-    }
-
-    function selectAllVisibleForBulkDelete() {
-      selectedBulkDeleteIds = new Set(
-        bulkDeleteVisibleRecords().map(record => Number(record.id))
-      );
-      renderList();
-    }
-
-    function clearBulkDeleteSelection() {
-      selectedBulkDeleteIds.clear();
-      renderList();
-    }
-
-    function canDeleteFreshContribution(record) {
-      if (!record) return false;
-      if (isAdministrator()) return true;
-
-      return Boolean(
-        isBureauContributor()
-        && currentUserBureauId
-        && Number(record.Bureau_origine) === Number(currentUserBureauId)
-      );
-    }
-
-    async function deleteSelectedContributions() {
-      pruneBulkDeleteSelection();
-
-      const visibleById = new Map(
-        bulkDeleteVisibleRecords().map(record => [Number(record.id), record])
-      );
-
-      const selected = [...selectedBulkDeleteIds]
-        .map(id => visibleById.get(Number(id)))
-        .filter(Boolean);
-
-      if (!selected.length) {
-        showToast("Aucune contribution sélectionnée.");
-        renderList();
-        return;
-      }
-
-      const count = selected.length;
-      const confirmed = window.confirm(
-        `Supprimer définitivement ${count} contribution${count > 1 ? "s" : ""} sélectionnée${count > 1 ? "s" : ""} ?\n\n`
-        + "Cette action est irréversible. Les relances associées seront également supprimées."
-      );
-
-      if (!confirmed) return;
-
-      const button = $("bulk-delete-btn");
-      button.disabled = true;
-      button.textContent = "Suppression…";
-
-      try {
-        const freshTable = await grist.docApi.fetchTable("CONTRIBUTIONS");
-        const freshRows = tableToRows(freshTable);
-        const freshById = new Map(freshRows.map(row => [Number(row.id), row]));
-
-        for (const record of selected) {
-          const fresh = freshById.get(Number(record.id));
-          if (!fresh) {
-            throw new Error("Une contribution sélectionnée n'existe plus. Rechargez la page avant de recommencer.");
-          }
-          if (!canDeleteFreshContribution(fresh)) {
-            throw new Error("Votre périmètre ne permet plus de supprimer l'une des contributions sélectionnées.");
-          }
-          if (contributionVersion(fresh) !== contributionVersion(record)) {
-            const error = new Error(
-              "Au moins une contribution sélectionnée a été modifiée par un autre utilisateur. Aucune suppression n'a été effectuée."
-            );
-            error.code = "VERSION_CONFLICT";
-            throw error;
-          }
-        }
-
-        const ids = selected.map(record => Number(record.id));
-        const idSet = new Set(ids);
-        const relanceTable = await grist.docApi.fetchTable("RELANCES");
-        const relances = tableToRows(relanceTable);
-        const relanceIds = relances
-          .filter(row => idSet.has(Number(row.Contribution)))
-          .map(row => Number(row.id))
-          .filter(Number.isFinite);
-
-        const actions = [];
-        if (relanceIds.length) {
-          actions.push(["BulkRemoveRecord", "RELANCES", relanceIds]);
-        }
-        actions.push(["BulkRemoveRecord", "CONTRIBUTIONS", ids]);
-
-        await grist.docApi.applyUserActions(actions);
-
-        selectedBulkDeleteIds.clear();
-        selectedRecordId = null;
-        showToast(
-          `✓ ${count} contribution${count > 1 ? "s" : ""} supprimée${count > 1 ? "s" : ""} définitivement.`
-        );
-
-        await new Promise(resolve => setTimeout(resolve, 400));
-        await loadContributions();
-      }
-      catch (error) {
-        console.error(error);
-        showToast(error.message || "Impossible de supprimer les contributions sélectionnées.");
-        await loadContributions();
-      }
-      finally {
-        button.disabled = false;
-        button.textContent = "Supprimer définitivement";
-      }
-    }
-
-    /* =========================
        LISTE
        ========================= */
 
@@ -2541,7 +2387,12 @@
   <script>
 
     /* =========================================================
-       CONTRIBUTIONS À TRAITER — V14
+       CONTRIBUTIONS À TRAITER — V15
+
+       V15 :
+       - corrige le placement du JavaScript de suppression multiple ;
+       - restaure l'identification utilisateur ;
+       - conserve la sélection multiple et la suppression sécurisée de V14.
 
        Évolutions V5 :
        - verrouillage optimiste via CONTRIBUTIONS.Version_modification ;
@@ -4907,6 +4758,161 @@
       }
       finally {
         $("save-edit-btn").disabled = false;
+      }
+    }
+
+    /* =========================
+       V15 — SÉLECTION / SUPPRESSION MULTIPLE
+       Correction : ce bloc est bien dans le JavaScript principal.
+       ========================= */
+
+    function bulkDeleteVisibleRecords() {
+      const filtered = getFilteredRecords();
+      const visibleGroupKeys = new Set(filtered.map(groupKey));
+
+      return getPilotRecords().filter(record =>
+        visibleGroupKeys.has(groupKey(record))
+        && canEditRecord(record)
+      );
+    }
+
+    function pruneBulkDeleteSelection() {
+      const visibleIds = new Set(
+        bulkDeleteVisibleRecords().map(record => Number(record.id))
+      );
+
+      selectedBulkDeleteIds = new Set(
+        [...selectedBulkDeleteIds].filter(id => visibleIds.has(Number(id)))
+      );
+    }
+
+    function updateBulkDeleteControls() {
+      const bar = $("bulk-delete-bar");
+      if (!bar) return;
+
+      const allowed = isAdministrator() || isBureauContributor();
+      bar.hidden = !allowed;
+      if (!allowed) return;
+
+      const visible = bulkDeleteVisibleRecords();
+      const selectedCount = selectedBulkDeleteIds.size;
+
+      $("bulk-delete-count").textContent =
+        `${selectedCount} contribution${selectedCount > 1 ? "s" : ""} sélectionnée${selectedCount > 1 ? "s" : ""}`;
+
+      $("bulk-select-all-btn").disabled = visible.length === 0;
+      $("bulk-clear-btn").disabled = selectedCount === 0;
+      $("bulk-delete-btn").disabled = selectedCount === 0;
+    }
+
+    function selectAllVisibleForBulkDelete() {
+      selectedBulkDeleteIds = new Set(
+        bulkDeleteVisibleRecords().map(record => Number(record.id))
+      );
+      renderList();
+    }
+
+    function clearBulkDeleteSelection() {
+      selectedBulkDeleteIds.clear();
+      renderList();
+    }
+
+    function canDeleteFreshContribution(record) {
+      if (!record) return false;
+      if (isAdministrator()) return true;
+
+      return Boolean(
+        isBureauContributor()
+        && currentUserBureauId
+        && Number(record.Bureau_origine) === Number(currentUserBureauId)
+      );
+    }
+
+    async function deleteSelectedContributions() {
+      pruneBulkDeleteSelection();
+
+      const visibleById = new Map(
+        bulkDeleteVisibleRecords().map(record => [Number(record.id), record])
+      );
+
+      const selected = [...selectedBulkDeleteIds]
+        .map(id => visibleById.get(Number(id)))
+        .filter(Boolean);
+
+      if (!selected.length) {
+        showToast("Aucune contribution sélectionnée.");
+        renderList();
+        return;
+      }
+
+      const count = selected.length;
+      const confirmed = window.confirm(
+        `Supprimer définitivement ${count} contribution${count > 1 ? "s" : ""} sélectionnée${count > 1 ? "s" : ""} ?\n\n`
+        + "Cette action est irréversible. Les relances associées seront également supprimées."
+      );
+
+      if (!confirmed) return;
+
+      const button = $("bulk-delete-btn");
+      button.disabled = true;
+      button.textContent = "Suppression…";
+
+      try {
+        const freshTable = await grist.docApi.fetchTable("CONTRIBUTIONS");
+        const freshRows = tableToRows(freshTable);
+        const freshById = new Map(freshRows.map(row => [Number(row.id), row]));
+
+        for (const record of selected) {
+          const fresh = freshById.get(Number(record.id));
+          if (!fresh) {
+            throw new Error("Une contribution sélectionnée n'existe plus. Rechargez la page avant de recommencer.");
+          }
+          if (!canDeleteFreshContribution(fresh)) {
+            throw new Error("Votre périmètre ne permet plus de supprimer l'une des contributions sélectionnées.");
+          }
+          if (contributionVersion(fresh) !== contributionVersion(record)) {
+            const error = new Error(
+              "Au moins une contribution sélectionnée a été modifiée par un autre utilisateur. Aucune suppression n'a été effectuée."
+            );
+            error.code = "VERSION_CONFLICT";
+            throw error;
+          }
+        }
+
+        const ids = selected.map(record => Number(record.id));
+        const idSet = new Set(ids);
+        const relanceTable = await grist.docApi.fetchTable("RELANCES");
+        const relances = tableToRows(relanceTable);
+        const relanceIds = relances
+          .filter(row => idSet.has(Number(row.Contribution)))
+          .map(row => Number(row.id))
+          .filter(Number.isFinite);
+
+        const actions = [];
+        if (relanceIds.length) {
+          actions.push(["BulkRemoveRecord", "RELANCES", relanceIds]);
+        }
+        actions.push(["BulkRemoveRecord", "CONTRIBUTIONS", ids]);
+
+        await grist.docApi.applyUserActions(actions);
+
+        selectedBulkDeleteIds.clear();
+        selectedRecordId = null;
+        showToast(
+          `✓ ${count} contribution${count > 1 ? "s" : ""} supprimée${count > 1 ? "s" : ""} définitivement.`
+        );
+
+        await new Promise(resolve => setTimeout(resolve, 400));
+        await loadContributions();
+      }
+      catch (error) {
+        console.error(error);
+        showToast(error.message || "Impossible de supprimer les contributions sélectionnées.");
+        await loadContributions();
+      }
+      finally {
+        button.disabled = false;
+        button.textContent = "Supprimer définitivement";
       }
     }
 
